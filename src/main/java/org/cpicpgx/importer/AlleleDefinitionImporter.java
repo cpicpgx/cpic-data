@@ -269,11 +269,12 @@ public class AlleleDefinitionImporter {
       
       PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleleid, locationid, variantallele) values (?,?,?)");
       
-      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=? where hgncid=?");
+      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,alleleslastmodified=? where hgncid=?");
       geneUpdate.setString(1, m_geneSeqId);
       geneUpdate.setString(2, m_proteinSeqId);
       geneUpdate.setString(3, m_chromoSeqId);
-      geneUpdate.setString(4, m_gene);
+      geneUpdate.setDate(4, new java.sql.Date(m_revisionDate.getTime()));
+      geneUpdate.setString(5, m_gene);
       geneUpdate.executeUpdate();
 
       PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, hgncid) values (?,?,?,?,?,?) returning (id)");
