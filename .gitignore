@@ -4,6 +4,6 @@
 /.gradle
 /.idea/dataSources*
 /.idea/markdown-navigator*
-/src/main/config/cpicData.properties
+/src/main/resources/cpicData.properties
 /out
 cpicData.log

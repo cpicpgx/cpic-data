@@ -248,12 +248,11 @@ public class AlleleDefinitionImporter {
   void writeToDB() throws SQLException {
 
     ResourceBundle resources = ResourceBundle.getBundle("cpicData");
+    String host = resources.getString("db.host");
+    String user = resources.getString("db.user");
+    String pass = resources.getString("db.pass");
     
-    try (Connection conn = DriverManager.getConnection(
-        String.format(sf_dbUrl, resources.getString("db.host")), 
-        resources.getString("db.user"), 
-        resources.getString("db.pass"))
-    ) {
+    try (Connection conn = DriverManager.getConnection(String.format(sf_dbUrl, host), user, pass)) {
       
       String[] statements = new String[]{
           "delete from translation_note where hgncid=?",
