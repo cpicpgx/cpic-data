@@ -88,9 +88,7 @@ public class AlleleDefinitionImporter {
       Sheet sheet = workbook.getSheetAt(0);
 
       readGene(sheet);
-      
       readRevision(sheet);
-      
       readLegacyRow(sheet);
       readProteinRow(sheet);
       readChromoRow(sheet);
@@ -109,7 +107,10 @@ public class AlleleDefinitionImporter {
   
   private void readGene(Sheet sheet) {
     Row row = sheet.getRow(0);
-    m_gene = trim(row.getCell(0).getStringCellValue().replaceAll("GENE:", ""));
+    Optional<String> geneOpt = getCellValue(row, 0);
+    m_gene = geneOpt
+        .orElseThrow(IllegalStateException::new)
+        .replaceAll("GENE:\\s*", "");
   }
   
   private void readRevision(Sheet sheet) {
@@ -123,8 +124,7 @@ public class AlleleDefinitionImporter {
     m_legacyNames = new String[m_variantColEnd];
     
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
-      Cell cell = row.getCell(i);
-      m_legacyNames[i] = trim(cell.getStringCellValue());
+      m_legacyNames[i] = getCellValue(row, i).orElse(null);
     }
   }
   
@@ -136,8 +136,7 @@ public class AlleleDefinitionImporter {
     m_proteinSeqId = findSeqId(description.getStringCellValue()).orElse("");
     
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
-      Cell cell = row.getCell(i);
-      m_proteinEffects[i] = trim(cell.getStringCellValue());
+      m_proteinEffects[i] = getCellValue(row, i).orElse(null);
     }
   }
   
@@ -149,8 +148,7 @@ public class AlleleDefinitionImporter {
     m_chromoSeqId = findSeqId(description.getStringCellValue()).orElse("");
 
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
-      Cell cell = row.getCell(i);
-      m_chromoPositions[i] = trim(cell.getStringCellValue());
+      m_chromoPositions[i] = getCellValue(row, i).orElse(null);
     }
   }
   
@@ -162,8 +160,7 @@ public class AlleleDefinitionImporter {
     m_geneSeqId = findSeqId(description.getStringCellValue()).orElse("");
 
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
-      Cell cell = row.getCell(i);
-      m_genoPositions[i] = trim(cell.getStringCellValue());
+      m_genoPositions[i] = getCellValue(row, i).orElse(null);
     }
   }
   
@@ -172,21 +169,17 @@ public class AlleleDefinitionImporter {
     m_dbSnpIds = new String[m_variantColEnd];
     
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
-      Cell cell = row.getCell(i);
-      if (cell == null) {
-        continue;
-      }
-      String rsid = trim(cell.getStringCellValue());
-      if (rsid == null) {
+      Optional<String> rsid = getCellValue(row, i);
+      if (!rsid.isPresent()) {
         continue;
       }
       
-      Matcher m = sf_rsidPattern.matcher(rsid);
+      Matcher m = sf_rsidPattern.matcher(rsid.get());
       if (m.matches()) {
-        m_dbSnpIds[i] = rsid;
+        m_dbSnpIds[i] = m.group();
       }
       else {
-        sf_logger.warn("Invalid RSID found in {}, skipping", cell.getAddress().toString());
+        sf_logger.warn("Invalid RSID found in {}, skipping", row.getCell(i).getAddress());
       }
     }
   }
@@ -206,28 +199,30 @@ public class AlleleDefinitionImporter {
     for (int i=sf_alleleRowStart; i < sheet.getLastRowNum(); i++) {
       try {
         Row row = sheet.getRow(i);
-        if (row == null || row.getCell(0) == null) {
-          m_notesRowStart = i;
-          break;
+        if (row == null) {
+          continue;
         }
-        String alleleName = row.getCell(0).getStringCellValue();
+        
+        Optional<String> alleleNameOpt = getCellValue(row, 0);
+        if (!alleleNameOpt.isPresent()) {
+          continue;
+        }
+        String alleleName = alleleNameOpt.get();
         if (alleleName.length() == 0 || alleleName.contains(sf_notes)) {
           m_notesRowStart = i;
           break;
         }
 
-        String alleleFunction = row.getCell(1).toString();
-        m_alleleFunctionMap.put(trim(alleleName), trim(alleleFunction));
+        String alleleFunction = getCellValue(row, 1).orElse(null);
+        m_alleleFunctionMap.put(alleleName, alleleFunction);
 
         Map<Integer, String> definition = new LinkedHashMap<>();
         for (int j = sf_variantColStart; j < m_variantColEnd; j++) {
-          Cell cell = row.getCell(j);
-          if (cell != null && cell.getStringCellValue() != null && cell.getStringCellValue().length() > 0) {
-            definition.put(j, trim(cell.getStringCellValue()));
-          }
+          final int arrayIdx = j;
+          getCellValue(row, j).ifPresent(s -> definition.put(arrayIdx, s));
         }
 
-        m_alleles.put(trim(alleleName), definition);
+        m_alleles.put(alleleName, definition);
       } catch (Exception e) {
         sf_logger.error("Error parsing row {}", i+1);
         throw e;
@@ -333,11 +328,53 @@ public class AlleleDefinitionImporter {
       sf_logger.info("created {} new notes", m_notes.size());
     }
   }
-  
-  private static String trim(String value) {
-    if (value == null) {
-      return null;
+
+  /**
+   * Makes a string representation of a cell's value. Will log if the cell has extra whitespace preceding or succeeding 
+   * the cell value.
+   * @param cell a non-null Cell object 
+   * @return an Optional String of the cell value
+   */
+  private static Optional<String> makeCellString(Cell cell) {
+    String value = Objects.requireNonNull(cell).getStringCellValue();
+
+    // if the cell doesn't exist or is 0-length, we don't care, don't log
+    if (value == null || value.length() == 0) {
+      return Optional.empty();
     }
+
+    // strip down the cell value, including non-breaking spaces that Excel loves to introduce
+    String strippedValue = trim(value);
+
+    // log any instances of extra whitespace
+    if (!StringUtils.equals(value, strippedValue)) {
+      sf_logger.warn("Extra whitespace found in cell {}", cell.getAddress());
+    }
+
+    // return an empty value if there's nothing after strip
+    if (strippedValue == null) return Optional.empty();
+    
+    return Optional.of(strippedValue);
+  }
+
+  /**
+   * Trims ALL visible whitespace, including non-breaking spaces (<code>\h</code>)
+   * @param value a String
+   * @return a String without visible whitespace at the beginning or end of the string
+   */
+  static String trim(String value) {
     return StringUtils.stripToNull(value.replaceAll("(^\\h*)|(\\h*$)",""));
+  }
+
+  /**
+   * Given a row and index, extract the cell's String value
+   * @param row a non-null Row object
+   * @param cellIndex the index of a cell in the given row
+   * @return an Optional String of the cell value
+   */
+  private static Optional<String> getCellValue(Row row, int cellIndex) {
+    Cell cell = Objects.requireNonNull(row).getCell(cellIndex);
+    if (cell == null)  return Optional.empty();
+    return makeCellString(cell);
   }
 }
