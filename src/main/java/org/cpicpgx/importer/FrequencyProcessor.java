@@ -1,9 +1,8 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.util.RowWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +23,10 @@ import java.util.Map;
 public class FrequencyProcessor implements AutoCloseable {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
-  private String gene;
   private Connection conn;
-  private Map<String, Long> alleleNameMap = new HashMap<>();
   private Map<Integer, Long> colIdxAlleleIdMap = new HashMap<>();
+  private int colStartOffset = 0;
+  
 
   private PreparedStatement insertStatement;
   private PreparedStatement insertPopulation;
@@ -38,15 +37,15 @@ public class FrequencyProcessor implements AutoCloseable {
    * @param headerRow the header Row from the frequency data sheet
    * @throws SQLException can occur when reading the header row
    */
-  FrequencyProcessor(String gene, RowWrapper headerRow) throws SQLException {
-    this.gene = gene;
+  FrequencyProcessor(String gene, RowWrapper headerRow) throws SQLException, NotFoundException {
     this.conn = ConnectionFactory.newConnection();
 
     PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.hgncid=?");
-    pstmt.setString(1, this.gene);
+    pstmt.setString(1, gene);
     ResultSet rs = pstmt.executeQuery();
+    Map<String, Long> alleleNameMap = new HashMap<>();
     while (rs.next()) {
-      this.alleleNameMap.put(rs.getString(1), rs.getLong(2));
+      alleleNameMap.put(rs.getString(1), rs.getLong(2));
     }
 
     this.insertStatement = 
@@ -56,10 +55,20 @@ public class FrequencyProcessor implements AutoCloseable {
     
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
+      if (StringUtils.isNotBlank(cellText) && cellText.contains("Authors")) {
+        colStartOffset = i;
+        sf_logger.debug("Will offset authors at column {}", i);
+        sf_logger.debug("Will get pmid at column {}", getPmidIdx());
+        sf_logger.debug("Will get N at column {}", getNIdx());
+      }
       if (StringUtils.isNotBlank(cellText) && alleleNameMap.keySet().contains(cellText)) {
         colIdxAlleleIdMap.put((int)i, alleleNameMap.get(cellText));
         sf_logger.debug("Will get {} frequencies from column {}", cellText, i);
       }
+    }
+    
+    if (colIdxAlleleIdMap.size() == 0) {
+      throw new NotFoundException("No allele columns could be found for alleles " + String.join("; ", alleleNameMap.keySet()));
     }
   }
 
@@ -110,12 +119,12 @@ public class FrequencyProcessor implements AutoCloseable {
   void insertPopulation(RowWrapper row) throws SQLException {
     if (!row.hasTextIn(4)) return;
     
-    this.insertPopulation.setString(1, row.getNullableText(4));
-    this.insertPopulation.setString(2, row.getNullableText(5));
-    this.insertPopulation.setString(3, row.getNullableText(6));
-    this.insertPopulation.setString(4, row.getNullableText(7));
-    this.insertPopulation.setLong(5, row.getNullableLong(8));
-    this.insertPopulation.setString(6, row.getNullableText(3));
+    this.insertPopulation.setString(1, row.getNullableText(getEthIdx()));
+    this.insertPopulation.setString(2, row.getNullableText(getPopIdx()));
+    this.insertPopulation.setString(3, row.getNullableText(getPopInfoIdx()));
+    this.insertPopulation.setString(4, row.getNullableText(getSubjTypeIdx()));
+    this.insertPopulation.setLong(5, row.getNullableLong(getNIdx()));
+    this.insertPopulation.setString(6, row.getNullableText(getPmidIdx()));
     
     ResultSet rs = this.insertPopulation.executeQuery();
     if (!rs.next()) {
@@ -135,5 +144,47 @@ public class FrequencyProcessor implements AutoCloseable {
     if (conn != null && !conn.isClosed()) {
       conn.close();
     }
+  }
+
+  /**
+   * Gets the column index for the PMID value
+   */
+  private int getPmidIdx() {
+    return this.colStartOffset + 2;
+  }
+
+  /**
+   * Gets the column index for the Ethnicity value
+   */
+  private int getEthIdx() {
+    return this.colStartOffset + 3;
+  }
+
+  /**
+   * Gets the column index for the Population value
+   */
+  private int getPopIdx() {
+    return this.colStartOffset + 4;
+  }
+
+  /**
+   * Gets the column index for the Population Info value
+   */
+  private int getPopInfoIdx() {
+    return this.colStartOffset + 5;
+  }
+
+  /**
+   * Gets the column index for the Subject Type value
+   */
+  private int getSubjTypeIdx() {
+    return this.colStartOffset + 6;
+  }
+
+  /**
+   * Gets the column index for the Subject Count (n) value
+   */
+  private int getNIdx() {
+    return this.colStartOffset + 7;
   }
 }
