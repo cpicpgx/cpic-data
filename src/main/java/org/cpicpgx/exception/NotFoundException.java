@@ -5,7 +5,7 @@ package org.cpicpgx.exception;
  *
  * @author Ryan Whaley
  */
-public class NotFoundException extends Throwable {
+public class NotFoundException extends Exception {
   
   public NotFoundException(String message) {
     super(message);
