@@ -57,12 +57,19 @@ public class WorkbookWrapper {
   /**
    * Get a {@link RowWrapper} for the row at the given index, 0-based
    * @param i the index of the row to get, 0-based
-   * @return a row of data
+   * @return a row of data, null if past last row in sheet
    */
   public RowWrapper getRow(int i) {
     if (i < 0) {
-      throw new InvalidParameterException("Invalid row index");
+      throw new InvalidParameterException("Invalid row index " + i);
+    }
+    if (i > this.currentSheet.getLastRowNum()) {
+      return null;
     }
     return new RowWrapper(this.currentSheet.getRow(i), this.formulaEvaluator);
+  }
+  
+  public String toString() {
+    return this.workbook.toString();
   }
 }
