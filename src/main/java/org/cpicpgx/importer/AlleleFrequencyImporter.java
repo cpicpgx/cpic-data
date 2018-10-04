@@ -103,6 +103,7 @@ public class AlleleFrequencyImporter {
           throw new RuntimeException("Error parsing row " + (i+1), ex);
         }
       }
+      sf_logger.info("Successfully parsed " + gene + " frequencies from " + workbook);
     } catch (Exception ex) {
       sf_logger.error("Error saving to DB", ex);
     }
