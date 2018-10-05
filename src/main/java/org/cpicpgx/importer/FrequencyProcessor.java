@@ -117,7 +117,7 @@ public class FrequencyProcessor implements AutoCloseable {
    * @throws SQLException can occur when writing data to the DB
    */
   void insertPopulation(RowWrapper row) throws SQLException {
-    if (!row.hasTextIn(4)) return;
+    if (row.hasNoText(4)) return;
     
     this.insertPopulation.setString(1, row.getNullableText(getEthIdx()));
     this.insertPopulation.setString(2, row.getNullableText(getPopIdx()));

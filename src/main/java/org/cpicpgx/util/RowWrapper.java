@@ -1,11 +1,10 @@
 package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +15,7 @@ import java.util.regex.Pattern;
  */
 public class RowWrapper {
   private static final Pattern NUMBER_PATTERN = Pattern.compile("[\\d\\.]+");
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy");
   
   public Row row;
   private FormulaEvaluator formulaEvaluator;
@@ -33,11 +33,10 @@ public class RowWrapper {
   /**
    * Tests if the cell at the given index has text in it
    * @param cellIdx the index of a cell in this row
-   * @return true if the cell is non-blank (only whitespace counts as blank), false otherwise
+   * @return true if the cell is blank (only whitespace counts as blank), false otherwise
    */
-  public boolean hasTextIn(int cellIdx) {
-    return this.row != null 
-        && getNullableText(cellIdx) != null;
+  public boolean hasNoText(int cellIdx) {
+    return this.row == null || getNullableText(cellIdx) == null;
   }
 
   /**
@@ -58,7 +57,11 @@ public class RowWrapper {
       case STRING:
         return StringUtils.stripToNull(cell.getStringCellValue());
       case NUMERIC:
-        return String.valueOf(cell.getNumericCellValue());
+        if (DateUtil.isCellDateFormatted(cell)) {
+          return DATE_FORMAT.format(cell.getDateCellValue());
+        } else {
+          return String.valueOf(cell.getNumericCellValue());
+        }
       case BOOLEAN:
         return cell.getBooleanCellValue() ? "True" : "False";
       case BLANK:
@@ -69,7 +72,11 @@ public class RowWrapper {
           case STRING:
             return StringUtils.stripToNull(cellValue.getStringValue());
           case NUMERIC:
-            return String.valueOf(cellValue.getNumberValue());
+            if (DateUtil.isCellDateFormatted(cell)) {
+              return cellValue.getStringValue();
+            } else {
+              return String.valueOf(cellValue.getNumberValue());
+            }
           case BOOLEAN:
             return cellValue.getBooleanValue() ? "True" : "False";
           default:
@@ -84,6 +91,9 @@ public class RowWrapper {
   /**
    * Gets long value from the cell at the given index. This will try to convert STRING columns to long. This will also 
    * strip text down to just numerical content for conversion to long. Non-supported types will throw an exception.
+   * 
+   * String cells with absolutely no numerical characters in them (e.g. "var") will return 0.
+   * 
    * @param cellIdx the index of a cell in this row
    * @return a {@link Long} representation of the value in the cell at the given index
    */
@@ -99,13 +109,13 @@ public class RowWrapper {
       case NUMERIC:
         return Math.round(cell.getNumericCellValue());
       case BLANK:
-        return null;
+        return 0L;
       case STRING:
         Matcher m = NUMBER_PATTERN.matcher(cell.getStringCellValue());
         if (m.find()) {
           return Long.valueOf(m.group());
         } else {
-          throw new RuntimeException(cell.getAddress() + " No number found in string cell");
+          return 0L;
         }
       case FORMULA:
         CellValue cellValue = formulaEvaluator.evaluate(cell);
@@ -149,5 +159,23 @@ public class RowWrapper {
         return null;
         
     }
+  }
+
+  /**
+   * Gets a date value from the cell at the given cell index. Returns null if no cell exists at index. Will throw an 
+   * exception if the cell format is not Date.
+   * @param cellIdx the index of the cell to get a value for
+   * @return a Date value represented in the cell
+   * @throws RuntimeException if the cell is not date-formatted
+   */
+  public Date getNullableDate(int cellIdx) {
+    Cell cell = this.row.getCell(cellIdx);
+    if (cell == null) return null;
+
+    if (!DateUtil.isCellDateFormatted(cell)) {
+      throw new RuntimeException("Cell is not date formatted " + cell.getAddress());
+    }
+    
+    return cell.getDateCellValue();
   }
 }
