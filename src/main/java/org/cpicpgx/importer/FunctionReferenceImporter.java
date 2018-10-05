@@ -187,7 +187,7 @@ public class FunctionReferenceImporter {
         this.insertStmt.setArray(3, inVitroArray);
       }
       
-      Array inVivoArray = inVitro == null ? null : this.conn.createArrayOf("text", inVivo);
+      Array inVivoArray = inVivo == null ? null : this.conn.createArrayOf("text", inVivo);
       if (inVivoArray == null) {
         this.insertStmt.setNull(4, Types.ARRAY);
       } else {
