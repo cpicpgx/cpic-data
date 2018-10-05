@@ -89,6 +89,39 @@ public class RowWrapper {
   }
 
   /**
+   * Parses PubMed IDs out of a cell at the given index. Will split comma-separated PMID lists and automatically convert
+   * PMIDs that are stored as NUMERICs for some reason.
+   * @param cellIdx the index of the cell to get PMIDs from
+   * @return a nullable String array of PMIDs found in the given cell
+   */
+  public String[] getNullablePmids(int cellIdx) {
+    if (cellIdx < 0) {
+      throw new RuntimeException("Bad cell index, must be >= 0");
+    }
+
+    Cell cell = this.row.getCell(cellIdx);
+    if (cell == null) return null;
+
+    switch (cell.getCellTypeEnum()) {
+      case STRING:
+        if (StringUtils.isBlank(cell.getStringCellValue())) {
+          return null;
+        } else {
+          return cell.getStringCellValue().split(",\\s*");
+        }
+      case NUMERIC:
+        if (DateUtil.isCellDateFormatted(cell)) {
+          throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellTypeEnum());
+        } else {
+          return new String[]{String.valueOf(Math.round(cell.getNumericCellValue()))};
+        }
+      default:
+        throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellTypeEnum());
+
+    }
+  }
+
+  /**
    * Gets long value from the cell at the given index. This will try to convert STRING columns to long. This will also 
    * strip text down to just numerical content for conversion to long. Non-supported types will throw an exception.
    * 

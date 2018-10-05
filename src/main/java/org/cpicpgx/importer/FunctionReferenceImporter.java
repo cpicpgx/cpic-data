@@ -15,10 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,10 +28,19 @@ import java.util.regex.Pattern;
 public class FunctionReferenceImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_geneLabelPattern = Pattern.compile("GENE:\\s(\\w+)");
+  private static Set<String> GENES_WITH_FINDINGS = new HashSet<>();
+  static {
+    GENES_WITH_FINDINGS.add("CACNA1S");
+    GENES_WITH_FINDINGS.add("RYR1");
+  }
   private static final int COL_IDX_ALLELE = 0;
   private static final int COL_IDX_PMID = 3;
   private static final int COL_IDX_INVITRO = 4;
   private static final int COL_IDX_INVIVO = 5;
+  
+  private static final int COL_IDX_VARIANT_NAME = 2;
+  private static final int COL_IDX_FINDING = 5;
+  private static final int COL_IDX_PMIDS = 6;
 
   private Path m_directory;
 
@@ -111,28 +117,55 @@ public class FunctionReferenceImporter {
     java.util.Date modDate = row.getNullableDate(1);
     
     rowIdx += 2; // move down 2 rows and start reading;
-    String currentAllele = null;
-    
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
-
       dbHarness.updateModified(new java.sql.Date(modDate.getTime()));
-      
-      for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-        row = workbook.getRow(rowIdx);
-        if (row.hasNoText(COL_IDX_PMID)) {
-          continue;
-        }
+      if (GENES_WITH_FINDINGS.contains(geneSymbol)) {
+        processPerFinding(workbook, dbHarness, rowIdx);
+      } else {
+        processPerReference(workbook, dbHarness, rowIdx);
+      }
+    }
+  }
 
-        if (row.getNullableText(COL_IDX_ALLELE) != null) {
-          currentAllele = row.getNullableText(COL_IDX_ALLELE);
+  private void processPerReference(WorkbookWrapper workbook, DbHarness dbHarness, int rowIdx) throws SQLException {
+    String currentAllele = null;
+    for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
+      RowWrapper row = workbook.getRow(rowIdx);
+      if (row.hasNoText(COL_IDX_PMID)) {
+        continue;
+      }
+
+      if (row.getNullableText(COL_IDX_ALLELE) != null) {
+        currentAllele = row.getNullableText(COL_IDX_ALLELE);
+      }
+      Long pmid = row.getNullableLong(COL_IDX_PMID);
+      String inVitro = row.getNullableText(COL_IDX_INVITRO);
+      String[] inVitroArray = inVitro == null ? null : inVitro.split(",\\s*");
+      String inVivo = row.getNullableText(COL_IDX_INVIVO);
+      String[] inVivoArray = inVivo == null ? null : inVivo.split(",\\s*");
+
+      dbHarness.insert(currentAllele, pmid, inVitroArray, inVivoArray);
+    }
+  }
+  
+  private void processPerFinding(WorkbookWrapper workbook, DbHarness dbHarness, int rowIdx) throws SQLException {
+    String currentAllele = null;
+    for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
+      RowWrapper row = workbook.getRow(rowIdx);
+      if (row.hasNoText(COL_IDX_FINDING)) {
+        continue;
+      }
+
+      if (row.getNullableText(COL_IDX_VARIANT_NAME) != null) {
+        currentAllele = row.getNullableText(COL_IDX_VARIANT_NAME);
+      }
+      String finding = row.getNullableText(COL_IDX_FINDING);
+      String[] pmids = row.getNullablePmids(COL_IDX_PMIDS);
+
+      if (pmids != null) {
+        for (String pmid : pmids) {
+          dbHarness.insertFinding(currentAllele, pmid, finding);
         }
-        Long pmid = row.getNullableLong(COL_IDX_PMID);
-        String inVitro = row.getNullableText(COL_IDX_INVITRO);
-        String[] inVitroArray = inVitro == null ? null : inVitro.split(",\\s*");
-        String inVivo = row.getNullableText(COL_IDX_INVIVO);
-        String[] inVivoArray = inVivo == null ? null : inVivo.split(",\\s*");
-      
-        dbHarness.insert(currentAllele, pmid, inVitroArray, inVivoArray);
       }
     }
   }
@@ -144,6 +177,7 @@ public class FunctionReferenceImporter {
     private Connection conn;
     private Map<String, Long> alleleNameMap = new HashMap<>();
     private PreparedStatement insertStmt;
+    private PreparedStatement insertFinding;
     private String gene;
     
     DbHarness(String gene) throws SQLException {
@@ -160,6 +194,7 @@ public class FunctionReferenceImporter {
       }
       
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, substrate_in_vitro, substrate_in_vivo) values (?, ?, ?, ?)");
+      insertFinding = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, finding) values (?, ?, ?)");
     }
     
     void updateModified(java.sql.Date date) throws SQLException {
@@ -197,10 +232,32 @@ public class FunctionReferenceImporter {
       this.insertStmt.executeUpdate();
     }
 
+    void insertFinding(String allele, String pmid, String finding) throws SQLException {
+      if (!this.alleleNameMap.keySet().contains(allele)) {
+        sf_logger.warn("No allele defined with name {}", allele);
+        return;
+      }
+      
+      this.insertFinding.clearParameters();
+      this.insertFinding.setLong(1, this.alleleNameMap.get(allele));
+      this.insertFinding.setString(2, pmid);
+      
+      if (finding == null) {
+        this.insertFinding.setNull(3, Types.VARCHAR);
+      } else {
+        this.insertFinding.setString(3, finding);
+      }
+      
+      this.insertFinding.executeUpdate();
+    }
+
     @Override
     public void close() throws SQLException {
       if (this.insertStmt != null) {
         this.insertStmt.close();
+      }
+      if (this.insertFinding != null) {
+        this.insertFinding.close();
       }
       if (this.conn != null) {
         this.conn.close();
