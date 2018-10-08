@@ -354,6 +354,9 @@ public class AlleleDefinitionImporter {
     // return an empty value if there's nothing after strip
     if (strippedValue == null) return Optional.empty();
     
+    // fix common misspellings
+    strippedValue = strippedValue.replaceAll("Function", "function");
+    
     return Optional.of(strippedValue);
   }
 
