@@ -8,6 +8,14 @@ CREATE TABLE drug
   atcId VARCHAR(200)
 );
 
+COMMENT ON TABLE drug IS 'A clinically-used drug.';
+COMMENT ON COLUMN drug.drugId IS 'A unique identifier for this drug in the form "source:id" where source is some outside knowledge resource and id is their identifier, primary key';
+COMMENT ON COLUMN drug.name IS 'The generic name for this drug, lower-cased, required';
+COMMENT ON COLUMN drug.pharmgkbId IS 'The PharmGKB ID for this drug, optional';
+COMMENT ON COLUMN drug.rxnormId IS 'The RxNorm ID for this drug, optional';
+COMMENT ON COLUMN drug.drugbankId IS 'The DrugBank ID for this drug, optional';
+COMMENT ON COLUMN drug.atcId IS 'One or more ATC IDs for this drug, comma-separated, optional';
+
 \copy drug(drugId,name,pharmgkbId,rxnormId,drugbankId,atcId) from STDIN;
 RxNorm:190521	abacavir	PA448004	190521	DB01048	J05AF06,J05AR02,J05AR13,J05AR04
 ATC:C09AA	Ace Inhibitors, Plain	PA164712308			C09AA

@@ -1,7 +1,7 @@
 CREATE TABLE pair
 (
   pairid INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  hgncId varchar(20) references gene(hgncId),
+  hgncId varchar(20) REFERENCES gene(hgncId),
   drugId varchar(20) REFERENCES drug(drugId),
   guidelineId INTEGER REFERENCES guideline(id),
   version INTEGER DEFAULT 1,
@@ -10,9 +10,22 @@ CREATE TABLE pair
   pgxTesting VARCHAR(50),
   citations TEXT[],
 
-  drugName varchar(100),      -- temporary column, is removed at end of script
-  pgkbGuidelineId varchar(20) -- temporary column, is removed at end of script
+  drugName varchar(100),       -- temporary column, is removed at end of script
+  pgkbGuidelineId varchar(20), -- temporary column, is removed at end of script
+  
+  UNIQUE (hgncId, drugId)
 );
+
+COMMENT ON TABLE pair IS 'A pair of a gene and a drug that is notable to CPIC';
+COMMENT ON COLUMN pair.pairid IS 'A synthetic numerical id, automatically assigned, primary key';
+COMMENT ON COLUMN pair.hgncId IS 'The HGNC symbol of the gene in this pair, required';
+COMMENT ON COLUMN pair.drugId IS 'The ID of the drug in this pair, required';
+COMMENT ON COLUMN pair.guidelineId IS 'The ID of a guideline this pair is described in, optional';
+COMMENT ON COLUMN pair.version IS 'The version number, iterates on modification';
+COMMENT ON COLUMN pair.level IS 'The CPIC level of this pair, required';
+COMMENT ON COLUMN pair.pgkbCALevel IS 'The top level of PharmGKB Clinical Annotation for this pair, optional';
+COMMENT ON COLUMN pair.pgxTesting IS 'The top level of PGx testing recommendation from PharmGKB label annotations, optional';
+COMMENT ON COLUMN pair.citations IS 'The PMID citations in an array for this pair, optional';
 
 \copy pair(hgncId,drugName,pgkbGuidelineId,level,pgkbCALevel,pgxTesting,citations) from STDIN;
 HLA-B	abacavir	PA166104997	A	1A	Testing required	{"22378157","24561393"}

@@ -10,6 +10,16 @@ CREATE TABLE gene
   functionalityReferenceLastModified DATE
 );
 
+COMMENT ON TABLE gene IS 'Gene information with a primary key of the approved HGNC symbol for the gene. This means any gene used in the table must be approved by HGNC.';
+COMMENT ON COLUMN gene.hgncId IS 'Approved HGNC symbol, primary key.';
+COMMENT ON COLUMN gene.chr IS 'Chromosome symbol. In the form chr##, where ## is the number or X/Y.';
+COMMENT ON COLUMN gene.geneSequenceId IS 'The RefSeq ID for the sequence that represents this gene, starts with "NG_". No version suffix.';
+COMMENT ON COLUMN gene.proteinSequenceId IS 'The RefSeq ID for the sequence that represents the protein product of this gene, starts with "NP_". No version suffix.';
+COMMENT ON COLUMN gene.chromoSequenceId IS 'The RefSeq ID for the sequence that represents the chromosome this gene is on, starts with "NC_". No version suffix.';
+COMMENT ON COLUMN gene.pharmgkbId IS 'The ID for this gene in PharmGKB.';
+COMMENT ON COLUMN gene.allelesLastModified IS 'The date that the allele definitions for this gene were last modified.';
+COMMENT ON COLUMN gene.functionalityReferenceLastModified IS 'The date that the functionality reference data for this gene was last modified';
+
 \copy gene(hgncId,chr,geneSequenceId,proteinSequenceId,pharmgkbId) from STDIN;
 ABCB1	chr7	NG_011513	NP_000918	PA267
 ABCC4	chr13		NP_005836	PA397

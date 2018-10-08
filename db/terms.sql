@@ -1,12 +1,21 @@
-CREATE TABLE terms (
+CREATE TABLE term (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  category VARCHAR(200),
-  term VARCHAR(200),
-  functionaldef VARCHAR(200),
-  geneticdef VARCHAR(200)
+  category TEXT NOT NULL,
+  term TEXT NOT NULL,
+  functionaldef TEXT,
+  geneticdef TEXT,
+  
+  UNIQUE (category, term)
 );
 
-\copy terms(category,term,functionaldef,geneticdef) from STDIN;
+COMMENT ON TABLE term IS 'Standardized terms for clinical PGx test results';
+COMMENT ON COLUMN term.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN term.category IS 'Category group this term falls into';
+COMMENT ON COLUMN term.term IS 'The term name';
+COMMENT ON COLUMN term.functionaldef IS 'The functional definition of the term';
+COMMENT ON COLUMN term.geneticdef IS 'The genetic definition of the term';
+
+\copy term(category,term,functionaldef,geneticdef) from STDIN;
 Allele functional status: all genes	Increased function	Function greater than normal function	N/A
 Allele functional status: all genes	Normal function	Fully functional/wild-type	N/A
 Allele functional status: all genes	Decreased function	Function less than normal function	N/A

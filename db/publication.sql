@@ -14,6 +14,14 @@ CREATE TABLE publication
   doi text
 );
 
+COMMENT ON TABLE publication IS 'Published literature';
+COMMENT ON COLUMN publication.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN publication.guidelineId IS 'The ID for the guideline this publication is about';
+COMMENT ON COLUMN publication.pmid IS 'The PubMed identifier for this publication';
+COMMENT ON COLUMN publication.pmcid IS 'The PubMed Central identifier for this publication';
+COMMENT ON COLUMN publication.doi IS 'The Document Object Identifier (DOI) for this publication';
+
+-- guideline publications
 \copy publication(title,guidelineid,authors,journal,month,page,volume,year,pmid) from STDIN;
 Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for IFNL3 (IL28B) genotype and peginterferon alpha based regimens	100000	{"Muir Andrew J","Gong Li","Johnson Samuel G","Michael Lee Ming Ta","Williams Marc S","Klein Teri E","Caudle Kelly E","Nelson David R"}	Clinical pharmacology and therapeutics	10	null	null	2013	24096968
 Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Ivacaftor Therapy in the Context of CFTR Genotype	100001	{"Clancy John P","Johnson Samuel G","Yee Sook Wah","McDonagh Ellen M","Caudle Kelly E","Klein Teri E","Cannavo Matthew","Giacomini Kathleen M"}	Clinical pharmacology and therapeutics	3	null	null	2014	24598717
@@ -69,6 +77,7 @@ Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 
 Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for UGT1A1 and Atazanavir Prescribing	100034	{"Gammal Roseann S","Court Michael H","Haidar Cyrine E","Iwuchukwu Otito Frances","Gaur Aditya H","Alvarellos Maria","Guillemette Chantal","Lennox Jeffrey L","Whirl-Carrillo Michelle","Brummel Sean","Ratain Mark J","Klein Teri E","Schackman Bruce R","Caudle Kelly E","Haas David W"}	Clinical pharmacology and therapeutics	9	null	null	2015	26417955
 \.
 
+-- publications about CPIC itself
 \copy publication(title,authors,journal,month,page,volume,year,pmid) from STDIN;
 CPIC: Clinical Pharmacogenetics Implementation Consortium of the Pharmacogenomics Research Network	{"Relling M V","Klein T E"}	Clinical pharmacology and therapeutics	3	464-7	89	2011	21270786
 Incorporation of Pharmacogenomics into Routine Clinical Practice: the Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline Development Process	{"Caudle Kelly E","Klein Teri E","Hoffman James M","Müller Daniel J","Whirl-Carrillo Michelle","Gong Li","McDonagh Ellen M","Sangkuhl Katrin","Thorn Caroline F","Schwab Matthias","Agunder Jose A G","Freimuth Robert R","Huser Vojtech","Lee Ming Ta Michael","Iwuchukwu Otito F","Crews Kristine R","Scott Stuart A","Wadelius Mia","Swen Jesse J","Tyndale Rachel F","Stein C Michael","Roden Dan","Relling Mary V","Williams Marc S","Johnson Samuel G"}	Current drug metabolism	1	null	null	2014	24479687
