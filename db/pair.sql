@@ -61,7 +61,6 @@ SLCO1B1	simvastatin	PA166105005	A	1A		{"22617227","24918167"}
 CACNA1S	succinylcholine	PA166153250	A	3	Actionable PGx	{}
 CYP3A5	tacrolimus	PA166124619	A	1A		{"25801146"}
 CYP2D6	tamoxifen	PA166176068	A	1A		{}
-CYP2D6	tamoxifen	PA166116105	A	1A		{}
 TPMT	thioguanine	PA166104965	A	1A	Actionable PGx	{"21270794","23422873"}
 CYP2D6	tramadol	PA166116089	A	1B	Actionable PGx	{}
 CYP2D6	tropisetron	PA166161955	A			{"28002639"}
@@ -124,7 +123,6 @@ G6PD	nitrofurantoin	PA166116121	B	3	Actionable PGx	{}
 G6PD	norfloxacin	PA166116122	B		Actionable PGx	{}
 CYP2C19	omeprazole	PA166116095	B	2A	Actionable PGx	{}
 HLA-B	oxcarbazepine	PA166176623	A	1A	Testing recommended	{"23695185"}
-HLA-B	oxcarbazepine	PA166153267	B	3	Testing recommended	{}
 CYP2C19	pantoprazole	PA166128111	B	3	Actionable PGx	{}
 G6PD	pegloticase	PA166128113	B	3	Testing required	{}
 G6PD	phenazopyridine	PA166116123	B	3		{}
@@ -157,7 +155,6 @@ POLG	valproic acid	PA166153369	B	3	Testing required	{}
 GBA	velaglucerase alfa	PA166153363	B		Testing required	{}
 CYP2D6	venlafaxine	PA166116102	B	2A	Informative PGx	{}
 CYP2D6	vortioxetine	PA166128118	B	3	Actionable PGx	{}
-CYP4F2	warfarin	PA166116135	B	1B		{}
 CYP2D6	dextromethorphan	PA166153249	B	3		{}
 CYP2D6	quinidine	PA166153249	B		Informative PGx	{}
 G6PD	erythromycin	PA166153265	B			{}
