@@ -51,18 +51,18 @@ public class FunctionReferenceImporter {
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
 
-      FunctionReferenceImporter processor = new FunctionReferenceImporter(cli.getOptionValue("d"));
+      FunctionReferenceImporter processor = new FunctionReferenceImporter(Paths.get(cli.getOptionValue("d")));
       processor.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
     }
   }
 
-  private FunctionReferenceImporter(String directory) {
-    if (directory == null) {
+  public FunctionReferenceImporter(Path directoryPath) {
+    if (directoryPath == null) {
       throw new IllegalArgumentException("No directory given");
     }
-    Path directoryPath = Paths.get(directory);
+
     if (!directoryPath.toFile().exists()) {
       throw new IllegalArgumentException("Directory doesn't exist " + directoryPath);
     }
@@ -76,7 +76,7 @@ public class FunctionReferenceImporter {
     m_directory = directoryPath;
   }
 
-  private void execute() {
+  public void execute() {
     Arrays.stream(Objects.requireNonNull(m_directory.toFile().listFiles()))
         .filter(f -> f.getName().toLowerCase().endsWith(".xlsx") && !f.getName().startsWith("~$"))
         .forEach(processFile);

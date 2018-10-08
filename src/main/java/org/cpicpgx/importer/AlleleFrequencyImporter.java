@@ -36,7 +36,7 @@ public class AlleleFrequencyImporter {
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
 
-      AlleleFrequencyImporter processor = new AlleleFrequencyImporter(cli.getOptionValue("d"));
+      AlleleFrequencyImporter processor = new AlleleFrequencyImporter(Paths.get(cli.getOptionValue("d")));
       processor.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
@@ -45,13 +45,13 @@ public class AlleleFrequencyImporter {
 
   /**
    * Constructor
-   * @param directory an existing directory containing Excel .xlsx files
+   * @param directoryPath an existing directory containing Excel .xlsx files
    */
-  private AlleleFrequencyImporter(String directory) {
-    if (directory == null) {
+  public AlleleFrequencyImporter(Path directoryPath) {
+    if (directoryPath == null) {
       throw new IllegalArgumentException("No directory given");
     }
-    Path directoryPath = Paths.get(directory);
+
     if (!directoryPath.toFile().exists()) {
       throw new IllegalArgumentException("Directory doesn't exist " + directoryPath);
     }
@@ -68,7 +68,7 @@ public class AlleleFrequencyImporter {
   /**
    * Read the files and store the data in the database
    */
-  private void execute() {
+  public void execute() {
     Arrays.stream(Objects.requireNonNull(m_directory.toFile().listFiles()))
         .filter(f -> f.getName().toLowerCase().endsWith(".xlsx") && !f.getName().startsWith("~$"))
         .forEach(processFile);
