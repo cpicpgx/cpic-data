@@ -44,7 +44,7 @@ public class DiplotypePhenotypeImporter {
   public static void main(String[] args) {
     try {
       Options options = new Options();
-      options.addOption("d", true,"directory containing function reference excel files (*.xlsx)");
+      options.addOption("d", true,"directory containing diplotype-phenotype translation excel files (*.xlsx)");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
 
