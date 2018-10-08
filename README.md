@@ -10,19 +10,35 @@ Look in `src/main/resources`, copy `cpicData.properties.sample` to `cpicData.pro
 
 ## Running
 
-To set up the DB, look in the `db` folder. Run the following to build the db:
+### Bootstrapping the DB
+
+This project uses Flyway configured through Gradle to set up the DB. Schema definition files are found in the `src/resources/db/migration` directory. Run the following to build the db:
+
+You will need to set the Flyway "user" value (and possibly password). The best way is via an envvar called `FLYWAY_USER` but read the docs for other methods.
 
 ```sh
-make build
+gradle flywayMigrate -i
 ```
 
-Next, apply the right permissions to ensure your user account can import data
+### Bootstrapping Gene-specific Information
 
-The entry points to load data are in the `org.cpicpgx.importer` package. Check the javadocs on the individual files for command-line parameters.
+The entry points to load gene-specific data are in the `org.cpicpgx.importer` package. Check the javadocs on the individual importer classes for command-line parameters.
+
+To load all data at once, use the `DataImport` class. This takes a `-d` parameter that is a directory that expects the following subfolders containing excel files:
+
+- allele_definition_tables
+- allele_functionality_reference
+- diplotype_phenotype_tables
+- frequency_table
+
+Use gradle to build the jar file:
 
 ```sh
-java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.importer.AlleleDirectoryProcessor -d **PATH_TO**/allele_definition_tables
-java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.importer.AlleleFrequencyImporter -d **PATH_TO**/frequency_table
-java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.importer.FunctionReferenceImporter -d **PATH_TO**/allele_functionality_reference
-java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.importer.DiplotypePhenotypeImporter -d **PATH_TO**/diplotype_phenotype_tables
+gradle jar
+```
+
+Then put that jar on the classpath and run `org.cpicpgx.DataImport` class:
+
+```sh
+java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.DataImport -d **PATH_TO_DATA_DIRECTORY**
 ```

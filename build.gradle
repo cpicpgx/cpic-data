@@ -1,5 +1,12 @@
+buildscript {
+    dependencies {
+        classpath 'org.postgresql:postgresql:42.2.2'
+    }
+}
+
 plugins {
     id 'net.nemerosa.versioning' version '2.7.1'
+    id 'org.flywaydb.flyway' version '5.2.0'
 }
 
 group 'org.cpicpgx'
@@ -28,10 +35,14 @@ dependencies {
 
 jar {
     manifest {
-        attributes "Main-Class": "org.cpicpgx.importer.AlleleDefinitionImporter"
+        attributes 'Main-Class': 'org.cpicpgx.DataImporter'
     }
     
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+flyway {
+    url = 'jdbc:postgresql://localhost/cpic'
 }
