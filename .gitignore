@@ -5,6 +5,9 @@
 /.idea/dataSources*
 /.idea/dictionaries*
 /.idea/markdown-navigator*
+/.idea/shelf/
+/.idea/workspace.xml
+/build
 /src/main/resources/cpicData.properties
 /out
 cpicData.log
