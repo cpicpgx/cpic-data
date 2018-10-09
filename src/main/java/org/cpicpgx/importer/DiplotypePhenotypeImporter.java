@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.util.RowWrapper;
@@ -179,8 +180,9 @@ public class DiplotypePhenotypeImporter {
       this.insertStmt.setString(1, this.gene);
       this.insertStmt.setString(2, diplotype);
 
-      if (phenotype != null) {
-        this.insertStmt.setString(3, phenotype.replaceAll("unctionc", "unction"));
+      String phenoStripped = stripPhenotype(phenotype);
+      if (phenoStripped != null) {
+        this.insertStmt.setString(3, phenoStripped);
       } else {
         this.insertStmt.setNull(3, Types.VARCHAR);
       }
@@ -198,6 +200,20 @@ public class DiplotypePhenotypeImporter {
       }
 
       this.insertStmt.executeUpdate();
+    }
+
+    String stripPhenotype(String pheno) {
+      if (pheno == null) {
+        return null;
+      }
+      return StringUtils.stripToNull(
+          pheno
+              .replaceAll(this.gene, "")
+              .replaceAll("\\s+", " ")
+              .replaceAll("unctionc", "unction")
+              .replaceAll("Function", "function")
+              .replaceAll("[Mm]eta[zb]olizer[cd]*+", "metabolizer")
+      );
     }
 
     @Override
