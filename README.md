@@ -2,6 +2,13 @@
 
 This repo contains all the DDL and code for defining the [CPIC](https://cpicpgx.org) data model and populating it with data.
 
+## WARNING: NOT READY FOR USE :exclamation:  :exclamation:  :exclamation:
+
+__:warning: This repo is under active development and, thus, not ready for any useful purpose. When this message disappears and a production release is on the Releases tab then it will be ready for review. :warning:__
+
+__Seriously, you don't want to use this yet.__
+
+
 ## Setup
 
 This project assumes you're running a Postgres 9+ database for loading/querying data.
