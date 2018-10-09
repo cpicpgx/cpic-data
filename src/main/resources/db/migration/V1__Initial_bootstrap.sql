@@ -293,6 +293,7 @@ CREATE TABLE function_reference
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   alleleid INTEGER NOT NULL REFERENCES allele(id),
+  allele_function TEXT,
   pmid VARCHAR(50),
   finding TEXT,
   substrate_in_vitro TEXT[],

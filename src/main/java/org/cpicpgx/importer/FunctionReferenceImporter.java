@@ -34,11 +34,13 @@ public class FunctionReferenceImporter {
     GENES_WITH_FINDINGS.add("RYR1");
   }
   private static final int COL_IDX_ALLELE = 0;
+  private static final int COL_IDX_FUNCTION = 1;
   private static final int COL_IDX_PMID = 3;
   private static final int COL_IDX_INVITRO = 4;
   private static final int COL_IDX_INVIVO = 5;
   
   private static final int COL_IDX_VARIANT_NAME = 2;
+  private static final int COL_IDX_FINDING_FX = 4;
   private static final int COL_IDX_FINDING = 5;
   private static final int COL_IDX_PMIDS = 6;
 
@@ -129,6 +131,7 @@ public class FunctionReferenceImporter {
 
   private void processPerReference(WorkbookWrapper workbook, DbHarness dbHarness, int rowIdx) throws SQLException {
     String currentAllele = null;
+    String currentFunction = null;
     for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
       RowWrapper row = workbook.getRow(rowIdx);
       if (row.hasNoText(COL_IDX_PMID)) {
@@ -137,6 +140,7 @@ public class FunctionReferenceImporter {
 
       if (row.getNullableText(COL_IDX_ALLELE) != null) {
         currentAllele = row.getNullableText(COL_IDX_ALLELE);
+        currentFunction = row.getNullableText(COL_IDX_FUNCTION);
       }
       Long pmid = row.getNullableLong(COL_IDX_PMID);
       String inVitro = row.getNullableText(COL_IDX_INVITRO);
@@ -144,12 +148,13 @@ public class FunctionReferenceImporter {
       String inVivo = row.getNullableText(COL_IDX_INVIVO);
       String[] inVivoArray = inVivo == null ? null : inVivo.split(",\\s*");
 
-      dbHarness.insert(currentAllele, pmid, inVitroArray, inVivoArray);
+      dbHarness.insert(currentAllele, currentFunction, pmid, inVitroArray, inVivoArray);
     }
   }
   
   private void processPerFinding(WorkbookWrapper workbook, DbHarness dbHarness, int rowIdx) throws SQLException {
     String currentAllele = null;
+    String currentFunction = null;
     for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
       RowWrapper row = workbook.getRow(rowIdx);
       if (row.hasNoText(COL_IDX_FINDING)) {
@@ -158,13 +163,14 @@ public class FunctionReferenceImporter {
 
       if (row.getNullableText(COL_IDX_VARIANT_NAME) != null) {
         currentAllele = row.getNullableText(COL_IDX_VARIANT_NAME);
+        currentFunction = row.getNullableText(COL_IDX_FINDING_FX);
       }
       String finding = row.getNullableText(COL_IDX_FINDING);
       String[] pmids = row.getNullablePmids(COL_IDX_PMIDS);
 
       if (pmids != null) {
         for (String pmid : pmids) {
-          dbHarness.insertFinding(currentAllele, pmid, finding);
+          dbHarness.insertFinding(currentAllele, currentFunction, pmid, finding);
         }
       }
     }
@@ -193,8 +199,8 @@ public class FunctionReferenceImporter {
         }
       }
       
-      insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, substrate_in_vitro, substrate_in_vivo) values (?, ?, ?, ?)");
-      insertFinding = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, finding) values (?, ?, ?)");
+      insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, substrate_in_vitro, substrate_in_vivo, allele_function) values (?, ?, ?, ?, ?)");
+      insertFinding = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, finding, allele_function) values (?, ?, ?, ?)");
     }
     
     void updateModified(java.sql.Date date) throws SQLException {
@@ -205,7 +211,7 @@ public class FunctionReferenceImporter {
       }
     }
     
-    void insert(String allele, Long pmid, String[] inVitro, String[] inVivo) throws SQLException {
+    void insert(String allele, String alleleFunction, Long pmid, String[] inVitro, String[] inVivo) throws SQLException {
       if (!this.alleleNameMap.keySet().contains(allele)) {
         sf_logger.warn("No allele defined with name {}", allele);
         return;
@@ -229,10 +235,12 @@ public class FunctionReferenceImporter {
         this.insertStmt.setArray(4, inVivoArray);
       }
       
+      this.insertStmt.setString(5, normalizeFunction(alleleFunction));
+      
       this.insertStmt.executeUpdate();
     }
 
-    void insertFinding(String allele, String pmid, String finding) throws SQLException {
+    void insertFinding(String allele, String alleleFunction, String pmid, String finding) throws SQLException {
       if (!this.alleleNameMap.keySet().contains(allele)) {
         sf_logger.warn("No allele defined with name {}", allele);
         return;
@@ -248,6 +256,8 @@ public class FunctionReferenceImporter {
         this.insertFinding.setString(3, finding);
       }
       
+      this.insertFinding.setString(4, normalizeFunction(alleleFunction));
+      
       this.insertFinding.executeUpdate();
     }
 
@@ -262,6 +272,16 @@ public class FunctionReferenceImporter {
       if (this.conn != null) {
         this.conn.close();
       }
+    }
+    
+    private String normalizeFunction(String fn) {
+      if (fn == null) {
+        return null;
+      }
+      
+      return fn
+          .replaceAll("Function", "function")
+          .replaceAll("unctione", "unction");
     }
   }
 }
