@@ -182,6 +182,9 @@ public class DiplotypePhenotypeImporter {
 
       String phenoStripped = stripPhenotype(phenotype);
       if (phenoStripped != null) {
+        if (!phenotype.equals(gene + " " + phenoStripped)) {
+          sf_logger.warn("{} phenotype modified: {} >> {}", diplotype, phenotype, phenoStripped);
+        }
         this.insertStmt.setString(3, phenoStripped);
       } else {
         this.insertStmt.setNull(3, Types.VARCHAR);
