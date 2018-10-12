@@ -1,10 +1,7 @@
 package org.cpicpgx;
 
 import org.apache.commons.cli.*;
-import org.cpicpgx.importer.AlleleDirectoryProcessor;
-import org.cpicpgx.importer.AlleleFrequencyImporter;
-import org.cpicpgx.importer.DiplotypePhenotypeImporter;
-import org.cpicpgx.importer.FunctionReferenceImporter;
+import org.cpicpgx.importer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +21,13 @@ public class DataImport {
   private static final String DEFAULT_FREQUENCYDIRECTORY = "frequency_table";
   private static final String DEFAULT_FUNCTIONDIRECTORY = "allele_functionality_reference";
   private static final String DEFAULT_DIPLOTYPEDIRECTORY = "diplotype_phenotype_tables";
+  private static final String DEFAULT_RECOMMENDATIONDIRECTORY = "recommendation_tables";
   
   private String alleleDirectory = null;
   private String frequencyDirectory = null;
   private String functionDirectory = null;
   private String diplotypeDirectory = null;
+  private String recommendationDirectory = null;
 
   private Path m_directory;
 
@@ -38,6 +37,7 @@ public class DataImport {
     String frequency = null;
     String funcReference = null;
     String diplotype = null;
+    String recommendation = null;
     try {
       Options options = new Options();
       options.addOption("d", true,"directory that has sub-folders with excel data files (*.xlsx)");
@@ -45,6 +45,7 @@ public class DataImport {
       options.addOption("fd", true,"allele frequency subdirectory name");
       options.addOption("rd", true,"function reference subdirectory name");
       options.addOption("dd", true,"diplotype-phenotype subdirectory name");
+      options.addOption("dr", true,"recommendation subdirectory name");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
       directory = cli.getOptionValue("d");
@@ -53,6 +54,7 @@ public class DataImport {
       frequency = cli.getOptionValue("fd");
       funcReference = cli.getOptionValue("rd");
       diplotype = cli.getOptionValue("dd");
+      recommendation = cli.getOptionValue("dr");
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
       System.exit(1);
@@ -63,6 +65,7 @@ public class DataImport {
     processor.frequencyDirectory = frequency;
     processor.functionDirectory = funcReference;
     processor.diplotypeDirectory = diplotype;
+    processor.recommendationDirectory = recommendation;
     processor.execute();
   }
 
@@ -93,6 +96,8 @@ public class DataImport {
     fri.execute();
     DiplotypePhenotypeImporter dpi = new DiplotypePhenotypeImporter(m_directory.resolve(getDiplotypeDirectory()));
     dpi.execute();
+    RecommendationImporter ri = new RecommendationImporter(getRecommendationDirectory());
+    ri.execute();
   }
   
   private String getAlleleDirectory() {
@@ -124,6 +129,14 @@ public class DataImport {
       return DEFAULT_DIPLOTYPEDIRECTORY;
     } else {
       return this.diplotypeDirectory;
+    }
+  }
+  
+  private String getRecommendationDirectory() {
+    if (this.recommendationDirectory == null) {
+      return DEFAULT_RECOMMENDATIONDIRECTORY;
+    } else {
+      return this.recommendationDirectory;
     }
   }
 }
