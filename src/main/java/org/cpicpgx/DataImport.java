@@ -96,7 +96,7 @@ public class DataImport {
     fri.execute();
     DiplotypePhenotypeImporter dpi = new DiplotypePhenotypeImporter(m_directory.resolve(getDiplotypeDirectory()));
     dpi.execute();
-    RecommendationImporter ri = new RecommendationImporter(getRecommendationDirectory());
+    RecommendationImporter ri = new RecommendationImporter(m_directory.resolve(getRecommendationDirectory()));
     ri.execute();
   }
   

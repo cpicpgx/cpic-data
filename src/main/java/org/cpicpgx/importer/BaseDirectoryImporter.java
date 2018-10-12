@@ -61,7 +61,11 @@ abstract class BaseDirectoryImporter {
       throw new IllegalArgumentException("Need a directory");
     }
     
-    this.directory = Paths.get(directory);
+    setDirectory(Paths.get(directory));
+  }
+  
+  void setDirectory(Path directory) {
+    this.directory = directory;
 
     if (!this.directory.toFile().exists()) {
       throw new IllegalArgumentException("Directory doesn't exist " + this.directory);

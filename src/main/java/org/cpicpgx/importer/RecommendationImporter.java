@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -52,7 +53,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   
   private RecommendationImporter() {}
   
-  public RecommendationImporter(String directory) {
+  public RecommendationImporter(Path directory) {
     this.setDirectory(directory);
   }
   
@@ -63,13 +64,13 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   }
   
   private Consumer<File> processFile = f -> {
+    sf_logger.info("Processing file {}", f);
     Matcher m = DRUG_NAME_PATTERN.matcher(f.getName().toLowerCase());
     if (!m.find()) {
       sf_logger.warn("No drug name found for {}", f.getName().toLowerCase());
       return;
     }
     String drug = m.group(1);
-    sf_logger.info(drug);
 
     List<String> geneList = new ArrayList<>();
     try (FileReader fileReader = new FileReader(f); DbHarness dbHarness = new DbHarness()) {
@@ -81,9 +82,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             if (cellValue.endsWith(" Phenotype") && i == geneList.size()) {
               String gene = cellValue.replaceAll(" Phenotype", "");
               geneList.add(gene);
-              sf_logger.info("Header: Gene {}", gene);
-            } else {
-              sf_logger.info("Header: {}", cellValue);
             }
           }
         } else {
@@ -133,13 +131,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         String drugId = lookupDrug(drug);
         Long guidelineId = lookupGuideline(drug);
 
-        sf_logger.info("Guideline:{}", guidelineId);
-        sf_logger.info(drugId);
-        sf_logger.info(genotype.toString());
-        sf_logger.info(implications);
-        sf_logger.info(recommendation);
-        sf_logger.info(classification);
-        
         this.insertStmt.setLong(1, guidelineId);
         this.insertStmt.setString(2, drugId);
         if (StringUtils.isNotBlank(implications)) {
