@@ -1,6 +1,6 @@
 package org.cpicpgx.exporter;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.cpicpgx.db.ConnectionFactory;
@@ -11,7 +11,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +21,7 @@ import java.sql.SQLException;
  *
  * @author Ryan Whaley
  */
-public class PairsExporter {
+public class PairsExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String sf_defaultFileName = "cpicPairs.csv";
   private static final String sf_pairQuery = "select " +
@@ -38,35 +37,14 @@ public class PairsExporter {
       "left join guideline g on p.guidelineid = g.id " +
       "order by p.level, d2.name";
 
-  private Path directory;
-
   public static void main(String[] args) {
     try {
-      Options options = new Options();
-      options.addOption("d", true,"directory to write the cpic pairs to");
-      CommandLineParser clParser = new DefaultParser();
-      CommandLine cli = clParser.parse(options, args);
-
-      PairsExporter export = new PairsExporter(Paths.get(cli.getOptionValue("d")));
+      PairsExporter export = new PairsExporter();
+      export.parseArgs(args);
       export.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
     }
-  }
-  
-  private PairsExporter(Path directoryPath) {
-    if (directoryPath == null) {
-      throw new IllegalArgumentException("No directory given");
-    }
-
-    if (!directoryPath.toFile().exists()) {
-      throw new IllegalArgumentException("Directory doesn't exist " + directoryPath);
-    }
-    if (!directoryPath.toFile().isDirectory()) {
-      throw new IllegalArgumentException("Path is not a directory " + directoryPath);
-    }
-
-    directory = directoryPath;
   }
   
   private void execute() {
