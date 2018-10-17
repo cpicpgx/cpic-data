@@ -24,11 +24,11 @@ abstract class BaseDirectoryImporter {
    * 
    * Expect a "d" argument that gives the directory to crawl through. Must exist and must contain files.
    * @param args an array of command line arguments
-   * @throws ParseException
+   * @throws ParseException can occur from bad argument syntax
    */
   void parseArgs(String [] args) throws ParseException {
     Options options = new Options();
-    options.addOption("d", true,"directory containing allele frequency excel files (*.xlsx)");
+    options.addOption("d", true,"directory containing files to process (*.xlsx)");
     CommandLineParser clParser = new DefaultParser();
     CommandLine cli = clParser.parse(options, args);
 
