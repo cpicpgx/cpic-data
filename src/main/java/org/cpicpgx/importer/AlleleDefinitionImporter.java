@@ -307,7 +307,7 @@ public class AlleleDefinitionImporter {
         alleleInsert.setString(3, m_alleleFunctionMap.get(alleleName));
         ResultSet rs = alleleInsert.executeQuery();
         rs.next();
-        Integer alleleId = rs.getInt(1);
+        int alleleId = rs.getInt(1);
         
         Map<Integer,String> allelePosMap = m_alleles.get(alleleName);
         for (Integer locIdx : allelePosMap.keySet()) {
