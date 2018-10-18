@@ -22,7 +22,7 @@ class AlleleDefinitionWorkbook {
   private static final String CELL_HEADER_FXN = "Allele Functional Status";
   private static final String FILE_NAME_PATTERN = "%s_allele_definition_table.xlsx";
   
-  private String hgncId;
+  private String geneSymbol;
   private Workbook workbook;
   private Sheet sheet;
   private Row nameRow;
@@ -46,7 +46,7 @@ class AlleleDefinitionWorkbook {
       throw new IllegalArgumentException("Gene must be specified");
     }
     
-    this.hgncId = gene;
+    this.geneSymbol = gene;
     this.workbook = new XSSFWorkbook();
     this.sheet = workbook.createSheet("Definitions");
 
@@ -57,7 +57,7 @@ class AlleleDefinitionWorkbook {
     );
     
     Row row = sheet.createRow(rowIdx++);
-    writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.hgncId));
+    writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
     writeDateCell(row, 1, modified);
     
     nameRow = sheet.createRow(rowIdx++);
@@ -67,7 +67,7 @@ class AlleleDefinitionWorkbook {
     dbsnpRow = sheet.createRow(rowIdx++);
     
     Row headerRow = sheet.createRow(rowIdx);
-    writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.hgncId));
+    writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.geneSymbol));
     writeStringCell(headerRow, 1, CELL_HEADER_FXN);
   }
 
@@ -76,7 +76,7 @@ class AlleleDefinitionWorkbook {
    * @return a file name for this workbook
    */
   String getFilename() {
-    return String.format(FILE_NAME_PATTERN, this.hgncId);
+    return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
 
   /**
@@ -118,11 +118,11 @@ class AlleleDefinitionWorkbook {
   /**
    * Writes the column header information for a variant location
    * @param name the name of the allele
-   * @param protein the 
-   * @param chromo
-   * @param gene
-   * @param dbSnpId
-   * @param locId
+   * @param protein the name of this variant on the protein sequence
+   * @param chromo the name of this variant on the chromosomal sequence
+   * @param gene the name of this variant on the gene sequence
+   * @param dbSnpId the ID of this variant assigned by dbSNP
+   * @param locId the ID for this location assigned by the DB
    */
   void writeVariant(String name, String protein, String chromo, String gene, String dbSnpId, Long locId) {
     colIdx += 1;

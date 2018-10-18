@@ -172,7 +172,7 @@ public class DiplotypePhenotypeImporter {
       this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
 
-      insertStmt = this.conn.prepareStatement("insert into diplotype_phenotype(hgncid, diplotype, phenotype, activityscore, ehr) values (?, ?, ?, ?, ?)");
+      insertStmt = this.conn.prepareStatement("insert into diplotype_phenotype(geneSymbol, diplotype, phenotype, activityscore, ehr) values (?, ?, ?, ?, ?)");
     }
     
     void insert(String diplotype, String phenotype, Double activity, String ehr) throws SQLException {

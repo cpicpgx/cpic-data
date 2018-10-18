@@ -41,7 +41,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
    */
   private void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement geneStmt = conn.prepareStatement("select distinct a.hgncid, g.alleleslastmodified from allele a join gene g on a.hgncid = g.hgncid order by 1");
+         PreparedStatement geneStmt = conn.prepareStatement("select distinct a.geneSymbol, g.alleleslastmodified from allele a join gene g on a.geneSymbol = g.symbol order by 1");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -50,7 +50,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
       
         AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, allelesLastModified);
 
-        try (PreparedStatement seqLocStmt = conn.prepareStatement("select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where hgncid=?")) {
+        try (PreparedStatement seqLocStmt = conn.prepareStatement("select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?")) {
           seqLocStmt.setString(1, symbol);
           try (ResultSet rs = seqLocStmt.executeQuery()) {
             while (rs.next()) {
@@ -67,7 +67,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
         }
       
         try (
-            PreparedStatement alleleStmt = conn.prepareStatement("select name, functionalstatus, id from allele where hgncid=?");
+            PreparedStatement alleleStmt = conn.prepareStatement("select name, functionalstatus, id from allele where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?")
         ) {
           alleleStmt.setString(1, symbol);

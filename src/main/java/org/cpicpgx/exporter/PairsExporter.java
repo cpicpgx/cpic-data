@@ -25,7 +25,7 @@ public class PairsExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String sf_defaultFileName = "cpicPairs.csv";
   private static final String sf_pairQuery = "select " +
-      "hgncid as \"Gene\", " +
+      "p.geneSymbol as \"Gene\", " +
       "d2.name as \"Drug\", " +
       "g.url as \"Guideline URL\", " +
       "level as \"CPIC Level\", " +

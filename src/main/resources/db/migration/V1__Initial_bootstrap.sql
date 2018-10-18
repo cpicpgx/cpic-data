@@ -59,7 +59,7 @@ CPIC Guideline for atazanavir and UGT1A1	https://cpicpgx.org/guidelines/guidelin
 
 CREATE TABLE gene
 (
-  hgncId VARCHAR(20) PRIMARY KEY NOT NULL,
+  symbol VARCHAR(20) PRIMARY KEY NOT NULL,
   chr VARCHAR(20),
   geneSequenceId VARCHAR(20),
   proteinSequenceId VARCHAR(20),
@@ -70,7 +70,7 @@ CREATE TABLE gene
 );
 
 COMMENT ON TABLE gene IS 'Gene information with a primary key of the approved HGNC symbol for the gene. This means any gene used in the table must be approved by HGNC.';
-COMMENT ON COLUMN gene.hgncId IS 'Approved HGNC symbol, primary key.';
+COMMENT ON COLUMN gene.symbol IS 'Approved HGNC symbol, primary key.';
 COMMENT ON COLUMN gene.chr IS 'Chromosome symbol. In the form chr##, where ## is the number or X/Y.';
 COMMENT ON COLUMN gene.geneSequenceId IS 'The RefSeq ID for the sequence that represents this gene, starts with "NG_". No version suffix.';
 COMMENT ON COLUMN gene.proteinSequenceId IS 'The RefSeq ID for the sequence that represents the protein product of this gene, starts with "NP_". No version suffix.';
@@ -79,7 +79,7 @@ COMMENT ON COLUMN gene.pharmgkbId IS 'The ID for this gene in PharmGKB.';
 COMMENT ON COLUMN gene.allelesLastModified IS 'The date that the allele definitions for this gene were last modified.';
 COMMENT ON COLUMN gene.functionalityReferenceLastModified IS 'The date that the functionality reference data for this gene was last modified';
 
-copy gene(hgncId,chr,geneSequenceId,proteinSequenceId,pharmgkbId) from STDIN;
+copy gene(symbol,chr,geneSequenceId,proteinSequenceId,pharmgkbId) from STDIN;
 ABCB1	chr7	NG_011513	NP_000918	PA267
 ABCC4	chr13		NP_005836	PA397
 ABCG2	chr4		NP_004818	PA390
@@ -214,14 +214,14 @@ CREATE TABLE allele
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   version INTEGER DEFAULT 1,
-  hgncId VARCHAR(50) REFERENCES gene(hgncid) NOT NULL,
+  geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   name VARCHAR(200) NOT NULL,
   functionalStatus VARCHAR(200)
 );
 
 COMMENT ON TABLE allele IS 'An allele of a gene';
 COMMENT ON COLUMN allele.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN allele.hgncId IS 'The HGNC symbol of the gene the allele is for, required';
+COMMENT ON COLUMN allele.geneSymbol IS 'The HGNC symbol of the gene the allele is for, required';
 COMMENT ON COLUMN allele.name IS 'The name of this allele, required';
 COMMENT ON COLUMN allele.functionalStatus IS 'The functional phenotype of this allele';
 
@@ -234,7 +234,7 @@ CREATE TABLE sequence_location
   chromosomeLocation VARCHAR(200),
   geneLocation VARCHAR(200),
   proteinLocation VARCHAR(200),
-  hgncId VARCHAR(50) REFERENCES gene(hgncId) NOT NULL,
+  geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   dbSnpId VARCHAR(20)
 );
 
@@ -243,7 +243,7 @@ COMMENT ON COLUMN sequence_location.name IS 'The short name of this sequence loc
 COMMENT ON COLUMN sequence_location.chromosomeLocation IS 'The partial HGVS representation of the location on the chromosomal sequence';
 COMMENT ON COLUMN sequence_location.geneLocation IS 'The partial HGVS representation of the location on the gene sequence';
 COMMENT ON COLUMN sequence_location.proteinLocation IS 'The partial HGVS representation of the location on the protein sequence';
-COMMENT ON COLUMN sequence_location.hgncId IS 'The HGNC symbol fo the gene this squence location falls in';
+COMMENT ON COLUMN sequence_location.geneSymbol IS 'The HGNC symbol fo the gene this squence location falls in';
 COMMENT ON COLUMN sequence_location.dbSnpId IS 'The DBSNP identifier (rs#) for this location, optional';
 
 
@@ -259,12 +259,12 @@ COMMENT ON TABLE allele_location_value IS 'The change at a specific location for
 
 CREATE TABLE translation_note
 (
-  hgncId VARCHAR(50) REFERENCES gene(hgncId) NOT NULL,
+  geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   note TEXT NOT NULL
 );
 
 COMMENT ON TABLE translation_note IS 'A note about allele translation for a gene';
-COMMENT ON COLUMN translation_note.hgncId IS 'The HGNC gene symbol for the gene this note is about, required';
+COMMENT ON COLUMN translation_note.geneSymbol IS 'The HGNC gene symbol for the gene this note is about, required';
 COMMENT ON COLUMN translation_note.note IS 'The text of the note about allele translation, required';
 
 
@@ -636,7 +636,7 @@ RxNorm:114176	zuclopenthixol	PA452629	114176	DB01624	{"N05AF05"}
 CREATE TABLE pair
 (
   pairid INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  hgncId varchar(20) REFERENCES gene(hgncId),
+  geneSymbol VARCHAR(20) REFERENCES gene(symbol),
   drugId varchar(20) REFERENCES drug(drugId),
   guidelineId INTEGER REFERENCES guideline(id),
   version INTEGER DEFAULT 1,
@@ -648,12 +648,12 @@ CREATE TABLE pair
   drugName varchar(100),       -- temporary column, is removed at end of script
   pgkbGuidelineId varchar(20), -- temporary column, is removed at end of script
 
-  UNIQUE (hgncId, drugId)
+  UNIQUE (geneSymbol, drugId)
 );
 
 COMMENT ON TABLE pair IS 'A pair of a gene and a drug that is notable to CPIC';
 COMMENT ON COLUMN pair.pairid IS 'A synthetic numerical id, automatically assigned, primary key';
-COMMENT ON COLUMN pair.hgncId IS 'The HGNC symbol of the gene in this pair, required';
+COMMENT ON COLUMN pair.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
 COMMENT ON COLUMN pair.drugId IS 'The ID of the drug in this pair, required';
 COMMENT ON COLUMN pair.guidelineId IS 'The ID of a guideline this pair is described in, optional';
 COMMENT ON COLUMN pair.version IS 'The version number, iterates on modification';
@@ -662,7 +662,7 @@ COMMENT ON COLUMN pair.pgkbCALevel IS 'The top level of PharmGKB Clinical Annota
 COMMENT ON COLUMN pair.pgxTesting IS 'The top level of PGx testing recommendation from PharmGKB label annotations, optional';
 COMMENT ON COLUMN pair.citations IS 'The PMID citations in an array for this pair, optional';
 
-copy pair(hgncId,drugName,pgkbGuidelineId,level,pgkbCALevel,pgxTesting,citations) from STDIN;
+copy pair(geneSymbol,drugName,pgkbGuidelineId,level,pgkbCALevel,pgxTesting,citations) from STDIN;
 HLA-B	abacavir	PA166104997	A	1A	Testing required	{"22378157","24561393"}
 HLA-B	allopurinol	PA166105003	A	1A		{"23232549","26094938"}
 CYP2C19	amitriptyline	PA166105006	A	1A		{"23486447","27997040"}
@@ -1064,18 +1064,18 @@ Phenotype: high-risk genotype status	Negative	High-risk allele not detected	No c
 CREATE TABLE diplotype_phenotype
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  hgncId VARCHAR(50) REFERENCES gene(hgncid) NOT NULL,
+  geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   diplotype TEXT NOT NULL,
   phenotype TEXT,
   ehr TEXT,
   activityScore NUMERIC,
 
-  UNIQUE (hgncId, diplotype)
+  UNIQUE (geneSymbol, diplotype)
 );
 
 COMMENT ON TABLE diplotype_phenotype IS 'A diplotype to phenotype translation';
 COMMENT ON COLUMN diplotype_phenotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN diplotype_phenotype.hgncId IS 'The HGNC symbol of the gene in this pair, required';
+COMMENT ON COLUMN diplotype_phenotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
 COMMENT ON COLUMN diplotype_phenotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
 COMMENT ON COLUMN diplotype_phenotype.phenotype IS 'Coded Genotype/Phenotype Summary, optional';
 COMMENT ON COLUMN diplotype_phenotype.ehr IS 'EHR Priority Result, optional';

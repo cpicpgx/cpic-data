@@ -40,7 +40,7 @@ public class FrequencyProcessor implements AutoCloseable {
   FrequencyProcessor(String gene, RowWrapper headerRow) throws SQLException, NotFoundException {
     this.conn = ConnectionFactory.newConnection();
 
-    PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.hgncid=?");
+    PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?");
     pstmt.setString(1, gene);
     ResultSet rs = pstmt.executeQuery();
     Map<String, Long> alleleNameMap = new HashMap<>();

@@ -255,10 +255,10 @@ public class AlleleDefinitionImporter {
     try (Connection conn = DriverManager.getConnection(String.format(sf_dbUrl, host), user, pass)) {
       
       String[] statements = new String[]{
-          "delete from translation_note where hgncid=?",
-          "delete from allele_location_value where alleleid in (select id from allele where hgncid=?)",
-          "delete from allele where hgncid=?",
-          "delete from sequence_location where hgncid=?"
+          "delete from translation_note where geneSymbol=?",
+          "delete from allele_location_value where alleleid in (select id from allele where geneSymbol=?)",
+          "delete from allele where geneSymbol=?",
+          "delete from sequence_location where geneSymbol=?"
       };
       for (String statement : statements) {
         PreparedStatement notesDelete = conn.prepareStatement(statement);
@@ -268,7 +268,7 @@ public class AlleleDefinitionImporter {
       
       PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleleid, locationid, variantallele) values (?,?,?)");
       
-      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,alleleslastmodified=? where hgncid=?");
+      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,alleleslastmodified=? where symbol=?");
       geneUpdate.setString(1, m_geneSeqId);
       geneUpdate.setString(2, m_proteinSeqId);
       geneUpdate.setString(3, m_chromoSeqId);
@@ -276,7 +276,7 @@ public class AlleleDefinitionImporter {
       geneUpdate.setString(5, m_gene);
       geneUpdate.executeUpdate();
 
-      PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, hgncid) values (?,?,?,?,?,?) returning (id)");
+      PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) values (?,?,?,?,?,?) returning (id)");
       Integer[] locIdAssignements = new Integer[m_chromoPositions.length];
       for (int i=0; i < m_chromoPositions.length; i++) {
         
@@ -300,7 +300,7 @@ public class AlleleDefinitionImporter {
       }
       sf_logger.info("created {} new locations", m_chromoPositions.length);
 
-      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(hgncId, name, functionalstatus) values (?,?,?) returning (id)");
+      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(geneSymbol, name, functionalstatus) values (?,?,?) returning (id)");
       for (String alleleName : m_alleles.keySet()) {
         alleleInsert.setString(1, m_gene);
         alleleInsert.setString(2, alleleName);
@@ -319,7 +319,7 @@ public class AlleleDefinitionImporter {
       }
       sf_logger.info("created {} new alleles", m_alleles.keySet().size());
 
-      PreparedStatement noteInsert = conn.prepareStatement("insert into translation_note(hgncId, note) values (?,?)");
+      PreparedStatement noteInsert = conn.prepareStatement("insert into translation_note(geneSymbol, note) values (?,?)");
       for (String note : m_notes) {
         noteInsert.setString(1, m_gene);
         noteInsert.setString(2, note);

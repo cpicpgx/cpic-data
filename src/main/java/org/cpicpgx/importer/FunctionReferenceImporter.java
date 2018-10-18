@@ -190,7 +190,7 @@ public class FunctionReferenceImporter {
       this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
 
-      try (PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.hgncid=?")) {
+      try (PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?")) {
         pstmt.setString(1, gene);
         try (ResultSet rs = pstmt.executeQuery()) {
           while (rs.next()) {
@@ -204,7 +204,7 @@ public class FunctionReferenceImporter {
     }
     
     void updateModified(java.sql.Date date) throws SQLException {
-      try (PreparedStatement stmt = this.conn.prepareStatement("update gene set functionalityreferencelastmodified=? where hgncid=?")) {
+      try (PreparedStatement stmt = this.conn.prepareStatement("update gene set functionalityreferencelastmodified=? where symbol=?")) {
         stmt.setDate(1, date);
         stmt.setString(2, gene);
         stmt.executeUpdate();
