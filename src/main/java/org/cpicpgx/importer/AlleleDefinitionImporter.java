@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+import org.cpicpgx.db.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,6 @@ public class AlleleDefinitionImporter {
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
   private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
   private static final int sf_alleleRowStart = 7;
-  private static final String sf_dbUrl = "jdbc:postgresql://%s/cpic";
   private static final String sf_notes = "NOTES:";
   
   private Path m_inputPath;
@@ -246,13 +246,7 @@ public class AlleleDefinitionImporter {
   }
   
   void writeToDB() throws SQLException {
-
-    ResourceBundle resources = ResourceBundle.getBundle("cpicData");
-    String host = resources.getString("db.host");
-    String user = resources.getString("db.user");
-    String pass = resources.getString("db.pass");
-    
-    try (Connection conn = DriverManager.getConnection(String.format(sf_dbUrl, host), user, pass)) {
+    try (Connection conn = ConnectionFactory.newConnection()) {
       
       String[] statements = new String[]{
           "delete from translation_note where geneSymbol=?",
