@@ -42,7 +42,7 @@ public class RowWrapper {
   /**
    * Gets text value from the cell at the given index. This will convert non-STRING columns to text. This will also 
    * strip text down to null values. This will give the words True/False for a BOOLEAN cell type.
-   * @param cellIdx the index of a cell in this row
+   * @param cellIdx the index of a cell in this row, 0-based
    * @return a {@link String} representation of the value in the cell at the given index
    */
   public String getNullableText(int cellIdx) {
