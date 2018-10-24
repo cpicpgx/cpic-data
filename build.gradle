@@ -44,5 +44,5 @@ jar {
 }
 
 flyway {
-    url = 'jdbc:postgresql://localhost/cpic'
+    url = 'jdbc:postgresql://localhost/cpic?user=cpic'
 }
