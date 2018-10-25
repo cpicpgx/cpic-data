@@ -8,7 +8,7 @@ CREATE TABLE guideline
   version INTEGER DEFAULT 1,
   name VARCHAR(200) NOT NULL,
   url VARCHAR(200),
-  pharmgkbId varchar(20)
+  pharmgkbId TEXT CHECK (pharmgkbId ~ '^(PA\d+){0,1}$')
 );
 
 COMMENT ON TABLE guideline IS 'A guideline for a drug or group of drugs';
@@ -59,14 +59,17 @@ CPIC Guideline for atazanavir and UGT1A1	https://cpicpgx.org/guidelines/guidelin
 
 CREATE TABLE gene
 (
-  symbol VARCHAR(20) PRIMARY KEY NOT NULL,
-  chr VARCHAR(20),
-  geneSequenceId VARCHAR(20),
-  proteinSequenceId VARCHAR(20),
-  chromoSequenceId VARCHAR(20),
-  pharmgkbId VARCHAR(20),
-  allelesLastModified DATE,
-  functionalityReferenceLastModified DATE
+  symbol            VARCHAR(20) PRIMARY KEY NOT NULL,
+  chr               VARCHAR(20) CHECK (chr ~ '^chr\S+$'),
+  geneSequenceId    TEXT CHECK (geneSequenceId ~ '^(NG_\S+){0,1}$'),
+  proteinSequenceId TEXT CHECK (proteinSequenceId ~ '^(NP_\S+){0,1}$'),
+  chromoSequenceId  TEXT CHECK (chromoSequenceId ~ '^(NC_\S+){0,1}$'),
+  hgncId            TEXT CHECK (hgncId ~ '^(HGNC:\d+){0,1}$'),
+  ncbiId            TEXT,
+  ensemblId         TEXT CHECK (ensemblId ~ '^(ENSG\d+){0,1}$'),
+  pharmgkbId        TEXT CHECK (pharmgkbId ~ '^(PA\d+){0,1}$'),
+  allelesLastModified                 DATE,
+  functionalityReferenceLastModified  DATE
 );
 
 COMMENT ON TABLE gene IS 'Gene information with a primary key of the approved HGNC symbol for the gene. This means any gene used in the table must be approved by HGNC.';
@@ -78,6 +81,9 @@ COMMENT ON COLUMN gene.chromoSequenceId IS 'The RefSeq ID for the sequence that 
 COMMENT ON COLUMN gene.pharmgkbId IS 'The ID for this gene in PharmGKB.';
 COMMENT ON COLUMN gene.allelesLastModified IS 'The date that the allele definitions for this gene were last modified.';
 COMMENT ON COLUMN gene.functionalityReferenceLastModified IS 'The date that the functionality reference data for this gene was last modified';
+COMMENT ON COLUMN gene.hgncId IS 'The HGNC numerical ID number for this gene prefixed by "HGNC:"';
+COMMENT ON COLUMN gene.ncbiId IS 'The NCBI Gene (Entrez) ID number for this gene';
+COMMENT ON COLUMN gene.ensemblId IS 'The Ensembl ID for this gene';
 
 copy gene(symbol,chr,geneSequenceId,proteinSequenceId,pharmgkbId) from STDIN;
 ABCB1	chr7	NG_011513	NP_000918	PA267

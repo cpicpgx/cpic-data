@@ -16,6 +16,7 @@ import java.util.stream.Stream;
  * @author Ryan Whaley
  */
 abstract class BaseDirectoryImporter {
+  static final String EXCEL_EXTENSION = ".xlsx";
   
   private Path directory;
 
