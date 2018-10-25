@@ -1,6 +1,6 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
@@ -15,12 +15,9 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Arrays;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -31,52 +28,35 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Whaley
  */
-public class DiplotypePhenotypeImporter {
+public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern GENE_PATTERN = Pattern.compile("(\\w+)\\s*Diplotype");
   private static final int COL_IDX_DIP = 0;
   private static final String DIPLOTYPE_SEPARATOR = "/";
 
-  private Path m_directory;
   private int phenoIdx = -1;
   private int ehrIdx = -1;
   private int activityIdx = -1;
 
   public static void main(String[] args) {
     try {
-      Options options = new Options();
-      options.addOption("d", true,"directory containing diplotype-phenotype translation excel files (*.xlsx)");
-      CommandLineParser clParser = new DefaultParser();
-      CommandLine cli = clParser.parse(options, args);
-
-      DiplotypePhenotypeImporter processor = new DiplotypePhenotypeImporter(Paths.get(cli.getOptionValue("d")));
+      DiplotypePhenotypeImporter processor = new DiplotypePhenotypeImporter();
+      processor.parseArgs(args);
       processor.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
     }
   }
   
-  public DiplotypePhenotypeImporter(Path directoryPath) {
-    if (directoryPath == null) {
-      throw new IllegalArgumentException("No directory given");
-    }
-
-    if (!directoryPath.toFile().exists()) {
-      throw new IllegalArgumentException("Directory doesn't exist " + directoryPath);
-    }
-    if (!directoryPath.toFile().isDirectory()) {
-      throw new IllegalArgumentException("Path is not a directory " + directoryPath);
-    }
-    if (directoryPath.toFile().listFiles() == null) {
-      throw new IllegalArgumentException("Directory is empty " + directoryPath);
-    }
-
-    m_directory = directoryPath;
+  private DiplotypePhenotypeImporter() { }
+  
+  public DiplotypePhenotypeImporter(Path directory) {
+    this.setDirectory(directory);
   }
 
   public void execute() {
-    Arrays.stream(Objects.requireNonNull(m_directory.toFile().listFiles()))
-        .filter(f -> f.getName().toLowerCase().endsWith(".xlsx") && !f.getName().startsWith("~$"))
+    streamFiles()
+        .filter(filterFileFunction(".xlsx"))
         .forEach(processFile);
   }
 
@@ -85,13 +65,32 @@ public class DiplotypePhenotypeImporter {
     sf_logger.info("Reading {}", file);
 
     try (InputStream in = Files.newInputStream(file.toPath())) {
-      processWorkbook(new WorkbookWrapper(in));
+      WorkbookWrapper workbook = new WorkbookWrapper(in);
+      processCds(workbook);
+      processWorkbook(workbook);
     } catch (Exception ex) {
       throw new RuntimeException("Error processing frequency file: " + file, ex);
     }
   };
 
+  private void processCds(WorkbookWrapper workbook) {
+    // default CDS language should be on the second sheet
+    workbook.switchToSheet(1);
+
+    if (workbook.currentSheet == null) {
+      sf_logger.warn("No CDS sheet for {}", workbook.toString());
+      return;
+    }
+
+    sf_logger.info("Reading sheet for CDS: {}", workbook.currentSheet.getSheetName());
+    //TODO: finish this
+  }
+
   private void processWorkbook(WorkbookWrapper workbook) throws Exception {
+    // default diplo-pheno mappings should be on the first sheet
+    workbook.switchToSheet(0);
+    sf_logger.info("Reading sheet for phenotypes: {}", workbook.currentSheet.getSheetName());
+
     RowWrapper headerRow = workbook.getRow(0);
     String geneText = headerRow.getNullableText(0);
     if (geneText == null) {
@@ -134,10 +133,6 @@ public class DiplotypePhenotypeImporter {
           dbHarness.insert(dip, pheno, activity, ehr);
         } catch (PSQLException ex) {
           sf_logger.warn("found duplicate " + dip + " on row " + (i+1));
-          continue;
-        }
-        if (!isHom(dip)) {
-          dbHarness.insert(flipDip(dip), pheno, activity, ehr);
         }
       }
     }
@@ -167,42 +162,65 @@ public class DiplotypePhenotypeImporter {
     private Connection conn;
     private String gene;
     private PreparedStatement insertStmt;
+    private PreparedStatement insertDipStmt;
+    private Map<String, Integer> phenoIdMap = new HashMap<>();
 
     DbHarness(String gene) throws SQLException {
       this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
 
-      insertStmt = this.conn.prepareStatement("insert into diplotype_phenotype(geneSymbol, diplotype, phenotype, activityscore, ehr) values (?, ?, ?, ?, ?)");
+      insertStmt = this.conn.prepareStatement(
+          "insert into gene_phenotype(geneSymbol, phenotype, activityscore, ehrPriority) values (?, ?, ?, ?) returning(id)"
+      );
+      insertDipStmt = this.conn.prepareStatement(
+          "insert into phenotype_diplotype(phenotypeid, diplotype) values (?, ?)"
+      );
     }
     
     void insert(String diplotype, String phenotype, Double activity, String ehr) throws SQLException {
-      this.insertStmt.clearParameters();
-      this.insertStmt.setString(1, this.gene);
-      this.insertStmt.setString(2, diplotype);
-
       String phenoStripped = stripPhenotype(phenotype);
-      if (phenoStripped != null) {
-        if (!phenotype.equals(gene + " " + phenoStripped) && !phenotype.equals(phenoStripped)) {
-          sf_logger.warn("{} phenotype modified: {} >> {}", diplotype, phenotype, phenoStripped);
+      Integer phenoId = this.phenoIdMap.get(phenoStripped);
+
+      if (phenoId == null) {
+        this.insertStmt.clearParameters();
+        this.insertStmt.setString(1, this.gene);
+
+        if (phenoStripped != null) {
+          if (!phenotype.equals(gene + " " + phenoStripped) && !phenotype.equals(phenoStripped)) {
+            sf_logger.warn("phenotype modified: {} >> {}", phenotype, phenoStripped);
+          }
+          this.insertStmt.setString(2, phenoStripped);
+        } else {
+          this.insertStmt.setNull(2, Types.VARCHAR);
         }
-        this.insertStmt.setString(3, phenoStripped);
-      } else {
-        this.insertStmt.setNull(3, Types.VARCHAR);
-      }
 
-      if (activity != null) {
-        this.insertStmt.setDouble(4, activity);
-      } else {
-        this.insertStmt.setNull(4, Types.NUMERIC);
-      }
+        if (activity != null) {
+          this.insertStmt.setDouble(3, activity);
+        } else {
+          this.insertStmt.setNull(3, Types.NUMERIC);
+        }
 
-      if (ehr != null) {
-        this.insertStmt.setString(5, ehr);
-      } else {
-        this.insertStmt.setNull(5, Types.VARCHAR);
-      }
+        if (ehr != null) {
+          this.insertStmt.setString(4, ehr);
+        } else {
+          this.insertStmt.setNull(4, Types.VARCHAR);
+        }
 
-      this.insertStmt.executeUpdate();
+        try (ResultSet rs = this.insertStmt.executeQuery()) {
+          rs.next();
+          phenoId = rs.getInt(1);
+          this.phenoIdMap.put(phenoStripped, phenoId);
+        }
+      }
+      
+      insertDipStmt.setInt(1, phenoId);
+      insertDipStmt.setString(2, diplotype);
+      insertDipStmt.executeUpdate();
+
+      if (!isHom(diplotype)) {
+        insertDipStmt.setString(2, flipDip(diplotype));
+        insertDipStmt.executeUpdate();
+      }
     }
 
     String stripPhenotype(String pheno) {

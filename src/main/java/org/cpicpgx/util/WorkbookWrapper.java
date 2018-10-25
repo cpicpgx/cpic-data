@@ -72,4 +72,18 @@ public class WorkbookWrapper {
   public String toString() {
     return this.workbook.toString();
   }
+
+  /**
+   * Switch to a sheet at the given index
+   * @param i index of a sheet in this workbook, 0-based
+   */
+  public void switchToSheet(int i) {
+    int n = this.workbook.getNumberOfSheets();
+    
+    if (i+1 <= n) {
+      this.currentSheet = this.workbook.getSheetAt(i);
+    } else {
+      this.currentSheet = null;
+    }
+  }
 }

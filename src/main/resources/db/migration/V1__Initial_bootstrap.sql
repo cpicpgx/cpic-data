@@ -1061,22 +1061,34 @@ Phenotype: high-risk genotype status	Negative	High-risk allele not detected	No c
 \.
 
 
-CREATE TABLE diplotype_phenotype
+CREATE TABLE gene_phenotype
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
-  diplotype TEXT NOT NULL,
   phenotype TEXT,
-  ehr TEXT,
+  ehrPriority TEXT,
+  consultationText TEXT,
   activityScore NUMERIC,
 
-  UNIQUE (geneSymbol, diplotype)
+  UNIQUE (geneSymbol, phenotype)
 );
 
-COMMENT ON TABLE diplotype_phenotype IS 'A diplotype to phenotype translation';
-COMMENT ON COLUMN diplotype_phenotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN diplotype_phenotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
-COMMENT ON COLUMN diplotype_phenotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
-COMMENT ON COLUMN diplotype_phenotype.phenotype IS 'Coded Genotype/Phenotype Summary, optional';
-COMMENT ON COLUMN diplotype_phenotype.ehr IS 'EHR Priority Result, optional';
-COMMENT ON COLUMN diplotype_phenotype.activityScore IS 'The Activity Score number, optional';
+COMMENT ON TABLE gene_phenotype IS 'Possible phenotype values for a gene';
+COMMENT ON COLUMN gene_phenotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN gene_phenotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
+COMMENT ON COLUMN gene_phenotype.phenotype IS 'Coded Genotype/Phenotype Summary, optional';
+COMMENT ON COLUMN gene_phenotype.ehrPriority IS 'EHR Priority Result, optional';
+COMMENT ON COLUMN gene_phenotype.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result';
+COMMENT ON COLUMN gene_phenotype.activityScore IS 'The Activity Score number, optional';
+
+CREATE TABLE phenotype_diplotype
+(
+  phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
+  diplotype TEXT NOT NULL,
+  
+  UNIQUE (phenotypeId, diplotype)
+);
+
+COMMENT ON TABLE phenotype_diplotype IS 'Specific diplotypes that are associated with a gene phenotype';
+COMMENT ON COLUMN phenotype_diplotype.phenotypeId IS 'An ID for a gene_phenotype record, required';
+COMMENT ON COLUMN phenotype_diplotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
