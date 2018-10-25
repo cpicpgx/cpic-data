@@ -1,0 +1,10 @@
+version: '3'
+services:
+  db:
+    ports:
+    - "5432:5432"
+    volumes:
+    - "./pgdata:/var/lib/postgresql/data"
+  swagger:
+    environment:
+      API_URL: http://localhost:3000/

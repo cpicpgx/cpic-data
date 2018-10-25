@@ -1,0 +1,5 @@
+version: '3'
+services:
+  swagger:
+    environment:
+      API_URL: https://api.cpicpgx.org/v1/

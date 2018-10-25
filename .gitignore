@@ -8,6 +8,7 @@
 /.idea/shelf/
 /.idea/workspace.xml
 /build
+/server/pgdata
 /src/main/resources/cpicData.properties
 /out
 cpicData.log
