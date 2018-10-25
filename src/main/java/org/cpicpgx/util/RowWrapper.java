@@ -46,6 +46,17 @@ public class RowWrapper {
    * @return a {@link String} representation of the value in the cell at the given index
    */
   public String getNullableText(int cellIdx) {
+    return getNullableText(cellIdx, false);
+  }
+
+  /**
+   * Gets text value from the cell at the given index. This will convert non-STRING columns to text. This will also 
+   * strip text down to null values. This will give the words True/False for a BOOLEAN cell type.
+   * @param cellIdx the index of a cell in this row, 0-based
+   * @param roundNumerics if true numbers will be rounded and returned as an integer
+   * @return a {@link String} representation of the value in the cell at the given index
+   */
+  public String getNullableText(int cellIdx, boolean roundNumerics) {
     if (cellIdx < 0) {
       throw new RuntimeException("Bad cell index, must be >= 0");
     }
@@ -60,7 +71,12 @@ public class RowWrapper {
         if (DateUtil.isCellDateFormatted(cell)) {
           return DATE_FORMAT.format(cell.getDateCellValue());
         } else {
-          return String.valueOf(cell.getNumericCellValue());
+          double numVal = cell.getNumericCellValue();
+          if (!roundNumerics) {
+            return String.valueOf(numVal);
+          } else {
+            return String.valueOf(Math.round(numVal));
+          }
         }
       case BOOLEAN:
         return cell.getBooleanCellValue() ? "True" : "False";
@@ -75,7 +91,11 @@ public class RowWrapper {
             if (DateUtil.isCellDateFormatted(cell)) {
               return cellValue.getStringValue();
             } else {
-              return String.valueOf(cellValue.getNumberValue());
+              if (roundNumerics) {
+                return String.valueOf(Math.round(cellValue.getNumberValue()));
+              } else {
+                return String.valueOf(cellValue.getNumberValue());
+              }
             }
           case BOOLEAN:
             return cellValue.getBooleanValue() ? "True" : "False";
