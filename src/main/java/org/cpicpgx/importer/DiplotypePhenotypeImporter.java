@@ -132,12 +132,15 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     }
 
     sf_logger.info("Reading sheet for CDS: {}", workbook.currentSheet.getSheetName());
+    
+    int phenoCol = geneSymbol.equals("CYP2D6") ? 1 : 0;
+    int textCol = geneSymbol.equals("CYP2D6") ? 3 : 2;
 
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
-        String pheno = row.getNullableText(0);
-        String text = row.getNullableText(2);
+        String pheno = row.getNullableText(phenoCol);
+        String text = row.getNullableText(textCol);
         
         if (pheno == null || text == null) continue;
         
