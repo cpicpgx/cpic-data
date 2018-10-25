@@ -66,25 +66,11 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
 
     try (InputStream in = Files.newInputStream(file.toPath())) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
-      processCds(workbook);
       processWorkbook(workbook);
     } catch (Exception ex) {
       throw new RuntimeException("Error processing frequency file: " + file, ex);
     }
   };
-
-  private void processCds(WorkbookWrapper workbook) {
-    // default CDS language should be on the second sheet
-    workbook.switchToSheet(1);
-
-    if (workbook.currentSheet == null) {
-      sf_logger.warn("No CDS sheet for {}", workbook.toString());
-      return;
-    }
-
-    sf_logger.info("Reading sheet for CDS: {}", workbook.currentSheet.getSheetName());
-    //TODO: finish this
-  }
 
   private void processWorkbook(WorkbookWrapper workbook) throws Exception {
     // default diplo-pheno mappings should be on the first sheet
@@ -136,6 +122,28 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
         }
       }
     }
+
+    // default CDS language should be on the second sheet
+    workbook.switchToSheet(1);
+
+    if (workbook.currentSheet == null) {
+      sf_logger.warn("No CDS sheet for {}", geneSymbol);
+      return;
+    }
+
+    sf_logger.info("Reading sheet for CDS: {}", workbook.currentSheet.getSheetName());
+
+    try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
+      for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
+        RowWrapper row = workbook.getRow(i);
+        String pheno = row.getNullableText(0);
+        String text = row.getNullableText(2);
+        
+        if (pheno == null || text == null) continue;
+        
+        dbHarness.setConsultation(pheno, text);
+      }
+    }
   }
 
   /**
@@ -163,6 +171,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     private String gene;
     private PreparedStatement insertStmt;
     private PreparedStatement insertDipStmt;
+    private PreparedStatement updateTextStmt;
     private Map<String, Integer> phenoIdMap = new HashMap<>();
 
     DbHarness(String gene) throws SQLException {
@@ -174,6 +183,9 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       );
       insertDipStmt = this.conn.prepareStatement(
           "insert into phenotype_diplotype(phenotypeid, diplotype) values (?, ?)"
+      );
+      updateTextStmt = this.conn.prepareStatement(
+          "update gene_phenotype set consultationtext=? where genesymbol=? and phenotype=?"
       );
     }
     
@@ -222,6 +234,13 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
         insertDipStmt.executeUpdate();
       }
     }
+    
+    void setConsultation(String phenotype, String consultationText) throws SQLException {
+      this.updateTextStmt.setString(1, consultationText);
+      this.updateTextStmt.setString(2, this.gene);
+      this.updateTextStmt.setString(3, stripPhenotype(phenotype));
+      this.updateTextStmt.executeUpdate();
+    }
 
     String stripPhenotype(String pheno) {
       if (pheno == null) {
@@ -231,7 +250,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
           pheno
               .replaceAll(this.gene, "")
               .replaceAll("\\s+", " ")
-              .replaceAll("unctionc", "unction")
+              .replaceAll("unction[abcdef]", "unction")
               .replaceAll("Function", "function")
               .replaceAll("[Mm]eta[zb]olizer[cd]*+", "metabolizer")
       );
