@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,6 +106,19 @@ public class RowWrapper {
       default:
         throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellTypeEnum());
         
+    }
+  }
+  
+  public Optional<String> getOptionalText(int cellIdx) {
+    return getOptionalText(cellIdx, false);
+  }
+
+  public Optional<String> getOptionalText(int cellIdx, boolean roundNumerics) {
+    String text = getNullableText(cellIdx, roundNumerics);
+    if (text == null) {
+      return Optional.empty();
+    } else {
+      return Optional.of(text);
     }
   }
 
