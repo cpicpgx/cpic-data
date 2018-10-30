@@ -56,51 +56,53 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   public RecommendationImporter(Path directory) {
     this.setDirectory(directory);
   }
-  
-  public void execute() {
-    streamFiles()
-        .filter(filterFileFunction(".csv"))
-        .forEach(processFile);
-  }
-  
-  private Consumer<File> processFile = f -> {
-    sf_logger.info("Processing file {}", f);
-    Matcher m = DRUG_NAME_PATTERN.matcher(f.getName().toLowerCase());
-    if (!m.find()) {
-      sf_logger.warn("No drug name found for {}", f.getName().toLowerCase());
-      return;
-    }
-    String drug = m.group(1);
 
-    List<String> geneList = new ArrayList<>();
-    try (FileReader fileReader = new FileReader(f); DbHarness dbHarness = new DbHarness()) {
-      CSVParser rows = CSVFormat.DEFAULT.parse(fileReader);
-      for (CSVRecord row : rows) {
-        if (row.getRecordNumber() == 1) {
-          for (int i = 0; i < row.size(); i++) {
-            String cellValue = row.get(i);
-            if (cellValue.endsWith(" Phenotype") && i == geneList.size()) {
-              String gene = cellValue.replaceAll(" Phenotype", "");
-              geneList.add(gene);
-            }
-          }
-        } else {
-          int columnOffset = geneList.size(); // the next 3 columns after the genes are always the same
-          Genotype genotype = new Genotype();
-          for (int i = 0; i < columnOffset; i++) {
-            genotype.with(geneList.get(i), row.get(i));
-          }
-         dbHarness.insert(drug, genotype, row.get(columnOffset), row.get(columnOffset + 1), row.get(columnOffset + 2));
-        }
+  @Override
+  String getFileExtensionToProcess() {
+    return CSV_EXTENSION;
+  }
+
+  @Override
+  Consumer<File> getFileProcessor() {
+    return f -> {
+      sf_logger.info("Processing file {}", f);
+      Matcher m = DRUG_NAME_PATTERN.matcher(f.getName().toLowerCase());
+      if (!m.find()) {
+        sf_logger.warn("No drug name found for {}", f.getName().toLowerCase());
+        return;
       }
-    } catch (IOException e) {
-      sf_logger.error("Error reading file", e);
-    } catch (SQLException e) {
-      sf_logger.error("Error writing to database", e);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  };
+      String drug = m.group(1);
+
+      List<String> geneList = new ArrayList<>();
+      try (FileReader fileReader = new FileReader(f); DbHarness dbHarness = new DbHarness()) {
+        CSVParser rows = CSVFormat.DEFAULT.parse(fileReader);
+        for (CSVRecord row : rows) {
+          if (row.getRecordNumber() == 1) {
+            for (int i = 0; i < row.size(); i++) {
+              String cellValue = row.get(i);
+              if (cellValue.endsWith(" Phenotype") && i == geneList.size()) {
+                String gene = cellValue.replaceAll(" Phenotype", "");
+                geneList.add(gene);
+              }
+            }
+          } else {
+            int columnOffset = geneList.size(); // the next 3 columns after the genes are always the same
+            Genotype genotype = new Genotype();
+            for (int i = 0; i < columnOffset; i++) {
+              genotype.with(geneList.get(i), row.get(i));
+            }
+            dbHarness.insert(drug, genotype, row.get(columnOffset), row.get(columnOffset + 1), row.get(columnOffset + 2));
+          }
+        }
+      } catch (IOException e) {
+        sf_logger.error("Error reading file", e);
+      } catch (SQLException e) {
+        sf_logger.error("Error writing to database", e);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    };
+  }
   
   private class DbHarness implements AutoCloseable {
     private Connection conn;

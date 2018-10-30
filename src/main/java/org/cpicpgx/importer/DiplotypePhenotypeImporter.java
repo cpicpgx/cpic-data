@@ -10,16 +10,12 @@ import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,26 +49,14 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   public DiplotypePhenotypeImporter(Path directory) {
     this.setDirectory(directory);
   }
-
-  public void execute() {
-    streamFiles()
-        .filter(filterFileFunction(".xlsx"))
-        .forEach(processFile);
+  
+  @Override
+  String getFileExtensionToProcess() {
+    return EXCEL_EXTENSION;
   }
 
-
-  private Consumer<File> processFile = (File file) -> {
-    sf_logger.info("Reading {}", file);
-
-    try (InputStream in = Files.newInputStream(file.toPath())) {
-      WorkbookWrapper workbook = new WorkbookWrapper(in);
-      processWorkbook(workbook);
-    } catch (Exception ex) {
-      throw new RuntimeException("Error processing frequency file: " + file, ex);
-    }
-  };
-
-  private void processWorkbook(WorkbookWrapper workbook) throws Exception {
+  @Override
+  void processWorkbook(WorkbookWrapper workbook) throws Exception {
     // default diplo-pheno mappings should be on the first sheet
     workbook.switchToSheet(0);
     sf_logger.info("Reading sheet for phenotypes: {}", workbook.currentSheet.getSheetName());

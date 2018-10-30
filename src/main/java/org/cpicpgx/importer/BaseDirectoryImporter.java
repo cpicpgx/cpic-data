@@ -1,14 +1,19 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.cli.*;
+import org.cpicpgx.util.WorkbookWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
 /**
  * Abstract class for classes that want to crawl all files in a directory and do something with them
@@ -16,7 +21,9 @@ import java.util.stream.Stream;
  * @author Ryan Whaley
  */
 abstract class BaseDirectoryImporter {
+  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   static final String EXCEL_EXTENSION = ".xlsx";
+  static final String CSV_EXTENSION = ".csv";
   
   private Path directory;
 
@@ -38,19 +45,47 @@ abstract class BaseDirectoryImporter {
   }
 
   /**
-   * A predicate for filtering the files in a directory based on their file extension
-   * @param fileExt a file extension like ".csv"
-   * @return a Predicate filter
+   * Gets the String file extension to look for in the given directory. This should be something like ".xlsx" or ".csv".
+   * @return a file extension to filter for
    */
-  Predicate<File> filterFileFunction(String fileExt) {
-    return f -> f.getName().toLowerCase().endsWith(fileExt.toLowerCase()) && !f.getName().startsWith("~$");
+  abstract String getFileExtensionToProcess();
+
+  /**
+   * Run the importer. Requires the "directory" to be set
+   */
+  public void execute() {
+    Arrays.stream(Objects.requireNonNull(this.directory.toFile().listFiles()))
+        .filter(f -> f.getName().toLowerCase().endsWith(getFileExtensionToProcess().toLowerCase()) && !f.getName().startsWith("~$"))
+        .forEach(getFileProcessor());
   }
 
   /**
-   * Gets a stream of all the files in the directory
+   * A {@link Consumer} that will take a {@link File} objects and then run {@link BaseDirectoryImporter#processWorkbook(WorkbookWrapper)}
+   * on them. You either need to override {@link BaseDirectoryImporter#processWorkbook(WorkbookWrapper)} or override 
+   * this method to do something different with the {@link File} 
+   * @return a Consumer of File objects
    */
-  Stream<File> streamFiles() {
-    return Arrays.stream(Objects.requireNonNull(this.directory.toFile().listFiles()));
+  Consumer<File> getFileProcessor() {
+    return (File file) -> {
+      sf_logger.info("Reading {}", file);
+
+      try (InputStream in = Files.newInputStream(file.toPath())) {
+        WorkbookWrapper workbook = new WorkbookWrapper(in);
+        processWorkbook(workbook);
+      } catch (Exception ex) {
+        throw new RuntimeException("Error processing file " + file, ex);
+      }
+    };
+  }
+
+  /**
+   * This method is meant to pass in a parsed {@link WorkbookWrapper} object and then do something with it. This must 
+   * be overriden and will throw an error if it is not.
+   * @param workbook a workbook pulled from the specified directory
+   * @throws Exception will be thrown if this method is not overridden
+   */
+  void processWorkbook(WorkbookWrapper workbook) throws Exception {
+    throw new RuntimeException("Workbook processor not implemented in this importer");
   }
 
   /**
@@ -64,7 +99,11 @@ abstract class BaseDirectoryImporter {
     
     setDirectory(Paths.get(directory));
   }
-  
+
+  /**
+   * Sets a directory to search for files to process. The path must exist and be for a directory (not a file)
+   * @param directory a directory in the filesystem
+   */
   void setDirectory(Path directory) {
     this.directory = directory;
 

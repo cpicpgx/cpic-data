@@ -7,13 +7,10 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.*;
-import java.util.function.Consumer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 /**
  * Parses gene mapping files for NCBI, HGNC, and Ensembl data. Those IDs are then set in the gene table
@@ -38,25 +35,14 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
   public GeneReferenceImporter(Path directory) {
     this.setDirectory(directory);
   }
-  
-  public void execute() {
-    streamFiles()
-        .filter(filterFileFunction(EXCEL_EXTENSION))
-        .forEach(processFile);
+
+  @Override
+  String getFileExtensionToProcess() {
+    return EXCEL_EXTENSION;
   }
-  
-  private Consumer<File> processFile = (File file) -> {
-    sf_logger.info("Reading {}", file);
-    
-    try (InputStream in = Files.newInputStream(file.toPath())) {
-      WorkbookWrapper workbook = new WorkbookWrapper(in);
-      processWorkbook(workbook);
-    } catch (Exception ex) {
-      throw new RuntimeException("Error processing file " + file, ex);
-    }
-  };
-  
-  private void processWorkbook(WorkbookWrapper workbook) throws Exception {
+
+  @Override
+  void processWorkbook(WorkbookWrapper workbook) throws Exception {
     try (Connection conn = ConnectionFactory.newConnection()) {
       PreparedStatement hgncstmt = conn.prepareStatement("update gene set hgncid=? where symbol=?");
       PreparedStatement ncbistmt = conn.prepareStatement("update gene set ncbiid=? where symbol=?");

@@ -1,6 +1,6 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.util.RowWrapper;
@@ -8,15 +8,13 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.*;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +23,7 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Whaley
  */
-public class FunctionReferenceImporter {
+public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_geneLabelPattern = Pattern.compile("GENE:\\s(\\w+)");
   private static Set<String> GENES_WITH_FINDINGS = new HashSet<>();
@@ -44,57 +42,28 @@ public class FunctionReferenceImporter {
   private static final int COL_IDX_FINDING = 5;
   private static final int COL_IDX_PMIDS = 6;
 
-  private Path m_directory;
 
   public static void main(String[] args) {
     try {
-      Options options = new Options();
-      options.addOption("d", true,"directory containing function reference excel files (*.xlsx)");
-      CommandLineParser clParser = new DefaultParser();
-      CommandLine cli = clParser.parse(options, args);
-
-      FunctionReferenceImporter processor = new FunctionReferenceImporter(Paths.get(cli.getOptionValue("d")));
+      FunctionReferenceImporter processor = new FunctionReferenceImporter();
+      processor.parseArgs(args);
       processor.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
     }
   }
 
+  private FunctionReferenceImporter() { }
+
   public FunctionReferenceImporter(Path directoryPath) {
-    if (directoryPath == null) {
-      throw new IllegalArgumentException("No directory given");
-    }
-
-    if (!directoryPath.toFile().exists()) {
-      throw new IllegalArgumentException("Directory doesn't exist " + directoryPath);
-    }
-    if (!directoryPath.toFile().isDirectory()) {
-      throw new IllegalArgumentException("Path is not a directory " + directoryPath);
-    }
-    if (directoryPath.toFile().listFiles() == null) {
-      throw new IllegalArgumentException("Directory is empty " + directoryPath);
-    }
-
-    m_directory = directoryPath;
+    this.setDirectory(directoryPath);
   }
-
-  public void execute() {
-    Arrays.stream(Objects.requireNonNull(m_directory.toFile().listFiles()))
-        .filter(f -> f.getName().toLowerCase().endsWith(".xlsx") && !f.getName().startsWith("~$"))
-        .forEach(processFile);
-  }
-
-  private Consumer<File> processFile = (File file) -> {
-    sf_logger.info("Reading {}", file);
-
-    try (InputStream in = Files.newInputStream(file.toPath())) {
-      processWorkbook(new WorkbookWrapper(in));
-    } catch (Exception ex) {
-      throw new RuntimeException("Error processing frequency file: " + file, ex);
-    }
-  };
   
-  private void processWorkbook(WorkbookWrapper workbook) throws NotFoundException, SQLException {
+  String getFileExtensionToProcess() {
+    return EXCEL_EXTENSION;
+  }
+
+  void processWorkbook(WorkbookWrapper workbook) throws NotFoundException, SQLException {
     int rowIdx = 0;
 
     RowWrapper row = null;
