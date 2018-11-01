@@ -35,7 +35,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'org.cpicpgx.DataImporter'
+        attributes 'Main-Class': 'org.cpicpgx.DataImport'
     }
     
     from {
