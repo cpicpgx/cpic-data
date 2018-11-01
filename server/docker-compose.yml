@@ -4,16 +4,9 @@ services:
     image: postgrest/postgrest
     ports:
     - "3000:3000"
-    links:
-    - db:db
     environment:
-      PGRST_DB_URI: postgres://cpic_api:cpicapi@db:5432/cpic
       PGRST_DB_SCHEMA: public
       PGRST_DB_ANON_ROLE: web_anon
-    depends_on:
-    - db
-  db:
-    image: cpicpgx/cpic-db
   swagger:
     image: swaggerapi/swagger-ui
     ports:

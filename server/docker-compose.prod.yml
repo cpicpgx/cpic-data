@@ -1,5 +1,8 @@
 version: '3'
 services:
+  server:
+    environment:
+      PGRST_DB_URI: postgres://cpic_api:cpicapi@cpic.crecwpuzatdq.us-east-1.rds.amazonaws.com:5432/cpic
   swagger:
     environment:
       API_URL: https://api.cpicpgx.org/v1/
