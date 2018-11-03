@@ -30,10 +30,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   private static final int COL_IDX_DIP = 0;
   private static final String DIPLOTYPE_SEPARATOR = "/";
 
-  private int phenoIdx = -1;
-  private int ehrIdx = -1;
-  private int activityIdx = -1;
-
   public static void main(String[] args) {
     try {
       DiplotypePhenotypeImporter processor = new DiplotypePhenotypeImporter();
@@ -57,6 +53,10 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
 
   @Override
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
+    int phenoIdx = -1;
+    int ehrIdx = -1;
+    int activityIdx = -1;
+
     // default diplo-pheno mappings should be on the first sheet
     workbook.switchToSheet(0);
     sf_logger.info("Reading sheet for phenotypes: {}", workbook.currentSheet.getSheetName());
@@ -71,11 +71,11 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       if (headerRow.hasNoText(i)) continue;
       String headerText = headerRow.getNullableText(i);
       if (headerText.contains("Phenotype Summary")) {
-        this.phenoIdx = i;
+        phenoIdx = i;
       } else if (headerText.contains("Activity")) {
-        this.activityIdx = i;
+        activityIdx = i;
       } else if (headerText.contains("EHR Priority")) {
-        this.ehrIdx = i;
+        ehrIdx = i;
       }
     }
     
@@ -90,14 +90,14 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
         // don't load rows that are footnotes (won't have a phenotype)
-        if (row.hasNoText(this.phenoIdx)) {
+        if (row.hasNoText(phenoIdx)) {
           continue;
         }
 
         String dip = row.getNullableText(COL_IDX_DIP);
-        String pheno = row.getNullableText(this.phenoIdx);
-        Double activity = row.getNullableDouble(this.activityIdx);
-        String ehr = row.getNullableText(this.ehrIdx);
+        String pheno = row.getNullableText(phenoIdx);
+        Double activity = activityIdx >= 0 ? row.getNullableDouble(activityIdx) : null;
+        String ehr = ehrIdx >= 0 ? row.getNullableText(ehrIdx) : null;
 
         try {
           dbHarness.insert(dip, pheno, activity, ehr);
