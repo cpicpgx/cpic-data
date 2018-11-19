@@ -23,6 +23,7 @@ public class DataImport {
   private static final String DEFAULT_DIPLOTYPEDIRECTORY = "diplotype_phenotype_tables";
   private static final String DEFAULT_RECOMMENDATIONDIRECTORY = "recommendation_tables";
   private static final String DEFAULT_GENEMAPPINGDIRECTORY = "gene_resource_mappings";
+  private static final String DEFAULT_TESTALERTDIRECTORY = "test_alerts";
   
   private String alleleDirectory = null;
   private String frequencyDirectory = null;
@@ -30,6 +31,7 @@ public class DataImport {
   private String diplotypeDirectory = null;
   private String recommendationDirectory = null;
   private String geneMappingDirectory = null;
+  private String testAlertsDirectory = null;
 
   private Path m_directory;
 
@@ -41,6 +43,7 @@ public class DataImport {
     String diplotype = null;
     String recommendation = null;
     String geneMapping = null;
+    String testAlerts = null;
     try {
       Options options = new Options();
       options.addOption("d", true,"directory that has sub-folders with excel data files (*.xlsx)");
@@ -50,6 +53,7 @@ public class DataImport {
       options.addOption("dd", true,"diplotype-phenotype subdirectory name");
       options.addOption("dr", true,"recommendation subdirectory name");
       options.addOption("gm", true,"gene mapping subdirectory name");
+      options.addOption("ta", true,"test alerts subdirectory name");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
       directory = cli.getOptionValue("d");
@@ -60,6 +64,7 @@ public class DataImport {
       diplotype = cli.getOptionValue("dd");
       recommendation = cli.getOptionValue("dr");
       geneMapping = cli.getOptionValue("gm");
+      testAlerts = cli.getOptionValue("ta");
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
       System.exit(1);
@@ -72,6 +77,7 @@ public class DataImport {
     processor.diplotypeDirectory = diplotype;
     processor.recommendationDirectory = recommendation;
     processor.geneMappingDirectory = geneMapping;
+    processor.testAlertsDirectory = testAlerts;
     processor.execute();
   }
 
@@ -100,6 +106,7 @@ public class DataImport {
     new FunctionReferenceImporter(m_directory.resolve(getFunctionDirectory())).execute();
     new DiplotypePhenotypeImporter(m_directory.resolve(getDiplotypeDirectory())).execute();
     new RecommendationImporter(m_directory.resolve(getRecommendationDirectory())).execute();
+    new TestAlertImporter(m_directory.resolve(getTestAlertsDirectory())).execute();
   }
   
   private String getAlleleDirectory() {
@@ -147,6 +154,14 @@ public class DataImport {
       return DEFAULT_GENEMAPPINGDIRECTORY;
     } else {
       return this.geneMappingDirectory;
+    }
+  }
+  
+  private String getTestAlertsDirectory() {
+    if (this.testAlertsDirectory == null) {
+      return DEFAULT_TESTALERTDIRECTORY;
+    } else {
+      return this.testAlertsDirectory;
     }
   }
 }
