@@ -26,7 +26,7 @@ the `docker-compose.yml` and `docker-compose.override.yml` files.
 
 When you're ready to run this on a __production server__ use:
 
-    docker-compose up -f docker-compose.yml -f docker-compose.prod.yml -d
+    docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 This uses [multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) to control the 
 different settings between dev and prod. 
