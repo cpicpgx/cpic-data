@@ -60,6 +60,9 @@ public class RowWrapperTest {
 
       RowWrapper row = workbook.getRow(0);
       assertEquals("EHR Priority Result Notation", row.stripFootnote(2));
+
+      row = workbook.getRow(3);
+      assertEquals("test a midstring styling", row.stripFootnote(1));
     }
   }
 

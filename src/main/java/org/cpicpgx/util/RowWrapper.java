@@ -291,7 +291,7 @@ public class RowWrapper {
   private static String getSuperScript(XSSFRichTextString cellContent) {
     int lenSuper = cellContent.getLengthOfFormattingRun(cellContent.numFormattingRuns() - 1);
     int iSuper = cellContent.getIndexOfFormattingRun(cellContent.numFormattingRuns() - 1);
-    if (lenSuper < 0) return null;
+    if (lenSuper < 0 || iSuper != cellContent.length() - 1) return null;
     return cellContent.toString().substring(iSuper, lenSuper + iSuper);
   }
 }
