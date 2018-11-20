@@ -2,6 +2,7 @@ package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,7 +68,7 @@ public class RowWrapper {
     
     switch (cell.getCellTypeEnum()) {
       case STRING:
-        return StringUtils.stripToNull(cell.getStringCellValue());
+        return stripFootnote(cellIdx);
       case NUMERIC:
         if (DateUtil.isCellDateFormatted(cell)) {
           return DATE_FORMAT.format(cell.getDateCellValue());
@@ -244,5 +245,53 @@ public class RowWrapper {
     }
     
     return cell.getDateCellValue();
+  }
+
+  /**
+   * Strip any whitespace from the given cell index and also any superscripted footnotes
+   * @param cellIdx the index of the cell to strip
+   * @return a String of the cell contents without any superscripts at the end, null if empty
+   */
+  String stripFootnote(int cellIdx) {
+    if (row == null || row.getCell(cellIdx) == null) return null;
+    
+    RichTextString rts = row.getCell(cellIdx).getRichStringCellValue();
+    if (rts instanceof XSSFRichTextString) {
+      String superScript = getSuperScript((XSSFRichTextString)rts);
+      if (StringUtils.isNotBlank(superScript)) {
+        return StringUtils.stripToNull(StringUtils.stripEnd(row.getCell(cellIdx).getStringCellValue(), superScript));
+      }
+    }
+    return StringUtils.stripToNull(row.getCell(cellIdx).getStringCellValue());
+  }
+
+  /**
+   * Parses out any superscript and returns that
+   * @param cellIdx the index of the cell to parse
+   * @return a String of the superscript of this cell, null if empty
+   */
+  String getFootnote(int cellIdx) {
+    if (row == null || row.getCell(cellIdx) == null) return null;
+    
+    RichTextString rts = row.getCell(cellIdx).getRichStringCellValue();
+    if (rts instanceof XSSFRichTextString) {
+      String superScript = getSuperScript((XSSFRichTextString)rts);
+      if (StringUtils.isNotBlank(superScript)) {
+        return superScript;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Reads the superscript String from a {@link RichTextString} object. This only applies to XSSF Cells
+   * @param cellContent a {@link XSSFRichTextString} representation of cell contents
+   * @return the superscript text, null if none exists
+   */
+  private static String getSuperScript(XSSFRichTextString cellContent) {
+    int lenSuper = cellContent.getLengthOfFormattingRun(cellContent.numFormattingRuns() - 1);
+    int iSuper = cellContent.getIndexOfFormattingRun(cellContent.numFormattingRuns() - 1);
+    if (lenSuper < 0) return null;
+    return cellContent.toString().substring(iSuper, lenSuper + iSuper);
   }
 }
