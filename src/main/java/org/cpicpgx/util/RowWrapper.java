@@ -256,10 +256,11 @@ public class RowWrapper {
     if (row == null || row.getCell(cellIdx) == null) return null;
     
     RichTextString rts = row.getCell(cellIdx).getRichStringCellValue();
+    int rtsLength = rts.length();
     if (rts instanceof XSSFRichTextString) {
       String superScript = getSuperScript((XSSFRichTextString)rts);
       if (StringUtils.isNotBlank(superScript)) {
-        return StringUtils.stripToNull(StringUtils.stripEnd(row.getCell(cellIdx).getStringCellValue(), superScript));
+        return StringUtils.stripToNull(StringUtils.substring(row.getCell(cellIdx).getStringCellValue(), 0, rtsLength-1));
       }
     }
     return StringUtils.stripToNull(row.getCell(cellIdx).getStringCellValue());

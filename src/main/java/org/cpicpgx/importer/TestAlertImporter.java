@@ -113,8 +113,27 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   }
 
   private void processOneTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {
-    PreparedStatement insert = conn.prepareStatement(
-        "insert into test_alerts(cds_context, trigger_condition, drugid, alert_text) values (?, ?, ?, ?)");
+    PreparedStatement insert;
+    int contextIdx;
+    int triggerIdx;
+    int alertIdx;
+    int refPointIdx = -1;
+    
+    RowWrapper headerRow = workbook.getRow(2);
+    if (headerRow.getNullableText(1).contains("Flow Chart")) {
+      insert = conn.prepareStatement(
+          "insert into test_alerts(cds_context, trigger_condition, drugid, alert_text, reference_point) values (?, ?, ?, ?, ?)");
+      contextIdx = 2;
+      triggerIdx = 0;
+      alertIdx = 3;
+      refPointIdx = 1;
+    } else {
+      insert = conn.prepareStatement(
+          "insert into test_alerts(cds_context, trigger_condition, drugid, alert_text) values (?, ?, ?, ?)");
+      contextIdx = 0;
+      triggerIdx = 1;
+      alertIdx = 2;
+    }
 
     for (int i = 3; i <= workbook.currentSheet.getLastRowNum(); i++) {
       sf_logger.debug("reading row {}", i);
@@ -122,9 +141,9 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       RowWrapper row = workbook.getRow(i);
       if (row.hasNoText(2)) break; // alert should always have text
 
-      String context = row.getNullableText(0);
-      String trigger = row.getNullableText(1);
-      String alert = row.getNullableText(2);
+      String context = row.getNullableText(contextIdx);
+      String trigger = row.getNullableText(triggerIdx);
+      String alert = row.getNullableText(alertIdx);
 
       Array triggers = conn.createArrayOf("text", new String[]{trigger});
       Array alertArg = conn.createArrayOf("text", new String[]{alert});
@@ -133,6 +152,10 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       insert.setArray(2, triggers);
       insert.setString(3, drugId);
       insert.setArray(4, alertArg);
+      
+      if (refPointIdx > 0) {
+        insert.setString(5, row.getNullableText(refPointIdx, true));
+      }
 
       insert.executeUpdate();
     }

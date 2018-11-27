@@ -73,6 +73,9 @@ public class RowWrapperTest {
 
       RowWrapper row = workbook.getRow(0);
       assertEquals("b", row.getFootnote(2));
+
+      row = workbook.getRow(3);
+      assertNull(row.getFootnote(1));
     }
   }
 
