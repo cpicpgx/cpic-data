@@ -21,13 +21,13 @@ COMMENT ON COLUMN guideline.pharmgkbId IS 'The PharmGKB ID for this guideline, o
 copy guideline(name,url,pharmgkbId) from STDIN;
 CPIC Guideline for peginterferon alfa-2a,peginterferon alfa-2b,ribavirin and IFNL3	https://cpicpgx.org/guidelines/guideline-for-peg-interferon-alpha-based-regimens-and-ifnl3/	PA166110235
 CPIC Guideline for ivacaftor and CFTR	https://cpicpgx.org/guidelines/guideline-for-ivacaftor-and-cftr/	PA166114461
-CPIC Guideline for azathioprine and TPMT	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104933
+CPIC Guideline for azathioprine and TPMT and NUDT15	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104933
 CPIC Guideline for rasburicase and G6PD	https://cpicpgx.org/guidelines/guideline-for-rasburicase-and-g6pd/	PA166119846
-CPIC Guideline for mercaptopurine and TPMT	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104945
+CPIC Guideline for mercaptopurine and TPMT and NUDT15	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104945
 CPIC Guideline for clopidogrel and CYP2C19	https://cpicpgx.org/guidelines/guideline-for-clopidogrel-and-cyp2c19/	PA166104948
 CPIC Guideline for warfarin and CYP2C9,CYP4F2,VKORC1	https://cpicpgx.org/guidelines/guideline-for-warfarin-and-cyp2c9-and-vkorc1/	PA166104949
 CPIC Guideline for phenytoin and CYP2C9,HLA-B	https://cpicpgx.org/guidelines/guideline-for-phenytoin-and-cyp2c9-and-hla-b/	PA166122806
-CPIC Guideline for thioguanine and TPMT	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104965
+CPIC Guideline for thioguanine and TPMT and NUDT15	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104965
 CPIC Guideline for codeine and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-codeine-and-cyp2d6/	PA166104996
 CPIC Guideline for abacavir and HLA-B	https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/	PA166104997
 CPIC Guideline for nortriptyline and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166104998
@@ -675,6 +675,7 @@ CYP2C19	amitriptyline	PA166105006	A	1A		{"23486447","27997040"}
 CYP2D6	amitriptyline	PA166105006	A	1A	Actionable PGx	{"23486447","27997040"}
 UGT1A1	atazanavir	PA166128738	A	1A		{"26417955"}
 TPMT	azathioprine	PA166104933	A	1A	Testing recommended	{"21270794","23422873"}
+NUDT15	azathioprine	PA166104933	A	1A	Testing recommended	{"21270794","23422873"}
 DPYD	capecitabine	PA166109594	A	1A	Actionable PGx	{"23988873","29152729"}
 HLA-A	carbamazepine	PA166153254	A	2B	Actionable PGx	{}
 HLA-B	carbamazepine	PA166105008	A	1A	Testing required	{"23695185"}
@@ -689,6 +690,7 @@ CACNA1S	isoflurane	PA166153251	A	3	Actionable PGx	{}
 RYR1	isoflurane	PA166153255	A	3	Actionable PGx	{}
 CFTR	ivacaftor	PA166114461	A	1A	Testing required	{"24598717"}
 TPMT	mercaptopurine	PA166104945	A	1A	Testing recommended	{"21270794","23422873"}
+NUDT15	mercaptopurine	PA166104945	A	1A	Testing recommended	{"21270794","23422873"}
 CYP2D6	nortriptyline	PA166104998	A	1A	Actionable PGx	{"23486447","27997040"}
 CYP2D6	ondansetron	PA166161954	A	1A	Informative PGx	{"28002639"}
 CYP2D6	oxycodone	PA166116088	A	2A		{}
@@ -703,6 +705,7 @@ CACNA1S	succinylcholine	PA166153250	A	3	Actionable PGx	{}
 CYP3A5	tacrolimus	PA166124619	A	1A		{"25801146"}
 CYP2D6	tamoxifen	PA166176068	A	1A		{}
 TPMT	thioguanine	PA166104965	A	1A	Actionable PGx	{"21270794","23422873"}
+NUDT15	thioguanine	PA166104965	A	1A	Actionable PGx	{"21270794","23422873"}
 CYP2D6	tramadol	PA166116089	A	1B	Actionable PGx	{}
 CYP2D6	tropisetron	PA166161955	A			{"28002639"}
 CYP2C19	voriconazole	PA166161537	A	1A	Actionable PGx	{"27981572"}
@@ -1018,8 +1021,6 @@ NAT2	isosorbide dinitrate	PA166128107	D			{}
 IFNL4	peginterferon alfa-2a	PA166153337	D	1A		{}
 IFNL4	peginterferon alfa-2b	PA166153337	D	1A		{}
 ABCB1	antidepressants	PA166153258	A/B	3		{}
-NUDT15	azathioprine	PA166153259	A/B	1B		{}
-NUDT15	mercaptopurine	PA166153260	A/B	1B		{}
 \.
 
 -- load drug ID's into pair table and then remove the drug name column
