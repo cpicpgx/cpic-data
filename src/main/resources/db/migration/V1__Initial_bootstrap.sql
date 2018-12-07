@@ -703,13 +703,13 @@ ATIC	methotrexate	PA166116209	D	2B		{}
 BCHE	succinylcholine	PA166153307	C/D	3	Actionable PGx	{}
 C11orf65	metformin	PA166116207	D	2B		{}
 C8orf34	irinotecan	PA166153317	D	2B		{}
-CACNA1S	desflurane	PA166153253	A	3	Actionable PGx	{30499100}
-CACNA1S	enflurane	PA166153253	A	3	Actionable PGx	{30499100}
-CACNA1S	halothane	PA166153253	A	3	Actionable PGx	{30499100}
-CACNA1S	methoxyflurane	PA166153253	A	3	Actionable PGx	{30499100}
-CACNA1S	isoflurane	PA166153251	A	3	Actionable PGx	{30499100}
-CACNA1S	sevoflurane	PA166153252	A	3	Actionable PGx	{30499100}
-CACNA1S	succinylcholine	PA166153250	A	3	Actionable PGx	{30499100}
+CACNA1S	desflurane	PA166153253	A	1A	Actionable PGx	{30499100}
+CACNA1S	enflurane	PA166153253	A	1A	Actionable PGx	{30499100}
+CACNA1S	halothane	PA166153253	A	1A	Actionable PGx	{30499100}
+CACNA1S	methoxyflurane	PA166153253	A	1A	Actionable PGx	{30499100}
+CACNA1S	isoflurane	PA166153251	A	1A	Actionable PGx	{30499100}
+CACNA1S	sevoflurane	PA166153252	A	1A	Actionable PGx	{30499100}
+CACNA1S	succinylcholine	PA166153250	A	1A	Actionable PGx	{30499100}
 CALU	warfarin	PA166116225	D	2B		{}
 CBR3	anthracyclines and related substances	PA166116185	D	2B		{}
 CCHCR1	nevirapine	PA166153318	D	2B		{}
@@ -982,13 +982,13 @@ PROC	warfarin	PA166153348	D		Actionable PGx	{}
 PROS1	warfarin	PA166153349	D		Actionable PGx	{}
 PTGFR	latanoprost	PA166153350	D	2B		{}
 PTGS1	aspirin	PA166153351	D	2B		{}
-RYR1	desflurane	PA166153257	A	3	Actionable PGx	{30499100}
-RYR1	enflurane	PA166153257	A	3	Actionable PGx	{30499100}
-RYR1	halothane	PA166153257	A	3	Actionable PGx	{30499100}
-RYR1	methoxyflurane	PA166153257	A	3	Actionable PGx	{30499100}
-RYR1	isoflurane	PA166153255	A	3	Actionable PGx	{30499100}
-RYR1	sevoflurane	PA166153256	A	3	Actionable PGx	{30499100}
-RYR1	succinylcholine	PA166116131	B	3	Actionable PGx	{30499100}
+RYR1	desflurane	PA166153257	A	1A	Actionable PGx	{30499100}
+RYR1	enflurane	PA166153257	A	1A	Actionable PGx	{30499100}
+RYR1	halothane	PA166153257	A	1A	Actionable PGx	{30499100}
+RYR1	methoxyflurane	PA166153257	A	1A	Actionable PGx	{30499100}
+RYR1	isoflurane	PA166153255	A	1A	Actionable PGx	{30499100}
+RYR1	sevoflurane	PA166153256	A	1A	Actionable PGx	{30499100}
+RYR1	succinylcholine	PA166116131	A	1A	Actionable PGx	{30499100}
 SCN1A	carbamazepine	PA166116164	B	2B		{}
 SCN1A	phenytoin	PA166116181	B	2B		{}
 SEMA3C	irinotecan	PA166153352	D	2B		{}
