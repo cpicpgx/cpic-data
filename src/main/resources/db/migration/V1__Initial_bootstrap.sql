@@ -483,6 +483,9 @@ RxNorm:72625	duloxetine	PA10066	72625	DB00476	{"N06AX21"}
 RxNorm:195085	efavirenz	PA449441	195085	DB00625	{"J05AG03"}
 RxNorm:1547220	eliglustat	PA166123486	1547220		{""}
 RxNorm:711942	eltrombopag	PA165981594	711942		{"B02BX"}
+RxNorm:3920	enflurane	PA449461	3920	DB00228	{"N01AB04"}
+RxNorm:5095	halothane	PA449845	5095	DB01159	{"N01AB01"}
+RxNorm:6857	methoxyflurane	PA450434	6857	DB01028	{"N02BG09"}
 RxNorm:3995	epirubicin	PA449476	3995	DB00445	{"L01DB03"}
 RxNorm:4053	erythromycin	PA449493	4053	DB00199	{"D10AF02","J01FA01","S01AA17"}
 RxNorm:321988	escitalopram	PA10074	321988	DB01175	{"N06AB10"}
@@ -700,10 +703,13 @@ ATIC	methotrexate	PA166116209	D	2B		{}
 BCHE	succinylcholine	PA166153307	C/D	3	Actionable PGx	{}
 C11orf65	metformin	PA166116207	D	2B		{}
 C8orf34	irinotecan	PA166153317	D	2B		{}
-CACNA1S	desflurane	PA166153253	A	3	Actionable PGx	{}
-CACNA1S	isoflurane	PA166153251	A	3	Actionable PGx	{}
-CACNA1S	sevoflurane	PA166153252	A	3	Actionable PGx	{}
-CACNA1S	succinylcholine	PA166153250	A	3	Actionable PGx	{}
+CACNA1S	desflurane	PA166153253	A	3	Actionable PGx	{30499100}
+CACNA1S	enflurane	PA166153253	A	3	Actionable PGx	{30499100}
+CACNA1S	halothane	PA166153253	A	3	Actionable PGx	{30499100}
+CACNA1S	methoxyflurane	PA166153253	A	3	Actionable PGx	{30499100}
+CACNA1S	isoflurane	PA166153251	A	3	Actionable PGx	{30499100}
+CACNA1S	sevoflurane	PA166153252	A	3	Actionable PGx	{30499100}
+CACNA1S	succinylcholine	PA166153250	A	3	Actionable PGx	{30499100}
 CALU	warfarin	PA166116225	D	2B		{}
 CBR3	anthracyclines and related substances	PA166116185	D	2B		{}
 CCHCR1	nevirapine	PA166153318	D	2B		{}
@@ -976,10 +982,13 @@ PROC	warfarin	PA166153348	D		Actionable PGx	{}
 PROS1	warfarin	PA166153349	D		Actionable PGx	{}
 PTGFR	latanoprost	PA166153350	D	2B		{}
 PTGS1	aspirin	PA166153351	D	2B		{}
-RYR1	desflurane	PA166153257	A	3	Actionable PGx	{}
-RYR1	isoflurane	PA166153255	A	3	Actionable PGx	{}
-RYR1	sevoflurane	PA166153256	A	3	Actionable PGx	{}
-RYR1	succinylcholine	PA166116131	B	3	Actionable PGx	{}
+RYR1	desflurane	PA166153257	A	3	Actionable PGx	{30499100}
+RYR1	enflurane	PA166153257	A	3	Actionable PGx	{30499100}
+RYR1	halothane	PA166153257	A	3	Actionable PGx	{30499100}
+RYR1	methoxyflurane	PA166153257	A	3	Actionable PGx	{30499100}
+RYR1	isoflurane	PA166153255	A	3	Actionable PGx	{30499100}
+RYR1	sevoflurane	PA166153256	A	3	Actionable PGx	{30499100}
+RYR1	succinylcholine	PA166116131	B	3	Actionable PGx	{30499100}
 SCN1A	carbamazepine	PA166116164	B	2B		{}
 SCN1A	phenytoin	PA166116181	B	2B		{}
 SEMA3C	irinotecan	PA166153352	D	2B		{}
