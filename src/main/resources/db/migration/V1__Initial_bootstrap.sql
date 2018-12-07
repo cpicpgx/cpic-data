@@ -670,12 +670,12 @@ COMMENT ON COLUMN pair.citations IS 'The PMID citations in an array for this pai
 
 copy pair(geneSymbol,drugName,pgkbGuidelineId,level,pgkbCALevel,pgxTesting,citations) from STDIN;
 HLA-B	abacavir	PA166104997	A	1A	Testing required	{"22378157","24561393"}
-HLA-B	allopurinol	PA166105003	A	1A		{"23232549","26094938"}
+HLA-B	allopurinol	PA166105003	A	1A	Actionable PGx	{"23232549","26094938"}
 CYP2C19	amitriptyline	PA166105006	A	1A		{"23486447","27997040"}
 CYP2D6	amitriptyline	PA166105006	A	1A	Actionable PGx	{"23486447","27997040"}
-UGT1A1	atazanavir	PA166128738	A	1A		{"26417955"}
+UGT1A1	atazanavir	PA166128738	A	1A	Informative PGx	{"26417955"}
 TPMT	azathioprine	PA166104933	A	1A	Testing recommended	{"21270794","23422873"}
-NUDT15	azathioprine	PA166104933	A	1A	Testing recommended	{"21270794","23422873"}
+NUDT15	azathioprine	PA166104933	A	1B		{"21270794","23422873"}
 DPYD	capecitabine	PA166109594	A	1A	Actionable PGx	{"23988873","29152729"}
 HLA-A	carbamazepine	PA166153254	A	2B	Actionable PGx	{}
 HLA-B	carbamazepine	PA166105008	A	1A	Testing required	{"23695185"}
@@ -690,27 +690,27 @@ CACNA1S	isoflurane	PA166153251	A	3	Actionable PGx	{}
 RYR1	isoflurane	PA166153255	A	3	Actionable PGx	{}
 CFTR	ivacaftor	PA166114461	A	1A	Testing required	{"24598717"}
 TPMT	mercaptopurine	PA166104945	A	1A	Testing recommended	{"21270794","23422873"}
-NUDT15	mercaptopurine	PA166104945	A	1A	Testing recommended	{"21270794","23422873"}
+NUDT15	mercaptopurine	PA166104945	A	1B	Testing recommended	{"21270794","23422873"}
 CYP2D6	nortriptyline	PA166104998	A	1A	Actionable PGx	{"23486447","27997040"}
 CYP2D6	ondansetron	PA166161954	A	1A	Informative PGx	{"28002639"}
 CYP2D6	oxycodone	PA166116088	A	2A		{}
 CYP2D6	paroxetine	PA166127636	A	1A	Informative PGx	{"25974703"}
 CYP2C9	phenytoin	PA166122806	A	1A	Actionable PGx	{"25099164"}
-HLA-B	phenytoin	PA166122806	A	1A	Actionable PGx	{"25099164"}
+HLA-B	phenytoin	PA166122806	A	1A	Testing recommended	{"25099164"}
 G6PD	rasburicase	PA166119846	A	1A	Testing required	{"24787449"}
 CACNA1S	sevoflurane	PA166153252	A	3	Actionable PGx	{}
 RYR1	sevoflurane	PA166153256	A	3	Actionable PGx	{}
-SLCO1B1	simvastatin	PA166105005	A	1A		{"22617227","24918167"}
+SLCO1B1	simvastatin	PA166105005	A	1A	Informative PGx	{"22617227","24918167"}
 CACNA1S	succinylcholine	PA166153250	A	3	Actionable PGx	{}
 CYP3A5	tacrolimus	PA166124619	A	1A		{"25801146"}
-CYP2D6	tamoxifen	PA166176068	A	1A		{}
-TPMT	thioguanine	PA166104965	A	1A	Actionable PGx	{"21270794","23422873"}
-NUDT15	thioguanine	PA166104965	A	1A	Actionable PGx	{"21270794","23422873"}
+CYP2D6	tamoxifen	PA166176068	A	1A	Testing required	{}
+TPMT	thioguanine	PA166104965	A	1A	Testing recommended	{"21270794","23422873"}
+NUDT15	thioguanine	PA166104965	A		Testing recommended	{"21270794","23422873"}
 CYP2D6	tramadol	PA166116089	A	1B	Actionable PGx	{}
 CYP2D6	tropisetron	PA166161955	A			{"28002639"}
 CYP2C19	voriconazole	PA166161537	A	1A	Actionable PGx	{"27981572"}
 CYP2C9	warfarin	PA166104949	A	1A	Actionable PGx	{"21900891","28198005"}
-CYP4F2	warfarin	PA166104949	A	1B		{"21900891","28198005"}
+CYP4F2	warfarin	PA166104949	A	1A		{"21900891","28198005"}
 VKORC1	warfarin	PA166104949	A	1A	Actionable PGx	{"21900891","28198005"}
 CYP2C19	citalopram	PA166127638	A	1A	Actionable PGx	{"25974703"}
 CYP2C19	escitalopram	PA166127638	A	1A	Actionable PGx	{"25974703"}
@@ -816,7 +816,7 @@ G6PD	lidocaine	PA166163810	B/C			{}
 UGT1A1	pazopanib	PA166128112	B/C	3	Actionable PGx	{}
 CYP2D6	perphenazine	PA166128114	B/C		Actionable PGx	{}
 HLA-C	allopurinol	PA166153288	C	2B		{}
-MT-RNR1	aminoglycoside antibacterials	PA166153294	C	1B		{}
+MT-RNR1	aminoglycoside antibacterials	PA166153294	A/B	1B		{}
 MC4R	antipsychotics	PA166153293	C	2B		{}
 HLA-DPB1	aspirin	PA166153290	C	2B		{}
 CFTR	ataluren	PA166153271	C	2A		{}
