@@ -24,6 +24,7 @@ public class DataImport {
   private static final String DEFAULT_RECOMMENDATIONDIRECTORY = "recommendation_tables";
   private static final String DEFAULT_GENEMAPPINGDIRECTORY = "gene_resource_mappings";
   private static final String DEFAULT_TESTALERTDIRECTORY = "test_alerts";
+  private static final String DEFAULT_GUIDELINESDIRECTORY = "test_alerts";
   
   private String alleleDirectory = null;
   private String frequencyDirectory = null;
@@ -32,6 +33,7 @@ public class DataImport {
   private String recommendationDirectory = null;
   private String geneMappingDirectory = null;
   private String testAlertsDirectory = null;
+  private String guidelinesDirectory = null;
 
   private Path m_directory;
 
@@ -44,6 +46,7 @@ public class DataImport {
     String recommendation = null;
     String geneMapping = null;
     String testAlerts = null;
+    String guidelines = null;
     try {
       Options options = new Options();
       options.addOption("d", true,"directory that has sub-folders with excel data files (*.xlsx)");
@@ -54,6 +57,7 @@ public class DataImport {
       options.addOption("dr", true,"recommendation subdirectory name");
       options.addOption("gm", true,"gene mapping subdirectory name");
       options.addOption("ta", true,"test alerts subdirectory name");
+      options.addOption("g", true,"guidelines subdirectory name");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
       directory = cli.getOptionValue("d");
@@ -65,6 +69,7 @@ public class DataImport {
       recommendation = cli.getOptionValue("dr");
       geneMapping = cli.getOptionValue("gm");
       testAlerts = cli.getOptionValue("ta");
+      guidelines = cli.getOptionValue("g");
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
       System.exit(1);
@@ -78,6 +83,7 @@ public class DataImport {
     processor.recommendationDirectory = recommendation;
     processor.geneMappingDirectory = geneMapping;
     processor.testAlertsDirectory = testAlerts;
+    processor.guidelinesDirectory = guidelines;
     processor.execute();
   }
 
@@ -100,6 +106,7 @@ public class DataImport {
   }
 
   private void execute() {
+    new GuidelineImporter(m_directory.resolve(getGuidelinesDirectory())).execute();
     new GeneReferenceImporter(m_directory.resolve(getGeneMappingDirectory())).execute();
     new AlleleDirectoryProcessor(m_directory.resolve(getAlleleDirectory())).execute();
     new AlleleFrequencyImporter(m_directory.resolve(getFrequencyDirectory())).execute();
@@ -162,6 +169,14 @@ public class DataImport {
       return DEFAULT_TESTALERTDIRECTORY;
     } else {
       return this.testAlertsDirectory;
+    }
+  }
+  
+  private String getGuidelinesDirectory() {
+    if (this.guidelinesDirectory == null) {
+      return DEFAULT_GUIDELINESDIRECTORY;
+    } else {
+      return this.guidelinesDirectory;
     }
   }
 }
