@@ -643,13 +643,13 @@ ATIC	methotrexate	D	2B		{}
 BCHE	succinylcholine	C/D	3	Actionable PGx	{}
 C11orf65	metformin	D	2B		{}
 C8orf34	irinotecan	D	2B		{}
-CACNA1S	desflurane	A	1A	Actionable PGx	{“30499100”}
-CACNA1S	enflurane	A	1A	Actionable PGx	{“30499100”}
-CACNA1S	halothane	A	1A	Actionable PGx	{“30499100”}
-CACNA1S	methoxyflurane	A	1A	Actionable PGx	{“30499100”}
-CACNA1S	isoflurane	A	1A	Actionable PGx	{“30499100”}
-CACNA1S	sevoflurane	A	1A	Actionable PGx	{“30499100”}
-CACNA1S	succinylcholine	A	1A	Actionable PGx	{“30499100”}
+CACNA1S	desflurane	A	1A	Actionable PGx	{"30499100"}
+CACNA1S	enflurane	A	1A	Actionable PGx	{"30499100"}
+CACNA1S	halothane	A	1A	Actionable PGx	{"30499100"}
+CACNA1S	methoxyflurane	A	1A	Actionable PGx	{"30499100"}
+CACNA1S	isoflurane	A	1A	Actionable PGx	{"30499100"}
+CACNA1S	sevoflurane	A	1A	Actionable PGx	{"30499100"}
+CACNA1S	succinylcholine	A	1A	Actionable PGx	{"30499100"}
 CALU	warfarin	D	2B		{}
 CBR3	anthracyclines and related substances	D	2B		{}
 CCHCR1	nevirapine	D	2B		{}
@@ -922,13 +922,13 @@ PROC	warfarin	D		Actionable PGx	{}
 PROS1	warfarin	D		Actionable PGx	{}
 PTGFR	latanoprost	D	2B		{}
 PTGS1	aspirin	D	2B		{}
-RYR1	desflurane	A	1A	Actionable PGx	{“30499100”}
-RYR1	enflurane	A	1A	Actionable PGx	{“30499100”}
-RYR1	halothane	A	1A	Actionable PGx	{“30499100”}
-RYR1	methoxyflurane	A	1A	Actionable PGx	{“30499100”}
-RYR1	isoflurane	A	1A	Actionable PGx	{“30499100”}
-RYR1	sevoflurane	A	1A	Actionable PGx	{“30499100”}
-RYR1	succinylcholine	A	1A	Actionable PGx	{“30499100”}
+RYR1	desflurane	A	1A	Actionable PGx	{"30499100"}
+RYR1	enflurane	A	1A	Actionable PGx	{"30499100"}
+RYR1	halothane	A	1A	Actionable PGx	{"30499100"}
+RYR1	methoxyflurane	A	1A	Actionable PGx	{"30499100"}
+RYR1	isoflurane	A	1A	Actionable PGx	{"30499100"}
+RYR1	sevoflurane	A	1A	Actionable PGx	{"30499100"}
+RYR1	succinylcholine	A	1A	Actionable PGx	{"30499100"}
 SCN1A	carbamazepine	B	2B		{}
 SCN1A	phenytoin	B	2B		{}
 SEMA3C	irinotecan	D	2B		{}
