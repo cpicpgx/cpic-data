@@ -119,7 +119,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           ResultSet.TYPE_SCROLL_INSENSITIVE, 
           ResultSet.CONCUR_READ_ONLY);
       this.guidelineLookupStmt = this.conn.prepareStatement(
-          "select id from guideline where name like ?", 
+          "select distinct p.guidelineid from pair p join drug d on p.drugid = d.drugid where d.name=? and p.guidelineid is not null", 
           ResultSet.TYPE_SCROLL_INSENSITIVE, 
           ResultSet.CONCUR_READ_ONLY);
       closables.add(this.guidelineLookupStmt);
@@ -166,13 +166,13 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       if (rs.first()) {
         return rs.getString(1);
       } else {
-        throw new NotFoundException("Couldn't find drug");
+        throw new NotFoundException("Couldn't find drug " + name);
       }
     }
 
     private Long lookupGuideline(String name) throws SQLException, NotFoundException {
       this.guidelineLookupStmt.clearParameters();
-      this.guidelineLookupStmt.setString(1, "%"+name+"%");
+      this.guidelineLookupStmt.setString(1, name);
       ResultSet rs = this.guidelineLookupStmt.executeQuery();
       if (rs.first()) {
         if (!rs.isLast()) {
