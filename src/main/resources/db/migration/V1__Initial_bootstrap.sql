@@ -6,9 +6,9 @@ CREATE TABLE guideline
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   version INTEGER DEFAULT 1,
-  name VARCHAR(200) NOT NULL,
-  url VARCHAR(200),
-  pharmgkbId TEXT CHECK (pharmgkbId ~ '^(PA\d+){0,1}$')
+  name VARCHAR(200) UNIQUE NOT NULL,
+  url VARCHAR(200) UNIQUE,
+  pharmgkbId TEXT[]
 );
 
 COMMENT ON TABLE guideline IS 'A guideline for a drug or group of drugs';
@@ -16,45 +16,72 @@ COMMENT ON COLUMN guideline.id IS 'A synthetic numerical ID, primary key';
 COMMENT ON COLUMN guideline.version IS 'The version number, iterates on modification';
 COMMENT ON COLUMN guideline.name IS 'The name (title) of this guideline, required';
 COMMENT ON COLUMN guideline.url IS 'The URL of this guideline on the cpicpgx.org domain, optional';
-COMMENT ON COLUMN guideline.pharmgkbId IS 'The PharmGKB ID for this guideline, optional';
+COMMENT ON COLUMN guideline.pharmgkbId IS 'The IDs from PharmGKB for their annotations of this guideline, optional';
 
-copy guideline(name,url,pharmgkbId) from STDIN;
-CPIC Guideline for peginterferon alfa-2a,peginterferon alfa-2b,ribavirin and IFNL3	https://cpicpgx.org/guidelines/guideline-for-peg-interferon-alpha-based-regimens-and-ifnl3/	PA166110235
-CPIC Guideline for ivacaftor and CFTR	https://cpicpgx.org/guidelines/guideline-for-ivacaftor-and-cftr/	PA166114461
-CPIC Guideline for azathioprine and TPMT and NUDT15	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104933
-CPIC Guideline for rasburicase and G6PD	https://cpicpgx.org/guidelines/guideline-for-rasburicase-and-g6pd/	PA166119846
-CPIC Guideline for mercaptopurine and TPMT and NUDT15	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104945
-CPIC Guideline for clopidogrel and CYP2C19	https://cpicpgx.org/guidelines/guideline-for-clopidogrel-and-cyp2c19/	PA166104948
-CPIC Guideline for warfarin and CYP2C9,CYP4F2,VKORC1	https://cpicpgx.org/guidelines/guideline-for-warfarin-and-cyp2c9-and-vkorc1/	PA166104949
-CPIC Guideline for phenytoin and CYP2C9,HLA-B	https://cpicpgx.org/guidelines/guideline-for-phenytoin-and-cyp2c9-and-hla-b/	PA166122806
-CPIC Guideline for thioguanine and TPMT and NUDT15	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	PA166104965
-CPIC Guideline for codeine and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-codeine-and-cyp2d6/	PA166104996
-CPIC Guideline for abacavir and HLA-B	https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/	PA166104997
-CPIC Guideline for nortriptyline and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166104998
-CPIC Guideline for imipramine and CYP2C19,CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166104999
-CPIC Guideline for doxepin and CYP2C19,CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166105000
-CPIC Guideline for trimipramine and CYP2C19,CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166105001
-CPIC Guideline for desipramine and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166105002
-CPIC Guideline for allopurinol and HLA-B	https://cpicpgx.org/guidelines/guideline-for-allopurinol-and-hla-b/	PA166105003
-CPIC Guideline for simvastatin and SLCO1B1	https://cpicpgx.org/guidelines/guideline-for-simvastatin-and-slco1b1/	PA166105005
-CPIC Guideline for amitriptyline and CYP2C19,CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166105006
-CPIC Guideline for clomipramine and CYP2C19,CYP2D6	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	PA166105007
-CPIC Guideline for carbamazepine and HLA-A,HLA-B	https://cpicpgx.org/guidelines/guideline-for-carbamazepine-and-hla-b/	PA166105008
-CPIC Guideline for capecitabine and DPYD	https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/	PA166109594
-CPIC Guideline for tropisetron and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-ondansetron-and-tropisetron-and-cyp2d6-genotype/	PA166161955
-CPIC Guideline for tegafur and DPYD	https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/	PA166122687
-CPIC Guideline for fluorouracil and DPYD	https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/	PA166122686
-CPIC Guideline for voriconazole and CYP2C19	https://cpicpgx.org/guidelines/guideline-for-voriconazole-and-cyp2c19/	PA166161537
-CPIC Guideline for oxcarbazepine and HLA-B	https://cpicpgx.org/guidelines/guideline-for-carbamazepine-and-hla-b/	PA166176623
-CPIC Guideline for ondansetron and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-ondansetron-and-tropisetron-and-cyp2d6-genotype/	PA166161954
-CPIC Guideline for tamoxifen and CYP2D6	https://cpicpgx.org/guidelines/cpic-guideline-for-tamoxifen-based-on-cyp2d6-genotype/	PA166176068
-CPIC Guideline for tacrolimus and CYP3A5	https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-cyp3a5/	PA166124619
-CPIC Guideline for paroxetine and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/	PA166127636
-CPIC Guideline for fluvoxamine and CYP2D6	https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/	PA166127637
-CPIC Guideline for citalopram,escitalopram and CYP2C19	https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/	PA166127638
-CPIC Guideline for sertraline and CYP2C19	https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/	PA166127639
-CPIC Guideline for atazanavir and UGT1A1	https://cpicpgx.org/guidelines/guideline-for-atazanavir-and-ugt1a1/	PA166128738
-CPIC Guideline for the use of potent volatile anesthetic agents and succinylcholine in the context of RYR1 or CACNA1S genotypes	https://cpicpgx.org/guidelines/cpic-guideline-for-ryr1-and-cacna1s/	PA166180457
+
+CREATE TABLE publication
+(
+  id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
+  guidelineId INTEGER REFERENCES guideline(id),
+  title VARCHAR(200) UNIQUE NOT NULL,
+  authors TEXT[],
+  journal varchar(200),
+  month integer,
+  page varchar(50),
+  volume varchar(50),
+  year integer,
+  pmid text,
+  pmcid text,
+  doi text
+);
+
+COMMENT ON TABLE publication IS 'Published literature';
+COMMENT ON COLUMN publication.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN publication.guidelineId IS 'The ID for the guideline this publication is about, optional';
+COMMENT ON COLUMN publication.pmid IS 'The PubMed identifier for this publication';
+COMMENT ON COLUMN publication.pmcid IS 'The PubMed Central identifier for this publication';
+COMMENT ON COLUMN publication.doi IS 'The Document Object Identifier (DOI) for this publication';
+
+-- guideline publications
+copy publication(title,authors,journal,month,page,volume,year,pmid) from STDIN;
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 Genotype and Use of Ondansetron and Tropisetron	{"Bell Gillian C","Caudle Kelly E","Whirl-Carrillo Michelle","Gordon Ronald J","Hikino Keiko","Prows Cynthia A","Gaedigk Andrea","Agundez Jose A G","Sadhasivam Senthilkumar","Klein Teri E","Schwab Matthias"}	Clinical pharmacology and therapeutics	12			2016	28002639
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Selective Serotonin Reuptake Inhibitors	{"Hicks J Kevin","Bishop Jeffrey R","Sangkuhl Katrin","Müller Daniel J","Ji Yuan","Leckband Susan G","Leeder J Steven","Graham Rebecca L","Chiulli Dana L","LLerena Adrián","Skaar Todd C","Scott Stuart A","Stingl Julia C","Klein Teri E","Caudle Kelly E","Gaedigk Andrea"}	Clinical pharmacology and therapeutics	5			2015	25974703
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for UGT1A1 and Atazanavir Prescribing	{"Gammal Roseann S","Court Michael H","Haidar Cyrine E","Iwuchukwu Otito Frances","Gaur Aditya H","Alvarellos Maria","Guillemette Chantal","Lennox Jeffrey L","Whirl-Carrillo Michelle","Brummel Sean","Ratain Mark J","Klein Teri E","Schackman Bruce R","Caudle Kelly E","Haas David W"}	Clinical pharmacology and therapeutics	9			2015	26417955
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for the use of potent volatile anesthetic agents and succinylcholine in the context of RYR1 or CACNA1S genotypes	{"Gonsalves Stephen G","Dirksen Robert T","Sangkuhl Katrin","Pulk Rebecca","Alvarellos Maria","Vo Teresa","Hikino Keiko","Roden Dan","Klein Teri","Mark Poler S","Patel Sephalie","Caudle Kelly E","Gordon Ronald","Brandom Barbara","Biesecker Leslie G"}	Clinical pharmacology and therapeutics	11			2018	30499100
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for CYP2C9 and HLA-B Genotype and Phenytoin Dosing	{"Caudle Kelly E","Rettie Allan E","Whirl-Carrillo Michelle","Smith Lisa H","Mintzer Scott E","Lee Ming Ta Michael","Klein Teri E","Callaghan J Thomas"}	Clinical pharmacology and therapeutics	8			2014	25099164
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for HLA-B Genotype and Carbamazepine Dosing	{"Leckband Susan G","Kelsoe John R","Dunnenberger H Mark","George Alfred L","Tran Eric","Berger Reisel","Müller Daniel J","Whirl-Carrillo Michelle","Caudle Kelly E","Pirmohamed Munir"}	Clinical pharmacology and therapeutics	5			2013	23695185
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Ivacaftor Therapy in the Context of CFTR Genotype	{"Clancy John P","Johnson Samuel G","Yee Sook Wah","McDonagh Ellen M","Caudle Kelly E","Klein Teri E","Cannavo Matthew","Giacomini Kathleen M"}	Clinical pharmacology and therapeutics	3			2014	24598717
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Rasburicase Therapy in the context of G6PD Deficiency Genotype	{"Relling Mary V","McDonagh Ellen M","Chang Tamara","Caudle Kelly E","McLeod Howard L","Haidar Cyrine E","Klein Teri","Luzzatto Lucio"}	Clinical pharmacology and therapeutics	5			2014	24787449
+Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for IFNL3 (IL28B) genotype and peginterferon alpha based regimens	{"Muir Andrew J","Gong Li","Johnson Samuel G","Michael Lee Ming Ta","Williams Marc S","Klein Teri E","Caudle Kelly E","Nelson David R"}	Clinical pharmacology and therapeutics	10			2013	24096968
+Clinical Pharmacogenetics Implementation Consortium (CPIC®) Guideline for CYP2C19 and Voriconazole Therapy	{"Moriyama Brad","Obeng Aniwaa Owusu","Barbarino Julia","Penzak Scott R","Henning Stacey A","Scott Stuart A","Agúndez José A G","Wingard John R","McLeod Howard L","Klein Teri E","Cross Shane","Caudle Kelly E","Walsh Thomas J"}	Clinical pharmacology and therapeutics	12			2016	27981572
+Clinical pharmacogenetics implementation consortium (CPIC) guidelines for CYP3A5 genotype and tacrolimus dosing	{"Birdwell Kelly A","Decker Brian","Barbarino Julia M","Peterson Josh F","Stein C Michael","Sadee Wolfgang","Wang Danxin","Vinks Alexander A","He Yijing","Swen Jesse J","Leeder J Steven","van Schaik R H N","Thummel Kenneth E","Klein Teri E","Caudle Kelly E","MacPhee Iain A M"}	Clinical pharmacology and therapeutics	3			2015	25801146
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 and Tamoxifen Therapy.	{"Goetz Matthew P","Sangkuhl Katrin","Guchelaar Henk-Jan","Schwab Matthias","Province Michael","Whirl-Carrillo Michelle","Symmans W Fraser","McLeod Howard L","Ratain Mark J","Zembutsu Hitoshi","Gaedigk Andrea","van Schaik Ron H","Ingle James N","Caudle Kelly E","Klein Teri E"}	Clinical pharmacology and therapeutics	5			2018	29385237
+Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
+Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
+Clinical Pharmacogenetics Implementation Consortium Guidelines for Cytochrome P450-2C19 (CYP2C19) Genotype and Clopidogrel Therapy	{"Scott S A","Sangkuhl K","Gardner E E","Stein C M","Hulot J-S","Johnson J A","Roden D M","Klein T E","Shuldiner A R"}	Clinical pharmacology and therapeutics	6			2011	21716271
+Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for cytochrome P450-2C19 (CYP2C19) genotype and clopidogrel therapy: 2013 Update	{"Scott Stuart A","Sangkuhl Katrin","Stein C Michael","Hulot Jean-Sébastien","Mega Jessica L","Roden Dan M","Klein Teri E","Sabatine Marc S","Johnson Julie A","Shuldiner Alan R"}	Clinical pharmacology and therapeutics	5			2013	23698643
+Clinical Pharmacogenetics Implementation Consortium Guidelines for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing	{"Caudle Kelly E","Thorn Caroline F","Klein Teri E","Swen Jesse J","McLeod Howard L","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	8			2013	23988873
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing: 2017 Update	{"Amstutz Ursula","Henricks Linda M","Offer Steven M","Barbarino Julia","Schellens Jan H M","Swen Jesse J","Klein Teri E","McLeod Howard L","Caudle Kelly E","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	11			2017	29152729
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Codeine Therapy in the Context of Cytochrome P450 2D6 (CYP2D6) Genotype	{"Crews K R","Gaedigk A","Dunnenberger H M","Klein T E","Shen D D","Callaghan J T","Kharasch E D","Skaar T C"}	Clinical pharmacology and therapeutics	12			2011	22205192
+Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for cytochrome P450 2D6 (CYP2D6) genotype and codeine therapy: 2014 Update	{"Crews Kristine R","Gaedigk Andrea","Dunnenberger Henry M","Leeder J Steve","Klein Teri E","Caudle Kelly E","Haidar Cyrine E","Shen Danny D","Callaghan John T","Sadhasivam Senthilkumar","Prows Cynthia A","Kharasch Evan D","Skaar Todd C"}	Clinical pharmacology and therapeutics	1			2014	24458010
+Clinical Pharmacogenetics Implementation Consortium Guidelines for HLA-B Genotype and Abacavir Dosing	{"Martin M A","Klein T E","Dong B J","Pirmohamed M","Haas D W","Kroetz D L"}	Clinical pharmacology and therapeutics	2			2012	22378157
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for HLA-B Genotype and Abacavir Dosing: 2014 update	{"Martin Michael A","Hoffman James M","Freimuth Robert R","Klein Teri E","Dong Betty J","Pirmohamed Munir","Hicks J Kevin","Wilkinson Mark R","Haas David W","Kroetz Deanna L"}	Clinical pharmacology and therapeutics	2			2014	24561393
+Clinical Pharmacogenetics Implementation Consortium Guidelines for Human Leukocyte Antigen-B Genotype and Allopurinol Dosing	{"Hershfield M S","Callaghan J T","Tassaneeyakul W","Mushiroda T","Thorn C F","Klein T E","Lee M T M"}	Clinical pharmacology and therapeutics	10			2012	23232549
+Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for human leukocyte antigen B (HLA-B) genotype and allopurinol dosing: 2015 update	{"Saito Y","Stamp L K","Caudle K E","Hershfield M S","McDonagh E M","Callaghan J T","Tassaneeyakul W","Mushiroda T","Kamatani N","Goldspiel B R","Phillips E J","Klein T E","Lee Mtm"}	Clinical pharmacology and therapeutics	6			2015	26094938
+Clinical pharmacogenetics implementation consortium guidelines for thiopurine methyltransferase genotype and thiopurine dosing	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Klein T E"}	Clinical pharmacology and therapeutics	3	387-91	89	2011	21270794
+Clinical Pharmacogenetics Implementation Consortium Guidelines for Thiopurine Methyltransferase Genotype and Thiopurine Dosing: 2013 Update	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Hicks J K","Schwab M","Klein T E"}	Clinical pharmacology and therapeutics	1			2013	23422873
+Clinical Pharmacogenetics Implementation Consortium Guidelines for CYP2C9 and VKORC1 Genotypes and Warfarin Dosing	{"Johnson J A","Gong L","Whirl-Carrillo M","Gage B F","Scott S A","Stein C M","Anderson J L","Kimmel S E","Lee M T M","Pirmohamed M","Wadelius M","Klein T E","Altman R B"}	Clinical pharmacology and therapeutics	9			2011	21900891
+Clinical pharmacogenetics implementation consortium (cpic) guideline for pharmacogenetics-guided warfarin dosing: 2017 update	{"Johnson Julie A","Caudle Kelly E","Gong Li","Whirl-Carrillo Michelle","Stein C Michael","Scott Stuart A","Lee Ming Ta Michael","Gage Brian F","Kimmel Stephen E","Perera Minoli A","Anderson Jeffrey L","Pirmohamed Munir","Klein Teri E","Limdi Nita A","Cavallari Larisa H","Wadelius Mia"}	Clinical pharmacology and therapeutics	2			2017	28198005
+The Clinical Pharmacogenomics Implementation Consortium: Guideline for SLCO1B1 and Simvastatin-Induced Myopathy	{"Wilke R A","Ramsey L B","Johnson S G","Maxwell W D","McLeod H L","Voora D","Krauss R M","Roden D M","Feng Q","Cooper-Dehoff R M","Gong L","Klein T E","Wadelius M","Niemi M"}	Clinical pharmacology and therapeutics	5			2012	22617227
+The Clinical Pharmacogenetics Implementation Consortium (CPIC) guideline for SLCO1B1 and simvastatin-induced myopathy: 2014 update	{"Ramsey Laura B","Johnson Samuel G","Caudle Kelly E","Haidar Cyrine E","Voora Deepak","Wilke Russell A","Maxwell Whitney D","McLeod Howard L","Krauss Ronald M","Roden Dan M","Feng Qiping","Cooper-DeHoff Rhonda M","Gong Li","Klein Teri E","Wadelius Mia","Niemi Mikko"}	Clinical pharmacology and therapeutics	6			2014	24918167
+Clinical Pharmacogenetics Implementation Consortium (CPIC) guideline for thiopurine dosing based on TPMT and NUDT15 genotypes: 2018 update.	{"Relling Mary V","Schwab Matthias","Whirl-Carrillo Michelle","Suarez-Kurtz Guilherme","Pui Ching-Hon","Stein Charles M","Moyer Ann M","Evans William E","Klein Teri E","Antillon-Klussmann Federico Guillermo","Caudle Kelly E","Kato Motohiro","Yeoh Allen E J","Schmiegelow Kjeld","Yang Jun J"}	Clinical pharmacology and therapeutics	11			2018	30447069
+\.
+
+-- publications about CPIC itself
+copy publication(title,authors,journal,month,page,volume,year,pmid) from STDIN;
+CPIC: Clinical Pharmacogenetics Implementation Consortium of the Pharmacogenomics Research Network	{"Relling M V","Klein T E"}	Clinical pharmacology and therapeutics	3	464-7	89	2011	21270786
+Incorporation of Pharmacogenomics into Routine Clinical Practice: the Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline Development Process	{"Caudle Kelly E","Klein Teri E","Hoffman James M","Müller Daniel J","Whirl-Carrillo Michelle","Gong Li","McDonagh Ellen M","Sangkuhl Katrin","Thorn Caroline F","Schwab Matthias","Agunder Jose A G","Freimuth Robert R","Huser Vojtech","Lee Ming Ta Michael","Iwuchukwu Otito F","Crews Kristine R","Scott Stuart A","Wadelius Mia","Swen Jesse J","Tyndale Rachel F","Stein C Michael","Roden Dan","Relling Mary V","Williams Marc S","Johnson Samuel G"}	Current drug metabolism	1			2014	24479687
+Standardizing terms for clinical pharmacogenetic test results: consensus terms from the Clinical Pharmacogenetics Implementation Consortium (CPIC)	{"Caudle Kelly E","Dunnenberger Henry M","Freimuth Robert R","Peterson Josh F","Burlison Jonathan D","Whirl-Carrillo Michelle","Scott Stuart A","Rehm Heidi L","Williams Marc S","Klein Teri E","Relling Mary V","Hoffman James M"}	Genetics in medicine : official journal of the American College of Medical Genetics	7			2016	27441996
 \.
 
 
@@ -306,94 +333,6 @@ CREATE TABLE function_reference
   substrate_in_vitro TEXT[],
   substrate_in_vivo TEXT[]
 );
-
-
-CREATE TABLE publication
-(
-  id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  guidelineid INTEGER REFERENCES guideline(id),
-  title VARCHAR(200),
-  authors TEXT[],
-  journal varchar(200),
-  month integer,
-  page varchar(50),
-  volume varchar(50),
-  year integer,
-  pmid text,
-  pmcid text,
-  doi text
-);
-
-COMMENT ON TABLE publication IS 'Published literature';
-COMMENT ON COLUMN publication.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN publication.guidelineId IS 'The ID for the guideline this publication is about';
-COMMENT ON COLUMN publication.pmid IS 'The PubMed identifier for this publication';
-COMMENT ON COLUMN publication.pmcid IS 'The PubMed Central identifier for this publication';
-COMMENT ON COLUMN publication.doi IS 'The Document Object Identifier (DOI) for this publication';
-
--- guideline publications
-copy publication(title,guidelineid,authors,journal,month,page,volume,year,pmid) from STDIN;
-Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for IFNL3 (IL28B) genotype and peginterferon alpha based regimens	100000	{"Muir Andrew J","Gong Li","Johnson Samuel G","Michael Lee Ming Ta","Williams Marc S","Klein Teri E","Caudle Kelly E","Nelson David R"}	Clinical pharmacology and therapeutics	10			2013	24096968
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Ivacaftor Therapy in the Context of CFTR Genotype	100001	{"Clancy John P","Johnson Samuel G","Yee Sook Wah","McDonagh Ellen M","Caudle Kelly E","Klein Teri E","Cannavo Matthew","Giacomini Kathleen M"}	Clinical pharmacology and therapeutics	3			2014	24598717
-Clinical pharmacogenetics implementation consortium guidelines for thiopurine methyltransferase genotype and thiopurine dosing	100002	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Klein T E"}	Clinical pharmacology and therapeutics	3	387-91	89	2011	21270794
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Thiopurine Methyltransferase Genotype and Thiopurine Dosing: 2013 Update	100002	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Hicks J K","Schwab M","Klein T E"}	Clinical pharmacology and therapeutics	1			2013	23422873
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Rasburicase Therapy in the context of G6PD Deficiency Genotype	100003	{"Relling Mary V","McDonagh Ellen M","Chang Tamara","Caudle Kelly E","McLeod Howard L","Haidar Cyrine E","Klein Teri","Luzzatto Lucio"}	Clinical pharmacology and therapeutics	5			2014	24787449
-Clinical pharmacogenetics implementation consortium guidelines for thiopurine methyltransferase genotype and thiopurine dosing	100004	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Klein T E"}	Clinical pharmacology and therapeutics	3	387-91	89	2011	21270794
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Thiopurine Methyltransferase Genotype and Thiopurine Dosing: 2013 Update	100004	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Hicks J K","Schwab M","Klein T E"}	Clinical pharmacology and therapeutics	1			2013	23422873
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Cytochrome P450-2C19 (CYP2C19) Genotype and Clopidogrel Therapy	100005	{"Scott S A","Sangkuhl K","Gardner E E","Stein C M","Hulot J-S","Johnson J A","Roden D M","Klein T E","Shuldiner A R"}	Clinical pharmacology and therapeutics	6			2011	21716271
-Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for cytochrome P450-2C19 (CYP2C19) genotype and clopidogrel therapy: 2013 Update	100005	{"Scott Stuart A","Sangkuhl Katrin","Stein C Michael","Hulot Jean-Sébastien","Mega Jessica L","Roden Dan M","Klein Teri E","Sabatine Marc S","Johnson Julie A","Shuldiner Alan R"}	Clinical pharmacology and therapeutics	5			2013	23698643
-Clinical Pharmacogenetics Implementation Consortium Guidelines for CYP2C9 and VKORC1 Genotypes and Warfarin Dosing	100006	{"Johnson J A","Gong L","Whirl-Carrillo M","Gage B F","Scott S A","Stein C M","Anderson J L","Kimmel S E","Lee M T M","Pirmohamed M","Wadelius M","Klein T E","Altman R B"}	Clinical pharmacology and therapeutics	9			2011	21900891
-Clinical pharmacogenetics implementation consortium (cpic) guideline for pharmacogenetics-guided warfarin dosing: 2017 update	100006	{"Johnson Julie A","Caudle Kelly E","Gong Li","Whirl-Carrillo Michelle","Stein C Michael","Scott Stuart A","Lee Ming Ta Michael","Gage Brian F","Kimmel Stephen E","Perera Minoli A","Anderson Jeffrey L","Pirmohamed Munir","Klein Teri E","Limdi Nita A","Cavallari Larisa H","Wadelius Mia"}	Clinical pharmacology and therapeutics	2			2017	28198005
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for CYP2C9 and HLA-B Genotype and Phenytoin Dosing	100007	{"Caudle Kelly E","Rettie Allan E","Whirl-Carrillo Michelle","Smith Lisa H","Mintzer Scott E","Lee Ming Ta Michael","Klein Teri E","Callaghan J Thomas"}	Clinical pharmacology and therapeutics	8			2014	25099164
-Clinical pharmacogenetics implementation consortium guidelines for thiopurine methyltransferase genotype and thiopurine dosing	100008	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Klein T E"}	Clinical pharmacology and therapeutics	3	387-91	89	2011	21270794
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Thiopurine Methyltransferase Genotype and Thiopurine Dosing: 2013 Update	100008	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Hicks J K","Schwab M","Klein T E"}	Clinical pharmacology and therapeutics	1			2013	23422873
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Codeine Therapy in the Context of Cytochrome P450 2D6 (CYP2D6) Genotype	100009	{"Crews K R","Gaedigk A","Dunnenberger H M","Klein T E","Shen D D","Callaghan J T","Kharasch E D","Skaar T C"}	Clinical pharmacology and therapeutics	12			2011	22205192
-Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for cytochrome P450 2D6 (CYP2D6) genotype and codeine therapy: 2014 Update	100009	{"Crews Kristine R","Gaedigk Andrea","Dunnenberger Henry M","Leeder J Steve","Klein Teri E","Caudle Kelly E","Haidar Cyrine E","Shen Danny D","Callaghan John T","Sadhasivam Senthilkumar","Prows Cynthia A","Kharasch Evan D","Skaar Todd C"}	Clinical pharmacology and therapeutics	1			2014	24458010
-Clinical Pharmacogenetics Implementation Consortium Guidelines for HLA-B Genotype and Abacavir Dosing	100010	{"Martin M A","Klein T E","Dong B J","Pirmohamed M","Haas D W","Kroetz D L"}	Clinical pharmacology and therapeutics	2			2012	22378157
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for HLA-B Genotype and Abacavir Dosing: 2014 update	100010	{"Martin Michael A","Hoffman James M","Freimuth Robert R","Klein Teri E","Dong Betty J","Pirmohamed Munir","Hicks J Kevin","Wilkinson Mark R","Haas David W","Kroetz Deanna L"}	Clinical pharmacology and therapeutics	2			2014	24561393
-Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	100011	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
-Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	100011	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
-Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	100012	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
-Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	100012	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
-Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	100013	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
-Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	100013	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
-Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	100014	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
-Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	100014	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
-Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	100015	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
-Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	100015	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Human Leukocyte Antigen-B Genotype and Allopurinol Dosing	100016	{"Hershfield M S","Callaghan J T","Tassaneeyakul W","Mushiroda T","Thorn C F","Klein T E","Lee M T M"}	Clinical pharmacology and therapeutics	10			2012	23232549
-Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for human leukocyte antigen B (HLA-B) genotype and allopurinol dosing: 2015 update	100016	{"Saito Y","Stamp L K","Caudle K E","Hershfield M S","McDonagh E M","Callaghan J T","Tassaneeyakul W","Mushiroda T","Kamatani N","Goldspiel B R","Phillips E J","Klein T E","Lee Mtm"}	Clinical pharmacology and therapeutics	6			2015	26094938
-The Clinical Pharmacogenomics Implementation Consortium: CPIC Guideline for SLCO1B1 and Simvastatin-Induced Myopathy	100017	{"Wilke R A","Ramsey L B","Johnson S G","Maxwell W D","McLeod H L","Voora D","Krauss R M","Roden D M","Feng Q","Cooper-Dehoff R M","Gong L","Klein T E","Wadelius M","Niemi M"}	Clinical pharmacology and therapeutics	5			2012	22617227
-The Clinical Pharmacogenetics Implementation Consortium (CPIC) guideline for SLCO1B1 and simvastatin-induced myopathy: 2014 update	100017	{"Ramsey Laura B","Johnson Samuel G","Caudle Kelly E","Haidar Cyrine E","Voora Deepak","Wilke Russell A","Maxwell Whitney D","McLeod Howard L","Krauss Ronald M","Roden Dan M","Feng Qiping","Cooper-DeHoff Rhonda M","Gong Li","Klein Teri E","Wadelius Mia","Niemi Mikko"}	Clinical pharmacology and therapeutics	6			2014	24918167
-Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	100018	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
-Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	100018	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
-Clinical Pharmacogenetics Implementation Consortium Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants	100019	{"Hicks J K","Swen J J","Thorn C F","Sangkuhl K","Kharasch E D","Ellingrod V L","Skaar T C","Müller D J","Gaedigk A","Stingl J C"}	Clinical pharmacology and therapeutics	1			2013	23486447
-Clinical Pharmacogenetics Implementation Consortium Guideline (CPIC®) for CYP2D6 and CYP2C19 Genotypes and Dosing of Tricyclic Antidepressants: 2016 Update	100019	{"Kevin Hicks J","Sangkuhl Katrin","Swen Jesse J","Ellingrod Vicki L","Müller Daniel J","Shimoda Kazutaka","Bishop Jeffrey R","Kharasch Evan D","Skaar Todd C","Gaedigk Andrea","Dunnenberger Henry M","Klein Teri E","Caudle Kelly E","Stingl Julia C"}	Clinical pharmacology and therapeutics	12			2016	27997040
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for HLA-B Genotype and Carbamazepine Dosing	100020	{"Leckband Susan G","Kelsoe John R","Dunnenberger H Mark","George Alfred L","Tran Eric","Berger Reisel","Müller Daniel J","Whirl-Carrillo Michelle","Caudle Kelly E","Pirmohamed Munir"}	Clinical pharmacology and therapeutics	5			2013	23695185
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing	100021	{"Caudle Kelly E","Thorn Caroline F","Klein Teri E","Swen Jesse J","McLeod Howard L","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	8			2013	23988873
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing: 2017 Update	100021	{"Amstutz Ursula","Henricks Linda M","Offer Steven M","Barbarino Julia","Schellens Jan H M","Swen Jesse J","Klein Teri E","McLeod Howard L","Caudle Kelly E","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	11			2017	29152729
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 Genotype and Use of Ondansetron and Tropisetron	100022	{"Bell Gillian C","Caudle Kelly E","Whirl-Carrillo Michelle","Gordon Ronald J","Hikino Keiko","Prows Cynthia A","Gaedigk Andrea","Agundez Jose A G","Sadhasivam Senthilkumar","Klein Teri E","Schwab Matthias"}	Clinical pharmacology and therapeutics	12			2016	28002639
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing	100023	{"Caudle Kelly E","Thorn Caroline F","Klein Teri E","Swen Jesse J","McLeod Howard L","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	8			2013	23988873
-Clinical Pharmacogenetics Implementation Consortium Guidelines for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing	100024	{"Caudle Kelly E","Thorn Caroline F","Klein Teri E","Swen Jesse J","McLeod Howard L","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	8			2013	23988873
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing: 2017 Update	100024	{"Amstutz Ursula","Henricks Linda M","Offer Steven M","Barbarino Julia","Schellens Jan H M","Swen Jesse J","Klein Teri E","McLeod Howard L","Caudle Kelly E","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	11			2017	29152729
-Clinical Pharmacogenetics Implementation Consortium (CPIC®) Guideline for CYP2C19 and Voriconazole Therapy	100025	{"Moriyama Brad","Obeng Aniwaa Owusu","Barbarino Julia","Penzak Scott R","Henning Stacey A","Scott Stuart A","Agúndez José A G","Wingard John R","McLeod Howard L","Klein Teri E","Cross Shane","Caudle Kelly E","Walsh Thomas J"}	Clinical pharmacology and therapeutics	12			2016	27981572
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for HLA-B Genotype and Carbamazepine Dosing	100026	{"Leckband Susan G","Kelsoe John R","Dunnenberger H Mark","George Alfred L","Tran Eric","Berger Reisel","Müller Daniel J","Whirl-Carrillo Michelle","Caudle Kelly E","Pirmohamed Munir"}	Clinical pharmacology and therapeutics	5			2013	23695185
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 Genotype and Use of Ondansetron and Tropisetron	100027	{"Bell Gillian C","Caudle Kelly E","Whirl-Carrillo Michelle","Gordon Ronald J","Hikino Keiko","Prows Cynthia A","Gaedigk Andrea","Agundez Jose A G","Sadhasivam Senthilkumar","Klein Teri E","Schwab Matthias"}	Clinical pharmacology and therapeutics	12			2016	28002639
-Clinical pharmacogenetics implementation consortium (CPIC) guidelines for CYP3A5 genotype and tacrolimus dosing	100029	{"Birdwell Kelly A","Decker Brian","Barbarino Julia M","Peterson Josh F","Stein C Michael","Sadee Wolfgang","Wang Danxin","Vinks Alexander A","He Yijing","Swen Jesse J","Leeder J Steven","van Schaik R H N","Thummel Kenneth E","Klein Teri E","Caudle Kelly E","MacPhee Iain A M"}	Clinical pharmacology and therapeutics	3			2015	25801146
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Selective Serotonin Reuptake Inhibitors	100030	{"Hicks J Kevin","Bishop Jeffrey R","Sangkuhl Katrin","Müller Daniel J","Ji Yuan","Leckband Susan G","Leeder J Steven","Graham Rebecca L","Chiulli Dana L","LLerena Adrián","Skaar Todd C","Scott Stuart A","Stingl Julia C","Klein Teri E","Caudle Kelly E","Gaedigk Andrea"}	Clinical pharmacology and therapeutics	5			2015	25974703
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Selective Serotonin Reuptake Inhibitors	100031	{"Hicks J Kevin","Bishop Jeffrey R","Sangkuhl Katrin","Müller Daniel J","Ji Yuan","Leckband Susan G","Leeder J Steven","Graham Rebecca L","Chiulli Dana L","LLerena Adrián","Skaar Todd C","Scott Stuart A","Stingl Julia C","Klein Teri E","Caudle Kelly E","Gaedigk Andrea"}	Clinical pharmacology and therapeutics	5			2015	25974703
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Selective Serotonin Reuptake Inhibitors	100032	{"Hicks J Kevin","Bishop Jeffrey R","Sangkuhl Katrin","Müller Daniel J","Ji Yuan","Leckband Susan G","Leeder J Steven","Graham Rebecca L","Chiulli Dana L","LLerena Adrián","Skaar Todd C","Scott Stuart A","Stingl Julia C","Klein Teri E","Caudle Kelly E","Gaedigk Andrea"}	Clinical pharmacology and therapeutics	5			2015	25974703
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 and CYP2C19 Genotypes and Dosing of Selective Serotonin Reuptake Inhibitors	100033	{"Hicks J Kevin","Bishop Jeffrey R","Sangkuhl Katrin","Müller Daniel J","Ji Yuan","Leckband Susan G","Leeder J Steven","Graham Rebecca L","Chiulli Dana L","LLerena Adrián","Skaar Todd C","Scott Stuart A","Stingl Julia C","Klein Teri E","Caudle Kelly E","Gaedigk Andrea"}	Clinical pharmacology and therapeutics	5			2015	25974703
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for UGT1A1 and Atazanavir Prescribing	100034	{"Gammal Roseann S","Court Michael H","Haidar Cyrine E","Iwuchukwu Otito Frances","Gaur Aditya H","Alvarellos Maria","Guillemette Chantal","Lennox Jeffrey L","Whirl-Carrillo Michelle","Brummel Sean","Ratain Mark J","Klein Teri E","Schackman Bruce R","Caudle Kelly E","Haas David W"}	Clinical pharmacology and therapeutics	9			2015	26417955
-Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for the use of potent volatile anesthetic agents and succinylcholine in the context of RYR1 or CACNA1S genotypes	100035	{"Gonsalves Stephen G","Dirksen Robert T","Sangkuhl Katrin","Pulk Rebecca","Alvarellos Maria","Vo Teresa","Hikino Keiko","Roden Dan","Klein Teri","Mark Poler S","Patel Sephalie","Caudle Kelly E","Gordon Ronald","Brandom Barbara","Biesecker Leslie G"}	Clinical pharmacology and therapeutics	11			2018	30499100
-\.
-
--- publications about CPIC itself
-copy publication(title,authors,journal,month,page,volume,year,pmid) from STDIN;
-CPIC: Clinical Pharmacogenetics Implementation Consortium of the Pharmacogenomics Research Network	{"Relling M V","Klein T E"}	Clinical pharmacology and therapeutics	3	464-7	89	2011	21270786
-Incorporation of Pharmacogenomics into Routine Clinical Practice: the Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline Development Process	{"Caudle Kelly E","Klein Teri E","Hoffman James M","Müller Daniel J","Whirl-Carrillo Michelle","Gong Li","McDonagh Ellen M","Sangkuhl Katrin","Thorn Caroline F","Schwab Matthias","Agunder Jose A G","Freimuth Robert R","Huser Vojtech","Lee Ming Ta Michael","Iwuchukwu Otito F","Crews Kristine R","Scott Stuart A","Wadelius Mia","Swen Jesse J","Tyndale Rachel F","Stein C Michael","Roden Dan","Relling Mary V","Williams Marc S","Johnson Samuel G"}	Current drug metabolism	1			2014	24479687
-Standardizing terms for clinical pharmacogenetic test results: consensus terms from the Clinical Pharmacogenetics Implementation Consortium (CPIC)	{"Caudle Kelly E","Dunnenberger Henry M","Freimuth Robert R","Peterson Josh F","Burlison Jonathan D","Whirl-Carrillo Michelle","Scott Stuart A","Rehm Heidi L","Williams Marc S","Klein Teri E","Relling Mary V","Hoffman James M"}	Genetics in medicine : official journal of the American College of Medical Genetics	7			2016	27441996
-\.
 
 
 CREATE TABLE drug
@@ -657,7 +596,6 @@ CREATE TABLE pair
   citations TEXT[],
 
   drugName varchar(100),       -- temporary column, is removed at end of script
-  pgkbGuidelineId varchar(20), -- temporary column, is removed at end of script
 
   UNIQUE (geneSymbol, drugId)
 );
@@ -673,373 +611,370 @@ COMMENT ON COLUMN pair.pgkbCALevel IS 'The top level of PharmGKB Clinical Annota
 COMMENT ON COLUMN pair.pgxTesting IS 'The top level of PGx testing recommendation from PharmGKB label annotations, optional';
 COMMENT ON COLUMN pair.citations IS 'The PMID citations in an array for this pair, optional';
 
-copy pair(geneSymbol,drugName,pgkbGuidelineId,level,pgkbCALevel,pgxTesting,citations) from STDIN;
-ABCB1	antidepressants	PA166153258	A/B	3		{}
-ABCB1	digoxin	PA166116168	C/D	2A		{}
-ABCB1	fentanyl	PA166153301	C/D	2B		{}
-ABCB1	methadone	PA166153302	C/D	2B		{}
-ABCB1	methotrexate	PA166153300	C/D	2A		{}
-ABCB1	morphine	PA166153303	C/D	2B		{}
-ABCB1	nevirapine	PA166116176	C/D	2A		{}
-ABCB1	ondansetron	PA166153299	C/D	2A		{}
-ABCB1	oxycodone	PA166153304	C/D	2B		{}
-ABCB1	simvastatin	PA166153298	C/D	2A		{}
-ABCB1	sunitinib	PA166153306	C/D	2B		{}
-ABCB1	tramadol	PA166153305	C/D	2B		{}
-ABCC4	tenofovir	PA166116223	D	2B		{}
-ABCG2	rosuvastatin	PA166116216	D	2B		{}
-ABL2	valproic acid	PA166153358	B		Actionable PGx	{}
-ACE	captopril	PA166153314	D	2A		{}
-ADD1	furosemide	PA166116205	D	2B		{}
-ADD1	spironolactone	PA166116221	D	2B		{}
-ADORA2A	caffeine	PA166116192	D	2B		{}
-ADRB2	salbutamol	PA166116183	C/D	2A		{}
-ADRB2	salmeterol	PA166116184	C/D	2A		{}
-ANKK1	antipsychotics	PA166116186	D	2B		{}
-ANKK1	bupropion	PA166116191	D	1B		{}
-ANKK1	ethanol	PA166153315	D	2B		{}
-APOE	atorvastatin	PA166153316	D	2A		{}
-ASL	valproic acid	PA166153359	B		Actionable PGx	{}
-ASS1	valproic acid	PA166153360	B		Actionable PGx	{}
-ATIC	methotrexate	PA166116209	D	2B		{}
-BCHE	succinylcholine	PA166153307	C/D	3	Actionable PGx	{}
-C11orf65	metformin	PA166116207	D	2B		{}
-C8orf34	irinotecan	PA166153317	D	2B		{}
-CACNA1S	desflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-CACNA1S	enflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-CACNA1S	halothane	PA166180457	A	1A	Actionable PGx	{30499100}
-CACNA1S	methoxyflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-CACNA1S	isoflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-CACNA1S	sevoflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-CACNA1S	succinylcholine	PA166180457	A	1A	Actionable PGx	{30499100}
-CALU	warfarin	PA166116225	D	2B		{}
-CBR3	anthracyclines and related substances	PA166116185	D	2B		{}
-CCHCR1	nevirapine	PA166153318	D	2B		{}
-CES1	clopidogrel	PA166116166	C/D	2B		{}
-CETP	hmg coa reductase inhibitors	PA166153319	D	2B		{}
-CFTR	ataluren	PA166153271	C	2A		{}
-CFTR	ivacaftor	PA166114461	A	1A	Testing required	{"24598717"}
-CHRNA3	nicotine	PA166153320	D	2B		{}
-COL22A1	salbutamol	PA166116218	D	2B		{}
-COMT	Selective serotonin reuptake inhibitors	PA166163818	C	2B		{}
-COMT	cisplatin	PA166116165	C/D	3		{}
-COMT	nicotine	PA166116179	C/D	2A		{}
-COQ2	atorvastatin	PA166116188	D	2B		{}
-COQ2	rosuvastatin	PA166116217	D	2B		{}
-CPS1	valproic acid	PA166153361	B		Actionable PGx	{}
-CRHR1	budesonide	PA166116190	D	2B		{}
-CRHR1	fluticasone propionate	PA166153321	D	2B		{}
-CRHR1	fluticasone/salmeterol	PA166153322	D	2B		{}
-CRHR1	triamcinolone	PA166153323	D	2B		{}
-CRHR2	salbutamol	PA166116219	D	2B		{}
-CYB5R1	metoclopramide	PA166128186	D		Actionable PGx	{}
-CYB5R2	metoclopramide	PA166153324	D		Actionable PGx	{}
-CYB5R3	metoclopramide	PA166153325	D		Actionable PGx	{}
-CYB5R4	metoclopramide	PA166153326	D		Actionable PGx	{}
-CYP2A7P1	efavirenz	PA166116169	C/D			{}
-CYP2A7P1	nevirapine	PA166116177	C/D			{}
-CYP2B6	efavirenz	PA166116170	B	1B	Actionable PGx	{}
-CYP2B6	methadone	PA166153261	B	2A		{}
-CYP2B6	nevirapine	PA166116178	B	2A		{}
-CYP2C19	amitriptyline	PA166105006	A	1A		{"23486447","27997040"}
-CYP2C19	brivaracetam	PA166163799	B/C	4	Actionable PGx	{}
-CYP2C19	carisoprodol	PA166128096	B/C	3	Actionable PGx	{}
-CYP2C19	citalopram	PA166127638	A	1A	Actionable PGx	{"25974703"}
-CYP2C19	clobazam	PA166128098	C	2A	Actionable PGx	{}
-CYP2C19	clomipramine	PA166105007	B	2A		{"23486447","27997040"}
-CYP2C19	clopidogrel	PA166104948	A	1A	Actionable PGx	{"21716271","23698643"}
-CYP2C19	dexlansoprazole	PA166128100	B		Actionable PGx	{}
-CYP2C19	diazepam	PA166116136	C	3	Actionable PGx	{}
-CYP2C19	doxepin	PA166105000	B	3	Actionable PGx	{"23486447","27997040"}
-CYP2C19	escitalopram	PA166127638	A	1A	Actionable PGx	{"25974703"}
-CYP2C19	esomeprazole	PA166116093	B	3	Actionable PGx	{}
-CYP2C19	flibanserin	PA166163806	C		Actionable PGx	{}
-CYP2C19	imipramine	PA166104999	B	2A		{"23486447","27997040"}
-CYP2C19	lansoprazole	PA166116094	B	2A	Informative PGx	{}
-CYP2C19	omeprazole	PA166116095	B	2A	Actionable PGx	{}
-CYP2C19	pantoprazole	PA166128111	B	3	Actionable PGx	{}
-CYP2C19	rabeprazole	PA166116096	B	2A	Actionable PGx	{}
-CYP2C19	sertraline	PA166127639	B	1A		{"25974703"}
-CYP2C19	trimipramine	PA166105001	B	2A		{"23486447","27997040"}
-CYP2C19	voriconazole	PA166161537	A	1A	Actionable PGx	{"27981572"}
-CYP2C8	rosiglitazone	PA166163816	C/D	2A		{}
-CYP2C9	acenocoumarol	PA166153262	B	2A		{}
-CYP2C9	celecoxib	PA166116132	B	2A	Actionable PGx	{}
-CYP2C9	diclofenac	PA166153272	C	2A		{}
-CYP2C9	flibanserin	PA166163805	C		Actionable PGx	{}
-CYP2C9	flurbiprofen	PA166128101	B/C	3	Actionable PGx	{}
-CYP2C9	lesinurad	PA166163809	C		Actionable PGx	{}
-CYP2C9	phenytoin	PA166122806	A	1A	Actionable PGx	{"25099164"}
-CYP2C9	warfarin	PA166104949	A	1A	Actionable PGx	{"21900891","28198005"}
-CYP2D6	amitriptyline	PA166105006	A	1A	Actionable PGx	{"23486447","27997040"}
-CYP2D6	aripiprazole	PA166116129	B	3	Actionable PGx	{}
-CYP2D6	atomoxetine	PA166116103	B	2A	Actionable PGx	{}
-CYP2D6	brexpiprazole	PA166163798	B		Actionable PGx	{}
-CYP2D6	carvedilol	PA166116149	C	3	Actionable PGx	{}
-CYP2D6	cevimeline	PA166116142	C		Actionable PGx	{}
-CYP2D6	clomipramine	PA166105007	B	1A	Actionable PGx	{"23486447","27997040"}
-CYP2D6	clozapine	PA166116137	C		Actionable PGx	{}
-CYP2D6	codeine	PA166104996	A	1A	Actionable PGx	{"22205192","24458010"}
-CYP2D6	darifenacin	PA166153274	C		Actionable PGx	{}
-CYP2D6	desipramine	PA166105002	B	1A	Actionable PGx	{"23486447","27997040"}
-CYP2D6	dextromethorphan	PA166153249	B	3		{}
-CYP2D6	dolasetron	PA166161899	C	3		{}
-CYP2D6	donepezil	PA166163803	B/C	3	Actionable PGx	{}
-CYP2D6	doxepin	PA166105000	B	1A	Actionable PGx	{"23486447","27997040"}
-CYP2D6	duloxetine	PA166163804	C		Actionable PGx	{}
-CYP2D6	eliglustat	PA166153263	B		Testing required	{}
-CYP2D6	fesoterodine	PA166153275	C		Actionable PGx	{}
-CYP2D6	flecainide	PA166116143	C	2A		{}
-CYP2D6	flibanserin	PA166163807	C		Actionable PGx	{}
-CYP2D6	fluoxetine	PA166116106	C	3	Informative PGx	{}
-CYP2D6	fluvoxamine	PA166127637	A	1A	Actionable PGx	{"25974703"}
-CYP2D6	galantamine	PA166128102	D	3	Informative PGx	{}
-CYP2D6	haloperidol	PA166116138	C	3		{}
-CYP2D6	iloperidone	PA166128106	B/C	3	Actionable PGx	{}
-CYP2D6	imipramine	PA166104999	B	1A	Actionable PGx	{"23486447","27997040"}
-CYP2D6	methylphenidate	PA166116104	B	4		{}
-CYP2D6	metoprolol	PA166116150	C	2A	Informative PGx	{}
-CYP2D6	mirtazapine	PA166116101	B	2A		{}
-CYP2D6	modafinil	PA166153273	C		Actionable PGx	{}
-CYP2D6	nortriptyline	PA166104998	A	1A	Actionable PGx	{"23486447","27997040"}
-CYP2D6	olanzapine	PA166116139	C	3		{}
-CYP2D6	ondansetron	PA166161954	A	1A	Informative PGx	{"28002639"}
-CYP2D6	oxycodone	PA166116088	A	2A		{}
-CYP2D6	palonosetron	PA166161901	C		Informative PGx	{}
-CYP2D6	paroxetine	PA166127636	A	1A	Informative PGx	{"25974703"}
-CYP2D6	perphenazine	PA166128114	B/C		Actionable PGx	{}
-CYP2D6	pimozide	PA166128115	B	4	Testing required	{}
-CYP2D6	propafenone	PA166116144	C	2A	Actionable PGx	{}
-CYP2D6	propranolol	PA166116151	C	4	Informative PGx	{}
-CYP2D6	protriptyline	PA166116085	B		Actionable PGx	{}
-CYP2D6	quinidine	PA166153249	B		Informative PGx	{}
-CYP2D6	quinine	PA166153362	C		Actionable PGx	{}
-CYP2D6	risperidone	PA166116130	B	2A	Informative PGx	{}
-CYP2D6	sertraline	PA166116108	B	3		{}
-CYP2D6	tamoxifen	PA166176068	A	1A	Testing required	{}
-CYP2D6	tamsulosin	PA166163819	C		Actionable PGx	{}
-CYP2D6	terbinafine	PA166116145	C		Informative PGx	{}
-CYP2D6	tetrabenazine	PA166116146	C		Testing required	{}
-CYP2D6	thioridazine	PA166116140	C	3	Actionable PGx	{}
-CYP2D6	timolol	PA166116152	C	3		{}
-CYP2D6	tiotropium	PA166116147	C		Informative PGx	{}
-CYP2D6	tolterodine	PA166116148	C	2A	Actionable PGx	{}
-CYP2D6	tramadol	PA166116089	A	1B	Actionable PGx	{}
-CYP2D6	trimipramine	PA166105001	B	1A	Actionable PGx	{"23486447","27997040"}
-CYP2D6	tropisetron	PA166161955	A			{"28002639"}
-CYP2D6	venlafaxine	PA166116102	B	2A	Informative PGx	{}
-CYP2D6	vortioxetine	PA166128118	B	3	Actionable PGx	{}
-CYP2D6	zuclopenthixol	PA166116141	C	3		{}
-CYP3A4	tacrolimus	PA166153276	C	2A		{}
-CYP3A5	atazanavir	PA166153279	C	3		{}
-CYP3A5	cyclosporine	PA166153278	C	2B		{}
-CYP3A5	midazolam	PA166163812	C	3		{}
-CYP3A5	sirolimus	PA166153277	C	2A		{}
-CYP3A5	tacrolimus	PA166124619	A	1A		{"25801146"}
-CYP4F2	acenocoumarol	PA166116133	B	2B		{}
-CYP4F2	phenprocoumon	PA166116134	B	2A		{}
-CYP4F2	warfarin	PA166104949	A	1A		{"21900891","28198005"}
-DPYD	capecitabine	PA166109594	A	1A	Actionable PGx	{"23988873","29152729"}
-DPYD	fluorouracil	PA166122686	A	1A	Actionable PGx	{"23988873","29152729"}
-DPYD	tegafur	PA166122687	C	1A		{"23988873"}
-DRD2	risperidone	PA166116163	C	2A		{}
-DYNC2H1	Platinum compounds	PA166153328	D	2B		{}
-DYNC2H1	etoposide	PA166153327	D	2B		{}
-EGF	cetuximab	PA166116196	D	2B		{}
-EPHX1	carbamazepine	PA166116194	D	2B		{}
-ERCC1	Platinum compounds	PA166116212	D	2B		{}
-F5	eltrombopag	PA166153280	C		Actionable PGx	{}
-F5	hormonal contraceptives for systemic use	PA166116153	C	2A		{}
-FCGR3A	cetuximab	PA166116195	D	3		{}
-FCGR3A	rituximab	PA166116215	D	2B		{}
-FDPS	Bisphosphonates	PA166116189	D	2B		{}
-FKBP5	antidepressants	PA166153329	D	2B		{}
-FLOT1	carbamazepine	PA166116193	D			{}
-G6PD	chloramphenicol	PA166116110	B	3		{}
-G6PD	chloroquine	PA166116111	B	3	Actionable PGx	{}
-G6PD	chlorpropamide	PA166128097	B		Actionable PGx	{}
-G6PD	ciprofloxacin	PA166116112	B	4		{}
-G6PD	dabrafenib	PA166128099	B/C		Actionable PGx	{}
-G6PD	dapsone	PA166116113	B	1B	Actionable PGx	{}
-G6PD	dimercaprol	PA166116114	B	3		{}
-G6PD	erythromycin	PA166153265	B			{}
-G6PD	glibenclamide	PA166131625	B	3	Actionable PGx	{}
-G6PD	glimepiride	PA166128103	B		Actionable PGx	{}
-G6PD	glipizide	PA166128104	B		Actionable PGx	{}
-G6PD	hydroxychloroquine	PA166116115	B			{}
-G6PD	levofloxacin	PA166116116	B			{}
-G6PD	lidocaine	PA166163810	B/C			{}
-G6PD	mafenide	PA166128108	B		Actionable PGx	{}
-G6PD	mefloquine	PA166116117	B	3		{}
-G6PD	mesalazine	PA166116118	B			{}
-G6PD	methylene blue	PA166116119	B	3	Actionable PGx	{}
-G6PD	moxifloxacin	PA166116120	B			{}
-G6PD	nalidixic acid	PA166128110	B		Actionable PGx	{}
-G6PD	nitrofurantoin	PA166116121	B	3	Actionable PGx	{}
-G6PD	norfloxacin	PA166116122	B		Actionable PGx	{}
-G6PD	pegloticase	PA166128113	B	3	Testing required	{}
-G6PD	phenazopyridine	PA166116123	B	3		{}
-G6PD	primaquine	PA166116124	B	3	Testing required	{}
-G6PD	probenecid	PA166116125	B		Actionable PGx	{}
-G6PD	quinine	PA166128116	B		Actionable PGx	{}
-G6PD	rasburicase	PA166119846	A	1A	Testing required	{"24787449"}
-G6PD	sodium nitrite	PA166128117	B		Actionable PGx	{}
-G6PD	sulfacetamide	PA166116126	B			{}
-G6PD	sulfadiazine	PA166153264	B		Actionable PGx	{}
-G6PD	sulfamethoxazole / trimethoprim	PA166116127	B	3	Actionable PGx	{}
-G6PD	sulfasalazine	PA166116128	B	4	Actionable PGx	{}
-G6PD	sulfisoxazole	PA166153265	B			{}
-G6PD	vitamin c	PA166153281	C			{}
-GBA	velaglucerase alfa	PA166153363	B		Testing required	{}
-GGCX	warfarin	PA166116224	D	2B		{}
-GNB3	sildenafil	PA166116220	D	2B		{}
-GP1BA	aspirin	PA166153330	D	2B		{}
-GRIK4	antidepressants	PA166153331	D	2B		{}
-GRIK4	citalopram	PA166116199	D			{}
-GSTM1	cisplatin	PA166153332	D	2B		{}
-GSTM1	oxaliplatin	PA166153333	D	2B		{}
-GSTP1	Platinum compounds	PA166116182	C/D	2A		{}
-GSTP1	cyclophosphamide	PA166116167	C/D	2A		{}
-GSTP1	epirubicin	PA166116171	C/D	2A		{}
-GSTP1	fluorouracil	PA166116172	C/D	2A		{}
-GSTP1	oxaliplatin	PA166116180	C/D	2A		{}
-HAS3	anthracyclines and related substances	PA166153334	D	2B		{}
-HLA-A	allopurinol	PA166153266	B	2B		{}
-HLA-A	carbamazepine	PA166153254	A	2B	Actionable PGx	{}
-HLA-B	abacavir	PA166104997	A	1A	Testing required	{"22378157","24561393"}
-HLA-B	allopurinol	PA166105003	A	1A	Actionable PGx	{"23232549","26094938"}
-HLA-B	carbamazepine	PA166105008	A	1A	Testing required	{"23695185"}
-HLA-B	carbimazole	PA166153285	C	2A		{}
-HLA-B	dapsone	PA166153282	C	2A		{}
-HLA-B	methazolamide	PA166153284	C	2A		{}
-HLA-B	methimazole	PA166153286	C	2A		{}
-HLA-B	nevirapine	PA166153283	C	2A		{}
-HLA-B	oxcarbazepine	PA166176623	A	1A	Testing recommended	{"23695185"}
-HLA-B	phenytoin	PA166122806	A	1A	Testing recommended	{"25099164"}
-HLA-B	propylthiouracil	PA166153287	C	2A		{}
-HLA-C	allopurinol	PA166153288	C	2B		{}
-HLA-C	methazolamide	PA166153289	C	2B		{}
-HLA-DPB1	aspirin	PA166153290	C	2B		{}
-HLA-DQA1	lapatinib	PA166153291	C	2B	Actionable PGx	{}
-HLA-DRB1	nevirapine	PA166153292	C	2B		{}
-HMGCR	hmg coa reductase inhibitors	PA166116222	D	2A		{}
-HPRT1	mycophenolic acid	PA166153364	B		Actionable PGx	{}
-HTR1A	paroxetine	PA166153335	D	2B		{}
-HTR2A	antidepressants	PA166153336	D	2B		{}
-HTR2A	citalopram	PA166116200	D	2B		{}
-HTR2C	clozapine	PA166116201	D	2B		{}
-HTR2C	olanzapine	PA166116210	D	2B		{}
-HTR2C	risperidone	PA166116214	D	2B		{}
-IFNL3	peginterferon alfa-2a	PA166110235	A	1A		{"24096968"}
-IFNL3	peginterferon alfa-2b	PA166110235	A	1A	Actionable PGx	{"24096968"}
-IFNL3	ribavirin	PA166110235	A	1A		{"24096968"}
-IFNL4	peginterferon alfa-2a	PA166153337	D	1A		{}
-IFNL4	peginterferon alfa-2b	PA166153337	D	1A		{}
-ITPA	interferon alfa-2b, recombinant	PA166116173	C/D	2B		{}
-KCNIP4	Ace Inhibitors, Plain	PA166153248	D	3		{}
-KIF6	atorvastatin	PA166153339	D	2B		{}
-KIF6	pravastatin	PA166153338	D	2B		{}
-LDLR	atorvastatin	PA166153365	D		Informative PGx	{}
-LPA	hmg coa reductase inhibitors	PA166153340	D	2B		{}
-LTC4S	aspirin	PA166116187	D	2B		{}
-MC4R	antipsychotics	PA166153293	C	2B		{}
-MT-RNR1	aminoglycoside antibacterials	PA166153294	A/B	1B		{}
-MTHFR	capecitabine	PA166116155	C	3		{}
-MTHFR	carboplatin	PA166116156	C	2A		{}
-MTHFR	cyclophosphamide	PA166116157	C	2A		{}
-MTHFR	fluorouracil	PA166116158	C	3		{}
-MTHFR	leucovorin	PA166116159	C	3		{}
-MTHFR	methotrexate	PA166116160	C	2A		{}
-MTHFR	oxaliplatin	PA166116161	C	3		{}
-MTRR	methotrexate	PA166116208	D	2B		{}
-NAGS	carglumic acid	PA166153367	B		Testing required	{}
-NAGS	valproic acid	PA166153366	B		Actionable PGx	{}
-NAT1	hydralazine	PA166128107	D			{}
-NAT1	isosorbide dinitrate	PA166128107	D			{}
-NAT2	hydralazine	PA166128107	D	3		{}
-NAT2	isoniazid	PA166116162	C	2A		{}
-NAT2	isosorbide dinitrate	PA166128107	D			{}
-NEDD4L	hydrochlorothiazide	PA166153341	D	2B		{}
-NQO1	Alkylating Agents	PA166153342	D	2A		{}
-NQO1	Platinum compounds	PA166153345	D	2A		{}
-NQO1	anthracyclines and related substances	PA166153343	D	2A		{}
-NQO1	fluorouracil	PA166153344	D	2A		{}
-NT5C2	gemcitabine	PA166153346	D	2B		{}
-NUDT15	azathioprine	PA166104933	A	1B		{"21270794","23422873"}
-NUDT15	mercaptopurine	PA166104945	A	1B	Testing recommended	{"21270794","23422873"}
-NUDT15	thioguanine	PA166104965	A		Testing recommended	{"21270794","23422873"}
-OPRM1	alfentanil	PA166153309	C/D	2B		{}
-OPRM1	ethanol	PA166153308	C/D	2B		{}
-OPRM1	fentanyl	PA166153310	C/D	2B		{}
-OPRM1	methadone	PA166153312	C/D	3		{}
-OPRM1	morphine	PA166116174	C/D	2B		{}
-OPRM1	naloxone	PA166116175	C/D	2B		{}
-OPRM1	naltrexone	PA166153311	C/D	3		{}
-OPRM1	tramadol	PA166153313	C/D	2B		{}
-OTC	valproic acid	PA166153368	B		Actionable PGx	{}
-POLG	divalproex sodium	PA166153370	B		Testing required	{}
-POLG	valproic acid	PA166153369	B	3	Testing required	{}
-PRKCA	hydrochlorothiazide	PA166153347	D	2B		{}
-PROC	warfarin	PA166153348	D		Actionable PGx	{}
-PROS1	warfarin	PA166153349	D		Actionable PGx	{}
-PTGFR	latanoprost	PA166153350	D	2B		{}
-PTGS1	aspirin	PA166153351	D	2B		{}
-RYR1	desflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-RYR1	enflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-RYR1	halothane	PA166180457	A	1A	Actionable PGx	{30499100}
-RYR1	methoxyflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-RYR1	isoflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-RYR1	sevoflurane	PA166180457	A	1A	Actionable PGx	{30499100}
-RYR1	succinylcholine	PA166180457	A	1A	Actionable PGx	{30499100}
-SCN1A	carbamazepine	PA166116164	B	2B		{}
-SCN1A	phenytoin	PA166116181	B	2B		{}
-SEMA3C	irinotecan	PA166153352	D	2B		{}
-SERPINC1	eltrombopag	PA166153295	C		Actionable PGx	{}
-SLC28A3	anthracyclines and related substances	PA166163797	D	2B		{}
-SLC47A2	metformin	PA166153353	D	3		{}
-SLC6A4	citalopram	PA166153270	B/C	2A		{}
-SLC6A4	escitalopram	PA166153269	B/C	2A		{}
-SLCO1B1	cerivastatin	PA166163801	B	2A		{}
-SLCO1B1	methotrexate	PA166163811	C	2A		{}
-SLCO1B1	pravastatin	PA166163814	C	2A		{}
-SLCO1B1	rosuvastatin	PA166163817	C	2A	Actionable PGx	{}
-SLCO1B1	simvastatin	PA166105005	A	1A	Informative PGx	{"22617227","24918167"}
-SOD2	cyclophosphamide	PA166116202	D	2B		{}
-TANC1	radiotherapy	PA166153354	D	2A		{}
-TCF7L2	sulfonamides	PA166153355	D			{}
-TMEM43	cisplatin	PA166116197	D			{}
-TNF	Tumor necrosis factor alpha (TNF-alpha) inhibitors	PA166153296	C	2B		{}
-TP53	cisplatin	PA166116198	D	2B		{}
-TP53	cyclophosphamide	PA166116203	D	2B		{}
-TPMT	azathioprine	PA166104933	A	1A	Testing recommended	{"21270794","23422873"}
-TPMT	mercaptopurine	PA166104945	A	1A	Testing recommended	{"21270794","23422873"}
-TPMT	thioguanine	PA166104965	A	1A	Testing recommended	{"21270794","23422873"}
-TXNRD2	Selective serotonin reuptake inhibitors	PA166153356	D	2B		{}
-TYMS	capecitabine	PA166163800	D	2A		{}
-TYMS	fluorouracil	PA166163808	D	2A		{}
-UGT1A1	atazanavir	PA166128738	A	1A	Informative PGx	{"26417955"}
-UGT1A1	belinostat	PA166153268	B	3	Actionable PGx	{}
-UGT1A1	dolutegravir	PA166163802	B/C		Actionable PGx	{}
-UGT1A1	irinotecan	PA166116092	A	2A	Actionable PGx	{}
-UGT1A1	nilotinib	PA166116154	C	3	Actionable PGx	{}
-UGT1A1	pazopanib	PA166128112	B/C	3	Actionable PGx	{}
-UGT1A4	lamotrigine	PA166153357	D	2B		{}
-UGT2B15	oxazepam	PA166116211	D	2B		{}
-UMPS	fluorouracil	PA166116204	D	2B		{}
-VDR	peginterferon alfa-2b	PA166163813	D	2A		{}
-VDR	ribavirin	PA166163815	D	2A		{}
-VKORC1	warfarin	PA166104949	A	1A	Actionable PGx	{"21900891","28198005"}
-XPC	cisplatin	PA166153297	C	1B		{}
-XRCC1	platinum	PA166116213	D	2B		{}
-YEATS4	hydrochlorothiazide	PA166116206	D	2B		{}
+copy pair(geneSymbol,drugName,level,pgkbCALevel,pgxTesting,citations) from STDIN;
+ABCB1	antidepressants	A/B	3		{}
+ABCB1	digoxin	C/D	2A		{}
+ABCB1	fentanyl	C/D	2B		{}
+ABCB1	methadone	C/D	2B		{}
+ABCB1	methotrexate	C/D	2A		{}
+ABCB1	morphine	C/D	2B		{}
+ABCB1	nevirapine	C/D	2A		{}
+ABCB1	ondansetron	C/D	2A		{}
+ABCB1	oxycodone	C/D	2B		{}
+ABCB1	simvastatin	C/D	2A		{}
+ABCB1	sunitinib	C/D	2B		{}
+ABCB1	tramadol	C/D	2B		{}
+ABCC4	tenofovir	D	2B		{}
+ABCG2	rosuvastatin	D	2B		{}
+ABL2	valproic acid	B		Actionable PGx	{}
+ACE	captopril	D	2A		{}
+ADD1	furosemide	D	2B		{}
+ADD1	spironolactone	D	2B		{}
+ADORA2A	caffeine	D	2B		{}
+ADRB2	salbutamol	C/D	2A		{}
+ADRB2	salmeterol	C/D	2A		{}
+ANKK1	antipsychotics	D	2B		{}
+ANKK1	bupropion	D	1B		{}
+ANKK1	ethanol	D	2B		{}
+APOE	atorvastatin	D	2A		{}
+ASL	valproic acid	B		Actionable PGx	{}
+ASS1	valproic acid	B		Actionable PGx	{}
+ATIC	methotrexate	D	2B		{}
+BCHE	succinylcholine	C/D	3	Actionable PGx	{}
+C11orf65	metformin	D	2B		{}
+C8orf34	irinotecan	D	2B		{}
+CACNA1S	desflurane	A	1A	Actionable PGx	{“30499100”}
+CACNA1S	enflurane	A	1A	Actionable PGx	{“30499100”}
+CACNA1S	halothane	A	1A	Actionable PGx	{“30499100”}
+CACNA1S	methoxyflurane	A	1A	Actionable PGx	{“30499100”}
+CACNA1S	isoflurane	A	1A	Actionable PGx	{“30499100”}
+CACNA1S	sevoflurane	A	1A	Actionable PGx	{“30499100”}
+CACNA1S	succinylcholine	A	1A	Actionable PGx	{“30499100”}
+CALU	warfarin	D	2B		{}
+CBR3	anthracyclines and related substances	D	2B		{}
+CCHCR1	nevirapine	D	2B		{}
+CES1	clopidogrel	C/D	2B		{}
+CETP	hmg coa reductase inhibitors	D	2B		{}
+CFTR	ataluren	C	2A		{}
+CFTR	ivacaftor	A	1A	Testing required	{"24598717"}
+CHRNA3	nicotine	D	2B		{}
+COL22A1	salbutamol	D	2B		{}
+COMT	Selective serotonin reuptake inhibitors	C	2B		{}
+COMT	cisplatin	C/D	3		{}
+COMT	nicotine	C/D	2A		{}
+COQ2	atorvastatin	D	2B		{}
+COQ2	rosuvastatin	D	2B		{}
+CPS1	valproic acid	B		Actionable PGx	{}
+CRHR1	budesonide	D	2B		{}
+CRHR1	fluticasone propionate	D	2B		{}
+CRHR1	fluticasone/salmeterol	D	2B		{}
+CRHR1	triamcinolone	D	2B		{}
+CRHR2	salbutamol	D	2B		{}
+CYB5R1	metoclopramide	D		Actionable PGx	{}
+CYB5R2	metoclopramide	D		Actionable PGx	{}
+CYB5R3	metoclopramide	D		Actionable PGx	{}
+CYB5R4	metoclopramide	D		Actionable PGx	{}
+CYP2A7P1	efavirenz	C/D			{}
+CYP2A7P1	nevirapine	C/D			{}
+CYP2B6	efavirenz	B	1B	Actionable PGx	{}
+CYP2B6	methadone	B	2A		{}
+CYP2B6	nevirapine	B	2A		{}
+CYP2C19	amitriptyline	A	1A		{"23486447","27997040"}
+CYP2C19	brivaracetam	B/C	4	Actionable PGx	{}
+CYP2C19	carisoprodol	B/C	3	Actionable PGx	{}
+CYP2C19	citalopram	A	1A	Actionable PGx	{"25974703"}
+CYP2C19	clobazam	C	2A	Actionable PGx	{}
+CYP2C19	clomipramine	B	2A		{"23486447","27997040"}
+CYP2C19	clopidogrel	A	1A	Actionable PGx	{"21716271","23698643"}
+CYP2C19	dexlansoprazole	B		Actionable PGx	{}
+CYP2C19	diazepam	C	3	Actionable PGx	{}
+CYP2C19	doxepin	B	3	Actionable PGx	{"23486447","27997040"}
+CYP2C19	escitalopram	A	1A	Actionable PGx	{"25974703"}
+CYP2C19	esomeprazole	B	3	Actionable PGx	{}
+CYP2C19	flibanserin	C		Actionable PGx	{}
+CYP2C19	imipramine	B	2A		{"23486447","27997040"}
+CYP2C19	lansoprazole	B	2A	Informative PGx	{}
+CYP2C19	omeprazole	B	2A	Actionable PGx	{}
+CYP2C19	pantoprazole	B	3	Actionable PGx	{}
+CYP2C19	rabeprazole	B	2A	Actionable PGx	{}
+CYP2C19	sertraline	B	1A		{"25974703"}
+CYP2C19	trimipramine	B	2A		{"23486447","27997040"}
+CYP2C19	voriconazole	A	1A	Actionable PGx	{"27981572"}
+CYP2C8	rosiglitazone	C/D	2A		{}
+CYP2C9	acenocoumarol	B	2A		{}
+CYP2C9	celecoxib	B	2A	Actionable PGx	{}
+CYP2C9	diclofenac	C	2A		{}
+CYP2C9	flibanserin	C		Actionable PGx	{}
+CYP2C9	flurbiprofen	B/C	3	Actionable PGx	{}
+CYP2C9	lesinurad	C		Actionable PGx	{}
+CYP2C9	phenytoin	A	1A	Actionable PGx	{"25099164"}
+CYP2C9	warfarin	A	1A	Actionable PGx	{"21900891","28198005"}
+CYP2D6	amitriptyline	A	1A	Actionable PGx	{"23486447","27997040"}
+CYP2D6	aripiprazole	B	3	Actionable PGx	{}
+CYP2D6	atomoxetine	B	2A	Actionable PGx	{}
+CYP2D6	brexpiprazole	B		Actionable PGx	{}
+CYP2D6	carvedilol	C	3	Actionable PGx	{}
+CYP2D6	cevimeline	C		Actionable PGx	{}
+CYP2D6	clomipramine	B	1A	Actionable PGx	{"23486447","27997040"}
+CYP2D6	clozapine	C		Actionable PGx	{}
+CYP2D6	codeine	A	1A	Actionable PGx	{"22205192","24458010"}
+CYP2D6	darifenacin	C		Actionable PGx	{}
+CYP2D6	desipramine	B	1A	Actionable PGx	{"23486447","27997040"}
+CYP2D6	dextromethorphan	B	3		{}
+CYP2D6	dolasetron	C	3		{}
+CYP2D6	donepezil	B/C	3	Actionable PGx	{}
+CYP2D6	doxepin	B	1A	Actionable PGx	{"23486447","27997040"}
+CYP2D6	duloxetine	C		Actionable PGx	{}
+CYP2D6	eliglustat	B		Testing required	{}
+CYP2D6	fesoterodine	C		Actionable PGx	{}
+CYP2D6	flecainide	C	2A		{}
+CYP2D6	flibanserin	C		Actionable PGx	{}
+CYP2D6	fluoxetine	C	3	Informative PGx	{}
+CYP2D6	fluvoxamine	A	1A	Actionable PGx	{"25974703"}
+CYP2D6	galantamine	D	3	Informative PGx	{}
+CYP2D6	haloperidol	C	3		{}
+CYP2D6	iloperidone	B/C	3	Actionable PGx	{}
+CYP2D6	imipramine	B	1A	Actionable PGx	{"23486447","27997040"}
+CYP2D6	methylphenidate	B	4		{}
+CYP2D6	metoprolol	C	2A	Informative PGx	{}
+CYP2D6	mirtazapine	B	2A		{}
+CYP2D6	modafinil	C		Actionable PGx	{}
+CYP2D6	nortriptyline	A	1A	Actionable PGx	{"23486447","27997040"}
+CYP2D6	olanzapine	C	3		{}
+CYP2D6	ondansetron	A	1A	Informative PGx	{"28002639"}
+CYP2D6	oxycodone	A	2A		{}
+CYP2D6	palonosetron	C		Informative PGx	{}
+CYP2D6	paroxetine	A	1A	Informative PGx	{"25974703"}
+CYP2D6	perphenazine	B/C		Actionable PGx	{}
+CYP2D6	pimozide	B	4	Testing required	{}
+CYP2D6	propafenone	C	2A	Actionable PGx	{}
+CYP2D6	propranolol	C	4	Informative PGx	{}
+CYP2D6	protriptyline	B		Actionable PGx	{}
+CYP2D6	quinidine	B		Informative PGx	{}
+CYP2D6	quinine	C		Actionable PGx	{}
+CYP2D6	risperidone	B	2A	Informative PGx	{}
+CYP2D6	sertraline	B	3		{}
+CYP2D6	tamoxifen	A	1A	Testing required	{}
+CYP2D6	tamsulosin	C		Actionable PGx	{}
+CYP2D6	terbinafine	C		Informative PGx	{}
+CYP2D6	tetrabenazine	C		Testing required	{}
+CYP2D6	thioridazine	C	3	Actionable PGx	{}
+CYP2D6	timolol	C	3		{}
+CYP2D6	tiotropium	C		Informative PGx	{}
+CYP2D6	tolterodine	C	2A	Actionable PGx	{}
+CYP2D6	tramadol	A	1B	Actionable PGx	{}
+CYP2D6	trimipramine	B	1A	Actionable PGx	{"23486447","27997040"}
+CYP2D6	tropisetron	A			{"28002639"}
+CYP2D6	venlafaxine	B	2A	Informative PGx	{}
+CYP2D6	vortioxetine	B	3	Actionable PGx	{}
+CYP2D6	zuclopenthixol	C	3		{}
+CYP3A4	tacrolimus	C	2A		{}
+CYP3A5	atazanavir	C	3		{}
+CYP3A5	cyclosporine	C	2B		{}
+CYP3A5	midazolam	C	3		{}
+CYP3A5	sirolimus	C	2A		{}
+CYP3A5	tacrolimus	A	1A		{"25801146"}
+CYP4F2	acenocoumarol	B	2B		{}
+CYP4F2	phenprocoumon	B	2A		{}
+CYP4F2	warfarin	A	1A		{"21900891","28198005"}
+DPYD	capecitabine	A	1A	Actionable PGx	{"23988873","29152729"}
+DPYD	fluorouracil	A	1A	Actionable PGx	{"23988873","29152729"}
+DPYD	tegafur	C	1A		{"23988873"}
+DRD2	risperidone	C	2A		{}
+DYNC2H1	Platinum compounds	D	2B		{}
+DYNC2H1	etoposide	D	2B		{}
+EGF	cetuximab	D	2B		{}
+EPHX1	carbamazepine	D	2B		{}
+ERCC1	Platinum compounds	D	2B		{}
+F5	eltrombopag	C		Actionable PGx	{}
+F5	hormonal contraceptives for systemic use	C	2A		{}
+FCGR3A	cetuximab	D	3		{}
+FCGR3A	rituximab	D	2B		{}
+FDPS	Bisphosphonates	D	2B		{}
+FKBP5	antidepressants	D	2B		{}
+FLOT1	carbamazepine	D			{}
+G6PD	chloramphenicol	B	3		{}
+G6PD	chloroquine	B	3	Actionable PGx	{}
+G6PD	chlorpropamide	B		Actionable PGx	{}
+G6PD	ciprofloxacin	B	4		{}
+G6PD	dabrafenib	B/C		Actionable PGx	{}
+G6PD	dapsone	B	1B	Actionable PGx	{}
+G6PD	dimercaprol	B	3		{}
+G6PD	erythromycin	B			{}
+G6PD	glibenclamide	B	3	Actionable PGx	{}
+G6PD	glimepiride	B		Actionable PGx	{}
+G6PD	glipizide	B		Actionable PGx	{}
+G6PD	hydroxychloroquine	B			{}
+G6PD	levofloxacin	B			{}
+G6PD	lidocaine	B/C			{}
+G6PD	mafenide	B		Actionable PGx	{}
+G6PD	mefloquine	B	3		{}
+G6PD	mesalazine	B			{}
+G6PD	methylene blue	B	3	Actionable PGx	{}
+G6PD	moxifloxacin	B			{}
+G6PD	nalidixic acid	B		Actionable PGx	{}
+G6PD	nitrofurantoin	B	3	Actionable PGx	{}
+G6PD	norfloxacin	B		Actionable PGx	{}
+G6PD	pegloticase	B	3	Testing required	{}
+G6PD	phenazopyridine	B	3		{}
+G6PD	primaquine	B	3	Testing required	{}
+G6PD	probenecid	B		Actionable PGx	{}
+G6PD	quinine	B		Actionable PGx	{}
+G6PD	rasburicase	A	1A	Testing required	{"24787449"}
+G6PD	sodium nitrite	B		Actionable PGx	{}
+G6PD	sulfacetamide	B			{}
+G6PD	sulfadiazine	B		Actionable PGx	{}
+G6PD	sulfamethoxazole / trimethoprim	B	3	Actionable PGx	{}
+G6PD	sulfasalazine	B	4	Actionable PGx	{}
+G6PD	sulfisoxazole	B			{}
+G6PD	vitamin c	C			{}
+GBA	velaglucerase alfa	B		Testing required	{}
+GGCX	warfarin	D	2B		{}
+GNB3	sildenafil	D	2B		{}
+GP1BA	aspirin	D	2B		{}
+GRIK4	antidepressants	D	2B		{}
+GRIK4	citalopram	D			{}
+GSTM1	cisplatin	D	2B		{}
+GSTM1	oxaliplatin	D	2B		{}
+GSTP1	Platinum compounds	C/D	2A		{}
+GSTP1	cyclophosphamide	C/D	2A		{}
+GSTP1	epirubicin	C/D	2A		{}
+GSTP1	fluorouracil	C/D	2A		{}
+GSTP1	oxaliplatin	C/D	2A		{}
+HAS3	anthracyclines and related substances	D	2B		{}
+HLA-A	allopurinol	B	2B		{}
+HLA-A	carbamazepine	A	2B	Actionable PGx	{}
+HLA-B	abacavir	A	1A	Testing required	{"22378157","24561393"}
+HLA-B	allopurinol	A	1A	Actionable PGx	{"23232549","26094938"}
+HLA-B	carbamazepine	A	1A	Testing required	{"23695185"}
+HLA-B	carbimazole	C	2A		{}
+HLA-B	dapsone	C	2A		{}
+HLA-B	methazolamide	C	2A		{}
+HLA-B	methimazole	C	2A		{}
+HLA-B	nevirapine	C	2A		{}
+HLA-B	oxcarbazepine	A	1A	Testing recommended	{"23695185"}
+HLA-B	phenytoin	A	1A	Testing recommended	{"25099164"}
+HLA-B	propylthiouracil	C	2A		{}
+HLA-C	allopurinol	C	2B		{}
+HLA-C	methazolamide	C	2B		{}
+HLA-DPB1	aspirin	C	2B		{}
+HLA-DQA1	lapatinib	C	2B	Actionable PGx	{}
+HLA-DRB1	nevirapine	C	2B		{}
+HMGCR	hmg coa reductase inhibitors	D	2A		{}
+HPRT1	mycophenolic acid	B		Actionable PGx	{}
+HTR1A	paroxetine	D	2B		{}
+HTR2A	antidepressants	D	2B		{}
+HTR2A	citalopram	D	2B		{}
+HTR2C	clozapine	D	2B		{}
+HTR2C	olanzapine	D	2B		{}
+HTR2C	risperidone	D	2B		{}
+IFNL3	peginterferon alfa-2a	A	1A		{"24096968"}
+IFNL3	peginterferon alfa-2b	A	1A	Actionable PGx	{"24096968"}
+IFNL3	ribavirin	A	1A		{"24096968"}
+IFNL4	peginterferon alfa-2a	D	1A		{}
+IFNL4	peginterferon alfa-2b	D	1A		{}
+ITPA	interferon alfa-2b, recombinant	C/D	2B		{}
+KCNIP4	Ace Inhibitors, Plain	D	3		{}
+KIF6	atorvastatin	D	2B		{}
+KIF6	pravastatin	D	2B		{}
+LDLR	atorvastatin	D		Informative PGx	{}
+LPA	hmg coa reductase inhibitors	D	2B		{}
+LTC4S	aspirin	D	2B		{}
+MC4R	antipsychotics	C	2B		{}
+MT-RNR1	aminoglycoside antibacterials	A/B	1B		{}
+MTHFR	capecitabine	C	3		{}
+MTHFR	carboplatin	C	2A		{}
+MTHFR	cyclophosphamide	C	2A		{}
+MTHFR	fluorouracil	C	3		{}
+MTHFR	leucovorin	C	3		{}
+MTHFR	methotrexate	C	2A		{}
+MTHFR	oxaliplatin	C	3		{}
+MTRR	methotrexate	D	2B		{}
+NAGS	carglumic acid	B		Testing required	{}
+NAGS	valproic acid	B		Actionable PGx	{}
+NAT1	hydralazine	D			{}
+NAT1	isosorbide dinitrate	D			{}
+NAT2	hydralazine	D	3		{}
+NAT2	isoniazid	C	2A		{}
+NAT2	isosorbide dinitrate	D			{}
+NEDD4L	hydrochlorothiazide	D	2B		{}
+NQO1	Alkylating Agents	D	2A		{}
+NQO1	Platinum compounds	D	2A		{}
+NQO1	anthracyclines and related substances	D	2A		{}
+NQO1	fluorouracil	D	2A		{}
+NT5C2	gemcitabine	D	2B		{}
+NUDT15	azathioprine	A	1B		{"21270794","23422873"}
+NUDT15	mercaptopurine	A	1B	Testing recommended	{"21270794","23422873"}
+NUDT15	thioguanine	A		Testing recommended	{"21270794","23422873"}
+OPRM1	alfentanil	C/D	2B		{}
+OPRM1	ethanol	C/D	2B		{}
+OPRM1	fentanyl	C/D	2B		{}
+OPRM1	methadone	C/D	3		{}
+OPRM1	morphine	C/D	2B		{}
+OPRM1	naloxone	C/D	2B		{}
+OPRM1	naltrexone	C/D	3		{}
+OPRM1	tramadol	C/D	2B		{}
+OTC	valproic acid	B		Actionable PGx	{}
+POLG	divalproex sodium	B		Testing required	{}
+POLG	valproic acid	B	3	Testing required	{}
+PRKCA	hydrochlorothiazide	D	2B		{}
+PROC	warfarin	D		Actionable PGx	{}
+PROS1	warfarin	D		Actionable PGx	{}
+PTGFR	latanoprost	D	2B		{}
+PTGS1	aspirin	D	2B		{}
+RYR1	desflurane	A	1A	Actionable PGx	{“30499100”}
+RYR1	enflurane	A	1A	Actionable PGx	{“30499100”}
+RYR1	halothane	A	1A	Actionable PGx	{“30499100”}
+RYR1	methoxyflurane	A	1A	Actionable PGx	{“30499100”}
+RYR1	isoflurane	A	1A	Actionable PGx	{“30499100”}
+RYR1	sevoflurane	A	1A	Actionable PGx	{“30499100”}
+RYR1	succinylcholine	A	1A	Actionable PGx	{“30499100”}
+SCN1A	carbamazepine	B	2B		{}
+SCN1A	phenytoin	B	2B		{}
+SEMA3C	irinotecan	D	2B		{}
+SERPINC1	eltrombopag	C		Actionable PGx	{}
+SLC28A3	anthracyclines and related substances	D	2B		{}
+SLC47A2	metformin	D	3		{}
+SLC6A4	citalopram	B/C	2A		{}
+SLC6A4	escitalopram	B/C	2A		{}
+SLCO1B1	cerivastatin	B	2A		{}
+SLCO1B1	methotrexate	C	2A		{}
+SLCO1B1	pravastatin	C	2A		{}
+SLCO1B1	rosuvastatin	C	2A	Actionable PGx	{}
+SLCO1B1	simvastatin	A	1A	Informative PGx	{"22617227","24918167"}
+SOD2	cyclophosphamide	D	2B		{}
+TANC1	radiotherapy	D	2A		{}
+TCF7L2	sulfonamides	D			{}
+TMEM43	cisplatin	D			{}
+TNF	Tumor necrosis factor alpha (TNF-alpha) inhibitors	C	2B		{}
+TP53	cisplatin	D	2B		{}
+TP53	cyclophosphamide	D	2B		{}
+TPMT	azathioprine	A	1A	Testing recommended	{"21270794","23422873"}
+TPMT	mercaptopurine	A	1A	Testing recommended	{"21270794","23422873"}
+TPMT	thioguanine	A	1A	Testing recommended	{"21270794","23422873"}
+TXNRD2	Selective serotonin reuptake inhibitors	D	2B		{}
+TYMS	capecitabine	D	2A		{}
+TYMS	fluorouracil	D	2A		{}
+UGT1A1	atazanavir	A	1A	Informative PGx	{"26417955"}
+UGT1A1	belinostat	B	3	Actionable PGx	{}
+UGT1A1	dolutegravir	B/C		Actionable PGx	{}
+UGT1A1	irinotecan	A	2A	Actionable PGx	{}
+UGT1A1	nilotinib	C	3	Actionable PGx	{}
+UGT1A1	pazopanib	B/C	3	Actionable PGx	{}
+UGT1A4	lamotrigine	D	2B		{}
+UGT2B15	oxazepam	D	2B		{}
+UMPS	fluorouracil	D	2B		{}
+VDR	peginterferon alfa-2b	D	2A		{}
+VDR	ribavirin	D	2A		{}
+VKORC1	warfarin	A	1A	Actionable PGx	{"21900891","28198005"}
+XPC	cisplatin	C	1B		{}
+XRCC1	platinum	D	2B		{}
+YEATS4	hydrochlorothiazide	D	2B		{}
 \.
 
 -- load drug ID's into pair table and then remove the drug name column
 update pair p set drugId=(select drugId from drug d where p.drugName=d.name);
--- noinspection SqlWithoutWhere
-update pair p set guidelineId=(select id from guideline g where p.pgkbGuidelineId=g.pharmgkbId);
 ALTER TABLE pair DROP COLUMN drugName;
-ALTER TABLE pair DROP COLUMN pgkbGuidelineId;
 
 
 CREATE TABLE term (
