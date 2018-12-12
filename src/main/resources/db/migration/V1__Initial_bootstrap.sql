@@ -754,7 +754,7 @@ CYP2D6	quinidine	B		Informative PGx	{}
 CYP2D6	quinine	C		Actionable PGx	{}
 CYP2D6	risperidone	B	2A	Informative PGx	{}
 CYP2D6	sertraline	B	3		{}
-CYP2D6	tamoxifen	A	1A	Testing required	{}
+CYP2D6	tamoxifen	A	1A	Testing required	{"29385237"}
 CYP2D6	tamsulosin	C		Actionable PGx	{}
 CYP2D6	terbinafine	C		Informative PGx	{}
 CYP2D6	tetrabenazine	C		Testing required	{}
