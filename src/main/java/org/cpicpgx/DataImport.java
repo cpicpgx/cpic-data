@@ -24,7 +24,7 @@ public class DataImport {
   private static final String DEFAULT_RECOMMENDATIONDIRECTORY = "recommendation_tables";
   private static final String DEFAULT_GENEMAPPINGDIRECTORY = "gene_resource_mappings";
   private static final String DEFAULT_TESTALERTDIRECTORY = "test_alerts";
-  private static final String DEFAULT_GUIDELINESDIRECTORY = "test_alerts";
+  private static final String DEFAULT_GUIDELINESDIRECTORY = "guidelines";
   
   private String alleleDirectory = null;
   private String frequencyDirectory = null;
