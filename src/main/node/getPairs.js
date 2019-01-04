@@ -41,7 +41,7 @@ axios.get(
 
   const csv = _.concat(
     [`"Date last updated: ${lastUpdated}"`, 'Gene,Drug,Guideline,CPIC Level,PharmGKB Level of Evidence,PGx on FDA Label,CPIC Publications (PMID)'],
-    pairs.map((p) => [p.gene.name, p.chemical.name, p.url, p.cpiclevel, p.pgkbLevel, p.label.name, p.pmids.join(';')].join(',')),
+    pairs.map((p) => [p.gene.name, p.chemical.name, p.url, p.cpicLevel, p.pgkbLevel, p.label.name, p.pmids.join(';')].join(',')),
   );
   fs.writeFile(process.argv[3], csv.join('\n'), (e) => {
     if (e) console.log(e);
