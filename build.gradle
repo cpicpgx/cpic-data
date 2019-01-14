@@ -5,12 +5,12 @@ buildscript {
 }
 
 plugins {
-    id 'net.nemerosa.versioning' version '2.7.1'
-    id 'org.flywaydb.flyway' version '5.2.0'
+    id 'net.nemerosa.versioning' version '2.8.2'
+    id 'org.flywaydb.flyway' version '5.2.4'
 }
 
 group 'org.cpicpgx'
-version versioning.info.full
+version = versioning.info.full
 
 apply plugin: 'java'
 
