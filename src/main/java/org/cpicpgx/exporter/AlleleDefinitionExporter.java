@@ -68,7 +68,8 @@ public class AlleleDefinitionExporter extends BaseExporter {
       
         try (
             PreparedStatement alleleStmt = conn.prepareStatement("select name, functionalstatus, id from allele where geneSymbol=?");
-            PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?")
+            PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?");
+            PreparedStatement notesStmt = conn.prepareStatement("select note from translation_note where genesymbol=?")
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
@@ -82,6 +83,14 @@ public class AlleleDefinitionExporter extends BaseExporter {
                   workbook.writeAlleleLocationValue(vrs.getLong(1), vrs.getString(2));
                 }
               }
+            }
+          }
+          workbook.writeNote("");
+          notesStmt.setString(1, symbol);
+          try (ResultSet rs = notesStmt.executeQuery()) {
+            while (rs.next()) {
+              String note = rs.getString(1);
+              workbook.writeNote(note);
             }
           }
         }

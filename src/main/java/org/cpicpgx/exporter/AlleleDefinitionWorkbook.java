@@ -58,7 +58,7 @@ class AlleleDefinitionWorkbook {
     
     Row row = sheet.createRow(rowIdx++);
     writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
-    writeDateCell(row, 1, modified);
+    writeDateCell(row, modified);
     
     nameRow = sheet.createRow(rowIdx++);
     proteinRow = sheet.createRow(rowIdx++);
@@ -135,14 +135,21 @@ class AlleleDefinitionWorkbook {
     colLocationMap.put(locId, colIdx);
   }
   
+  void writeNote(String note) {
+    if (note != null) {
+      Row row = sheet.createRow(++rowIdx);
+      writeStringCell(row, 0, note);
+    }
+  }
+  
   private void writeStringCell(Row row, int colIdx, String value) {
     Cell nameCell = row.createCell(colIdx);
     nameCell.setCellType(CellType.STRING);
     nameCell.setCellValue(StringUtils.strip(value));
   }
   
-  private void writeDateCell(Row row, int colIdx, Date value) {
-    Cell nameCell = row.createCell(colIdx);
+  private void writeDateCell(Row row, Date value) {
+    Cell nameCell = row.createCell(1);
     nameCell.setCellStyle(this.dateStyle);
     nameCell.setCellValue(value);
   }
