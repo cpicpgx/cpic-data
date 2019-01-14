@@ -28,6 +28,10 @@ public class ConnectionFactory {
    * @throws SQLException can occur if there is a problem connecting to the database
    */
   public static Connection newConnection() throws SQLException {
-    return DriverManager.getConnection(String.format(sf_dbUrl, sf_host), sf_user, sf_pass);
+    return DriverManager.getConnection(String.format(makeJdbcUrl(), sf_host), sf_user, sf_pass);
+  }
+  
+  static String makeJdbcUrl() {
+    return String.format(sf_dbUrl, sf_host);
   }
 }
