@@ -4,6 +4,7 @@
 /.gradle
 /.idea/dataSources*
 /.idea/dictionaries*
+/.idea/encodings.xml
 /.idea/markdown-navigator*
 /.idea/shelf/
 /.idea/workspace.xml
