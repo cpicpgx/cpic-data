@@ -41,14 +41,17 @@ public class AlleleDefinitionExporter extends BaseExporter {
    */
   private void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement geneStmt = conn.prepareStatement("select distinct a.geneSymbol, g.alleleslastmodified from allele a join gene g on a.geneSymbol = g.symbol order by 1");
+         PreparedStatement geneStmt = conn.prepareStatement("select distinct a.geneSymbol, g.alleleslastmodified, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid from allele a join gene g on a.geneSymbol = g.symbol order by 1");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
         String symbol = grs.getString(1);
         Date allelesLastModified = grs.getDate(2);
+        String seqChr = grs.getString(3);
+        String seqPro = grs.getString(4);
+        String seqGen = grs.getString(5);
       
-        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, allelesLastModified);
+        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, allelesLastModified, seqChr, seqPro, seqGen);
 
         try (PreparedStatement seqLocStmt = conn.prepareStatement("select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?")) {
           seqLocStmt.setString(1, symbol);

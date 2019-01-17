@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class represents an Excel workbook that holds allele definition information
@@ -21,6 +23,7 @@ class AlleleDefinitionWorkbook {
   private static final String CELL_PATTERN_HEADER_ALLELE = "%s Allele";
   private static final String CELL_HEADER_FXN = "Allele Functional Status";
   private static final String FILE_NAME_PATTERN = "%s_allele_definition_table.xlsx";
+  private static final Pattern CHR_PATTERN = Pattern.compile("NC_0+(\\d+)\\.\\d{2}");
   
   private String geneSymbol;
   private Workbook workbook;
@@ -41,7 +44,7 @@ class AlleleDefinitionWorkbook {
    * @param gene an HGNC gene symbol
    * @param modified the Date the allele data was last modified
    */
-  AlleleDefinitionWorkbook(String gene, Date modified) {
+  AlleleDefinitionWorkbook(String gene, Date modified, String seqChr, String seqPro, String seqGen) {
     if (StringUtils.stripToNull(gene) == null) {
       throw new IllegalArgumentException("Gene must be specified");
     }
@@ -69,6 +72,23 @@ class AlleleDefinitionWorkbook {
     Row headerRow = sheet.createRow(rowIdx);
     writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.geneSymbol));
     writeStringCell(headerRow, 1, CELL_HEADER_FXN);
+    
+    Matcher m = CHR_PATTERN.matcher(seqChr);
+    String chr = "";
+    if (m.matches()) {
+      chr = m.group(1);
+      if (chr.equals("23")) {
+        chr = "X";
+      } else if (chr.equals("24")) {
+        chr = "Y";
+      }
+    }
+    
+    writeStringCell(nameRow,  colIdx, "Nucleotide change per gene from http://www.pharmvar.org");
+    writeStringCell(proteinRow, colIdx, String.format("Effect on protein (%s)", seqPro));
+    writeStringCell(chromoRow, colIdx, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2", seqChr, chr));
+    writeStringCell(geneRow, colIdx, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
+    writeStringCell(dbsnpRow, colIdx, "rsID");
   }
 
   /**
