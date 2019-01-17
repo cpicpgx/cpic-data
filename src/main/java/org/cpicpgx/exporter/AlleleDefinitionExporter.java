@@ -97,6 +97,8 @@ public class AlleleDefinitionExporter extends BaseExporter {
             }
           }
         }
+        
+        workbook.autosizeColumns();
 
         Path filePath = this.directory.resolve(workbook.getFilename());
         try (OutputStream out = Files.newOutputStream(filePath)) {

@@ -34,6 +34,8 @@ class AlleleDefinitionWorkbook {
   private Row geneRow;
   private Row dbsnpRow;
   private CellStyle dateStyle;
+  private CellStyle textStyle;
+  private CellStyle noteStyle;
   
   private int rowIdx;
   private int colIdx = 1;
@@ -54,10 +56,23 @@ class AlleleDefinitionWorkbook {
     this.sheet = workbook.createSheet("Definitions");
 
     CreationHelper createHelper = this.workbook.getCreationHelper();
+    Font newFont = this.workbook.createFont();
+    newFont.setFontHeightInPoints((short)12);
+
     this.dateStyle = this.workbook.createCellStyle();
     this.dateStyle.setDataFormat(
         createHelper.createDataFormat().getFormat("m/d/yy")
     );
+    this.dateStyle.setAlignment(HorizontalAlignment.CENTER);
+    this.dateStyle.setFont(newFont);
+
+    this.textStyle = this.workbook.createCellStyle();
+    this.textStyle.setAlignment(HorizontalAlignment.CENTER);
+    this.textStyle.setFont(newFont);
+
+    this.noteStyle = this.workbook.createCellStyle();
+    this.noteStyle.setAlignment(HorizontalAlignment.LEFT);
+    this.textStyle.setFont(newFont);
     
     Row row = sheet.createRow(rowIdx++);
     writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
@@ -89,6 +104,13 @@ class AlleleDefinitionWorkbook {
     writeStringCell(chromoRow, colIdx, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2", seqChr, chr));
     writeStringCell(geneRow, colIdx, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
     writeStringCell(dbsnpRow, colIdx, "rsID");
+  }
+  
+  void autosizeColumns() {
+    this.sheet.setColumnWidth(0, 14*256);
+    for (int i=1; i <= this.colIdx; i++) {
+      this.sheet.autoSizeColumn(i);
+    }
   }
 
   /**
@@ -158,7 +180,10 @@ class AlleleDefinitionWorkbook {
   void writeNote(String note) {
     if (note != null) {
       Row row = sheet.createRow(++rowIdx);
-      writeStringCell(row, 0, note);
+      Cell nameCell = row.createCell(0);
+      nameCell.setCellType(CellType.STRING);
+      nameCell.setCellValue(StringUtils.strip(note));
+      nameCell.setCellStyle(this.noteStyle);
     }
   }
   
@@ -166,6 +191,7 @@ class AlleleDefinitionWorkbook {
     Cell nameCell = row.createCell(colIdx);
     nameCell.setCellType(CellType.STRING);
     nameCell.setCellValue(StringUtils.strip(value));
+    nameCell.setCellStyle(this.textStyle);
   }
   
   private void writeDateCell(Row row, Date value) {
