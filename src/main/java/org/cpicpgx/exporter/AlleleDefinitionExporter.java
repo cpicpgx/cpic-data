@@ -4,10 +4,7 @@ import org.cpicpgx.db.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -98,13 +95,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
           }
         }
         
-        workbook.autosizeColumns();
-
-        Path filePath = this.directory.resolve(workbook.getFilename());
-        try (OutputStream out = Files.newOutputStream(filePath)) {
-          workbook.write(out);
-        }
-        sf_logger.info("Wrote definitions for {} to {}", symbol, filePath);
+        writeWorkbook(workbook);
       }
     }
   }

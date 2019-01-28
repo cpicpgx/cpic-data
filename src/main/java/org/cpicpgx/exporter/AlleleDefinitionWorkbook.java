@@ -2,10 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +14,9 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Whaley
  */
-class AlleleDefinitionWorkbook {
-  
+class AlleleDefinitionWorkbook extends AbstractWorkbook {
+
+  private static final String DEFAULT_SHEET_NAME = "Definitions"; 
   private static final String CELL_PATTERN_GENE = "Gene:%s";
   private static final String CELL_PATTERN_HEADER_ALLELE = "%s Allele";
   private static final String CELL_HEADER_FXN = "Allele Functional Status";
@@ -26,19 +24,13 @@ class AlleleDefinitionWorkbook {
   private static final Pattern CHR_PATTERN = Pattern.compile("NC_0+(\\d+)\\.\\d{2}");
   
   private String geneSymbol;
-  private Workbook workbook;
   private Sheet sheet;
   private Row nameRow;
   private Row proteinRow;
   private Row chromoRow;
   private Row geneRow;
   private Row dbsnpRow;
-  private CellStyle dateStyle;
-  private CellStyle textStyle;
-  private CellStyle noteStyle;
   
-  private int rowIdx;
-  private int colIdx = 1;
   private Map<Long, Integer> colLocationMap = new HashMap<>();
 
   /**
@@ -47,34 +39,16 @@ class AlleleDefinitionWorkbook {
    * @param modified the Date the allele data was last modified
    */
   AlleleDefinitionWorkbook(String gene, Date modified, String seqChr, String seqPro, String seqGen) {
+    super();
     if (StringUtils.stripToNull(gene) == null) {
       throw new IllegalArgumentException("Gene must be specified");
     }
     
     this.geneSymbol = gene;
-    this.workbook = new XSSFWorkbook();
-    this.sheet = workbook.createSheet("Definitions");
 
-    CreationHelper createHelper = this.workbook.getCreationHelper();
-    Font newFont = this.workbook.createFont();
-    newFont.setFontHeightInPoints((short)12);
-
-    this.dateStyle = this.workbook.createCellStyle();
-    this.dateStyle.setDataFormat(
-        createHelper.createDataFormat().getFormat("m/d/yy")
-    );
-    this.dateStyle.setAlignment(HorizontalAlignment.CENTER);
-    this.dateStyle.setFont(newFont);
-
-    this.textStyle = this.workbook.createCellStyle();
-    this.textStyle.setAlignment(HorizontalAlignment.CENTER);
-    this.textStyle.setFont(newFont);
-
-    this.noteStyle = this.workbook.createCellStyle();
-    this.noteStyle.setAlignment(HorizontalAlignment.LEFT);
-    this.textStyle.setFont(newFont);
-    
+    this.sheet = getSheet(DEFAULT_SHEET_NAME);
     Row row = sheet.createRow(rowIdx++);
+
     writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
     writeDateCell(row, modified);
     
@@ -106,13 +80,6 @@ class AlleleDefinitionWorkbook {
     writeStringCell(dbsnpRow, colIdx, "rsID");
   }
   
-  void autosizeColumns() {
-    this.sheet.setColumnWidth(0, 14*256);
-    for (int i=1; i <= this.colIdx; i++) {
-      this.sheet.autoSizeColumn(i);
-    }
-  }
-
   /**
    * Generates the file name with the gene symbol in it
    * @return a file name for this workbook
@@ -120,14 +87,9 @@ class AlleleDefinitionWorkbook {
   String getFilename() {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
-
-  /**
-   * Wrapper around the default POI write method
-   * @param out an initialized {@link OutputStream}
-   * @throws IOException can occur when writing the workbook
-   */
-  void write(OutputStream out) throws IOException {
-    this.workbook.write(out);
+  
+  String getSheetName() {
+    return DEFAULT_SHEET_NAME;
   }
 
   /**
@@ -180,23 +142,7 @@ class AlleleDefinitionWorkbook {
   void writeNote(String note) {
     if (note != null) {
       Row row = sheet.createRow(++rowIdx);
-      Cell nameCell = row.createCell(0);
-      nameCell.setCellType(CellType.STRING);
-      nameCell.setCellValue(StringUtils.strip(note));
-      nameCell.setCellStyle(this.noteStyle);
+      writeStringCell(row, 0, StringUtils.strip(note), false);
     }
-  }
-  
-  private void writeStringCell(Row row, int colIdx, String value) {
-    Cell nameCell = row.createCell(colIdx);
-    nameCell.setCellType(CellType.STRING);
-    nameCell.setCellValue(StringUtils.strip(value));
-    nameCell.setCellStyle(this.textStyle);
-  }
-  
-  private void writeDateCell(Row row, Date value) {
-    Cell nameCell = row.createCell(1);
-    nameCell.setCellStyle(this.dateStyle);
-    nameCell.setCellValue(value);
   }
 }
