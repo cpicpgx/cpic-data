@@ -77,7 +77,7 @@ public abstract class AbstractWorkbook {
   void autosizeColumns() {
     Sheet sheet = getSheet(getSheetName());
     sheet.setColumnWidth(0, 14*256);
-    for (int i=1; i <= this.colIdx; i++) {
+    for (int i=0; i <= this.colIdx; i++) {
       sheet.autoSizeColumn(i);
     }
   }
