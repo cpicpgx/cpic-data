@@ -20,9 +20,12 @@ public abstract class AbstractWorkbook {
   private CellStyle centerTextStyle;
   private CellStyle leftTextStyle;
   private CellStyle headerStyle;
+  CellStyle wrapStyle;
 
   int rowIdx;
   int colIdx = 1;
+  
+  private Integer[] columnSizes;
 
   AbstractWorkbook() {
     workbook = new XSSFWorkbook();
@@ -46,6 +49,11 @@ public abstract class AbstractWorkbook {
     this.leftTextStyle = this.workbook.createCellStyle();
     this.leftTextStyle.setAlignment(HorizontalAlignment.LEFT);
     this.leftTextStyle.setFont(newFont);
+
+    this.wrapStyle = this.workbook.createCellStyle();
+    this.wrapStyle.setAlignment(HorizontalAlignment.LEFT);
+    this.wrapStyle.setWrapText(true);
+    this.wrapStyle.setFont(newFont);
 
     Font boldFont = this.workbook.createFont();
     boldFont.setFontHeightInPoints((short)14);
@@ -73,12 +81,25 @@ public abstract class AbstractWorkbook {
       return sheet;
     }
   }
+  
+  void setColumnSizes(Integer[] columnSizes) {
+    this.columnSizes = columnSizes;
+  }
 
   void autosizeColumns() {
     Sheet sheet = getSheet(getSheetName());
-    sheet.setColumnWidth(0, 14*256);
-    for (int i=0; i <= this.colIdx; i++) {
-      sheet.autoSizeColumn(i);
+    if (columnSizes == null) {
+      for (int i=0; i <= this.colIdx; i++) {
+        sheet.autoSizeColumn(i);
+      } 
+    } else {
+      for (int i = 0; i <= this.colIdx; i++) {
+        if (columnSizes[i] != null) {
+          sheet.setColumnWidth(i, columnSizes[i]);
+        } else {
+          sheet.autoSizeColumn(i);
+        }
+      }
     }
   }
 
@@ -93,17 +114,18 @@ public abstract class AbstractWorkbook {
   }
 
   void writeStringCell(Row row, int colIdx, String value, boolean centered) {
-    Cell nameCell = row.createCell(colIdx);
-    nameCell.setCellType(CellType.STRING);
-    nameCell.setCellValue(StringUtils.strip(value));
-    nameCell.setCellStyle(centered ? this.centerTextStyle : this.leftTextStyle);
+    writeStringCell(row, colIdx, value, centered ? this.centerTextStyle : this.leftTextStyle);
   }
   
   void writeHeaderCell(Row row, int colIdx, String value) {
-    Cell headerCell = row.createCell(colIdx);
-    headerCell.setCellType(CellType.STRING);
-    headerCell.setCellValue(StringUtils.strip(value));
-    headerCell.setCellStyle(this.headerStyle);
+    writeStringCell(row, colIdx, value, headerStyle);
+  }
+
+  void writeStringCell(Row row, int colIdx, String value, CellStyle style) {
+    Cell nameCell = row.createCell(colIdx);
+    nameCell.setCellType(CellType.STRING);
+    nameCell.setCellValue(StringUtils.strip(value));
+    nameCell.setCellStyle(style);
   }
 
   /**
