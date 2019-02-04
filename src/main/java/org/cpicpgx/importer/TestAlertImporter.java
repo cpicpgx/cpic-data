@@ -72,42 +72,49 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     PreparedStatement insert = conn.prepareStatement(
         "insert into test_alerts(cds_context, trigger_condition, drugid, reference_point, alert_text) values (?, ?, ?, ?, ?)");
 
-    String trigger1 = "";
-    String trigger2 = "";
-    String refPoint = "";
-    String context = "";
+    String lastTrigger1 = null;
+    String lastTrigger2 = null;
+    String lastRefPoint = null;
+    String lastContext = null;
     List<String> alerts = new ArrayList<>();
     for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
       sf_logger.debug("reading row {}", i);
-
       RowWrapper row = workbook.getRow(i);
+      if (row.row == null) break;
+
+      String currentTrigger1 = row.getNullableText(0);
+      String currentTrigger2 = row.getNullableText(1);
+      String currentRefPoint = row.getNullableText(2, true);
+      String currentContext = row.getNullableText(3);
+      String currentAlert = row.getNullableText(4);
+
       if (
-          StringUtils.isNotBlank(trigger1) && StringUtils.isNotBlank(trigger2) // ensure first row doesn't trigger
-              && (
-              (row.hasNoText(0) && row.hasNoText(1)) // insert at end of rows
-                  || (!trigger1.equals(row.getNullableText(0)) && !trigger2.equals(row.getNullableText(1))) // insert on change in triggers
-          )
+          !(lastTrigger1 == null && lastTrigger2 == null)
+          && (currentTrigger1 != null || currentTrigger2 != null)
       ) {
-        Array triggers = conn.createArrayOf("text", new String[]{trigger1, trigger2});
+        Array triggers = conn.createArrayOf("text", new String[]{lastTrigger1, lastTrigger2});
         Array alertArg = conn.createArrayOf("text", alerts.toArray());
 
-        insert.setString(1, context);
+        insert.setString(1, lastContext);
         insert.setArray(2, triggers);
         insert.setString(3, drugId);
-        insert.setString(4, refPoint);
+        insert.setString(4, lastRefPoint);
         insert.setArray(5, alertArg);
 
         insert.executeUpdate();
+        alerts.clear();
       }
 
       if (row.hasNoText(4)) break; // alert should always have text
 
-      trigger1 = StringUtils.defaultIfBlank(row.getNullableText(0), trigger1);
-      trigger2 = StringUtils.defaultIfBlank(row.getNullableText(1), trigger2);
-      refPoint = StringUtils.defaultIfBlank(row.getNullableText(2, true), refPoint);
-      context = StringUtils.defaultIfBlank(row.getNullableText(3), context);
-      if (row.getNullableText(4) != null) {
-        alerts.add(row.getNullableText(4));
+      lastTrigger1 = StringUtils.defaultIfBlank(currentTrigger1, lastTrigger1);
+      lastTrigger2 = StringUtils.defaultIfBlank(currentTrigger2, lastTrigger2);
+      lastRefPoint = StringUtils.defaultIfBlank(currentRefPoint, lastRefPoint);
+      lastContext = StringUtils.defaultIfBlank(currentContext, lastContext);
+      if (currentAlert != null) {
+        alerts.add(currentAlert);
+      } else {
+        break;
       }
     }
   }
