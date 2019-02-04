@@ -46,7 +46,7 @@ class TestAlertWorkbook extends AbstractWorkbook {
     }
     writeStringCell(row, colIdx++, flowRef);
     writeStringCell(row, colIdx++, context);
-    writeStringCell(row, colIdx++, String.join("\n", alertText), wrapStyle);
+    writeStringCell(row, colIdx++, String.join("\n\n", alertText), wrapStyle);
   }
 
   @Override
