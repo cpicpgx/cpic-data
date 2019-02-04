@@ -6,7 +6,7 @@ CREATE TABLE recommendation
   implications TEXT,
   drug_recommendation TEXT,
   classification VARCHAR(20),
-  genotypes JSONB
+  phenotypes JSONB
 );
 
 COMMENT ON TABLE recommendation IS 'Recommendations for a gene phenotype pulled from a guideline';
@@ -16,4 +16,4 @@ COMMENT ON COLUMN recommendation.drugId IS 'The drug this recommendation is for'
 COMMENT ON COLUMN recommendation.implications IS 'Implications for phenotypic measures';
 COMMENT ON COLUMN recommendation.drug_recommendation IS 'Dosing or therapeutic recommendations, depending on particular drug';
 COMMENT ON COLUMN recommendation.classification IS 'Classification of recommendations, described in supplementary meterial';
-COMMENT ON COLUMN recommendation.genotypes IS 'Genotypes that this recommendation applies to, this is a JSON Array';
+COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendation applies to, this is a JSON Array';

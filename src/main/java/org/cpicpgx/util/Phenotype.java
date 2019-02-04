@@ -10,18 +10,18 @@ import java.util.stream.Collectors;
  *
  * @author Ryan Whaley
  */
-public class Genotype {
+public class Phenotype {
   
   private SortedMap<String,String> geneMap = new TreeMap<>();
   
-  public Genotype() {}
+  public Phenotype() {}
 
   /**
    * Add a gene phenotype to this Genotype
    * @param gene a gene symbol
    * @param phenotype a phenotype descriptor (e.g. "Extensive metabolizer")
    */
-  public Genotype with(String gene, String phenotype) {
+  public Phenotype with(String gene, String phenotype) {
     this.geneMap.put(gene, phenotype);
     return this;
   }

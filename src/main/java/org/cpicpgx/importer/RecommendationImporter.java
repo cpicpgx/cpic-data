@@ -6,7 +6,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.util.Genotype;
+import org.cpicpgx.util.Phenotype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,11 +87,11 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             }
           } else {
             int columnOffset = geneList.size(); // the next 3 columns after the genes are always the same
-            Genotype genotype = new Genotype();
+            Phenotype phenotype = new Phenotype();
             for (int i = 0; i < columnOffset; i++) {
-              genotype.with(geneList.get(i), row.get(i));
+              phenotype.with(geneList.get(i), row.get(i));
             }
-            dbHarness.insert(drug, genotype, row.get(columnOffset), row.get(columnOffset + 1), row.get(columnOffset + 2));
+            dbHarness.insert(drug, phenotype, row.get(columnOffset), row.get(columnOffset + 1), row.get(columnOffset + 2));
           }
         }
       } catch (IOException e) {
@@ -113,7 +113,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     
     DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
-      this.insertStmt = this.conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, genotypes) values (?, ?, ?, ?, ? , ?::JSONB)");
+      this.insertStmt = this.conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes) values (?, ?, ?, ?, ? , ?::JSONB)");
       this.drugLookupStmt = this.conn.prepareStatement(
           "select drugid from drug where name=?", 
           ResultSet.TYPE_SCROLL_INSENSITIVE, 
@@ -128,7 +128,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       closables.add(this.conn);
     }
     
-    void insert(String drug, Genotype genotype, String implications, String recommendation, String classification) {
+    void insert(String drug, Phenotype phenotype, String implications, String recommendation, String classification) {
       try {
         String drugId = lookupDrug(drug);
         Long guidelineId = lookupGuideline(drug);
@@ -150,7 +150,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         } else {
           this.insertStmt.setNull(5, Types.VARCHAR);
         }
-        this.insertStmt.setObject(6, genotype.toString());
+        this.insertStmt.setObject(6, phenotype.toString());
         
         this.insertStmt.executeUpdate();
         
