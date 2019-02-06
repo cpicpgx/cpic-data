@@ -24,6 +24,7 @@ public abstract class AbstractWorkbook {
 
   int rowIdx;
   int colIdx = 1;
+  int colCount = 0;
   
   private Integer[] columnSizes;
 
@@ -40,14 +41,17 @@ public abstract class AbstractWorkbook {
         createHelper.createDataFormat().getFormat("m/d/yy")
     );
     this.dateStyle.setAlignment(HorizontalAlignment.CENTER);
+    this.dateStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.dateStyle.setFont(newFont);
 
     this.centerTextStyle = this.workbook.createCellStyle();
     this.centerTextStyle.setAlignment(HorizontalAlignment.CENTER);
+    this.centerTextStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.centerTextStyle.setFont(newFont);
     
     this.leftTextStyle = this.workbook.createCellStyle();
     this.leftTextStyle.setAlignment(HorizontalAlignment.LEFT);
+    this.leftTextStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.leftTextStyle.setFont(newFont);
 
     this.wrapStyle = this.workbook.createCellStyle();
@@ -82,6 +86,14 @@ public abstract class AbstractWorkbook {
     }
   }
   
+  int getColCount() {
+    return this.colCount;
+  }
+  
+  void setColCount(int count) {
+    this.colCount = count;
+  }
+  
   void setColumnSizes(Integer[] columnSizes) {
     this.columnSizes = columnSizes;
   }
@@ -89,11 +101,11 @@ public abstract class AbstractWorkbook {
   void autosizeColumns() {
     Sheet sheet = getSheet(getSheetName());
     if (columnSizes == null) {
-      for (int i=0; i <= this.colIdx; i++) {
+      for (int i=0; i < getColCount(); i++) {
         sheet.autoSizeColumn(i);
       } 
     } else {
-      for (int i = 0; i <= this.colIdx; i++) {
+      for (int i = 0; i < getColCount(); i++) {
         if (columnSizes[i] != null) {
           sheet.setColumnWidth(i, columnSizes[i]);
         } else {
