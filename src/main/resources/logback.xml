@@ -11,6 +11,14 @@
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>cpicData.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>cpicData.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- keep 30 days' worth of history capped at 3GB total size -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+
         <encoder>
             <pattern>%date %level %logger{10} [%file:%line] %msg%n</pattern>
         </encoder>
