@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 
 /**
  * A representation of a Recommendation workbook
@@ -13,43 +12,37 @@ class RecommendationWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_TEMPLATE = "%s_Recommendations.xlsx";
   private static final String SHEET_NAME = "Recommendations";
   
-  private Sheet sheet;
+  private SheetWrapper sheet;
   private String drug;
   
   RecommendationWorkbook(String drug) {
     super();
     
-    this.sheet = getSheet(getSheetName());
+    this.sheet = findSheet(SHEET_NAME);
     this.drug = drug;
-    setColCount(4);
 
-    Row headerRow = this.sheet.createRow(rowIdx++);
+    Row headerRow = this.sheet.nextRow();
     writeHeaderCell(headerRow, 0, "Phenotype");
     writeHeaderCell(headerRow, 1, "Implication");
     writeHeaderCell(headerRow, 2, "Therapeutic Recommendation");
     writeHeaderCell(headerRow, 3, "Classification of Recommendation");
+    this.sheet.setColCount(4);
     
     Integer[] columnSizes = new Integer[4];
     columnSizes[1] = 60*256;
-    setColumnSizes(columnSizes);
+    this.sheet.setWidths(columnSizes);
   }
   
   void writeRec(String pheno, String impl, String rec, String classification) {
-    this.colIdx = 0;
-    Row row = this.sheet.createRow(rowIdx++);
-    writeStringCell(row, colIdx++, pheno, false);
-    writeStringCell(row, colIdx++, impl, this.wrapStyle);
-    writeStringCell(row, colIdx++, rec, false);
-    writeStringCell(row, colIdx++, classification, false);
+    Row row = this.sheet.nextRow();
+    writeStringCell(row, 0, pheno, false);
+    writeStringCell(row, 1, impl, this.wrapStyle);
+    writeStringCell(row, 2, rec, false);
+    writeStringCell(row, 3, classification, false);
   }
 
   @Override
   String getFilename() {
     return String.format(FILE_NAME_TEMPLATE, this.drug);
-  }
-
-  @Override
-  String getSheetName() {
-    return SHEET_NAME;
   }
 }

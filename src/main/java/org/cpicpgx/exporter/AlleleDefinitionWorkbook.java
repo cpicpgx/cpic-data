@@ -24,12 +24,13 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private static final Pattern CHR_PATTERN = Pattern.compile("NC_0+(\\d+)\\.\\d{2}");
   
   private String geneSymbol;
-  private Sheet sheet;
+  private SheetWrapper sheet;
   private Row nameRow;
   private Row proteinRow;
   private Row chromoRow;
   private Row geneRow;
   private Row dbsnpRow;
+  private Row alleleRow;
   
   private Map<Long, Integer> colLocationMap = new HashMap<>();
 
@@ -46,19 +47,19 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     
     this.geneSymbol = gene;
 
-    this.sheet = getSheet(DEFAULT_SHEET_NAME);
-    Row row = sheet.createRow(rowIdx++);
+    this.sheet = findSheet(DEFAULT_SHEET_NAME);
+    Row row = sheet.nextRow();
 
     writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
     writeDateCell(row, modified);
     
-    nameRow = sheet.createRow(rowIdx++);
-    proteinRow = sheet.createRow(rowIdx++);
-    chromoRow = sheet.createRow(rowIdx++);
-    geneRow = sheet.createRow(rowIdx++);
-    dbsnpRow = sheet.createRow(rowIdx++);
+    nameRow = sheet.nextRow();
+    proteinRow = sheet.nextRow();
+    chromoRow = sheet.nextRow();
+    geneRow = sheet.nextRow();
+    dbsnpRow = sheet.nextRow();
     
-    Row headerRow = sheet.createRow(rowIdx);
+    Row headerRow = sheet.nextRow();
     writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.geneSymbol));
     writeStringCell(headerRow, 1, CELL_HEADER_FXN);
     
@@ -78,6 +79,8 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     writeStringCell(chromoRow, colIdx, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2", seqChr, chr));
     writeStringCell(geneRow, colIdx, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
     writeStringCell(dbsnpRow, colIdx, "rsID");
+    
+    this.sheet.setWidths(new Integer[]{20*256});
   }
   
   /**
@@ -88,20 +91,16 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
   
-  String getSheetName() {
-    return DEFAULT_SHEET_NAME;
-  }
-
   /**
    * Write an allele row. Do this before writing allele location values
    * @param name the name of the allele (e.g. "*2")
    * @param fxn the text of the functional status
    */
   void writeAllele(String name, String fxn) {
-    Row row = sheet.createRow(++rowIdx);
+    alleleRow = sheet.nextRow();
 
-    writeStringCell(row, 0, name);
-    writeStringCell(row, 1, fxn);
+    writeStringCell(alleleRow, 0, name);
+    writeStringCell(alleleRow, 1, fxn);
   }
 
   /**
@@ -115,7 +114,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
       throw new IllegalArgumentException("No location with ID specified " + locId);
     }
     
-    Row row = sheet.getRow(rowIdx);
+    Row row = alleleRow;
     writeStringCell(row, colLocationMap.get(locId), value);
   }
 
@@ -137,11 +136,12 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     writeStringCell(dbsnpRow, colIdx, dbSnpId);
     
     colLocationMap.put(locId, colIdx);
+    this.sheet.setColCount(colIdx+1);
   }
   
   void writeNote(String note) {
     if (note != null) {
-      Row row = sheet.createRow(++rowIdx);
+      Row row = sheet.nextRow();
       writeStringCell(row, 0, StringUtils.strip(note), false);
     }
   }

@@ -59,7 +59,7 @@ public abstract class BaseExporter {
   }
   
   void writeWorkbook(AbstractWorkbook workbook) throws IOException {
-    workbook.autosizeColumns();
+    workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
 
     Path filePath = this.directory.resolve(workbook.getFilename());
     try (OutputStream out = Files.newOutputStream(filePath)) {

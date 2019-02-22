@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 
 /**
  * A workbook containing test alert language for gene phenotypes
@@ -12,16 +11,16 @@ class TestAlertWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_TEMPLATE = "%s_Pre_and_Post_Test_Alerts.xlsx";
   
   private String drug;
-  private Sheet sheet;
+  private SheetWrapper sheet;
   
   TestAlertWorkbook(String drug, int numTriggers) {
     super();
     this.drug = drug;
     
-    this.sheet = getSheet(this.drug);
+    this.sheet = findSheet(this.drug);
     this.colIdx = 0;
     
-    Row headerRow = this.sheet.createRow(rowIdx++);
+    Row headerRow = this.sheet.nextRow();
     if (numTriggers == 1) {
       writeHeaderCell(headerRow, colIdx++, "Trigger Condition");
     } else {
@@ -33,14 +32,15 @@ class TestAlertWorkbook extends AbstractWorkbook {
     writeHeaderCell(headerRow, colIdx++, "CDS Context, Relative to Genetic Testing");
     writeHeaderCell(headerRow, colIdx++, "CDS Alert Text");
     
+    this.sheet.setColCount(colIdx+1);
     Integer[] columnSizes = new Integer[colIdx+1];
     columnSizes[colIdx] = 15*256;
-    setColumnSizes(columnSizes);
+    this.sheet.setWidths(columnSizes);
   }
   
   void writeAlert(String[] triggers, String flowRef, String context, String[] alertText) {
     this.colIdx = 0;
-    Row row = this.sheet.createRow(rowIdx++);
+    Row row = this.sheet.nextRow();
     for (String trigger : triggers) {
       writeStringCell(row, colIdx++, trigger, false);
     }
@@ -52,10 +52,5 @@ class TestAlertWorkbook extends AbstractWorkbook {
   @Override
   String getFilename() {
     return String.format(FILE_NAME_TEMPLATE, this.drug);
-  }
-
-  @Override
-  String getSheetName() {
-    return this.drug;
   }
 }

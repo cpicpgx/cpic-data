@@ -6,7 +6,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Shared workbook code that all exported workbooks can use.
@@ -16,17 +19,14 @@ import java.util.Date;
 public abstract class AbstractWorkbook {
 
   private Workbook workbook;
+  private List<SheetWrapper> sheets = new ArrayList<>();
   private CellStyle dateStyle;
   private CellStyle centerTextStyle;
   private CellStyle leftTextStyle;
   private CellStyle headerStyle;
   CellStyle wrapStyle;
 
-  int rowIdx;
   int colIdx = 1;
-  int colCount = 0;
-  
-  private Integer[] columnSizes;
 
   AbstractWorkbook() {
     workbook = new XSSFWorkbook();
@@ -69,49 +69,28 @@ public abstract class AbstractWorkbook {
   }
   
   abstract String getFilename();
-  abstract String getSheetName();
-  
+
   protected Workbook getWorkbook() {
     return this.workbook;
   }
   
-  Sheet getSheet(String name) {
+  List<SheetWrapper> getSheets() {
+    return this.sheets;
+  }
+  
+  SheetWrapper findSheet(String name) {
     if (name == null) return null;
-
-    Sheet sheet = getWorkbook().getSheet(name);
-    if (sheet == null) {
-      return getWorkbook().createSheet(name);
+    
+    Optional<SheetWrapper> sheet = sheets.stream()
+        .filter(s -> s.getName().equals("name"))
+        .findFirst();
+    
+    if (sheet.isPresent()) {
+      return sheet.get();
     } else {
-      return sheet;
-    }
-  }
-  
-  int getColCount() {
-    return this.colCount;
-  }
-  
-  void setColCount(int count) {
-    this.colCount = count;
-  }
-  
-  void setColumnSizes(Integer[] columnSizes) {
-    this.columnSizes = columnSizes;
-  }
-
-  void autosizeColumns() {
-    Sheet sheet = getSheet(getSheetName());
-    if (columnSizes == null) {
-      for (int i=0; i < getColCount(); i++) {
-        sheet.autoSizeColumn(i);
-      } 
-    } else {
-      for (int i = 0; i < getColCount(); i++) {
-        if (columnSizes[i] != null) {
-          sheet.setColumnWidth(i, columnSizes[i]);
-        } else {
-          sheet.autoSizeColumn(i);
-        }
-      }
+      SheetWrapper sheetWrapper = new SheetWrapper(getWorkbook().createSheet(name), 0);
+      this.sheets.add(sheetWrapper);
+      return sheetWrapper;
     }
   }
 

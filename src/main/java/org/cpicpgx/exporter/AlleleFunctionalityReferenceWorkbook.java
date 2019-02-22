@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 
 import java.util.Date;
 import java.util.List;
@@ -16,25 +15,27 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
   private static final String CELL_PATTERN_GENE = "Gene: %s";
   private static final String FILE_NAME_PATTERN = "%s_allele_functionality_reference.xlsx";
   private String geneSymbol;
+  private SheetWrapper sheet;
 
   
   AlleleFunctionalityReferenceWorkbook(String gene, Date modified) {
     super();
     this.geneSymbol = gene;
     
-    Sheet sheet = getSheet(FUNCTION_SHEET_NAME);
-    Row row = sheet.createRow(rowIdx++);
+    this.sheet = findSheet(FUNCTION_SHEET_NAME);
+    Row row = sheet.nextRow();
     
     writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
     writeDateCell(row, modified);
     
-    Row headerRow = sheet.createRow(rowIdx++);
+    Row headerRow = sheet.nextRow();
     writeHeaderCell(headerRow, 0, "Allele");
     writeHeaderCell(headerRow, 1, "Allele Functional Status");
     writeHeaderCell(headerRow, 2, "PMID");
     writeHeaderCell(headerRow, 3, "Finding");
     writeHeaderCell(headerRow, 4, "Drug Substrate - in vitro");
     writeHeaderCell(headerRow, 5, "Drug Substrate - in vivo");
+    sheet.setColCount(6);
     
     this.colIdx = 5;
   }
@@ -43,12 +44,8 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
   
-  String getSheetName() {
-    return FUNCTION_SHEET_NAME;
-  }
-  
   void writeAlleleRow(String allele, String function, String pmid, String finding, List<String> inVitro, List<String> inVivo) {
-    Row row = getSheet(FUNCTION_SHEET_NAME).createRow(rowIdx++);
+    Row row = this.sheet.nextRow();
     writeStringCell(row, 0, allele);
     writeStringCell(row, 1, function);
     writeStringCell(row, 2, pmid, false);
