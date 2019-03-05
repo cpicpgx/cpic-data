@@ -75,6 +75,7 @@ Clinical pharmacogenetics implementation consortium (cpic) guideline for pharmac
 The Clinical Pharmacogenomics Implementation Consortium: Guideline for SLCO1B1 and Simvastatin-Induced Myopathy	{"Wilke R A","Ramsey L B","Johnson S G","Maxwell W D","McLeod H L","Voora D","Krauss R M","Roden D M","Feng Q","Cooper-Dehoff R M","Gong L","Klein T E","Wadelius M","Niemi M"}	Clinical pharmacology and therapeutics	5			2012	22617227
 The Clinical Pharmacogenetics Implementation Consortium (CPIC) guideline for SLCO1B1 and simvastatin-induced myopathy: 2014 update	{"Ramsey Laura B","Johnson Samuel G","Caudle Kelly E","Haidar Cyrine E","Voora Deepak","Wilke Russell A","Maxwell Whitney D","McLeod Howard L","Krauss Ronald M","Roden Dan M","Feng Qiping","Cooper-DeHoff Rhonda M","Gong Li","Klein Teri E","Wadelius Mia","Niemi Mikko"}	Clinical pharmacology and therapeutics	6			2014	24918167
 Clinical Pharmacogenetics Implementation Consortium (CPIC) guideline for thiopurine dosing based on TPMT and NUDT15 genotypes: 2018 update.	{"Relling Mary V","Schwab Matthias","Whirl-Carrillo Michelle","Suarez-Kurtz Guilherme","Pui Ching-Hon","Stein Charles M","Moyer Ann M","Evans William E","Klein Teri E","Antillon-Klussmann Federico Guillermo","Caudle Kelly E","Kato Motohiro","Yeoh Allen E J","Schmiegelow Kjeld","Yang Jun J"}	Clinical pharmacology and therapeutics	11			2018	30447069
+Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 Genotype and Atomoxetine Therapy	{"Brown Jacob T", "Bishop Jeffrey R", "Sangkuhl Katrin", "Nurmi Erika L", "Mueller Daniel J", "Dinh Jean C", "Gaedigk Andrea", "Klein Teri E", "Caudle Kelly E", "McCracken James T", "de Leon Jose", "Steven Leeder J"}	Clinical pharmacology and therapeutics	2			2019	30801677
 \.
 
 -- publications about CPIC itself
@@ -711,7 +712,7 @@ CYP2C9	phenytoin	A	1A	Actionable PGx	{"25099164"}
 CYP2C9	warfarin	A	1A	Actionable PGx	{"21900891","28198005"}
 CYP2D6	amitriptyline	A	1A	Actionable PGx	{"23486447","27997040"}
 CYP2D6	aripiprazole	B	3	Actionable PGx	{}
-CYP2D6	atomoxetine	B	2A	Actionable PGx	{}
+CYP2D6	atomoxetine	A	2A	Actionable PGx	{"30801677"}
 CYP2D6	brexpiprazole	B		Actionable PGx	{}
 CYP2D6	carvedilol	C	3	Actionable PGx	{}
 CYP2D6	cevimeline	C		Actionable PGx	{}
