@@ -90,6 +90,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     rowIdx += 2; // move down 2 rows and start reading;
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       dbHarness.updateModified(new java.sql.Date(modDate.getTime()));
+      dbHarness.clearRecords();
       if (GENES_WITH_FINDINGS.contains(geneSymbol)) {
         processPerFinding(workbook, dbHarness, rowIdx);
       } else {
@@ -178,6 +179,15 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         stmt.setString(2, gene);
         stmt.executeUpdate();
       }
+    }
+    
+    void clearRecords() throws SQLException {
+      int delCount = 0;
+      try (PreparedStatement stmt = this.conn.prepareStatement("delete from function_reference where alleleid in (select id from allele where genesymbol=?)")) {
+        stmt.setString(1, gene);
+        delCount += stmt.executeUpdate();
+      }
+      sf_logger.info("cleared {} rows for {}", delCount, gene);
     }
     
     void insert(String allele, String alleleFunction, Long pmid, String[] inVitro, String[] inVivo) throws SQLException {

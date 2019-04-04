@@ -60,6 +60,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       String drugId = DbLookup.getDrugByName(conn, drugName)
           .orElseThrow(() -> new NotFoundException("No drug for " + drugName));
       
+      clearRecords(conn, drugId);
       if (sf_twoTriggerDrugs.contains(drugId)) {
         processTwoTrigger(workbook, conn, drugId);
       } else {
@@ -67,7 +68,16 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
   }
-  
+
+  private void clearRecords(Connection conn, String drugId) throws SQLException {
+    int delCount = 0;
+    try (PreparedStatement stmt = conn.prepareStatement("delete from test_alerts where drugid=?")) {
+      stmt.setString(1, drugId);
+      delCount += stmt.executeUpdate();
+    }
+    sf_logger.info("cleared {} rows for {}", delCount, drugId);
+  }
+
   private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {
     PreparedStatement insert = conn.prepareStatement(
         "insert into test_alerts(cds_context, trigger_condition, drugid, reference_point, alert_text) values (?, ?, ?, ?, ?)");

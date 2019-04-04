@@ -87,6 +87,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     sf_logger.debug("loading gene {}", geneSymbol);
 
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
+      dbHarness.clearRecords();
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
         // don't load rows that are footnotes (won't have a phenotype)
@@ -175,7 +176,23 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
           "update gene_phenotype set consultationtext=? where genesymbol=? and phenotype=?"
       );
     }
-    
+
+    void clearRecords() throws SQLException {
+      int pdCount = 0;
+      try (PreparedStatement stmt = this.conn.prepareStatement("delete from phenotype_diplotype where phenotypeid in (select id from gene_phenotype where genesymbol=?)")) {
+        stmt.setString(1, gene);
+        pdCount += stmt.executeUpdate();
+      }
+      sf_logger.info("cleared {} phenotype-diplotype rows for {}", pdCount, gene);
+
+      int gpCount = 0;
+      try (PreparedStatement stmt = this.conn.prepareStatement("delete from gene_phenotype where genesymbol=?")) {
+        stmt.setString(1, gene);
+        gpCount += stmt.executeUpdate();
+      }
+      sf_logger.info("cleared {} gene-phenotype rows for {}", gpCount, gene);
+    }
+
     void insert(String diplotype, String phenotype, Double activity, String ehr) throws SQLException {
       String phenoStripped = stripPhenotype(phenotype);
       Integer phenoId = this.phenoIdMap.get(phenoStripped);

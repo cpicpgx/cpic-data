@@ -75,6 +75,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
       List<String> geneList = new ArrayList<>();
       try (FileReader fileReader = new FileReader(f); DbHarness dbHarness = new DbHarness()) {
+        dbHarness.clear(drug);
         CSVParser rows = CSVFormat.DEFAULT.parse(fileReader);
         for (CSVRecord row : rows) {
           if (row.getRecordNumber() == 1) {
@@ -126,6 +127,21 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       closables.add(this.drugLookupStmt);
       closables.add(this.insertStmt);
       closables.add(this.conn);
+    }
+    
+    void clear(String drug) throws SQLException {
+      int delCount = 0;
+      String drugId;
+      try {
+        drugId = lookupDrug(drug);
+      } catch (NotFoundException e) {
+        return;
+      }
+      try (PreparedStatement stmt = this.conn.prepareStatement("delete from recommendation where drugid=?")) {
+        stmt.setString(1, drugId);
+        delCount += stmt.executeUpdate();
+      }
+      sf_logger.info("cleared {} recommendations for {}", delCount, drug);
     }
     
     void insert(String drug, Phenotype phenotype, String implications, String recommendation, String classification) {

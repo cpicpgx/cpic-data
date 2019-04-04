@@ -40,6 +40,8 @@ public class FrequencyProcessor implements AutoCloseable {
   FrequencyProcessor(String gene, RowWrapper headerRow) throws SQLException, NotFoundException {
     this.conn = ConnectionFactory.newConnection();
 
+    clearRecords(gene);
+
     PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?");
     pstmt.setString(1, gene);
     ResultSet rs = pstmt.executeQuery();
@@ -70,6 +72,25 @@ public class FrequencyProcessor implements AutoCloseable {
     if (colIdxAlleleIdMap.size() == 0) {
       throw new NotFoundException("No allele columns could be found for alleles " + String.join("; ", alleleNameMap.keySet()));
     }
+    
+    clearUnusedPopulations();
+  }
+
+  private void clearRecords(String gene) throws SQLException {
+    int delCount = 0;
+    try (PreparedStatement stmt = this.conn.prepareStatement("delete from allele_frequency where alleleid in (select id from allele where genesymbol=?)")) {
+      stmt.setString(1, gene);
+      delCount += stmt.executeUpdate();
+    }
+    sf_logger.info("cleared {} rows for {}", delCount, gene);
+  }
+
+  private void clearUnusedPopulations() throws SQLException {
+    int delCount = 0;
+    try (PreparedStatement stmt = this.conn.prepareStatement("delete from population where id not in (select population from allele_frequency)")) {
+      delCount += stmt.executeUpdate();
+    }
+    sf_logger.info("cleared {} unused population records", delCount);
   }
 
   /**
