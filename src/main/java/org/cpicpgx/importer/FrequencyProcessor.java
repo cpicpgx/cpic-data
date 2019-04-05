@@ -145,7 +145,7 @@ public class FrequencyProcessor implements AutoCloseable {
     this.insertPopulation.setString(3, row.getNullableText(getPopInfoIdx()));
     this.insertPopulation.setString(4, row.getNullableText(getSubjTypeIdx()));
     this.insertPopulation.setLong(5, row.getNullableLong(getNIdx()));
-    this.insertPopulation.setString(6, row.getNullableText(getPmidIdx()));
+    this.insertPopulation.setString(6, row.getNullableText(getPmidIdx(), true));
     
     ResultSet rs = this.insertPopulation.executeQuery();
     if (!rs.next()) {
