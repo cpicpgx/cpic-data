@@ -444,7 +444,7 @@ COPY pair (pairid, genesymbol, drugid, guidelineid, version, level, pgkbcalevel,
 100044	ABCB1	RxNorm:357977	\N	1	C/D	2B		{}
 100045	ABCB1	RxNorm:10689	\N	1	C/D	2B		{}
 100046	ABCC4	RxNorm:117466	\N	1	D	2B		{}
-100047	ABCG2	RxNorm:301542	\N	1	D	2B		{}
+100047	ABCG2	RxNorm:301542	\N	1	B	2B		{}
 100049	ACE	RxNorm:1998	\N	1	D	2A		{}
 100050	ADD1	RxNorm:4603	\N	1	D	2B		{}
 100051	ADD1	RxNorm:9997	\N	1	D	2B		{}
