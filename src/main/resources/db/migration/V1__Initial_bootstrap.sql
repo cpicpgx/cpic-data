@@ -228,7 +228,6 @@ CREATE TABLE function_reference
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   alleleid INTEGER NOT NULL REFERENCES allele(id),
-  allele_function TEXT,
   pmid VARCHAR(50),
   finding TEXT,
   substrate_in_vitro TEXT[],
@@ -243,7 +242,6 @@ CREATE TRIGGER version_function_reference
 COMMENT ON TABLE function_reference IS 'A reference about this allele''s function with supporting info';
 COMMENT ON COLUMN function_reference.id IS 'The synthetic primary key for this reference';
 COMMENT ON COLUMN function_reference.alleleId IS 'The ID of the allele in the allele table this function is for';
-COMMENT ON COLUMN function_reference.allele_function IS 'The function of this allele';
 COMMENT ON COLUMN function_reference.pmid IS 'The PubMed ID of the citation for this function';
 COMMENT ON COLUMN function_reference.finding IS 'A finding form the publication';
 COMMENT ON COLUMN function_reference.substrate_in_vitro IS 'in vitro substrate';

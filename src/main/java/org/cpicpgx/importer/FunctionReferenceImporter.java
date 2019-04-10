@@ -152,6 +152,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   class DbHarness implements AutoCloseable {
     private Connection conn;
     private Map<String, Long> alleleNameMap = new HashMap<>();
+    private PreparedStatement updateAlleleStmt;
     private PreparedStatement insertStmt;
     private PreparedStatement insertFinding;
     private String gene;
@@ -169,8 +170,9 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
       
-      insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, substrate_in_vitro, substrate_in_vivo, allele_function) values (?, ?, ?, ?, ?)");
-      insertFinding = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, finding, allele_function) values (?, ?, ?, ?)");
+      updateAlleleStmt = this.conn.prepareStatement("update allele set functionalstatus=? where id=?");
+      insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, substrate_in_vitro, substrate_in_vivo) values (?, ?, ?, ?)");
+      insertFinding = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, finding) values (?, ?, ?)");
     }
     
     void updateModified(java.sql.Date date) throws SQLException {
@@ -214,9 +216,12 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         this.insertStmt.setArray(4, inVivoArray);
       }
       
-      this.insertStmt.setString(5, normalizeFunction(alleleFunction));
-      
       this.insertStmt.executeUpdate();
+
+      this.updateAlleleStmt.clearParameters();
+      this.updateAlleleStmt.setString(1, normalizeFunction(alleleFunction));
+      this.updateAlleleStmt.setLong(2, this.alleleNameMap.get(allele));
+      this.updateAlleleStmt.executeUpdate();
     }
 
     void insertFinding(String allele, String alleleFunction, String pmid, String finding) throws SQLException {
@@ -235,9 +240,12 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         this.insertFinding.setString(3, finding);
       }
       
-      this.insertFinding.setString(4, normalizeFunction(alleleFunction));
-      
       this.insertFinding.executeUpdate();
+
+      this.updateAlleleStmt.clearParameters();
+      this.updateAlleleStmt.setString(1, normalizeFunction(alleleFunction));
+      this.updateAlleleStmt.setLong(2, this.alleleNameMap.get(allele));
+      this.updateAlleleStmt.executeUpdate();
     }
 
     @Override

@@ -35,8 +35,8 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
   private void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.functionalityreferencelastmodified from gene g where g.functionalityreferencelastmodified is not null order by 1");
-         PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.id from allele a where exists(select 1 from function_reference fr where a.id = fr.alleleid) and a.genesymbol=? order by 2");
-         PreparedStatement fxnStmt = conn.prepareStatement("select f.pmid, f.finding, f.allele_function, f.substrate_in_vitro, f.substrate_in_vivo from function_reference f where f.alleleid=?");
+         PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.id, a.functionalstatus from allele a where exists(select 1 from function_reference fr where a.id = fr.alleleid) and a.genesymbol=? order by 2");
+         PreparedStatement fxnStmt = conn.prepareStatement("select f.pmid, f.finding, f.substrate_in_vitro, f.substrate_in_vivo from function_reference f where f.alleleid=?");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -50,21 +50,21 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
           while (rs.next()) {
             String alleleName = rs.getString(1);
             int alleleId = rs.getInt(2);
+            String function = rs.getString(3);
 
             fxnStmt.setInt(1, alleleId);
             try (ResultSet frs = fxnStmt.executeQuery()) {
               while (frs.next()) {
                 String pmid = frs.getString(1);
                 String finding = frs.getString(2);
-                String function = frs.getString(3);
 
-                Array subInVitro = frs.getArray(4);
+                Array subInVitro = frs.getArray(3);
                 List<String> subInVitroList = new ArrayList<>();
                 if (subInVitro != null) {
                   subInVitroList.addAll(Arrays.asList((String[])subInVitro.getArray()));
                 }
 
-                Array subInVivo = frs.getArray(5);
+                Array subInVivo = frs.getArray(4);
                 List<String> subInVivoList = new ArrayList<>();
                 if (subInVivo != null) {
                   subInVivoList.addAll(Arrays.asList((String[])subInVivo.getArray()));
