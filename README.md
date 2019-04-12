@@ -64,3 +64,14 @@ To export file artifacts of compiled data in the database use the `DataArtifactA
 ```sh
 java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.DataArtifactArchive -d **PATH_TO_EXISTING_DIRECTORY**
 ```
+
+
+### Exporting Web Data
+
+To export JSON files that cache data for the website, just the following node script:
+
+```sh
+node src/main/node/writeData.js **PATH_TO_EXISTING_DIRECTORY**
+```
+
+By default it will use the production API. If you want to use a local development API set the `API` envvar to `dev`.
