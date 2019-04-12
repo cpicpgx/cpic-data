@@ -3,6 +3,7 @@ const cpicapi = require('./cpicapi');
 const fs = require('fs');
 
 const defaultFilename = 'publications.json';
+const pmids = ['21270786','24479687','27441996'];
 
 exports.getPublications = (path) => {
   const uri = cpicapi.apiUrl('/guideline');
@@ -18,4 +19,15 @@ exports.getPublications = (path) => {
         console.log(`Done writing ${filePath}`);
       });
     });
+  
+  pmids.forEach((pmid) => {
+    axios.get(cpicapi.apiUrl('/publication'), {params: {pmid: `eq.${pmid}`}})
+      .then((r) => {
+        const pmidFile = `${path}/${pmid}.json`;
+        fs.writeFile(pmidFile, JSON.stringify(r.data, null, 2), (e) => {
+          if (e) console.log(e);
+          console.log(`Done writing ${pmidFile}`);
+        });
+      });
+  });
 };
