@@ -27,7 +27,7 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
     }
   }
   
-  private void export() throws Exception {
+  public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct geneSymbol from diplotype_view");
          PreparedStatement dipStmt = conn.prepareStatement("select d.diplotype, d.phenotype, d.ehrpriority, d.activityscore from diplotype_view d where d.genesymbol=? order by d.diplotype");

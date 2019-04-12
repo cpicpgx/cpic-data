@@ -57,6 +57,20 @@ public abstract class BaseExporter {
       throw new IllegalArgumentException("Path is not a directory " + this.directory);
     }
   }
+
+  /**
+   * Set a directory to write to
+   * @param directory a directory to write files to
+   */
+  public void setDirectory(Path directory) {
+    this.directory = directory;
+  }
+
+  /**
+   * The method that will export files
+   * @throws Exception can occur from querying the DB
+   */
+  public abstract void export() throws Exception;
   
   void writeWorkbook(AbstractWorkbook workbook) throws IOException {
     workbook.getSheets().forEach(SheetWrapper::autosizeColumns);

@@ -27,7 +27,7 @@ public class TestAlertExporter extends BaseExporter {
     }
   }
   
-  private void export() throws Exception {
+  public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select d.name, t.drugid, max(array_length(t.trigger_condition,1)) as num_alerts from test_alerts t join drug d on t.drugid = d.drugid group by d.name, t.drugid");
          PreparedStatement alertStmt = conn.prepareStatement("select t.trigger_condition, t.reference_point, t.cds_context, t.alert_text from test_alerts t where t.drugid=?");

@@ -27,7 +27,7 @@ public class RecommendationExporter extends BaseExporter {
     }
   }
   
-  private void export() throws Exception {
+  public void export() throws Exception {
     try (
         Connection conn = ConnectionFactory.newConnection();
         PreparedStatement drugStmt = conn.prepareStatement("select distinct r.drugid, d.name from recommendation r join drug d on r.drugid = d.drugid");

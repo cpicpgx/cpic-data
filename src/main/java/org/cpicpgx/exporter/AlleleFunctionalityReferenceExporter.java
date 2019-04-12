@@ -32,7 +32,7 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
     }
   }
   
-  private void export() throws Exception {
+  public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.functionalityreferencelastmodified from gene g where g.functionalityreferencelastmodified is not null order by 1");
          PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.id, a.functionalstatus from allele a where exists(select 1 from function_reference fr where a.id = fr.alleleid) and a.genesymbol=? order by 2");

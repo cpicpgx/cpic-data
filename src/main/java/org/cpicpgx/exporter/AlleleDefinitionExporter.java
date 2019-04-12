@@ -36,7 +36,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
    * Export all genes with allele definitions, 1 file per gene.
    * @throws Exception can occur from IO or database activity
    */
-  private void export() throws Exception {
+  public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct a.geneSymbol, g.alleleslastmodified, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid from allele a join gene g on a.geneSymbol = g.symbol order by 1");
          ResultSet grs = geneStmt.executeQuery()

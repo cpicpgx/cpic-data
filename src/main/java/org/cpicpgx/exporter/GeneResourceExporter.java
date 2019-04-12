@@ -27,7 +27,7 @@ public class GeneResourceExporter extends BaseExporter {
     }
   }
   
-  private void export() throws Exception {
+  public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.hgncid, g.ncbiid, g.ensemblid, g.pharmgkbid from gene g where g.ncbiid is not null");
          ResultSet grs = geneStmt.executeQuery()

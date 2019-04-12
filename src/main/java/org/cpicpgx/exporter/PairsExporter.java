@@ -41,13 +41,13 @@ public class PairsExporter extends BaseExporter {
     try {
       PairsExporter export = new PairsExporter();
       export.parseArgs(args);
-      export.execute();
+      export.export();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
     }
   }
   
-  private void execute() {
+  public void export() {
     sf_logger.debug("Will write to " + this.directory);
     
     Path pairsFile = this.directory.resolve(sf_defaultFileName);

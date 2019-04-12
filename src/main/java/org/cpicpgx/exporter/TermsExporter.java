@@ -27,7 +27,7 @@ public class TermsExporter extends BaseExporter {
     }
   }
 
-  private void export() throws Exception {
+  public void export() throws Exception {
     try (
         Connection conn = ConnectionFactory.newConnection();
         PreparedStatement drugStmt = conn.prepareStatement("select category, functionaldef, geneticdef, term.term from term");
