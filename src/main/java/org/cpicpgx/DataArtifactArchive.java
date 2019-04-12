@@ -47,11 +47,11 @@ public class DataArtifactArchive {
   
   private void parseArgs(String[] args) throws ParseException {
     Options options = new Options();
-    options.addOption("f", true,"path to directory to write files to");
+    options.addOption("d", true,"path to directory to write files to");
     CommandLineParser clParser = new DefaultParser();
     CommandLine cli = clParser.parse(options, args);
 
-    m_baseDirectory = Paths.get(cli.getOptionValue("f"));
+    m_baseDirectory = Paths.get(cli.getOptionValue("d"));
   }
   
   private void write() {
