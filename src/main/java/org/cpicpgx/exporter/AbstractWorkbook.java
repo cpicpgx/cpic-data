@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -19,6 +20,7 @@ import java.util.Optional;
 public abstract class AbstractWorkbook {
 
   private Workbook workbook;
+  private CreationHelper createHelper;
   private List<SheetWrapper> sheets = new ArrayList<>();
   private CellStyle dateStyle;
   private CellStyle centerTextStyle;
@@ -30,8 +32,7 @@ public abstract class AbstractWorkbook {
 
   AbstractWorkbook() {
     workbook = new XSSFWorkbook();
-
-    CreationHelper createHelper = this.workbook.getCreationHelper();
+    createHelper = this.workbook.getCreationHelper();
 
     Font newFont = this.workbook.createFont();
     newFont.setFontHeightInPoints((short)12);
@@ -117,6 +118,21 @@ public abstract class AbstractWorkbook {
     nameCell.setCellType(CellType.STRING);
     nameCell.setCellValue(StringUtils.strip(value));
     nameCell.setCellStyle(style);
+  }
+
+  void writeLinkCell(Row row, int colIdx, String text, String url) {
+    if (StringUtils.isBlank(text)) {
+      return;
+    }
+    
+    Cell nameCell = row.createCell(colIdx);
+    nameCell.setCellType(CellType.STRING);
+    nameCell.setCellValue(StringUtils.strip(text));
+    nameCell.setCellStyle(leftTextStyle);
+    
+    Hyperlink link = this.createHelper.createHyperlink(HyperlinkType.URL);
+    link.setAddress(url);
+    nameCell.setHyperlink(link);
   }
 
   /**
