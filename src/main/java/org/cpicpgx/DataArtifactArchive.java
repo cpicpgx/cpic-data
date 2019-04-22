@@ -6,7 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.geom.IllegalPathStateException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -27,9 +31,10 @@ public class DataArtifactArchive {
   
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final SimpleDateFormat sf_dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-  private static final String sf_dirNamePattern = "cpic_information_%s";
+  private static final String sf_dirNamePattern = "cpic_information";
   private static final String sf_geneDirPattern = sf_dirNamePattern + "/genes";
   private static final String sf_drugDirPattern = sf_dirNamePattern + "/drugs";
+  private static final String sf_timeFile = "The contents these files were queried on %s. For more information visit https://cpicpgx.org";
   
   private Path m_baseDirectory;
   private Path m_geneCollectionDirectory;
@@ -91,16 +96,32 @@ public class DataArtifactArchive {
         throw new RuntimeException("Error exporting " + e.getClass().getSimpleName(), ex);
       }
     });
+
+    try {
+      writeTimestamp(m_baseDirectory.resolve(sf_dirNamePattern));
+    } catch (IOException e) {
+      sf_logger.error("Error writing timestamp file", e);
+    }
   }
   
   private Path getDirectoryPath(String filePath) {
-    String dateLabel = sf_dateFormat.format(new Date());
-    Path dir = m_baseDirectory.resolve(String.format(filePath, dateLabel));
+    Path dir = m_baseDirectory.resolve(filePath);
     if (dir.toFile().mkdirs()) {
       sf_logger.info("Created new directory {}", dir);
     } else {
       sf_logger.info("Using existing directory {}", dir);
     }
     return dir;
+  }
+
+  private void writeTimestamp(Path dirPath) throws IOException {
+    String displayDate = sf_dateFormat.format(new Date());
+    Path filePath = dirPath.resolve(String.format("Archive_Created_%s.txt", displayDate));
+    try (
+        OutputStream out = Files.newOutputStream(filePath);
+        PrintWriter print = new PrintWriter(out)
+    ) {
+      print.print(String.format(sf_timeFile, displayDate));
+    }
   }
 }
