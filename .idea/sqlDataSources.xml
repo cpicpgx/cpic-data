@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDataSourceStorage">
+    <option name="dataSources">
+      <list>
+        <State>
+          <option name="id" value="23a2e88f-9a19-4d8c-8b6f-441c0e2d3b1f" />
+          <option name="name" value="Postgres DDL" />
+          <option name="urls">
+            <array>
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V3__views.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V2__initial_data.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/R__apply_permissions.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__Initial_bootstrap.sql" />
+            </array>
+          </option>
+        </State>
+      </list>
+    </option>
+  </component>
+</project>
