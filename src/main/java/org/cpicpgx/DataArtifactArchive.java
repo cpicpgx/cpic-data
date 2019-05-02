@@ -34,6 +34,7 @@ public class DataArtifactArchive {
   private static final String sf_dirNamePattern = "cpic_information";
   private static final String sf_geneDirPattern = sf_dirNamePattern + "/genes";
   private static final String sf_drugDirPattern = sf_dirNamePattern + "/drugs";
+  private static final String sf_readmeFilename = "README.txt";
   private static final String sf_timeFile = "The contents these files were queried on %s. For more information visit https://cpicpgx.org";
   
   private Path m_baseDirectory;
@@ -116,7 +117,7 @@ public class DataArtifactArchive {
 
   private void writeTimestamp(Path dirPath) throws IOException {
     String displayDate = sf_dateFormat.format(new Date());
-    Path filePath = dirPath.resolve(String.format("Archive_Created_%s.txt", displayDate));
+    Path filePath = dirPath.resolve(sf_readmeFilename);
     try (
         OutputStream out = Files.newOutputStream(filePath);
         PrintWriter print = new PrintWriter(out)
