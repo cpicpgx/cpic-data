@@ -2,21 +2,24 @@ package org.cpicpgx.importer;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +36,6 @@ public class AlleleDefinitionImporter {
   private static final int sf_alleleRowStart = 7;
   private static final String sf_notes = "NOTES:";
   
-  private Path m_inputPath;
   private String m_gene;
   private Date m_revisionDate;
   private int m_variantColEnd;
@@ -56,36 +58,23 @@ public class AlleleDefinitionImporter {
       options.addOption("i", true,"input file (xls)");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
-      
-      AlleleDefinitionImporter importer = new AlleleDefinitionImporter(cli.getOptionValue("i"));
-      importer.writeToDB();
-    } catch (ParseException|SQLException e) {
+
+      Path inputPath = Paths.get(cli.getOptionValue("i"));
+      try (InputStream in = Files.newInputStream(inputPath)) {
+        WorkbookWrapper workbook = new WorkbookWrapper(in);
+
+        AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
+        importer.writeToDB();
+      } catch (Exception ex) {
+        throw new RuntimeException("Error processing file " + inputPath, ex);
+      }
+    } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
     }
   }
   
-  AlleleDefinitionImporter(String filePath) {
-    if (filePath == null) {
-      throw new IllegalArgumentException("No file specified");
-    }
-    
-    m_inputPath = Paths.get(filePath);
-    if (!m_inputPath.toFile().exists()) {
-      throw new IllegalArgumentException("File does not exist: " + filePath);
-    }
-    if (!m_inputPath.toFile().isFile()) {
-      throw new IllegalArgumentException("Input is not a file: " + filePath);
-    }
-    readData();
-  }
-  
-  private void readData() {
-    sf_logger.info("Parsing {}", m_inputPath);
-    
-    try (InputStream in = Files.newInputStream(m_inputPath)) {
-      Workbook workbook = WorkbookFactory.create(in);
-      
-      Sheet sheet = workbook.getSheetAt(0);
+  AlleleDefinitionImporter(WorkbookWrapper workbook) {
+      Sheet sheet = workbook.currentSheet;
 
       readGene(sheet);
       readRevision(sheet);
@@ -96,13 +85,6 @@ public class AlleleDefinitionImporter {
       readDbSnpRow(sheet);
       readAlleles(sheet);
       readNotes(sheet);
-      
-      workbook.close();
-    } catch (IOException|InvalidFormatException e) {
-      sf_logger.error("Couldn't process sheet", e);
-    }
-    
-    sf_logger.info("parsed worksheet successfully, last modified {}", m_revisionDate);
   }
   
   private void readGene(Sheet sheet) {
