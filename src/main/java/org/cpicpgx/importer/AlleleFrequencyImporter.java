@@ -1,21 +1,12 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.*;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.commons.cli.ParseException;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * Class to read all excel files in the given directory and store the allele frequency information found in them.
@@ -24,67 +15,40 @@ import java.util.function.Consumer;
  *
  * @author Ryan Whaley
  */
-public class AlleleFrequencyImporter {
+public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
-  private Path m_directory;
-
   public static void main(String[] args) {
     try {
-      Options options = new Options();
-      options.addOption("d", true,"directory containing allele frequency excel files (*.xlsx)");
-      CommandLineParser clParser = new DefaultParser();
-      CommandLine cli = clParser.parse(options, args);
-
-      AlleleFrequencyImporter processor = new AlleleFrequencyImporter(Paths.get(cli.getOptionValue("d")));
+      AlleleFrequencyImporter processor = new AlleleFrequencyImporter();
+      processor.parseArgs(args);
       processor.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
     }
   }
+  
+  private AlleleFrequencyImporter() { }
 
   /**
    * Constructor
-   * @param directoryPath an existing directory containing Excel .xlsx files
+   * @param directory an existing directory containing Excel .xlsx files
    */
-  public AlleleFrequencyImporter(Path directoryPath) {
-    if (directoryPath == null) {
-      throw new IllegalArgumentException("No directory given");
-    }
-
-    if (!directoryPath.toFile().exists()) {
-      throw new IllegalArgumentException("Directory doesn't exist " + directoryPath);
-    }
-    if (!directoryPath.toFile().isDirectory()) {
-      throw new IllegalArgumentException("Path is not a directory " + directoryPath);
-    }
-    if (directoryPath.toFile().listFiles() == null) {
-      throw new IllegalArgumentException("Directory is empty " + directoryPath);
-    }
-
-    m_directory = directoryPath;
+  public AlleleFrequencyImporter(Path directory) {
+    this.setDirectory(directory);
   }
 
-  /**
-   * Read the files and store the data in the database
-   */
-  public void execute() {
-    Arrays.stream(Objects.requireNonNull(m_directory.toFile().listFiles()))
-        .filter(f -> f.getName().toLowerCase().endsWith(".xlsx") && !f.getName().startsWith("~$"))
-        .forEach(processFile);
+  @Override
+  String getFileExtensionToProcess() {
+    return EXCEL_EXTENSION;
   }
 
-  private Consumer<File> processFile = (File file) -> {
-    sf_logger.info("Reading {}", file);
-
-    String[] nameParts = file.getName().split("_");
-    
-    try (InputStream in = Files.newInputStream(file.toPath())) {
-      processAlleles(new WorkbookWrapper(in), nameParts[0]);
-    } catch (IOException| InvalidFormatException ex) {
-      throw new RuntimeException("Error processing frequency file", ex);
-    }
-  };
+  @Override
+  void processWorkbook(WorkbookWrapper workbook) {
+    sf_logger.info("Reading {}", workbook.getFileName());
+    String[] nameParts = workbook.getFileName().split("_");
+    processAlleles(workbook, nameParts[0]);
+  }
 
   /**
    * Finds the sheet with allele data and iterates through the rows with data.

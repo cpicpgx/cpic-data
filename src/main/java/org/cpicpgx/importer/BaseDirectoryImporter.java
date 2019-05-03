@@ -71,6 +71,7 @@ abstract class BaseDirectoryImporter {
 
       try (InputStream in = Files.newInputStream(file.toPath())) {
         WorkbookWrapper workbook = new WorkbookWrapper(in);
+        workbook.setFileName(file.getName());
         processWorkbook(workbook);
       } catch (Exception ex) {
         throw new RuntimeException("Error processing file " + file, ex);

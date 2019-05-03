@@ -20,6 +20,7 @@ public class WorkbookWrapper {
   
   private Workbook workbook;
   private FormulaEvaluator formulaEvaluator;
+  private String fileName = null;
   public Sheet currentSheet;
 
   /**
@@ -85,5 +86,13 @@ public class WorkbookWrapper {
     } else {
       this.currentSheet = null;
     }
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
   }
 }
