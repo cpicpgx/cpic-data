@@ -238,11 +238,11 @@ DRD2	chr11	NG_008841	NP_000786	\N	HGNC:3023	1813	ENSG00000149295	PA27478	\N	\N	2
 KIF6	chr6		NP_659464	\N	HGNC:21202	221458	ENSG00000164627	PA134920075	\N	\N	2
 ATIC	chr2	NG_013002	NP_004035	\N	HGNC:794	471	ENSG00000138363	PA25094	\N	\N	2
 CALU	chr7		NP_001210	\N	HGNC:1458	813	ENSG00000128595	PA26047	\N	\N	2
-DPYD	chr1	NG_008807.2	NP_000101.2	NC_000001.11	HGNC:1806	282617	ENSG00000188641	PA145	\N	\N	1
-CYP2C19	chr10	NG_008384.2	NP_000760.1	NC_000010.11	HGNC:2621	1557	ENSG00000165841	PA124	\N	\N	1
+DPYD	chr1	NG_008807.2	NP_000101.2	NC_000001.11	HGNC:1806	282617	ENSG00000188641	PA145	2017-10-04	\N	1
+CYP2C19	chr10	NG_008384.2	NP_000760.1	NC_000010.11	HGNC:2621	1557	ENSG00000165841	PA124	2018-04-01	2017-06-20	1
 HLA-A	chr6	NG_002398	NP_002107	\N	HGNC:4931	3105	ENSG00000206503	PA35055	\N	\N	1
 HLA-B	chr6	NG_002397	NP_005505	\N	HGNC:4932	3106	ENSG00000234745	PA35056	\N	\N	1
-CFTR	chr7	NG_016465.3	NP_000483.3	NC_000007.14	HGNC:1884	1080	ENSG00000001626	PA109	\N	\N	1
+CFTR	chr7	NG_016465.3	NP_000483.3	NC_000007.14	HGNC:1884	1080	ENSG00000001626	PA109	2017-06-05	\N	1
 APOE	chr19	NG_007084	NP_000032	\N	HGNC:613	348	ENSG00000130203	PA55	\N	\N	2
 CCHCR1	chr6		NP_061925	\N	HGNC:13930	54535	ENSG00000204536	PA134942738	\N	\N	2
 HTR2A	chr13	NG_013011	NP_000612	\N	HGNC:5293	3356	ENSG00000102468	PA193	\N	\N	2
@@ -298,19 +298,19 @@ GNB3	chr12	NG_009100	NP_002066	\N	HGNC:4400	2784	ENSG00000111664	PA176	\N	\N	2
 FCGR3A	chr1	NG_009066	NP_000560	\N	HGNC:3619	2214	ENSG00000203747	PA28065	\N	\N	2
 MT-RNR1	chrM			\N	HGNC:7470	4549	ENSG00000211459	PA31274	\N	\N	2
 C11orf65	chr11		NP_689800	\N	HGNC:28519	160140	ENSG00000166323	PA144596484	\N	\N	2
-CYP4F2	chr19		NP_001073.3	NC_000019.10	HGNC:2645	8529	ENSG00000186115	PA27121	\N	\N	1
-CYP3A5	chr7	NG_007938.1	NP_000768.1	NC_000007.14	HGNC:2638	1577	ENSG00000106258	PA131	\N	\N	1
+CYP4F2	chr19		NP_001073.3	NC_000019.10	HGNC:2645	8529	ENSG00000186115	PA27121	2016-11-08	2016-11-08	1
+CYP3A5	chr7	NG_007938.1	NP_000768.1	NC_000007.14	HGNC:2638	1577	ENSG00000106258	PA131	2016-09-27	2017-02-08	1
 NUDT15	chr13		NP_060753	\N	HGNC:23063	55270	ENSG00000136159	PA134963132	\N	\N	1
-G6PD	chrX	NG_009015.2		NC_000023.11	HGNC:4057	2539	ENSG00000160211	PA28469	\N	\N	1
-IFNL3	chr19	NG_042193.1		NC_000019.10	HGNC:18365	282617	ENSG00000197110	PA134952671	\N	\N	1
-VKORC1	chr16			NC_000016.10	HGNC:23663	79001	ENSG00000167397	PA133787052	\N	\N	1
-SLCO1B1	chr12	NG_011745.1	NP_006437.3	NC_000012.12	HGNC:10959	10599	ENSG00000134538	PA134865839	\N	\N	1
-UGT1A1	chr2	NG_002601.2	NP_000454.1	NC_000002.12	HGNC:12530	54658	ENSG00000241635	PA420	\N	\N	1
-RYR1	chr19	NG_008866.1	NP_000531.2	NC_000019.10	HGNC:10483	6261	ENSG00000196218	PA34896	\N	\N	1
-CYP2D6	chr22	NG_008376.3	NP_000097.3	NC_000022.11	HGNC:2625	1565	ENSG00000100197	PA128	\N	\N	1
-TPMT	chr6	NG_012137.2	NP_000358.1	NC_000006.12	HGNC:12014	7172	ENSG00000137364	PA356	\N	\N	1
-CYP2C9	chr10	NG_008385.1	NP_000762.2	NC_000010.11	HGNC:2623	1559	ENSG00000138109	PA126	\N	\N	1
-CACNA1S	chr1	NG_009816.1	NP_000060.2	NC_000001.11	HGNC:1397	779	ENSG00000081248	PA85	\N	\N	1
+G6PD	chrX	NG_009015.2		NC_000023.11	HGNC:4057	2539	ENSG00000160211	PA28469	2018-09-26	\N	1
+IFNL3	chr19	NG_042193.1		NC_000019.10	HGNC:18365	282617	ENSG00000197110	PA134952671	2016-11-08	\N	1
+VKORC1	chr16			NC_000016.10	HGNC:23663	79001	ENSG00000167397	PA133787052	2016-11-08	2016-11-08	1
+SLCO1B1	chr12	NG_011745.1	NP_006437.3	NC_000012.12	HGNC:10959	10599	ENSG00000134538	PA134865839	2018-04-23	2017-02-08	1
+UGT1A1	chr2	NG_002601.2	NP_000454.1	NC_000002.12	HGNC:12530	54658	ENSG00000241635	PA420	2017-11-03	2017-11-03	1
+RYR1	chr19	NG_008866.1	NP_000531.2	NC_000019.10	HGNC:10483	6261	ENSG00000196218	PA34896	2018-09-17	2018-08-16	1
+CYP2D6	chr22	NG_008376.3	NP_000097.3	NC_000022.11	HGNC:2625	1565	ENSG00000100197	PA128	2018-05-29	2017-12-18	1
+TPMT	chr6	NG_012137.2	NP_000358.1	NC_000006.12	HGNC:12014	7172	ENSG00000137364	PA356	2018-04-25	2017-10-20	1
+CYP2C9	chr10	NG_008385.1	NP_000762.2	NC_000010.11	HGNC:2623	1559	ENSG00000138109	PA126	2018-03-20	2017-11-16	1
+CACNA1S	chr1	NG_009816.1	NP_000060.2	NC_000001.11	HGNC:1397	779	ENSG00000081248	PA85	2018-09-17	2018-05-29	1
 ABL2	chr1		NP_005149	\N	HGNC:77	27	ENSG00000143322	PA24414	\N	\N	2
 NAGS	chr17	NG_008106	NP_694551	\N	HGNC:17996	162417	ENSG00000161653	PA134968729	\N	\N	2
 OPRM1	chr6	NG_021208	NP_000905	\N	HGNC:8156	4988	ENSG00000112038	PA31945	\N	\N	2
@@ -382,6 +382,7 @@ COPY guideline (id, version, name, url, pharmgkbid) FROM stdin;
 100425	3	CYP2C9, VKORC1, CYP4F2 and Warfarin	https://cpicpgx.org/guidelines/guideline-for-warfarin-and-cyp2c9-and-vkorc1/	{PA166104949}
 100412	3	CYP2C9, HLA-B and Phenytoin 	https://cpicpgx.org/guidelines/guideline-for-phenytoin-and-cyp2c9-and-hla-b/	{PA166122806}
 100419	4	DPYD and Fluoropyrimidines	https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/	{PA166109594,PA166122686,PA166122687}
+104245	1	CYP2B6 and efavirenz	https://cpicpgx.org/guidelines/cpic-guideline-for-efavirenz-based-on-cyp2b6-genotype/	{PA166182603}
 \.
 
 
@@ -423,6 +424,7 @@ COPY pair (pairid, genesymbol, drugid, guidelineid, version, level, pgkbcalevel,
 100059	ASL	RxNorm:11118	\N	2	B			{}
 100056	ANKK1	RxNorm:42347	\N	2	D	3		{}
 100060	ASS1	RxNorm:11118	\N	2	B			{}
+100047	ABCG2	RxNorm:301542	\N	2	B	2B		{}
 100078	CFTR	RxNorm:1243041	100409	1	A	1A	Testing required	{24598717}
 100065	CACNA1S	RxNorm:27340	100427	1	A	1A	Actionable PGx	{30499100}
 100066	CACNA1S	RxNorm:3920	100427	1	A	1A	Actionable PGx	{30499100}
@@ -444,7 +446,6 @@ COPY pair (pairid, genesymbol, drugid, guidelineid, version, level, pgkbcalevel,
 100044	ABCB1	RxNorm:357977	\N	1	C/D	2B		{}
 100045	ABCB1	RxNorm:10689	\N	1	C/D	2B		{}
 100046	ABCC4	RxNorm:117466	\N	1	D	2B		{}
-100047	ABCG2	RxNorm:301542	\N	1	B	2B		{}
 100049	ACE	RxNorm:1998	\N	1	D	2A		{}
 100050	ADD1	RxNorm:4603	\N	1	D	2B		{}
 100051	ADD1	RxNorm:9997	\N	1	D	2B		{}
@@ -483,7 +484,6 @@ COPY pair (pairid, genesymbol, drugid, guidelineid, version, level, pgkbcalevel,
 100095	CYB5R4	RxNorm:6915	\N	1	D		Actionable PGx	{}
 100096	CYP2A7P1	RxNorm:195085	\N	1	C/D			{}
 100097	CYP2A7P1	RxNorm:53654	\N	1	C/D			{}
-100098	CYP2B6	RxNorm:195085	\N	1	B	1B	Actionable PGx	{}
 100099	CYP2B6	RxNorm:6813	\N	1	B	2A		{}
 100100	CYP2B6	RxNorm:53654	\N	1	B	2A		{}
 100102	CYP2C19	RxNorm:1739745	\N	1	B/C	4	Actionable PGx	{}
@@ -499,6 +499,7 @@ COPY pair (pairid, genesymbol, drugid, guidelineid, version, level, pgkbcalevel,
 100116	CYP2C19	RxNorm:7646	\N	1	B	2A	Actionable PGx	{}
 100117	CYP2C19	RxNorm:40790	\N	1	B	3	Actionable PGx	{}
 100118	CYP2C19	RxNorm:114979	\N	1	B	2A	Actionable PGx	{}
+100098	CYP2B6	RxNorm:195085	104245	2	A	1B	Actionable PGx	{31006110}
 100106	CYP2C19	RxNorm:2597	100414	1	B	2A		{23486447,27997040}
 100110	CYP2C19	RxNorm:3638	100414	1	B	3	Actionable PGx	{23486447,27997040}
 100122	CYP2C8	RxNorm:84108	\N	1	C/D	2A		{}
@@ -775,16 +776,17 @@ COPY publication (id, guidelineid, title, authors, journal, month, page, volume,
 100006	100409	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Ivacaftor Therapy in the Context of CFTR Genotype	{"Clancy John P","Johnson Samuel G","Yee Sook Wah","McDonagh Ellen M","Caudle Kelly E","Klein Teri E","Cannavo Matthew","Giacomini Kathleen M"}	Clinical pharmacology and therapeutics	3			2014	24598717	PMC4026598	10.1038/clpt.2014.54	2
 100025	100428	Clinical Pharmacogenetics Implementation Consortium Guidelines for Thiopurine Methyltransferase Genotype and Thiopurine Dosing: 2013 Update	{"Relling M V","Gardner E E","Sandborn W J","Schmiegelow K","Pui C-H","Yee S W","Stein C M","Carrillo M","Evans W E","Hicks J K","Schwab M","Klein T E"}	Clinical pharmacology and therapeutics	1			2013	23422873	PMC3604643	10.1038/clpt.2013.4	2
 100033	\N	Standardizing terms for clinical pharmacogenetic test results: consensus terms from the Clinical Pharmacogenetics Implementation Consortium (CPIC)	{"Caudle Kelly E","Dunnenberger Henry M","Freimuth Robert R","Peterson Josh F","Burlison Jonathan D","Whirl-Carrillo Michelle","Scott Stuart A","Rehm Heidi L","Williams Marc S","Klein Teri E","Relling Mary V","Hoffman James M"}	Genetics in medicine : official journal of the American College of Medical Genetics	7			2016	27441996	PMC5253119	10.1038/gim.2016.87	2
-100030	100428	Clinical Pharmacogenetics Implementation Consortium (CPIC) guideline for thiopurine dosing based on TPMT and NUDT15 genotypes: 2018 update.	{"Relling Mary V","Schwab Matthias","Whirl-Carrillo Michelle","Suarez-Kurtz Guilherme","Pui Ching-Hon","Stein Charles M","Moyer Ann M","Evans William E","Klein Teri E","Antillon-Klussmann Federico Guillermo","Caudle Kelly E","Kato Motohiro","Yeoh Allen E J","Schmiegelow Kjeld","Yang Jun J"}	Clinical pharmacology and therapeutics	11			2018	30447069	undefined	undefined	2
+100030	100428	Clinical Pharmacogenetics Implementation Consortium (CPIC) guideline for thiopurine dosing based on TPMT and NUDT15 genotypes: 2018 update.	{"Relling Mary V","Schwab Matthias","Whirl-Carrillo Michelle","Suarez-Kurtz Guilherme","Pui Ching-Hon","Stein Charles M","Moyer Ann M","Evans William E","Klein Teri E","Antillon-Klussmann Federico Guillermo","Caudle Kelly E","Kato Motohiro","Yeoh Allen E J","Schmiegelow Kjeld","Yang Jun J"}	Clinical pharmacology and therapeutics	11			2018	30447069	\N	\N	4
 100022	100422	Clinical Pharmacogenetics Implementation Consortium Guidelines for Human Leukocyte Antigen-B Genotype and Allopurinol Dosing	{"Hershfield M S","Callaghan J T","Tassaneeyakul W","Mushiroda T","Thorn C F","Klein T E","Lee M T M"}	Clinical pharmacology and therapeutics	10			2012	23232549	PMC3564416	10.1038/clpt.2012.209	2
 100015	100411	Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for cytochrome P450-2C19 (CYP2C19) genotype and clopidogrel therapy: 2013 Update	{"Scott Stuart A","Sangkuhl Katrin","Stein C Michael","Hulot Jean-Sébastien","Mega Jessica L","Roden Dan M","Klein Teri E","Sabatine Marc S","Johnson Julie A","Shuldiner Alan R"}	Clinical pharmacology and therapeutics	5			2013	23698643	PMC3748366	10.1038/clpt.2013.105	2
 100017	100419	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for Dihydropyrimidine Dehydrogenase Genotype and Fluoropyrimidine Dosing: 2017 Update	{"Amstutz Ursula","Henricks Linda M","Offer Steven M","Barbarino Julia","Schellens Jan H M","Swen Jesse J","Klein Teri E","McLeod Howard L","Caudle Kelly E","Diasio Robert B","Schwab Matthias"}	Clinical pharmacology and therapeutics	11			2017	29152729	PMC5760397	10.1002/cpt.911	2
-100003	100427	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for the use of potent volatile anesthetic agents and succinylcholine in the context of RYR1 or CACNA1S genotypes	{"Gonsalves Stephen G","Dirksen Robert T","Sangkuhl Katrin","Pulk Rebecca","Alvarellos Maria","Vo Teresa","Hikino Keiko","Roden Dan","Klein Teri","Mark Poler S","Patel Sephalie","Caudle Kelly E","Gordon Ronald","Brandom Barbara","Biesecker Leslie G"}	Clinical pharmacology and therapeutics	11			2018	30499100	undefined	undefined	2
 100027	100425	Clinical pharmacogenetics implementation consortium (cpic) guideline for pharmacogenetics-guided warfarin dosing: 2017 update	{"Johnson Julie A","Caudle Kelly E","Gong Li","Whirl-Carrillo Michelle","Stein C Michael","Scott Stuart A","Lee Ming Ta Michael","Gage Brian F","Kimmel Stephen E","Perera Minoli A","Anderson Jeffrey L","Pirmohamed Munir","Klein Teri E","Limdi Nita A","Cavallari Larisa H","Wadelius Mia"}	Clinical pharmacology and therapeutics	2			2017	28198005	PMC5546947	10.1002/cpt.668	2
 100018	100416	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for Codeine Therapy in the Context of Cytochrome P450 2D6 (CYP2D6) Genotype	{"Crews K R","Gaedigk A","Dunnenberger H M","Klein T E","Shen D D","Callaghan J T","Kharasch E D","Skaar T C"}	Clinical pharmacology and therapeutics	12			2011	22205192	PMC3289963	10.1038/clpt.2011.287	2
-104242	104243	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 Genotype and Atomoxetine Therapy.	{"Brown Jacob T","Bishop Jeffrey R","Sangkuhl Katrin","Nurmi Erika L","Mueller Daniel J","Dinh Jean C","Gaedigk Andrea","Klein Teri E","Caudle Kelly E","McCracken James T","de Leon Jose","Steven Leeder J"}	Clinical pharmacology and therapeutics	2			2019	30801677	undefined	undefined	2
+100003	100427	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for the use of potent volatile anesthetic agents and succinylcholine in the context of RYR1 or CACNA1S genotypes	{"Gonsalves Stephen G","Dirksen Robert T","Sangkuhl Katrin","Pulk Rebecca","Alvarellos Maria","Vo Teresa","Hikino Keiko","Roden Dan","Klein Teri","Mark Poler S","Patel Sephalie","Caudle Kelly E","Gordon Ronald","Brandom Barbara","Biesecker Leslie G"}	Clinical pharmacology and therapeutics	11			2018	30499100	\N	\N	4
 100019	100416	Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for cytochrome P450 2D6 (CYP2D6) genotype and codeine therapy: 2014 Update	{"Crews Kristine R","Gaedigk Andrea","Dunnenberger Henry M","Leeder J Steve","Klein Teri E","Caudle Kelly E","Haidar Cyrine E","Shen Danny D","Callaghan John T","Sadhasivam Senthilkumar","Prows Cynthia A","Kharasch Evan D","Skaar Todd C"}	Clinical pharmacology and therapeutics	1			2014	24458010	PMC3975212	10.1038/clpt.2013.254	2
 104241	100423	Clinical Pharmacogenetics Implementation Consortium Guideline for HLA Genotype and Use of Carbamazepine and Oxcarbazepine: 2017 Update.	{"Phillips Elizabeth J","Sukasem Chonlaphat","Whirl-Carrillo Michelle","Müller Daniel J","Dunnenberger Henry M","Chantratita Wasun","Goldspiel Barry","Chen Yuan-Tsong","Carleton Bruce C","George Alfred L","Mushiroda Taisei","Klein Teri","Gammal Roseann S","Pirmohamed Munir"}	Clinical pharmacology and therapeutics	4	574-581	103	2018	29392710	PMC5847474	10.1002/cpt.1004	2
+104242	104243	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2D6 Genotype and Atomoxetine Therapy.	{"Brown Jacob T","Bishop Jeffrey R","Sangkuhl Katrin","Nurmi Erika L","Mueller Daniel J","Dinh Jean C","Gaedigk Andrea","Klein Teri E","Caudle Kelly E","McCracken James T","de Leon Jose","Steven Leeder J"}	Clinical pharmacology and therapeutics	2			2019	30801677	\N	\N	4
+104246	104245	Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2B6 and Efavirenz-containing Antiretroviral Therapy.	{"Desta Zeruesenay","Gammal Roseann S","Gong Li","Whirl-Carrillo Michelle","Gaur Aditya H","Sukasem Chonlaphat","Hockings Jennifer","Myers Alan","Swart Marelize","Tyndale Rachel","Masimirembwa Collen","Iwuchukwu Otito F","Chirwa Sanika","Lennox Jeffrey","Gaedigk Andrea","Klein Teri","Haas David W"}	Clinical pharmacology and therapeutics	4			2019	31006110	\N	\N	1
 \.
 
 
