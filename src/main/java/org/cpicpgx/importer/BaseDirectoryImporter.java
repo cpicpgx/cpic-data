@@ -1,6 +1,8 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,9 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -25,12 +30,37 @@ import java.util.function.Consumer;
  *
  * @author Ryan Whaley
  */
-abstract class BaseDirectoryImporter {
+public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   static final String EXCEL_EXTENSION = ".xlsx";
   static final String CSV_EXTENSION = ".csv";
   
   private Path directory;
+
+  /**
+   * Gets the String file extension to look for in the given directory. This should be something like ".xlsx" or ".csv".
+   * @return a file extension to filter for
+   */
+  abstract String getFileExtensionToProcess();
+  
+  abstract String[] getDeleteStatements();
+  
+  abstract String getDefaultDirectoryName();
+
+  /**
+   * Calling this method 
+   */
+  public void clearAllData() throws SQLException {
+    Connection conn = ConnectionFactory.newConnection();
+
+    int delCount = 0;
+    for (String deleteStmt : getDeleteStatements()) {
+      try (PreparedStatement stmt = conn.prepareStatement(deleteStmt)) {
+        delCount += stmt.executeUpdate();
+      }
+    }
+    sf_logger.info("Deleted {} rows", delCount);
+  }
 
   /**
    * Parse arguments from the command line.
@@ -48,12 +78,6 @@ abstract class BaseDirectoryImporter {
     String directoryPath = cli.getOptionValue("d");
     setDirectory(directoryPath);
   }
-
-  /**
-   * Gets the String file extension to look for in the given directory. This should be something like ".xlsx" or ".csv".
-   * @return a file extension to filter for
-   */
-  abstract String getFileExtensionToProcess();
 
   /**
    * Run the importer. Requires the "directory" to be set
@@ -104,6 +128,11 @@ abstract class BaseDirectoryImporter {
     }
     
     setDirectory(Paths.get(directory));
+  }
+  
+  public BaseDirectoryImporter setDirectory(Path parentDir, String dir) {
+    setDirectory(parentDir.resolve(StringUtils.defaultIfBlank(dir, getDefaultDirectoryName())));
+    return this;
   }
 
   /**

@@ -229,19 +229,7 @@ public class AlleleDefinitionImporter {
   
   void writeToDB() throws SQLException {
     try (Connection conn = ConnectionFactory.newConnection()) {
-      
-      String[] statements = new String[]{
-          "delete from translation_note where geneSymbol=?",
-          "delete from allele_location_value where alleleid in (select id from allele where geneSymbol=?)",
-          "delete from allele where geneSymbol=?",
-          "delete from sequence_location where geneSymbol=?"
-      };
-      for (String statement : statements) {
-        PreparedStatement notesDelete = conn.prepareStatement(statement);
-        notesDelete.setString(1, m_gene);
-        notesDelete.executeUpdate();
-      }
-      
+
       PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleleid, locationid, variantallele) values (?,?,?)");
       
       PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,alleleslastmodified=? where symbol=?");

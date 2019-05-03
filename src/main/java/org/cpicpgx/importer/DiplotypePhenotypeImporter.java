@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +28,11 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   private static final Pattern GENE_PATTERN = Pattern.compile("(\\w+)\\s*Diplotype");
   private static final int COL_IDX_DIP = 0;
   private static final String DIPLOTYPE_SEPARATOR = "/";
+  private static final String[] sf_deleteStatements = new String[]{
+      "delete from phenotype_diplotype",
+      "delete from gene_phenotype"
+  };
+  private static final String DEFAULT_DIRECTORY = "diplotype_phenotype_tables";
 
   public static void main(String[] args) {
     try {
@@ -40,10 +44,15 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     }
   }
   
-  private DiplotypePhenotypeImporter() { }
+  public DiplotypePhenotypeImporter() { }
   
-  public DiplotypePhenotypeImporter(Path directory) {
-    this.setDirectory(directory);
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
+  }
+
+  @Override
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
   }
   
   @Override
@@ -87,7 +96,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     sf_logger.debug("loading gene {}", geneSymbol);
 
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
-      dbHarness.clearRecords();
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
         // don't load rows that are footnotes (won't have a phenotype)
@@ -175,22 +183,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       updateTextStmt = this.conn.prepareStatement(
           "update gene_phenotype set consultationtext=? where genesymbol=? and phenotype=?"
       );
-    }
-
-    void clearRecords() throws SQLException {
-      int pdCount = 0;
-      try (PreparedStatement stmt = this.conn.prepareStatement("delete from phenotype_diplotype where phenotypeid in (select id from gene_phenotype where genesymbol=?)")) {
-        stmt.setString(1, gene);
-        pdCount += stmt.executeUpdate();
-      }
-      sf_logger.info("cleared {} phenotype-diplotype rows for {}", pdCount, gene);
-
-      int gpCount = 0;
-      try (PreparedStatement stmt = this.conn.prepareStatement("delete from gene_phenotype where genesymbol=?")) {
-        stmt.setString(1, gene);
-        gpCount += stmt.executeUpdate();
-      }
-      sf_logger.info("cleared {} gene-phenotype rows for {}", gpCount, gene);
     }
 
     void insert(String diplotype, String phenotype, Double activity, String ehr) throws SQLException {

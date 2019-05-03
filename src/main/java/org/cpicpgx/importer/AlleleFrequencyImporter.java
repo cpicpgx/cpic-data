@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 
 /**
  * Class to read all excel files in the given directory and store the allele frequency information found in them.
@@ -17,6 +16,11 @@ import java.nio.file.Path;
  */
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String[] sf_deleteStatements = new String[]{
+      "delete from allele_frequency",
+      "delete from population"
+  };
+  private static final String DEFAULT_DIRECTORY = "frequency_table";
   
   public static void main(String[] args) {
     try {
@@ -28,14 +32,15 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
     }
   }
   
-  private AlleleFrequencyImporter() { }
+  public AlleleFrequencyImporter() { }
 
-  /**
-   * Constructor
-   * @param directory an existing directory containing Excel .xlsx files
-   */
-  public AlleleFrequencyImporter(Path directory) {
-    this.setDirectory(directory);
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
+  }
+
+  @Override
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
   }
 
   @Override

@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,6 +30,10 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     sf_twoTriggerDrugs.add("RxNorm:2002");
     sf_twoTriggerDrugs.add("RxNorm:704");
   }
+  private static final String[] sf_deleteStatements = new String[]{
+      "delete from test_alerts"
+  };
+  private static final String DEFAULT_DIRECTORY = "test_alerts";
 
   public static void main(String[] args) {
     try {
@@ -42,12 +45,17 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     }
   }
   
-  private TestAlertImporter() {}
+  public TestAlertImporter() {}
 
-  public TestAlertImporter(Path directory) {
-    this.setDirectory(directory);
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
   }
-  
+
+  @Override
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
+  }
+
   @Override
   String getFileExtensionToProcess() {
     return EXCEL_EXTENSION;
@@ -60,22 +68,12 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       String drugId = DbLookup.getDrugByName(conn, drugName)
           .orElseThrow(() -> new NotFoundException("No drug for " + drugName));
       
-      clearRecords(conn, drugId);
       if (sf_twoTriggerDrugs.contains(drugId)) {
         processTwoTrigger(workbook, conn, drugId);
       } else {
         processOneTrigger(workbook, conn, drugId);
       }
     }
-  }
-
-  private void clearRecords(Connection conn, String drugId) throws SQLException {
-    int delCount = 0;
-    try (PreparedStatement stmt = conn.prepareStatement("delete from test_alerts where drugid=?")) {
-      stmt.setString(1, drugId);
-      delCount += stmt.executeUpdate();
-    }
-    sf_logger.info("cleared {} rows for {}", delCount, drugId);
   }
 
   private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {

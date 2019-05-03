@@ -19,6 +19,8 @@ import java.sql.PreparedStatement;
  */
 public class GeneReferenceImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String[] sf_deleteStatements = new String[]{};
+  private static final String DEFAULT_DIRECTORY = "gene_resource_mappings";
 
   public static void main(String[] args) {
     try {
@@ -30,10 +32,14 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
     }
   }
   
-  private GeneReferenceImporter() {}
+  public GeneReferenceImporter() {}
   
-  public GeneReferenceImporter(Path directory) {
-    this.setDirectory(directory);
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
+  }
+
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
   }
 
   @Override

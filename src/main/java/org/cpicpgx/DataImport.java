@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An import task for getting all information from excel workbooks in the proper order and then inserting it into the 
@@ -17,14 +21,7 @@ import java.nio.file.Paths;
  */
 public class DataImport {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String DEFAULT_ALLELEDIRECTORY = "allele_definition_tables";
-  private static final String DEFAULT_FREQUENCYDIRECTORY = "frequency_table";
-  private static final String DEFAULT_FUNCTIONDIRECTORY = "allele_functionality_reference";
-  private static final String DEFAULT_DIPLOTYPEDIRECTORY = "diplotype_phenotype_tables";
-  private static final String DEFAULT_RECOMMENDATIONDIRECTORY = "recommendation_tables";
-  private static final String DEFAULT_GENEMAPPINGDIRECTORY = "gene_resource_mappings";
-  private static final String DEFAULT_TESTALERTDIRECTORY = "test_alerts";
-  
+
   private String alleleDirectory = null;
   private String frequencyDirectory = null;
   private String functionDirectory = null;
@@ -36,14 +33,6 @@ public class DataImport {
   private Path m_directory;
 
   public static void main(String[] args) {
-    String directory = null;
-    String allele = null;
-    String frequency = null;
-    String funcReference = null;
-    String diplotype = null;
-    String recommendation = null;
-    String geneMapping = null;
-    String testAlerts = null;
     try {
       Options options = new Options();
       options.addOption("d", true,"directory that has sub-folders with excel data files (*.xlsx)");
@@ -56,29 +45,23 @@ public class DataImport {
       options.addOption("ta", true,"test alerts subdirectory name");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
-      directory = cli.getOptionValue("d");
 
-      allele = cli.getOptionValue("ad");
-      frequency = cli.getOptionValue("fd");
-      funcReference = cli.getOptionValue("rd");
-      diplotype = cli.getOptionValue("dd");
-      recommendation = cli.getOptionValue("dr");
-      geneMapping = cli.getOptionValue("gm");
-      testAlerts = cli.getOptionValue("ta");
+      DataImport processor = new DataImport(cli.getOptionValue("d"));
+      processor.alleleDirectory         = cli.getOptionValue("ad");
+      processor.frequencyDirectory      = cli.getOptionValue("fd");
+      processor.functionDirectory       = cli.getOptionValue("rd");
+      processor.diplotypeDirectory      = cli.getOptionValue("dd");
+      processor.recommendationDirectory = cli.getOptionValue("dr");
+      processor.geneMappingDirectory    = cli.getOptionValue("gm");
+      processor.testAlertsDirectory     = cli.getOptionValue("ta");
+
+        processor.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
       System.exit(1);
+    } catch (Exception ex) {
+      sf_logger.error("Error importing data", ex);
     }
-
-    DataImport processor = new DataImport(directory);
-    processor.alleleDirectory = allele;
-    processor.frequencyDirectory = frequency;
-    processor.functionDirectory = funcReference;
-    processor.diplotypeDirectory = diplotype;
-    processor.recommendationDirectory = recommendation;
-    processor.geneMappingDirectory = geneMapping;
-    processor.testAlertsDirectory = testAlerts;
-    processor.execute();
   }
 
   private DataImport(String directory) {
@@ -99,69 +82,27 @@ public class DataImport {
     m_directory = directoryPath;
   }
 
-  private void execute() {
-    new GeneReferenceImporter(m_directory.resolve(getGeneMappingDirectory())).execute();
-    new AlleleDirectoryProcessor(m_directory.resolve(getAlleleDirectory())).execute();
-    new AlleleFrequencyImporter(m_directory.resolve(getFrequencyDirectory())).execute();
-    new FunctionReferenceImporter(m_directory.resolve(getFunctionDirectory())).execute();
-    new DiplotypePhenotypeImporter(m_directory.resolve(getDiplotypeDirectory())).execute();
-    new RecommendationImporter(m_directory.resolve(getRecommendationDirectory())).execute();
-    new TestAlertImporter(m_directory.resolve(getTestAlertsDirectory())).execute();
-  }
-  
-  private String getAlleleDirectory() {
-    if (this.alleleDirectory == null) {
-      return DEFAULT_ALLELEDIRECTORY;
-    } else {
-      return this.alleleDirectory;
+  private void execute() throws SQLException {
+    
+    List<BaseDirectoryImporter> importers = new ArrayList<>();
+    importers.add(new GeneReferenceImporter().setDirectory(m_directory, geneMappingDirectory));
+    importers.add(new AlleleDirectoryProcessor().setDirectory(m_directory, alleleDirectory));
+    importers.add(new AlleleFrequencyImporter().setDirectory(m_directory, frequencyDirectory));
+    importers.add(new FunctionReferenceImporter().setDirectory(m_directory, functionDirectory));
+    importers.add(new DiplotypePhenotypeImporter().setDirectory(m_directory, diplotypeDirectory));
+    importers.add(new RecommendationImporter().setDirectory(m_directory, recommendationDirectory));
+    importers.add(new TestAlertImporter().setDirectory(m_directory, testAlertsDirectory));
+    
+    // reverse the importers before clearing data due to referential integrity
+    Collections.reverse(importers);
+    for (BaseDirectoryImporter importer : importers) {
+      importer.clearAllData();
     }
-  }
-  
-  private String getFrequencyDirectory() {
-    if (this.frequencyDirectory == null) {
-      return DEFAULT_FREQUENCYDIRECTORY;
-    } else {
-      return this.frequencyDirectory;
-    }
-  }
-  
-  private String getFunctionDirectory() {
-    if (this.functionDirectory == null) {
-      return DEFAULT_FUNCTIONDIRECTORY;
-    } else {
-      return this.functionDirectory;
-    }
-  }
-  
-  private String getDiplotypeDirectory() {
-    if (this.diplotypeDirectory == null) {
-      return DEFAULT_DIPLOTYPEDIRECTORY;
-    } else {
-      return this.diplotypeDirectory;
-    }
-  }
-  
-  private String getRecommendationDirectory() {
-    if (this.recommendationDirectory == null) {
-      return DEFAULT_RECOMMENDATIONDIRECTORY;
-    } else {
-      return this.recommendationDirectory;
-    }
-  }
-  
-  private String getGeneMappingDirectory() {
-    if (this.geneMappingDirectory == null) {
-      return DEFAULT_GENEMAPPINGDIRECTORY;
-    } else {
-      return this.geneMappingDirectory;
-    }
-  }
-  
-  private String getTestAlertsDirectory() {
-    if (this.testAlertsDirectory == null) {
-      return DEFAULT_TESTALERTDIRECTORY;
-    } else {
-      return this.testAlertsDirectory;
+
+    // reverse again to put them in the "right" order for loading
+    Collections.reverse(importers);
+    for (BaseDirectoryImporter importer : importers) {
+      importer.execute();
     }
   }
 }

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +41,10 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final int COL_IDX_FINDING = 5;
   private static final int COL_IDX_PMIDS = 6;
 
+  private static final String[] sf_deleteStatements = new String[]{
+      "delete from function_reference"
+  };
+  private static final String DEFAULT_DIRECTORY = "allele_functionality_reference";
 
   public static void main(String[] args) {
     try {
@@ -53,14 +56,18 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     }
   }
 
-  private FunctionReferenceImporter() { }
-
-  public FunctionReferenceImporter(Path directoryPath) {
-    this.setDirectory(directoryPath);
-  }
+  public FunctionReferenceImporter() { }
   
   String getFileExtensionToProcess() {
     return EXCEL_EXTENSION;
+  }
+
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
+  }
+
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
   }
 
   void processWorkbook(WorkbookWrapper workbook) throws NotFoundException, SQLException {
@@ -90,7 +97,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     rowIdx += 2; // move down 2 rows and start reading;
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       dbHarness.updateModified(new java.sql.Date(modDate.getTime()));
-      dbHarness.clearRecords();
       if (GENES_WITH_FINDINGS.contains(geneSymbol)) {
         processPerFinding(workbook, dbHarness, rowIdx);
       } else {
@@ -181,15 +187,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         stmt.setString(2, gene);
         stmt.executeUpdate();
       }
-    }
-    
-    void clearRecords() throws SQLException {
-      int delCount = 0;
-      try (PreparedStatement stmt = this.conn.prepareStatement("delete from function_reference where alleleid in (select id from allele where genesymbol=?)")) {
-        stmt.setString(1, gene);
-        delCount += stmt.executeUpdate();
-      }
-      sf_logger.info("cleared {} rows for {}", delCount, gene);
     }
     
     void insert(String allele, String alleleFunction, Long pmid, String[] inVitro, String[] inVivo) throws SQLException {

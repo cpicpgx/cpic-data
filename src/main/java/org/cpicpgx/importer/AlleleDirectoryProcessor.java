@@ -17,6 +17,13 @@ import java.sql.SQLException;
  */
 public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String[] sf_deleteStatements = new String[]{
+      "delete from translation_note",
+      "delete from allele_location_value",
+      "delete from allele",
+      "delete from sequence_location"
+  };
+  private static final String DEFAULT_DIRECTORY = "allele_definition_tables";
 
   public static void main(String[] args) {
     try {
@@ -28,10 +35,15 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
     }
   }
 
-  private AlleleDirectoryProcessor() { }
+  public AlleleDirectoryProcessor() { }
 
-  public AlleleDirectoryProcessor(Path directory) {
-    this.setDirectory(directory);
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
+  }
+  
+  @Override
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
   }
 
   @Override

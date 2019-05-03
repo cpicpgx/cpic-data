@@ -14,9 +14,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +40,10 @@ import java.util.regex.Pattern;
 public class RecommendationImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern DRUG_NAME_PATTERN = Pattern.compile("(\\w+).*\\.csv");
+  private static final String[] sf_deleteStatements = new String[]{
+      "delete from recommendation"
+  };
+  private static final String DEFAULT_DIRECTORY = "recommendation_tables";
 
   public static void main(String[] args) {
     try {
@@ -51,10 +55,15 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     }
   }
   
-  private RecommendationImporter() {}
-  
-  public RecommendationImporter(Path directory) {
-    this.setDirectory(directory);
+  public RecommendationImporter() {}
+
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
+  }
+
+  @Override
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
   }
 
   @Override
@@ -75,7 +84,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
       List<String> geneList = new ArrayList<>();
       try (FileReader fileReader = new FileReader(f); DbHarness dbHarness = new DbHarness()) {
-        dbHarness.clear(drug);
         CSVParser rows = CSVFormat.DEFAULT.parse(fileReader);
         for (CSVRecord row : rows) {
           if (row.getRecordNumber() == 1) {
@@ -106,42 +114,26 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   }
   
   private class DbHarness implements AutoCloseable {
-    private Connection conn;
     private PreparedStatement insertStmt;
     private PreparedStatement drugLookupStmt;
     private PreparedStatement guidelineLookupStmt;
     private List<AutoCloseable> closables = new ArrayList<>();
     
     DbHarness() throws SQLException {
-      this.conn = ConnectionFactory.newConnection();
-      this.insertStmt = this.conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes) values (?, ?, ?, ?, ? , ?::JSONB)");
-      this.drugLookupStmt = this.conn.prepareStatement(
+      Connection conn = ConnectionFactory.newConnection();
+      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes) values (?, ?, ?, ?, ? , ?::JSONB)");
+      this.drugLookupStmt = conn.prepareStatement(
           "select drugid from drug where name=?", 
           ResultSet.TYPE_SCROLL_INSENSITIVE, 
           ResultSet.CONCUR_READ_ONLY);
-      this.guidelineLookupStmt = this.conn.prepareStatement(
+      this.guidelineLookupStmt = conn.prepareStatement(
           "select distinct p.guidelineid from pair p join drug d on p.drugid = d.drugid where d.name=? and p.guidelineid is not null", 
           ResultSet.TYPE_SCROLL_INSENSITIVE, 
           ResultSet.CONCUR_READ_ONLY);
       closables.add(this.guidelineLookupStmt);
       closables.add(this.drugLookupStmt);
       closables.add(this.insertStmt);
-      closables.add(this.conn);
-    }
-    
-    void clear(String drug) throws SQLException {
-      int delCount = 0;
-      String drugId;
-      try {
-        drugId = lookupDrug(drug);
-      } catch (NotFoundException e) {
-        return;
-      }
-      try (PreparedStatement stmt = this.conn.prepareStatement("delete from recommendation where drugid=?")) {
-        stmt.setString(1, drugId);
-        delCount += stmt.executeUpdate();
-      }
-      sf_logger.info("cleared {} recommendations for {}", delCount, drug);
+      closables.add(conn);
     }
     
     void insert(String drug, Phenotype phenotype, String implications, String recommendation, String classification) {

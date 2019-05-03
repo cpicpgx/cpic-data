@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,6 +20,8 @@ import java.util.Arrays;
  */
 public class GuidelineImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String[] sf_deleteStatements = new String[]{};
+  private static final String DEFAULT_DIRECTORY = "guidelines";
 
   public static void main(String[] args) {
     try {
@@ -34,8 +35,13 @@ public class GuidelineImporter extends BaseDirectoryImporter {
   
   private GuidelineImporter() {}
   
-  public GuidelineImporter(Path directory) {
-    this.setDirectory(directory);
+  public String getDefaultDirectoryName() {
+    return DEFAULT_DIRECTORY;
+  }
+
+  @Override
+  String[] getDeleteStatements() {
+    return sf_deleteStatements;
   }
 
   @Override
