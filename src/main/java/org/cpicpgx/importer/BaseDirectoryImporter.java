@@ -16,7 +16,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Abstract class for classes that want to crawl all files in a directory and do something with them
+ * Abstract class for classes that want to crawl all files in a directory and do something with them. This should be 
+ * extensible enough for any file type but it's mostly used for parsing Excel files and CSVs.
+ * 
+ * For an Excel parser example, check out {@link DiplotypePhenotypeImporter}.
+ * 
+ * For a CSV example, check out {@link RecommendationImporter}
  *
  * @author Ryan Whaley
  */
