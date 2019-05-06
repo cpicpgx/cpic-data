@@ -23,8 +23,8 @@ repositories {
 dependencies {
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'org.apache.poi', name: 'poi', version: '3.17'
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
+    compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
