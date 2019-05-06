@@ -10,7 +10,7 @@ plugins {
 }
 
 group 'org.cpicpgx'
-version = versioning.info.full
+version = versioning.info.lastTag
 
 apply plugin: 'java'
 
@@ -44,5 +44,5 @@ jar {
 }
 
 flyway {
-    url = 'jdbc:postgresql://localhost/cpic?user=cpic'
+    url = 'jdbc:postgresql://'+System.getenv('CPIC_DB')+'/cpic?user=cpic'
 }
