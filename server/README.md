@@ -1,6 +1,7 @@
-# CPIC API
+# CPIC Services
 
-## Running with Docker
+## Running DB/API with Docker
+
 
 ### Creating the cpic-db image
 
@@ -59,3 +60,16 @@ When that's installed, do the following to run it:
 To connect to the db via the psql client
 
     psql -h 0.0.0.0 -p 5432 -U cpic
+
+
+## File Services
+
+CPIC files are stored and distributed from an AWS S3 bucket accessible via http. The files are available via the `files.cpicpgx.org` domain.
+
+- `/data` - data files that are used to help render cpicpgx.org website. These are files generated from data in the database.
+- `/images` - static image assets to be used on the website or in reports.
+  - `/test_alerts` - graphics used in the Pre- and Post- test alert files.
+- `/reports` - report files generated from data in the database, mostly stored in Excel or CSV formatted files.
+  - `/archive` - timestamped tarball archives of the files that appear in this directory 
+  - `/drugs` - drug-centric reports
+  - `/genes` - gene-centric reports

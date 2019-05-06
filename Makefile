@@ -16,5 +16,5 @@ archive:
 	cp -r out/files/cpic_information/* $(ARCHIVE_NAME)
 	tar -czf $(TARBALL_NAME) $(ARCHIVE_NAME)
 	rm -rf $(ARCHIVE_NAME)
-	aws s3 cp $(TARBALL_NAME) s3://files.cpicpgx.org/archive/ --profile cpic
+	aws s3 cp $(TARBALL_NAME) s3://files.cpicpgx.org/reports/archive/ --profile cpic
 	mv $(TARBALL_NAME) out
