@@ -24,13 +24,7 @@ public class GuidelineImporter extends BaseDirectoryImporter {
   private static final String DEFAULT_DIRECTORY = "guidelines";
 
   public static void main(String[] args) {
-    try {
-      GuidelineImporter importer = new GuidelineImporter();
-      importer.parseArgs(args);
-      importer.execute();
-    } catch (Exception ex) {
-      sf_logger.error("Error importing guidelines", ex);
-    }
+    rebuild(new GuidelineImporter(), args);
   }
   
   private GuidelineImporter() {}

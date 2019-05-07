@@ -1,14 +1,9 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.ParseException;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
@@ -18,18 +13,11 @@ import java.sql.PreparedStatement;
  * @author Ryan Whaley
  */
 public class GeneReferenceImporter extends BaseDirectoryImporter {
-  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String[] sf_deleteStatements = new String[]{};
   private static final String DEFAULT_DIRECTORY = "gene_resource_mappings";
 
   public static void main(String[] args) {
-    try {
-      GeneReferenceImporter importer = new GeneReferenceImporter();
-      importer.parseArgs(args);
-      importer.execute();
-    } catch (ParseException e) {
-      sf_logger.error("Couldn't parse gene data", e);
-    }
+    rebuild(new GeneReferenceImporter(), args);
   }
   
   public GeneReferenceImporter() {}

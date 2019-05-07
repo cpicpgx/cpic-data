@@ -1,6 +1,5 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
@@ -36,13 +35,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private static final String DEFAULT_DIRECTORY = "test_alerts";
 
   public static void main(String[] args) {
-    try {
-      TestAlertImporter importer = new TestAlertImporter();
-      importer.parseArgs(args);
-      importer.execute();
-    } catch (ParseException e) {
-      sf_logger.error("Error parsing args", e);
-    }
+    rebuild(new TestAlertImporter(), args);
   }
   
   public TestAlertImporter() {}

@@ -1,6 +1,5 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.ParseException;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +22,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final String DEFAULT_DIRECTORY = "frequency_table";
   
   public static void main(String[] args) {
-    try {
-      AlleleFrequencyImporter processor = new AlleleFrequencyImporter();
-      processor.parseArgs(args);
-      processor.execute();
-    } catch (ParseException e) {
-      sf_logger.error("Couldn't parse command", e);
-    }
+    rebuild(new AlleleFrequencyImporter(), args);
   }
   
   public AlleleFrequencyImporter() { }

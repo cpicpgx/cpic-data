@@ -61,6 +61,18 @@ public abstract class BaseDirectoryImporter {
     }
     sf_logger.info("Deleted {} rows", delCount);
   }
+  
+  static void rebuild(BaseDirectoryImporter importer, String[] args) {
+    try {
+      importer.parseArgs(args);
+      importer.clearAllData();
+      importer.execute();
+    } catch (ParseException e) {
+      sf_logger.error("Couldn't parse command", e);
+    } catch (SQLException e) {
+      sf_logger.error("Error from database", e);
+    }
+  }
 
   /**
    * Parse arguments from the command line.
@@ -69,7 +81,7 @@ public abstract class BaseDirectoryImporter {
    * @param args an array of command line arguments
    * @throws ParseException can occur from bad argument syntax
    */
-  void parseArgs(String [] args) throws ParseException {
+  private void parseArgs(String [] args) throws ParseException {
     Options options = new Options();
     options.addOption("d", true,"directory containing files to process (*.xlsx)");
     CommandLineParser clParser = new DefaultParser();

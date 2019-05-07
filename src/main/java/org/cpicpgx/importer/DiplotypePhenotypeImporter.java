@@ -1,6 +1,5 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
@@ -35,13 +34,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   private static final String DEFAULT_DIRECTORY = "diplotype_phenotype_tables";
 
   public static void main(String[] args) {
-    try {
-      DiplotypePhenotypeImporter processor = new DiplotypePhenotypeImporter();
-      processor.parseArgs(args);
-      processor.execute();
-    } catch (ParseException e) {
-      sf_logger.error("Couldn't parse command", e);
-    }
+    rebuild(new DiplotypePhenotypeImporter(), args);
   }
   
   public DiplotypePhenotypeImporter() { }

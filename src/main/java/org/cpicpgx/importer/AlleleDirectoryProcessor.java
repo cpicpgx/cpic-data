@@ -1,12 +1,10 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.cli.ParseException;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.SQLException;
 
 /**
@@ -26,13 +24,7 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
   private static final String DEFAULT_DIRECTORY = "allele_definition_tables";
 
   public static void main(String[] args) {
-    try {
-      AlleleDirectoryProcessor processor = new AlleleDirectoryProcessor();
-      processor.parseArgs(args);
-      processor.execute();
-    } catch (ParseException e) {
-      sf_logger.error("Couldn't parse command", e);
-    }
+    rebuild(new AlleleDirectoryProcessor(), args);
   }
 
   public AlleleDirectoryProcessor() { }

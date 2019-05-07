@@ -46,13 +46,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
 
   public static void main(String[] args) {
-    try {
-      RecommendationImporter importer = new RecommendationImporter();
-      importer.parseArgs(args);
-      importer.execute();
-    } catch (Exception ex) {
-      sf_logger.error("Error importing recommendations", ex);
-    }
+    rebuild(new RecommendationImporter(), args);
   }
   
   public RecommendationImporter() {}
