@@ -257,6 +257,7 @@ CREATE TABLE drug
   rxnormId VARCHAR(20),
   drugbankId VARCHAR(20),
   atcId TEXT[],
+  umlsCui VARCHAR(20),
   version INTEGER DEFAULT 1
 );
 
@@ -270,6 +271,7 @@ COMMENT ON COLUMN drug.name IS 'The generic name for this drug, lower-cased, req
 COMMENT ON COLUMN drug.pharmgkbId IS 'The PharmGKB ID for this drug, optional';
 COMMENT ON COLUMN drug.rxnormId IS 'The RxNorm ID for this drug, optional';
 COMMENT ON COLUMN drug.drugbankId IS 'The DrugBank ID for this drug, optional';
+COMMENT ON COLUMN drug.umlsCui IS 'The UMLS Concept Unique ID for this drug, optional';
 COMMENT ON COLUMN drug.atcId IS 'One or more ATC IDs for this drug in an array, optional';
 
 
