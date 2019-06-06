@@ -104,7 +104,8 @@ CREATE TABLE allele
   version INTEGER DEFAULT 1,
   geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   name VARCHAR(200) NOT NULL,
-  functionalStatus VARCHAR(200)
+  functionalStatus VARCHAR(200),
+  pharmvarId VARCHAR(50)
 );
 
 CREATE TRIGGER version_allele
@@ -116,6 +117,7 @@ COMMENT ON COLUMN allele.id IS 'A synthetic numerical ID, auto-assigned, primary
 COMMENT ON COLUMN allele.geneSymbol IS 'The HGNC symbol of the gene the allele is for, required';
 COMMENT ON COLUMN allele.name IS 'The name of this allele, required';
 COMMENT ON COLUMN allele.functionalStatus IS 'The functional phenotype of this allele';
+COMMENT ON COLUMN allele.pharmvarId IS 'The PharmVar core allele ID for this allele';
 
 
 CREATE TABLE sequence_location
