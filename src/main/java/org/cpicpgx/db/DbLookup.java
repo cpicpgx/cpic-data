@@ -31,7 +31,7 @@ public class DbLookup {
         "select drugid from drug where name=?",
         ResultSet.TYPE_SCROLL_INSENSITIVE,
         ResultSet.CONCUR_READ_ONLY)) {
-      lookup.setString(1, name);
+      lookup.setString(1, name.toLowerCase());
       try (ResultSet rs = lookup.executeQuery()) {
         if (rs.first()) {
           return Optional.of(rs.getString(1));
