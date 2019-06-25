@@ -388,7 +388,7 @@ COPY guideline (id, version, name, url, pharmgkbid) FROM stdin;
 
 COPY pair (pairid, genesymbol, drugid, guidelineid, version, level, pgkbcalevel, pgxtesting, citations) FROM stdin;
 100274	HLA-B	RxNorm:32624	100423	1	A	1A	Testing recommended	{29392710}
-104244	HLA-A	RxNorm:32624	100423	1	A			{29392710}
+104244	HLA-A	RxNorm:32624	100423	1	C			{29392710}
 100120	CYP2C19	RxNorm:10834	100414	1	B	2A		{23486447,27997040}
 100137	CYP2D6	RxNorm:2597	100414	1	B	1A	Actionable PGx	{23486447,27997040}
 100141	CYP2D6	RxNorm:3247	100414	1	B	1A	Actionable PGx	{23486447,27997040}
