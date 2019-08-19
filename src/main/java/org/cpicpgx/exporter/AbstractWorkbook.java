@@ -115,7 +115,6 @@ public abstract class AbstractWorkbook {
 
   void writeStringCell(Row row, int colIdx, String value, CellStyle style) {
     Cell nameCell = row.createCell(colIdx);
-    nameCell.setCellType(CellType.STRING);
     nameCell.setCellValue(StringUtils.strip(value));
     nameCell.setCellStyle(style);
   }
@@ -126,7 +125,6 @@ public abstract class AbstractWorkbook {
     }
     
     Cell nameCell = row.createCell(colIdx);
-    nameCell.setCellType(CellType.STRING);
     nameCell.setCellValue(StringUtils.strip(text));
     nameCell.setCellStyle(leftTextStyle);
     
