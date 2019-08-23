@@ -6,12 +6,14 @@ const _ = require('lodash');
 const defaultFilename = 'cpic.alleles';
 
 exports.getAlleles = (path) => {
-  axios.get(cpicapi.apiUrl('/allele_guideline_view'), {})
+  const url = cpicapi.apiUrl('/allele_guideline_view');
+  console.log(`Fetching data from: ${url}`);
+  axios.get(url, {})
     .then((r) => {
       const original = r.data;
-      const alleles = _.uniq(_.map(original, (d) => {
+      const alleles = _.uniqBy(_.map(original, (d) => {
         return {genesymbol: d.genesymbol, allele_name: d.allele_name};
-      }));
+      }), (d) => d.genesymbol+d.allele_name);
       const payload = _.map(alleles, (a) => {
         return {
           allele: {
