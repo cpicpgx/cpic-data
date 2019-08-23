@@ -809,3 +809,11 @@ COPY term (id, category, term, functionaldef, geneticdef, version) FROM stdin;
 100407	Phenotype: high-risk genotype status	Positive	Detection of high-risk allele	Homozygous or heterozygous for high-risk allele	1
 100408	Phenotype: high-risk genotype status	Negative	High-risk allele not detected	No copies of high-risk allele	1
 \.
+
+-- these alleles don't have an allele definition file so manually import them
+COPY allele (geneSymbol, name) FROM stdin;
+HLA-A	*31:01
+HLA-B	*15:02
+HLA-B	*57:01
+HLA-B	*58:01
+\.
