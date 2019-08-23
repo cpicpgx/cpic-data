@@ -44,5 +44,5 @@ jar {
 }
 
 flyway {
-    url = 'jdbc:postgresql://'+System.getenv('CPIC_DB')+'/cpic?user=cpic'
+    url = 'jdbc:postgresql://'+System.getenv('CPIC_DB')+'/cpic?user=cpic&password='+System.getenv('CPIC_PASS')
 }
