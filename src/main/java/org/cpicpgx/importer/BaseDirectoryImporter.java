@@ -88,7 +88,7 @@ public abstract class BaseDirectoryImporter {
     CommandLine cli = clParser.parse(options, args);
 
     String directoryPath = cli.getOptionValue("d");
-    setDirectory(directoryPath);
+    setDirectory(Paths.get(directoryPath));
   }
 
   /**
@@ -130,18 +130,6 @@ public abstract class BaseDirectoryImporter {
     throw new RuntimeException("Workbook processor not implemented in this importer");
   }
 
-  /**
-   * Sets the directory to work with. Will fail if the directory doesn't exist or doesn't have files
-   * @param directory a directory path
-   */
-  void setDirectory(String directory) {
-    if (directory == null) {
-      throw new IllegalArgumentException("Need a directory");
-    }
-    
-    setDirectory(Paths.get(directory));
-  }
-  
   public BaseDirectoryImporter setDirectory(Path parentDir, String dir) {
     setDirectory(parentDir.resolve(StringUtils.defaultIfBlank(dir, getDefaultDirectoryName())));
     return this;
@@ -151,7 +139,7 @@ public abstract class BaseDirectoryImporter {
    * Sets a directory to search for files to process. The path must exist and be for a directory (not a file)
    * @param directory a directory in the filesystem
    */
-  void setDirectory(Path directory) {
+  private void setDirectory(Path directory) {
     this.directory = directory;
 
     if (!this.directory.toFile().exists()) {
