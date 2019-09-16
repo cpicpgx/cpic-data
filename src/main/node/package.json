@@ -4,6 +4,7 @@
   "description": "",
   "main": "getPublication.js",
   "scripts": {
+    "data": "node --harmony writeData.js ../../../out",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Ryan Whaley",
