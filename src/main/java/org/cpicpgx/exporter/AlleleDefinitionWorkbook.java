@@ -50,8 +50,8 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     this.sheet = findSheet(DEFAULT_SHEET_NAME);
     Row row = sheet.nextRow();
 
-    writeStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
-    writeDateCell(row, modified);
+    writeBoldStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
+    writeBoldDateCell(row, modified);
     
     nameRow = sheet.nextRow();
     proteinRow = sheet.nextRow();
@@ -139,6 +139,11 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     this.sheet.setColCount(colIdx+1);
   }
   
+  void writeNotesHeader() {
+    Row row = sheet.nextRow();
+    writeBoldStringCell(row, 0, "NOTES:");
+  }
+
   void writeNote(String note) {
     if (note != null) {
       Row row = sheet.nextRow();

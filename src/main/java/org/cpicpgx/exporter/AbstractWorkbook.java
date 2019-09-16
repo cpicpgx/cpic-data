@@ -23,9 +23,11 @@ public abstract class AbstractWorkbook {
   private CreationHelper createHelper;
   private List<SheetWrapper> sheets = new ArrayList<>();
   private CellStyle dateStyle;
+  private CellStyle boldDateStyle;
   private CellStyle centerTextStyle;
   private CellStyle leftTextStyle;
   private CellStyle headerStyle;
+  private CellStyle boldStyle;
   CellStyle wrapStyle;
 
   int colIdx = 1;
@@ -63,10 +65,21 @@ public abstract class AbstractWorkbook {
     Font boldFont = this.workbook.createFont();
     boldFont.setFontHeightInPoints((short)14);
     boldFont.setBold(true);
+    
+    this.boldStyle = this.workbook.createCellStyle();
+    this.boldStyle.setFont(boldFont);
 
     this.headerStyle = this.workbook.createCellStyle();
     this.headerStyle.setAlignment(HorizontalAlignment.CENTER);
     this.headerStyle.setFont(boldFont);
+
+    this.boldDateStyle = this.workbook.createCellStyle();
+    this.boldDateStyle.setDataFormat(
+        createHelper.createDataFormat().getFormat("m/d/yy")
+    );
+    this.boldDateStyle.setAlignment(HorizontalAlignment.CENTER);
+    this.boldDateStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.boldDateStyle.setFont(boldFont);
   }
   
   abstract String getFilename();
@@ -96,9 +109,20 @@ public abstract class AbstractWorkbook {
   }
 
   void writeDateCell(Row row, Date value) {
+    writeDateCell(row, value, null);
+  }
+  
+  void writeBoldDateCell(Row row, Date value) {
+    writeDateCell(row, value, this.boldDateStyle);
+  }
+
+  private void writeDateCell(Row row, Date value, CellStyle style) {
     Cell nameCell = row.createCell(1);
     nameCell.setCellStyle(this.dateStyle);
     nameCell.setCellValue(value);
+    if (style != null) {
+      nameCell.setCellStyle(style);
+    }
   }
 
   void writeStringCell(Row row, int colIdx, String value) {
@@ -107,6 +131,10 @@ public abstract class AbstractWorkbook {
 
   void writeStringCell(Row row, int colIdx, String value, boolean centered) {
     writeStringCell(row, colIdx, value, centered ? this.centerTextStyle : this.leftTextStyle);
+  }
+  
+  void writeBoldStringCell(Row row, int colIdx, String value) {
+    writeStringCell(row, colIdx, value, this.boldStyle);
   }
   
   void writeHeaderCell(Row row, int colIdx, String value) {

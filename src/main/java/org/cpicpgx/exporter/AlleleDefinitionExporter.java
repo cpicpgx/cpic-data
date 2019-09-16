@@ -1,5 +1,7 @@
 package org.cpicpgx.exporter;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
 import org.cpicpgx.db.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,10 +87,15 @@ public class AlleleDefinitionExporter extends BaseExporter {
               }
             }
           }
-          workbook.writeNote("");
           notesStmt.setString(1, symbol);
           try (ResultSet rs = notesStmt.executeQuery()) {
+            boolean wroteHeader = false;
             while (rs.next()) {
+              if (!wroteHeader) {
+                workbook.writeNote("");
+                workbook.writeNotesHeader();
+                wroteHeader = true;
+              }
               String note = rs.getString(1);
               workbook.writeNote(note);
             }
