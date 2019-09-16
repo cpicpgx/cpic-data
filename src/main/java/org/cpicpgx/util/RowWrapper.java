@@ -6,7 +6,6 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,7 +65,7 @@ public class RowWrapper {
     Cell cell = this.row.getCell(cellIdx);
     if (cell == null) return null;
     
-    switch (cell.getCellTypeEnum()) {
+    switch (cell.getCellType()) {
       case STRING:
         return stripFootnote(cellIdx);
       case NUMERIC:
@@ -86,7 +85,7 @@ public class RowWrapper {
         return null;
       case FORMULA:
         CellValue cellValue = formulaEvaluator.evaluate(cell);
-        switch (cellValue.getCellTypeEnum()) {
+        switch (cellValue.getCellType()) {
           case STRING:
             return StringUtils.stripToNull(cellValue.getStringValue());
           case NUMERIC:
@@ -102,24 +101,11 @@ public class RowWrapper {
           case BOOLEAN:
             return cellValue.getBooleanValue() ? "True" : "False";
           default:
-            throw new RuntimeException(cell.getAddress() + " Type not supported " + cellValue.getCellTypeEnum());
+            throw new RuntimeException(cell.getAddress() + " Type not supported " + cellValue.getCellType());
         }
       default:
-        throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellTypeEnum());
+        throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellType());
         
-    }
-  }
-  
-  public Optional<String> getOptionalText(int cellIdx) {
-    return getOptionalText(cellIdx, false);
-  }
-
-  public Optional<String> getOptionalText(int cellIdx, boolean roundNumerics) {
-    String text = getNullableText(cellIdx, roundNumerics);
-    if (text == null) {
-      return Optional.empty();
-    } else {
-      return Optional.of(text);
     }
   }
 
@@ -137,7 +123,7 @@ public class RowWrapper {
     Cell cell = this.row.getCell(cellIdx);
     if (cell == null) return null;
 
-    switch (cell.getCellTypeEnum()) {
+    switch (cell.getCellType()) {
       case STRING:
         if (StringUtils.isBlank(cell.getStringCellValue())) {
           return null;
@@ -146,12 +132,12 @@ public class RowWrapper {
         }
       case NUMERIC:
         if (DateUtil.isCellDateFormatted(cell)) {
-          throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellTypeEnum());
+          throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellType());
         } else {
           return new String[]{String.valueOf(Math.round(cell.getNumericCellValue()))};
         }
       default:
-        throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellTypeEnum());
+        throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellType());
 
     }
   }
@@ -173,7 +159,7 @@ public class RowWrapper {
     Cell cell = this.row.getCell(cellIdx);
     if (cell == null) return null;
     
-    switch (cell.getCellTypeEnum()) {
+    switch (cell.getCellType()) {
       case NUMERIC:
         return Math.round(cell.getNumericCellValue());
       case BLANK:
@@ -187,14 +173,12 @@ public class RowWrapper {
         }
       case FORMULA:
         CellValue cellValue = formulaEvaluator.evaluate(cell);
-        switch (cell.getCellTypeEnum()) {
-          case NUMERIC:
-            return Math.round(cellValue.getNumberValue());
-          default:
-            throw new RuntimeException(cell.getAddress() + " Type not supported " + cellValue.getCellTypeEnum());
+        if (cellValue.getCellType() == CellType.NUMERIC) {
+          return Math.round(cellValue.getNumberValue());
         }
+        throw new RuntimeException(cell.getAddress() + " Type not supported " + cellValue.getCellType());
       default:
-        throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellTypeEnum());
+        throw new RuntimeException(cell.getAddress() + " Type not supported " + cell.getCellType());
     }
   }
 
@@ -212,17 +196,15 @@ public class RowWrapper {
     Cell cell = this.row.getCell(cellIdx);
     if (cell == null) return null;
     
-    switch (cell.getCellTypeEnum()) {
+    switch (cell.getCellType()) {
       case NUMERIC:
         return cell.getNumericCellValue();
       case FORMULA:
         CellValue cellValue = formulaEvaluator.evaluate(cell);
-        switch (cell.getCellTypeEnum()) {
-          case NUMERIC:
-            return cellValue.getNumberValue();
-          default:
-            return null;
+        if (cell.getCellType() == CellType.NUMERIC) {
+          return cellValue.getNumberValue();
         }
+        return null;
       default:
         return null;
         
