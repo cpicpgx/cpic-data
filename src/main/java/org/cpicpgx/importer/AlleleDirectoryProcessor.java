@@ -48,7 +48,6 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
     try {
       AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
       importer.writeToDB();
-      sf_logger.info("Processed {}", workbook);
     } catch (SQLException e) {
       throw new RuntimeException("Error processing " + workbook, e);
     }
