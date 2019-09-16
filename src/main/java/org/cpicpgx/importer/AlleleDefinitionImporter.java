@@ -310,11 +310,6 @@ public class AlleleDefinitionImporter {
     // strip down the cell value, including non-breaking spaces that Excel loves to introduce
     String strippedValue = trim(value);
 
-    // log any instances of extra whitespace
-    if (!StringUtils.equals(value, strippedValue)) {
-      sf_logger.warn("Extra whitespace found in cell {}", cell.getAddress());
-    }
-
     // return an empty value if there's nothing after strip
     if (strippedValue == null) return Optional.empty();
     
