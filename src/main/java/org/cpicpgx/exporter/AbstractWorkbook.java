@@ -28,6 +28,7 @@ public abstract class AbstractWorkbook {
   private CellStyle leftTextStyle;
   private CellStyle headerStyle;
   private CellStyle boldStyle;
+  private CellStyle topBorderStyle;
   CellStyle wrapStyle;
 
   int colIdx = 1;
@@ -80,6 +81,9 @@ public abstract class AbstractWorkbook {
     this.boldDateStyle.setAlignment(HorizontalAlignment.CENTER);
     this.boldDateStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.boldDateStyle.setFont(boldFont);
+    
+    this.topBorderStyle = this.workbook.createCellStyle();
+    this.topBorderStyle.setBorderTop(BorderStyle.THIN);
   }
   
   abstract String getFilename();
@@ -139,6 +143,10 @@ public abstract class AbstractWorkbook {
   
   void writeHeaderCell(Row row, int colIdx, String value) {
     writeStringCell(row, colIdx, value, headerStyle);
+  }
+  
+  void writeTopBorderCell(Row row, int colIdx, String value) {
+    writeStringCell(row, colIdx, value, this.topBorderStyle);
   }
 
   void writeStringCell(Row row, int colIdx, String value, CellStyle style) {
