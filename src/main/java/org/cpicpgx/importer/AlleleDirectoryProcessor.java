@@ -29,8 +29,14 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
 
   public AlleleDirectoryProcessor() { }
 
+  @Override
   public String getDefaultDirectoryName() {
     return DEFAULT_DIRECTORY;
+  }
+
+  @Override
+  public FileType getFileType() {
+    return FileType.ALLELE_DEFINITION;
   }
   
   @Override
@@ -48,6 +54,7 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
     try {
       AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
       importer.writeToDB();
+      addImportHistory(workbook.getFileName());
     } catch (SQLException e) {
       throw new RuntimeException("Error processing " + workbook, e);
     }

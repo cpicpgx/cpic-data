@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.FileHistoryWriter;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,12 @@ public abstract class BaseDirectoryImporter {
    * @return a file extension to filter for
    */
   abstract String getFileExtensionToProcess();
+
+  /**
+   * Gets the type of file this importer is importing
+   * @return a {@link FileType} enum value
+   */
+  abstract FileType getFileType();
   
   abstract String[] getDeleteStatements();
   
@@ -150,6 +157,19 @@ public abstract class BaseDirectoryImporter {
     }
     if (this.directory.toFile().listFiles() == null) {
       throw new IllegalArgumentException("Directory is empty " + this.directory);
+    }
+  }
+
+  /**
+   * This will add a message to the history for a file with a default message saying the data was imported at the 
+   * current time
+   * @param fileName the file to log was imported
+   * @throws SQLException can occur from DB interaction
+   */
+  void addImportHistory(String fileName) throws SQLException {
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      FileHistoryWriter fileHistoryWriter = new FileHistoryWriter(conn, getFileType());
+      fileHistoryWriter.write(fileName, "imported to database from file");
     }
   }
 }

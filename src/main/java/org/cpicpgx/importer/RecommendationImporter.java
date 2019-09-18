@@ -56,6 +56,11 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   }
 
   @Override
+  public FileType getFileType() {
+    return FileType.RECOMMENDATIONS;
+  }
+
+  @Override
   String[] getDeleteStatements() {
     return sf_deleteStatements;
   }
@@ -97,6 +102,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             dbHarness.insert(drug, phenotype, row.get(columnOffset), row.get(columnOffset + 1), row.get(columnOffset + 2));
           }
         }
+        addImportHistory(f.getName());
       } catch (IOException e) {
         sf_logger.error("Error reading file", e);
       } catch (SQLException e) {
@@ -107,7 +113,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     };
   }
   
-  private class DbHarness implements AutoCloseable {
+  private static class DbHarness implements AutoCloseable {
     private PreparedStatement insertStmt;
     private PreparedStatement drugLookupStmt;
     private PreparedStatement guidelineLookupStmt;

@@ -44,6 +44,11 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   }
 
   @Override
+  public FileType getFileType() {
+    return FileType.DIPLOTYPE_PHENOTYPE;
+  }
+
+  @Override
   String[] getDeleteStatements() {
     return sf_deleteStatements;
   }
@@ -133,6 +138,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
         dbHarness.setConsultation(pheno, text);
       }
     }
+    addImportHistory(workbook.getFileName());
   }
 
   /**
@@ -155,7 +161,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     return Objects.equals(alleles[0], alleles[1]);
   }
 
-  class DbHarness implements AutoCloseable {
+  static class DbHarness implements AutoCloseable {
     private Connection conn;
     private String gene;
     private PreparedStatement insertStmt;

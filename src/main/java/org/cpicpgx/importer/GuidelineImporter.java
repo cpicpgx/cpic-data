@@ -34,6 +34,11 @@ public class GuidelineImporter extends BaseDirectoryImporter {
   }
 
   @Override
+  public FileType getFileType() {
+    return FileType.GUIDELINES;
+  }
+
+  @Override
   String[] getDeleteStatements() {
     return sf_deleteStatements;
   }

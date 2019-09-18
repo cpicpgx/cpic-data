@@ -59,6 +59,11 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     return DEFAULT_DIRECTORY;
   }
 
+  @Override
+  public FileType getFileType() {
+    return FileType.ALLELE_FUNCTION_REFERENCE;
+  }
+
   String[] getDeleteStatements() {
     return sf_deleteStatements;
   }
@@ -96,6 +101,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         processPerReference(workbook, dbHarness, rowIdx);
       }
     }
+    addImportHistory(workbook.getFileName());
   }
 
   private void processPerReference(WorkbookWrapper workbook, DbHarness dbHarness, int rowIdx) throws SQLException {
@@ -148,7 +154,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   /**
    * Private class for handling DB interactions
    */
-  class DbHarness implements AutoCloseable {
+  static class DbHarness implements AutoCloseable {
     private Connection conn;
     private Map<String, Long> alleleNameMap = new HashMap<>();
     private PreparedStatement updateAlleleStmt;
@@ -183,7 +189,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     }
     
     void insert(String allele, String alleleFunction, Long pmid, String[] inVitro, String[] inVivo) throws SQLException {
-      if (!this.alleleNameMap.keySet().contains(allele)) {
+      if (!this.alleleNameMap.containsKey(allele)) {
         sf_logger.warn("No allele defined with name {}", allele);
         return;
       }
@@ -215,7 +221,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     }
 
     void insertFinding(String allele, String alleleFunction, String pmid, String finding) throws SQLException {
-      if (!this.alleleNameMap.keySet().contains(allele)) {
+      if (!this.alleleNameMap.containsKey(allele)) {
         sf_logger.warn("No allele defined with name {}", allele);
         return;
       }

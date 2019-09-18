@@ -29,6 +29,11 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
   public String getDefaultDirectoryName() {
     return DEFAULT_DIRECTORY;
   }
+  
+  @Override
+  public FileType getFileType() {
+    return FileType.RESOURCE_IDS;
+  }
 
   @Override
   String getFileExtensionToProcess() {
@@ -72,5 +77,6 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
         }
       }
     }
+    addImportHistory(workbook.getFileName());
   }
 }

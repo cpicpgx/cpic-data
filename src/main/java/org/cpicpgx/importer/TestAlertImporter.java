@@ -73,6 +73,11 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   }
 
   @Override
+  public FileType getFileType() {
+    return FileType.TEST_ALERTS;
+  }
+
+  @Override
   String[] getDeleteStatements() {
     return sf_deleteStatements;
   }
@@ -95,6 +100,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         processOneTrigger(workbook, conn, drugId);
       }
     }
+    addImportHistory(workbook.getFileName());
   }
 
   private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {

@@ -32,6 +32,11 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   }
 
   @Override
+  public FileType getFileType() {
+    return FileType.FREQUENCIES;
+  }
+
+  @Override
   String[] getDeleteStatements() {
     return sf_deleteStatements;
   }
@@ -65,6 +70,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Error parsing row " + (i+1), ex);
         }
       }
+      addImportHistory(workbook.getFileName());
       sf_logger.info("Successfully parsed " + gene + " frequencies");
     } catch (Exception ex) {
       sf_logger.error("Error saving to DB", ex);
