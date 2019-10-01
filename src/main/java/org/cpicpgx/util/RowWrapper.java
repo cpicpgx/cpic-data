@@ -33,7 +33,7 @@ public class RowWrapper {
 
   /**
    * Tests if the cell at the given index has text in it
-   * @param cellIdx the index of a cell in this row
+   * @param cellIdx the index of a cell in this row, 0-based
    * @return true if the cell is blank (only whitespace counts as blank), false otherwise
    */
   public boolean hasNoText(int cellIdx) {
