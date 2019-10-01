@@ -39,7 +39,7 @@ CREATE TABLE publication
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   guidelineId INTEGER REFERENCES guideline(id),
-  title VARCHAR(200) UNIQUE NOT NULL,
+  title VARCHAR(200) UNIQUE,
   authors TEXT[],
   journal VARCHAR(200),
   month INTEGER,

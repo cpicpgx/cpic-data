@@ -30,6 +30,7 @@ public class FrequencyProcessor implements AutoCloseable {
 
   private PreparedStatement insertStatement;
   private PreparedStatement insertPopulation;
+  private PublicationCatalog publicationCatalog;
 
   /**
    * Construct the FrequencyProcessor
@@ -39,6 +40,7 @@ public class FrequencyProcessor implements AutoCloseable {
    */
   FrequencyProcessor(String gene, RowWrapper headerRow) throws SQLException, NotFoundException {
     this.conn = ConnectionFactory.newConnection();
+    publicationCatalog = new PublicationCatalog(this.conn);
 
     Map<String, Long> alleleNameMap = new HashMap<>();
     PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?");
@@ -140,13 +142,18 @@ public class FrequencyProcessor implements AutoCloseable {
    */
   void insertPopulation(RowWrapper row) throws SQLException {
     if (row.hasNoText(4)) return;
-    
+
+    String author = row.getNullableText(getAuthorIdx());
+    String pubYear = row.getNullableText(getPubYearIdx(), true);
+    String pmid = row.getNullableText(getPmidIdx(), true);
+    this.publicationCatalog.add(pmid, pubYear, author);
+
     this.insertPopulation.setString(1, row.getNullableText(getEthIdx()));
     this.insertPopulation.setString(2, row.getNullableText(getPopIdx()));
     this.insertPopulation.setString(3, row.getNullableText(getPopInfoIdx()));
     this.insertPopulation.setString(4, row.getNullableText(getSubjTypeIdx()));
     this.insertPopulation.setLong(5, row.getNullableLong(getNIdx()));
-    this.insertPopulation.setString(6, row.getNullableText(getPmidIdx(), true));
+    this.insertPopulation.setString(6, pmid);
     
     ResultSet rs = this.insertPopulation.executeQuery();
     if (!rs.next()) {
@@ -166,6 +173,14 @@ public class FrequencyProcessor implements AutoCloseable {
     if (conn != null && !conn.isClosed()) {
       conn.close();
     }
+  }
+  
+  private int getAuthorIdx() {
+    return this.colStartOffset;
+  }
+
+  private int getPubYearIdx() {
+    return this.colStartOffset + 1;
   }
 
   /**
