@@ -26,6 +26,8 @@ public abstract class AbstractWorkbook {
   private CellStyle boldDateStyle;
   private CellStyle centerTextStyle;
   private CellStyle leftTextStyle;
+  private CellStyle rightNumberStyle;
+  private CellStyle decimalNumberStyle;
   private CellStyle headerStyle;
   private CellStyle boldStyle;
   private CellStyle topBorderStyle;
@@ -58,6 +60,17 @@ public abstract class AbstractWorkbook {
     this.leftTextStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.leftTextStyle.setFont(newFont);
 
+    this.rightNumberStyle = this.workbook.createCellStyle();
+    this.rightNumberStyle.setAlignment(HorizontalAlignment.RIGHT);
+    this.rightNumberStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.rightNumberStyle.setFont(newFont);
+    
+    this.decimalNumberStyle = this.workbook.createCellStyle();
+    this.decimalNumberStyle.setDataFormat(this.workbook.createDataFormat().getFormat("0.00"));
+    this.decimalNumberStyle.setAlignment(HorizontalAlignment.RIGHT);
+    this.decimalNumberStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.decimalNumberStyle.setFont(newFont);
+
     this.wrapStyle = this.workbook.createCellStyle();
     this.wrapStyle.setAlignment(HorizontalAlignment.LEFT);
     this.wrapStyle.setWrapText(true);
@@ -88,7 +101,7 @@ public abstract class AbstractWorkbook {
   
   abstract String getFilename();
 
-  protected Workbook getWorkbook() {
+  private Workbook getWorkbook() {
     return this.workbook;
   }
   
@@ -112,10 +125,6 @@ public abstract class AbstractWorkbook {
     }
   }
 
-  void writeDateCell(Row row, Date value) {
-    writeDateCell(row, value, null);
-  }
-  
   void writeBoldDateCell(Row row, Date value) {
     writeDateCell(row, value, this.boldDateStyle);
   }
@@ -153,6 +162,20 @@ public abstract class AbstractWorkbook {
     Cell nameCell = row.createCell(colIdx);
     nameCell.setCellValue(StringUtils.strip(value));
     nameCell.setCellStyle(style);
+  }
+  
+  void writeIntegerCell(Row row, int colIdx, int value) {
+    Cell cell = row.createCell(colIdx);
+    cell.setCellValue(value);
+    cell.setCellStyle(this.rightNumberStyle);
+  }
+
+  void writeDoubleCell(Row row, int colIdx, Double value) {
+    if (value != null) {
+      Cell cell = row.createCell(colIdx);
+      cell.setCellValue(value);
+      cell.setCellStyle(this.decimalNumberStyle);
+    }
   }
 
   void writeLinkCell(Row row, int colIdx, String text, String url) {

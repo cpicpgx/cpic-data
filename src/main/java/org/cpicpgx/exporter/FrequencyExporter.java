@@ -1,0 +1,155 @@
+package org.cpicpgx.exporter;
+
+import org.cpicpgx.db.ConnectionFactory;
+import org.pharmgkb.common.comparator.HaplotypeNameComparator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
+import java.util.regex.Pattern;
+
+/**
+ * Exports a frequency excel sheet for every gene in the database that has frequency data
+ *
+ * @author Ryan Whaley
+ */
+public class FrequencyExporter extends BaseExporter {
+  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Pattern REF_ALLELE_PATTERN = Pattern.compile("^(\\*1|.*[Rr]eference.*)$");
+
+  public static void main(String[] args) {
+    FrequencyExporter exporter = new FrequencyExporter();
+    try {
+      exporter.parseArgs(args);
+      exporter.export();
+    } catch (Exception ex) {
+      sf_logger.error("Error exporting frequencies", ex);
+    }
+  }
+  
+  @Override
+  public void export() throws Exception {
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      try (
+          PreparedStatement pstmt = conn.prepareStatement(
+              "select distinct geneSymbol from population_frequency_view order by 1");
+          PreparedStatement stmt = conn.prepareStatement(
+              "select distinct a.name, a.id from allele_frequency f join allele a on f.alleleid = a.id where a.genesymbol=? order by 1");
+          PreparedStatement popsStmt = conn.prepareStatement(
+              "select distinct coalesce(p2.pmid, p2.url, p2.pmcid, p2.doi), p.ethnicity, p.population, p.populationinfo, p.subjecttype, p2.authors, p2.year, p.id, p.subjectcount\n" +
+              "from allele_frequency f join population p on f.population = p.id join allele a on f.alleleid = a.id\n" +
+              "left join publication p2 on p.publicationId=p2.id\n" +
+              "where a.genesymbol=? order by p.ethnicity, p2.year, p.population");
+          PreparedStatement afStmt = conn.prepareStatement(
+              "select f.label from allele_frequency f where f.population=? and f.alleleid=?");
+          PreparedStatement ethStmt = conn.prepareStatement(
+              "select distinct population_group " +
+                  "from population_frequency_view v where v.population_group != 'n/a' and v.genesymbol=?");
+          PreparedStatement ethAlleleStmt = conn.prepareStatement(
+              "select freq_weighted_avg from population_frequency_view v where v.name=? and v.population_group=? and v.genesymbol=?"
+          );
+          PreparedStatement refFreqStmt = conn.prepareStatement(
+              "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
+          ResultSet rs = pstmt.executeQuery();
+      ) {
+        // gene loop
+        while (rs.next()) {
+          String geneSymbol = rs.getString(1);
+          FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol);
+
+          // write the header row
+          Map<String, Integer> alleles = new TreeMap<>(HaplotypeNameComparator.getComparator());
+          stmt.setString(1, geneSymbol);
+          try (ResultSet r = stmt.executeQuery()) {
+            while (r.next()) {
+              alleles.put(r.getString(1), r.getInt(2));
+            }
+          }
+          workbook.writeReferenceHeader(alleles.keySet());
+          
+          // population loop (rows)
+          popsStmt.setString(1, geneSymbol);
+          try (ResultSet r = popsStmt.executeQuery()) {
+            while (r.next()) {
+
+              Array authorArray = r.getArray(6);
+              int popId = r.getInt(8);
+              String[] authors = null;
+              if (authorArray != null) {
+                authors = (String[])authorArray.getArray();
+              }
+
+              // allele loop (columns after standard)
+              String[] frequencies = new String[alleles.keySet().size()];
+              int i=0;
+              for (String alleleName : alleles.keySet()) {
+                Integer alleleId = alleles.get(alleleName);
+                afStmt.clearParameters();
+                afStmt.setInt(1, popId);
+                afStmt.setInt(2, alleleId);
+                try (ResultSet afrs = afStmt.executeQuery()) {
+                  while (afrs.next()) {
+                    frequencies[i] = afrs.getString(1);
+                  }
+                }
+                i += 1;
+              }
+              
+              workbook.writePopulation(
+                  authors,
+                  r.getInt(7),
+                  r.getString(1),
+                  r.getString(2),
+                  r.getString(3),
+                  r.getString(4),
+                  r.getString(5),
+                  r.getInt(9),
+                  frequencies);
+            }
+          }
+
+          workbook.writeEthnicity();
+          ethStmt.setString(1, geneSymbol);
+          SortedSet<String> ethnicities = new TreeSet<>();
+          try (ResultSet eth = ethStmt.executeQuery()) {
+            while (eth.next()) {
+              ethnicities.add(eth.getString(1));
+            }
+          }
+          for (String allele : alleles.keySet()) {
+            PreparedStatement specificStmt;
+            if (REF_ALLELE_PATTERN.matcher(allele).matches()) {
+              specificStmt = refFreqStmt;
+            } else {
+              specificStmt = ethAlleleStmt;
+            }
+
+            Double[] frequencies = new Double[ethnicities.size()];
+            int i = 0;
+            for (String ethnicity : ethnicities) {
+              specificStmt.clearParameters();
+              specificStmt.setString(1, allele);
+              specificStmt.setString(2, ethnicity);
+              specificStmt.setString(3, geneSymbol);
+              try (ResultSet ethAllele = specificStmt.executeQuery()) {
+                while (ethAllele.next()) {
+                  double freq = ethAllele.getDouble(1);
+                  frequencies[i] = freq;
+                }
+              }
+              i += 1;
+            }
+            workbook.writeEthnicitySummary(allele, frequencies);
+          }
+          
+          writeWorkbook(workbook);
+        }
+      }
+    }
+  }
+}

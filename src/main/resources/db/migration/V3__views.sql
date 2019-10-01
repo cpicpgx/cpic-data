@@ -40,7 +40,7 @@ COMMENT ON COLUMN allele_guideline_view.guideline_url IS 'The URL to the guideli
 CREATE VIEW population_frequency_view AS
 select
     a.genesymbol, a.name,
-    case when p.population = 'African-American' then p.population else p.ethnicity end as population_group,
+    p.ethnicity as population_group,
     sum(subjectcount) as subjectcount,
     round((sum((subjectcount * frequency)/100) / sum(subjectcount))*100, 2) as freq_weighted_avg,
     round(avg(frequency), 2) as freq_avg
@@ -51,4 +51,4 @@ from
 where
     frequency is not null
 group by
-    a.genesymbol, a.name, case when p.population = 'African-American' then p.population else p.ethnicity end;
+    a.genesymbol, a.name, p.ethnicity;

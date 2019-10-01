@@ -65,7 +65,7 @@ public class FrequencyProcessor implements AutoCloseable {
     this.insertStatement = 
         this.conn.prepareStatement("insert into allele_frequency(alleleid, population, frequency, label) values (?, ?, ?, ?)");
     this.insertPopulation = 
-        this.conn.prepareStatement("insert into population(ethnicity, population, populationinfo, subjecttype, subjectcount, citation) values (?, ?, ?, ?, ?, ?) returning (id)");
+        this.conn.prepareStatement("insert into population(ethnicity, population, populationinfo, subjecttype, subjectcount, publicationId) values (?, ?, ?, ?, ?, ?) returning (id)");
     
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
@@ -75,7 +75,7 @@ public class FrequencyProcessor implements AutoCloseable {
         sf_logger.debug("Will get pmid at column {}", getPmidIdx());
         sf_logger.debug("Will get N at column {}", getNIdx());
       }
-      if (StringUtils.isNotBlank(cellText) && alleleNameMap.keySet().contains(cellText)) {
+      if (StringUtils.isNotBlank(cellText) && alleleNameMap.containsKey(cellText)) {
         colIdxAlleleIdMap.put((int)i, alleleNameMap.get(cellText));
         sf_logger.debug("Will get {} frequencies from column {}", cellText, i);
       }
@@ -145,21 +145,23 @@ public class FrequencyProcessor implements AutoCloseable {
 
     String author = row.getNullableText(getAuthorIdx());
     String pubYear = row.getNullableText(getPubYearIdx(), true);
-    String pmid = row.getNullableText(getPmidIdx(), true);
-    this.publicationCatalog.add(pmid, pubYear, author);
+    String externalId = row.getNullableText(getPmidIdx(), true);
+    Integer publicationId = this.publicationCatalog.lookupId(externalId, pubYear, author);
 
     this.insertPopulation.setString(1, row.getNullableText(getEthIdx()));
     this.insertPopulation.setString(2, row.getNullableText(getPopIdx()));
     this.insertPopulation.setString(3, row.getNullableText(getPopInfoIdx()));
     this.insertPopulation.setString(4, row.getNullableText(getSubjTypeIdx()));
     this.insertPopulation.setLong(5, row.getNullableLong(getNIdx()));
-    this.insertPopulation.setString(6, pmid);
-    
+    if (publicationId != null) {
+      this.insertPopulation.setInt(6, publicationId);
+    } else {
+      this.insertPopulation.setNull(6, Types.INTEGER);
+    }
     ResultSet rs = this.insertPopulation.executeQuery();
     if (!rs.next()) {
       throw new RuntimeException("Insert failed");
     }
-    
     Long popId = rs.getLong(1);
     
     for (Integer colIdx : colIdxAlleleIdMap.keySet()) {

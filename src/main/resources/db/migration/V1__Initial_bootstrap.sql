@@ -49,6 +49,7 @@ CREATE TABLE publication
   pmid TEXT,
   pmcid TEXT,
   doi TEXT,
+  url TEXT,
   version INTEGER DEFAULT 1
 );
 
@@ -56,12 +57,13 @@ CREATE TRIGGER version_publication
   BEFORE UPDATE ON publication
   FOR EACH ROW EXECUTE PROCEDURE increment_version();
 
-COMMENT ON TABLE publication IS 'Published literature';
+COMMENT ON TABLE publication IS 'Documents published to an external resource';
 COMMENT ON COLUMN publication.id IS 'A synthetic numerical ID, auto-assigned, primary key';
 COMMENT ON COLUMN publication.guidelineId IS 'The ID for the guideline this publication is about, optional';
 COMMENT ON COLUMN publication.pmid IS 'The PubMed identifier for this publication';
 COMMENT ON COLUMN publication.pmcid IS 'The PubMed Central identifier for this publication';
 COMMENT ON COLUMN publication.doi IS 'The Document Object Identifier (DOI) for this publication';
+COMMENT ON COLUMN publication.url IS 'The URL for this publication';
 
 
 CREATE TABLE gene
@@ -179,7 +181,7 @@ COMMENT ON COLUMN translation_note.note IS 'The text of the note about allele tr
 CREATE TABLE population
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  citation VARCHAR(200),
+  publicationId INTEGER REFERENCES publication(id),
   ethnicity VARCHAR(50) NOT NULL,
   population VARCHAR(200),
   populationInfo VARCHAR(500),
@@ -194,7 +196,7 @@ CREATE TRIGGER version_population
 
 COMMENT ON TABLE population IS 'A population description of a group of subjects';
 COMMENT ON COLUMN population.id IS 'A synthetic primary key ID';
-COMMENT ON COLUMN population.citation IS 'A PubMed ID for a citation of this population';
+COMMENT ON COLUMN population.publicationId IS 'A reference to a publication';
 COMMENT ON COLUMN population.ethnicity IS 'The major ethnicity grouping of this population';
 COMMENT ON COLUMN population.population IS 'The descriptive name of this population (optional)';
 COMMENT ON COLUMN population.populationInfo IS 'Further information about this population (optional)';

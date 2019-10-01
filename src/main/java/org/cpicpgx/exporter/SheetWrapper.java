@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
  * @author Ryan Whaley
  */
 public class SheetWrapper {
-  private Sheet sheet;
+  public Sheet sheet;
   private Integer[] widths;
   private int colCount;
   private int rowIdx = 0;
