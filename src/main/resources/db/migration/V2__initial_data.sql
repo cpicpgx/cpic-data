@@ -749,6 +749,7 @@ YEATS4	RxNorm:5487	\N	1	D	2B		{}
 XRCC1	RxNorm:1311280	\N	2	D			{}
 VKORC1	RxNorm:11289	100425	1	A	1A	Actionable PGx	{21900891,28198005}
 G6PD	RxNorm:2054023	\N	1	A		Testing Required	{}
+CYP2C9	RxNorm:2054023	\N	1	A		Testing Required	{}
 \.
 
 
