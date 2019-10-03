@@ -1,10 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.cpicpgx.util.WorkbookWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.invoke.MethodHandles;
 import java.sql.SQLException;
 
 /**
@@ -14,11 +11,10 @@ import java.sql.SQLException;
  * @author Ryan Whaley
  */
 public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
-  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String[] sf_deleteStatements = new String[]{
       "delete from translation_note",
       "delete from allele_location_value",
-      "delete from allele",
+      "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from sequence_location"
   };
   private static final String DEFAULT_DIRECTORY = "allele_definition_tables";
