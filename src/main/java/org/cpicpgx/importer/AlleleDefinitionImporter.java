@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Whaley
  */
+@SuppressWarnings("SpellCheckingInspection")
 public class AlleleDefinitionImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int sf_variantColStart = 2;
@@ -37,7 +38,6 @@ public class AlleleDefinitionImporter {
   private static final String sf_notes = "NOTES:";
   
   private String m_gene;
-  private Date m_revisionDate;
   private int m_variantColEnd;
   private String m_proteinSeqId;
   private String m_chromoSeqId;
@@ -77,7 +77,6 @@ public class AlleleDefinitionImporter {
       Sheet sheet = workbook.currentSheet;
 
       readGene(sheet);
-      readRevision(sheet);
       readLegacyRow(sheet);
       readProteinRow(sheet);
       readChromoRow(sheet);
@@ -93,11 +92,6 @@ public class AlleleDefinitionImporter {
     m_gene = geneOpt
         .orElseThrow(IllegalStateException::new)
         .replaceAll("GENE:\\s*", "");
-  }
-  
-  private void readRevision(Sheet sheet) {
-    Row row = sheet.getRow(0);
-    m_revisionDate = row.getCell(1).getDateCellValue();
   }
   
   private void readLegacyRow(Sheet sheet) {
@@ -232,12 +226,11 @@ public class AlleleDefinitionImporter {
 
       PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleleid, locationid, variantallele) values (?,?,?)");
       
-      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,alleleslastmodified=? where symbol=?");
+      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=? where symbol=?");
       geneUpdate.setString(1, m_geneSeqId);
       geneUpdate.setString(2, m_proteinSeqId);
       geneUpdate.setString(3, m_chromoSeqId);
-      geneUpdate.setDate(4, new java.sql.Date(m_revisionDate.getTime()));
-      geneUpdate.setString(5, m_gene);
+      geneUpdate.setString(4, m_gene);
       geneUpdate.executeUpdate();
 
       PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) values (?,?,?,?,?,?) returning (id)");

@@ -90,11 +90,9 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     }
     
     sf_logger.debug("This sheet is for {}, {}", geneSymbol, row.getNullableText(1));
-    java.util.Date modDate = row.getNullableDate(1);
     
     rowIdx += 2; // move down 2 rows and start reading;
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
-      dbHarness.updateModified(new java.sql.Date(modDate.getTime()));
       if (GENES_WITH_FINDINGS.contains(geneSymbol)) {
         processPerFinding(workbook, dbHarness, rowIdx);
       } else {
@@ -160,10 +158,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private PreparedStatement updateAlleleStmt;
     private PreparedStatement insertStmt;
     private PreparedStatement insertFinding;
-    private String gene;
     
     DbHarness(String gene) throws SQLException {
-      this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
 
       try (PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?")) {
@@ -178,14 +174,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       updateAlleleStmt = this.conn.prepareStatement("update allele set functionalstatus=? where id=?");
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, substrate_in_vitro, substrate_in_vivo) values (?, ?, ?, ?)");
       insertFinding = this.conn.prepareStatement("insert into function_reference(alleleid, pmid, finding) values (?, ?, ?)");
-    }
-    
-    void updateModified(java.sql.Date date) throws SQLException {
-      try (PreparedStatement stmt = this.conn.prepareStatement("update gene set functionalityreferencelastmodified=? where symbol=?")) {
-        stmt.setDate(1, date);
-        stmt.setString(2, gene);
-        stmt.executeUpdate();
-      }
     }
     
     void insert(String allele, String alleleFunction, Long pmid, String[] inVitro, String[] inVivo) throws SQLException {
