@@ -55,7 +55,7 @@ public class FrequencyExporter extends BaseExporter {
           );
           PreparedStatement refFreqStmt = conn.prepareStatement(
               "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
-          ResultSet rs = pstmt.executeQuery();
+          ResultSet rs = pstmt.executeQuery()
       ) {
         // gene loop
         while (rs.next()) {
@@ -85,6 +85,9 @@ public class FrequencyExporter extends BaseExporter {
           for (String ethnicity : ethnicities) {
             popsStmt.setString(1, geneSymbol);
             popsStmt.setString(2, ethnicity);
+            
+            workbook.writeEthnicityHeader(ethnicity, alleles.size());
+            
             try (ResultSet r = popsStmt.executeQuery()) {
               while (r.next()) {
 

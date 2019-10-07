@@ -130,6 +130,15 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private Row currentMaxFreqRow;
   private int currentPopSummaryAlleleCol;
 
+  void writeEthnicityHeader(String ethnicity, int numAlleles) {
+    Row row = sheetReferences.nextRow();
+    writeTopBorderCell(row, 0, ethnicity);
+    for (int i = 1; i < REFERENCE_POP_HEADER_COL_COUNT + numAlleles; i++) {
+      writeTopBorderCell(row, i, "");
+    }
+    sheetReferences.sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, REFERENCE_POP_HEADER_COL_COUNT + numAlleles));
+  }
+
   void startPopulationSummary() {
     currentMinFreqRow = sheetReferences.nextRow();
     currentFreqRow = sheetReferences.nextRow();
