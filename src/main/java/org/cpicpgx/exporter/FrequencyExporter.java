@@ -44,14 +44,14 @@ public class FrequencyExporter extends BaseExporter {
               "select distinct coalesce(p2.pmid, p2.url, p2.pmcid, p2.doi), p.ethnicity, p.population, p.populationinfo, p.subjecttype, p2.authors, p2.year, p.id, p.subjectcount\n" +
               "from allele_frequency f join population p on f.population = p.id join allele a on f.alleleid = a.id\n" +
               "left join publication p2 on p.publicationId=p2.id\n" +
-              "where a.genesymbol=? order by p.ethnicity, p2.year, p.population");
+              "where a.genesymbol=? and p.ethnicity=? order by p.ethnicity, p2.year, p.population");
           PreparedStatement afStmt = conn.prepareStatement(
               "select f.label from allele_frequency f where f.population=? and f.alleleid=?");
           PreparedStatement ethStmt = conn.prepareStatement(
               "select distinct population_group " +
                   "from population_frequency_view v where v.population_group != 'n/a' and v.genesymbol=?");
           PreparedStatement ethAlleleStmt = conn.prepareStatement(
-              "select freq_weighted_avg from population_frequency_view v where v.name=? and v.population_group=? and v.genesymbol=?"
+              "select freq_weighted_avg, freq_max, freq_min from population_frequency_view v where v.name=? and v.population_group=? and v.genesymbol=?"
           );
           PreparedStatement refFreqStmt = conn.prepareStatement(
               "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
@@ -61,6 +61,15 @@ public class FrequencyExporter extends BaseExporter {
         while (rs.next()) {
           String geneSymbol = rs.getString(1);
           FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol);
+
+          // get the ethnicities applicable to this gene
+          ethStmt.setString(1, geneSymbol);
+          SortedSet<String> ethnicities = new TreeSet<>();
+          try (ResultSet eth = ethStmt.executeQuery()) {
+            while (eth.next()) {
+              ethnicities.add(eth.getString(1));
+            }
+          }
 
           // write the header row
           Map<String, Integer> alleles = new TreeMap<>(HaplotypeNameComparator.getComparator());
@@ -73,54 +82,67 @@ public class FrequencyExporter extends BaseExporter {
           workbook.writeReferenceHeader(alleles.keySet());
           
           // population loop (rows)
-          popsStmt.setString(1, geneSymbol);
-          try (ResultSet r = popsStmt.executeQuery()) {
-            while (r.next()) {
+          for (String ethnicity : ethnicities) {
+            popsStmt.setString(1, geneSymbol);
+            popsStmt.setString(2, ethnicity);
+            try (ResultSet r = popsStmt.executeQuery()) {
+              while (r.next()) {
 
-              Array authorArray = r.getArray(6);
-              int popId = r.getInt(8);
-              String[] authors = null;
-              if (authorArray != null) {
-                authors = (String[])authorArray.getArray();
-              }
-
-              // allele loop (columns after standard)
-              String[] frequencies = new String[alleles.keySet().size()];
-              int i=0;
-              for (String alleleName : alleles.keySet()) {
-                Integer alleleId = alleles.get(alleleName);
-                afStmt.clearParameters();
-                afStmt.setInt(1, popId);
-                afStmt.setInt(2, alleleId);
-                try (ResultSet afrs = afStmt.executeQuery()) {
-                  while (afrs.next()) {
-                    frequencies[i] = afrs.getString(1);
-                  }
+                Array authorArray = r.getArray(6);
+                int popId = r.getInt(8);
+                String[] authors = null;
+                if (authorArray != null) {
+                  authors = (String[]) authorArray.getArray();
                 }
-                i += 1;
+
+                // allele loop (columns after standard)
+                String[] frequencies = new String[alleles.keySet().size()];
+                int i = 0;
+                for (String alleleName : alleles.keySet()) {
+                  Integer alleleId = alleles.get(alleleName);
+                  afStmt.clearParameters();
+                  afStmt.setInt(1, popId);
+                  afStmt.setInt(2, alleleId);
+                  try (ResultSet afrs = afStmt.executeQuery()) {
+                    while (afrs.next()) {
+                      frequencies[i] = afrs.getString(1);
+                    }
+                  }
+                  i += 1;
+                }
+
+                workbook.writePopulation(
+                    authors,
+                    r.getInt(7),
+                    r.getString(1),
+                    r.getString(2),
+                    r.getString(3),
+                    r.getString(4),
+                    r.getString(5),
+                    r.getInt(9),
+                    frequencies);
               }
-              
-              workbook.writePopulation(
-                  authors,
-                  r.getInt(7),
-                  r.getString(1),
-                  r.getString(2),
-                  r.getString(3),
-                  r.getString(4),
-                  r.getString(5),
-                  r.getInt(9),
-                  frequencies);
+            }
+
+            workbook.startPopulationSummary();
+            for (String allele : alleles.keySet()) {
+              ethAlleleStmt.setString(1, allele);
+              ethAlleleStmt.setString(2, ethnicity);
+              ethAlleleStmt.setString(3, geneSymbol);
+              try (ResultSet rsEth = ethAlleleStmt.executeQuery()) {
+                boolean wroteSummary = false;
+                while (rsEth.next()) {
+                  workbook.writePopulationSummary(rsEth.getDouble(3), rsEth.getDouble(1), rsEth.getDouble(2));
+                  wroteSummary = true;
+                }
+                if (!wroteSummary) {
+                  workbook.writeEmptyPopulationSummary();
+                }
+              }
             }
           }
 
           workbook.writeEthnicity();
-          ethStmt.setString(1, geneSymbol);
-          SortedSet<String> ethnicities = new TreeSet<>();
-          try (ResultSet eth = ethStmt.executeQuery()) {
-            while (eth.next()) {
-              ethnicities.add(eth.getString(1));
-            }
-          }
           for (String allele : alleles.keySet()) {
             PreparedStatement specificStmt;
             if (REF_ALLELE_PATTERN.matcher(allele).matches()) {

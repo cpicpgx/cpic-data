@@ -100,6 +100,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
     sheetReferences.setColCount(headerIdx);
   }
   
+  private static final int REFERENCE_POP_HEADER_COL_COUNT = 8;
   void writePopulation(String[] authors, Integer year, String pmid, String ethnicity, String population, String popInfo,
                        String subjectType, Integer subjectCount, String[] frequencies) {
     ethnicities.add(ethnicity);
@@ -115,13 +116,37 @@ class FrequencyWorkbook extends AbstractWorkbook {
     writeStringCell(row, 5, popInfo);
     writeStringCell(row, 6, subjectType);
     writeIntegerCell(row, 7, subjectCount);
-    int i=8;
+    int i = REFERENCE_POP_HEADER_COL_COUNT;
     for (String frequency : frequencies) {
       if (frequency != null) {
         writeStringCell(row, i, frequency);
       }
       i += 1;
     }
+  }
+  
+  private Row currentMinFreqRow;
+  private Row currentFreqRow;
+  private Row currentMaxFreqRow;
+  private int currentPopSummaryAlleleCol;
+
+  void startPopulationSummary() {
+    currentMinFreqRow = sheetReferences.nextRow();
+    currentFreqRow = sheetReferences.nextRow();
+    currentMaxFreqRow = sheetReferences.nextRow();
+    currentPopSummaryAlleleCol = REFERENCE_POP_HEADER_COL_COUNT;
+    sheetReferences.nextRow();
+  }
+  
+  void writePopulationSummary(double minFreq, double freq, double maxFreq) {
+    writeDoubleCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq);
+    writeDoubleCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
+    writeDoubleCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq);
+    currentPopSummaryAlleleCol += 1;
+  }
+  
+  void writeEmptyPopulationSummary() {
+    currentPopSummaryAlleleCol += 1;
   }
   
   private static final String TITLE_TEMPLATE = "Frequencies of %s alleles in major race/ethnic groups";

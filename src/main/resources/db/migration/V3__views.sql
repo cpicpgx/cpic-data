@@ -42,8 +42,10 @@ select
     a.genesymbol, a.name,
     p.ethnicity as population_group,
     sum(subjectcount) as subjectcount,
-    round((sum((subjectcount * frequency)/100) / sum(subjectcount))*100, 2) as freq_weighted_avg,
-    round(avg(frequency), 2) as freq_avg
+    (sum((subjectcount * frequency)/100) / sum(subjectcount))*100 as freq_weighted_avg,
+    avg(frequency) as freq_avg,
+    max(frequency) freq_max,
+    min(frequency) freq_min
 from
     population p
         join allele_frequency af on p.id = af.population

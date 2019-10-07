@@ -66,7 +66,7 @@ public abstract class AbstractWorkbook {
     this.rightNumberStyle.setFont(newFont);
     
     this.decimalNumberStyle = this.workbook.createCellStyle();
-    this.decimalNumberStyle.setDataFormat(this.workbook.createDataFormat().getFormat("0.00"));
+    this.decimalNumberStyle.setDataFormat(this.workbook.createDataFormat().getFormat("0.0000"));
     this.decimalNumberStyle.setAlignment(HorizontalAlignment.RIGHT);
     this.decimalNumberStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.decimalNumberStyle.setFont(newFont);
