@@ -31,6 +31,8 @@ public abstract class AbstractWorkbook {
   private CellStyle headerStyle;
   private CellStyle boldStyle;
   private CellStyle topBorderStyle;
+  private CellStyle highlightStyle;
+  private CellStyle highlightDoubleStyle;
   CellStyle wrapStyle;
 
   int colIdx = 1;
@@ -97,6 +99,29 @@ public abstract class AbstractWorkbook {
     
     this.topBorderStyle = this.workbook.createCellStyle();
     this.topBorderStyle.setBorderTop(BorderStyle.THIN);
+    
+    this.highlightStyle = this.workbook.createCellStyle();
+    this.highlightStyle.setAlignment(HorizontalAlignment.CENTER);
+    this.highlightStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.highlightStyle.setFont(newFont);
+    this.highlightStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.index);
+    this.highlightStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    this.highlightStyle.setBorderTop(BorderStyle.HAIR);
+    this.highlightStyle.setBorderBottom(BorderStyle.HAIR);
+    this.highlightStyle.setBorderLeft(BorderStyle.HAIR);
+    this.highlightStyle.setBorderRight(BorderStyle.HAIR);
+
+    this.highlightDoubleStyle = this.workbook.createCellStyle();
+    this.highlightDoubleStyle.setDataFormat(this.workbook.createDataFormat().getFormat("0.0000"));
+    this.highlightDoubleStyle.setAlignment(HorizontalAlignment.RIGHT);
+    this.highlightDoubleStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.highlightDoubleStyle.setFont(newFont);
+    this.highlightDoubleStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.index);
+    this.highlightDoubleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    this.highlightDoubleStyle.setBorderTop(BorderStyle.HAIR);
+    this.highlightDoubleStyle.setBorderBottom(BorderStyle.HAIR);
+    this.highlightDoubleStyle.setBorderLeft(BorderStyle.HAIR);
+    this.highlightDoubleStyle.setBorderRight(BorderStyle.HAIR);
   }
   
   abstract String getFilename();
@@ -175,6 +200,18 @@ public abstract class AbstractWorkbook {
       Cell cell = row.createCell(colIdx);
       cell.setCellValue(value);
       cell.setCellStyle(this.decimalNumberStyle);
+    }
+  }
+
+  void writeHighlightCell(Row row, int colIdx, String value) {
+    writeStringCell(row, colIdx, value, this.highlightStyle);
+  }
+
+  void writeHighlightCell(Row row, int colIdx, Double value) {
+    if (value != null) {
+      Cell cell = row.createCell(colIdx);
+      cell.setCellValue(value);
+      cell.setCellStyle(this.highlightDoubleStyle);
     }
   }
 

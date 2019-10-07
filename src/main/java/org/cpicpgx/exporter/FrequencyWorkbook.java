@@ -140,21 +140,28 @@ class FrequencyWorkbook extends AbstractWorkbook {
   }
 
   void startPopulationSummary() {
-    currentMinFreqRow = sheetReferences.nextRow();
     currentFreqRow = sheetReferences.nextRow();
+    currentMinFreqRow = sheetReferences.nextRow();
     currentMaxFreqRow = sheetReferences.nextRow();
     currentPopSummaryAlleleCol = REFERENCE_POP_HEADER_COL_COUNT;
     sheetReferences.nextRow();
+    
+    writeHighlightCell(currentMinFreqRow, REFERENCE_POP_HEADER_COL_COUNT-1, "Min");
+    writeHighlightCell(currentFreqRow, REFERENCE_POP_HEADER_COL_COUNT-1, "Average");
+    writeHighlightCell(currentMaxFreqRow, REFERENCE_POP_HEADER_COL_COUNT-1, "Max");
   }
   
   void writePopulationSummary(double minFreq, double freq, double maxFreq) {
-    writeDoubleCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq);
-    writeDoubleCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
-    writeDoubleCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq);
+    writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq);
+    writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
+    writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq);
     currentPopSummaryAlleleCol += 1;
   }
   
   void writeEmptyPopulationSummary() {
+    writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, "");
+    writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, "");
+    writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, "");
     currentPopSummaryAlleleCol += 1;
   }
   
