@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +72,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
         try (
             PreparedStatement alleleStmt = conn.prepareStatement("select name, functionalstatus, id from allele where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?");
-            PreparedStatement notesStmt = conn.prepareStatement("select note from translation_note where genesymbol=?")
+            PreparedStatement notesStmt = conn.prepareStatement("select note from gene_note where genesymbol=? and type=? order by ordinal, note")
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
@@ -88,6 +89,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
             }
           }
           notesStmt.setString(1, symbol);
+          notesStmt.setString(2, NoteType.ALLELE_DEFINITION.name());
           try (ResultSet rs = notesStmt.executeQuery()) {
             boolean wroteHeader = false;
             while (rs.next()) {

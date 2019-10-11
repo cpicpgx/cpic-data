@@ -123,8 +123,8 @@ COMMENT ON COLUMN allele.geneSymbol IS 'The HGNC symbol of the gene the allele i
 COMMENT ON COLUMN allele.name IS 'The name of this allele, required';
 COMMENT ON COLUMN allele.functionalStatus IS 'The functional phenotype of this allele';
 COMMENT ON COLUMN allele.clinicalFunctionalStatus IS 'The functional phenotype of this allele used for clinical systems';
-COMMENT ON COLUMN allele.clinicalFunctionalSubstrate IS 'Allele clinical function substrate specificity (optional)';
-COMMENT ON COLUMN allele.activityScore IS 'Descriptor of activity score (optional)';
+COMMENT ON COLUMN allele.clinicalFunctionalSubstrate IS 'Allele clinical function substrate specificity, optional';
+COMMENT ON COLUMN allele.activityScore IS 'Descriptor of activity score, optional';
 COMMENT ON COLUMN allele.pharmvarId IS 'The PharmVar core allele ID for this allele';
 
 
@@ -168,20 +168,23 @@ CREATE TRIGGER version_pallele_location_value
 COMMENT ON TABLE allele_location_value IS 'The change at a specific location for a specific allele';
 
 
-CREATE TABLE translation_note
+CREATE TABLE gene_note
 (
-  geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
-  note TEXT NOT NULL,
-  version INTEGER DEFAULT 1
+    geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    ordinal INTEGER NOT NULL,
+    note TEXT NOT NULL,
+    version INTEGER DEFAULT 1
 );
-
-CREATE TRIGGER version_translation_note
-  BEFORE UPDATE ON translation_note
+CREATE TRIGGER version_gene_note
+  BEFORE UPDATE ON gene_note
   FOR EACH ROW EXECUTE PROCEDURE increment_version();
-
-COMMENT ON TABLE translation_note IS 'A note about allele translation for a gene';
-COMMENT ON COLUMN translation_note.geneSymbol IS 'The HGNC gene symbol for the gene this note is about, required';
-COMMENT ON COLUMN translation_note.note IS 'The text of the note about allele translation, required';
+COMMENT ON TABLE gene_note IS 'A note about a gene';
+COMMENT ON COLUMN gene_note.geneSymbol IS 'The HGNC gene symbol for the gene this note is about, required';
+COMMENT ON COLUMN gene_note.type IS 'The type of information this note is about, required';
+COMMENT ON COLUMN gene_note.ordinal IS 'A number for sort order of this note compared to other notes for this gene-type';
+COMMENT ON COLUMN gene_note.note IS 'The text of the note about allele translation, required';
+COMMENT ON COLUMN gene_note.version IS 'The version number, iterates on modification';
 
 
 CREATE TABLE population
@@ -204,8 +207,8 @@ COMMENT ON TABLE population IS 'A population description of a group of subjects'
 COMMENT ON COLUMN population.id IS 'A synthetic primary key ID';
 COMMENT ON COLUMN population.publicationId IS 'A reference to a publication';
 COMMENT ON COLUMN population.ethnicity IS 'The major ethnicity grouping of this population';
-COMMENT ON COLUMN population.population IS 'The descriptive name of this population (optional)';
-COMMENT ON COLUMN population.populationInfo IS 'Further information about this population (optional)';
+COMMENT ON COLUMN population.population IS 'The descriptive name of this population, optional';
+COMMENT ON COLUMN population.populationInfo IS 'Further information about this population, optional';
 COMMENT ON COLUMN population.subjectType IS 'Information about the types of subjects in this population';
 COMMENT ON COLUMN population.subjectCount IS 'The total number of subjects in this population';
 COMMENT ON COLUMN population.version IS 'The version number, iterates on modification';

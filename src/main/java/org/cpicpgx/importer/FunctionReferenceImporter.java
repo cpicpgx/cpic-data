@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
@@ -34,7 +35,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final int COL_IDX_COMMENTS = 8;
 
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from function_reference"
+      "delete from function_reference",
+      "delete from gene_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
   };
   private static final String DEFAULT_DIRECTORY = "allele_functionality_reference";
 
@@ -88,7 +90,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
         row = workbook.getRow(rowIdx);
-        if (row.hasNoText(COL_IDX_ALLELE)) break;
+        if (row.hasNoText(COL_IDX_ALLELE) || row.getNullableText(COL_IDX_ALLELE).toLowerCase().startsWith("note")) break;
         
         String alleleName = row.getNullableText(COL_IDX_ALLELE);
         String activityScore = row.getNullableText(COL_IDX_ACTIVITY);
@@ -117,6 +119,13 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
             comments
         );
       }
+      
+      for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
+        row = workbook.getRow(rowIdx);
+        if (!row.hasNoText(0) && !row.getNullableText(0).toLowerCase().startsWith("note")) {
+          dbHarness.insertNote(row.getNullableText(0));
+        }
+      }
     }
     addImportHistory(workbook.getFileName());
   }
@@ -129,8 +138,12 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private Map<String, Long> alleleNameMap = new HashMap<>();
     private PreparedStatement updateAlleleStmt;
     private PreparedStatement insertStmt;
+    private PreparedStatement insertNoteStmt;
+    private int noteIdx = 0;
+    private String gene;
     
     DbHarness(String gene) throws SQLException {
+      this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
 
       try (PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?")) {
@@ -144,6 +157,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       
       updateAlleleStmt = this.conn.prepareStatement("update allele set functionalstatus=?, activityScore=?, clinicalFunctionalStatus=?, clinicalFunctionalSubstrate=? where id=?");
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?, ?)");
+      insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
     }
     
     void insert(
@@ -177,6 +191,16 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       setNullableText(this.updateAlleleStmt, 4, substrate);
       this.updateAlleleStmt.setLong(5, this.alleleNameMap.get(allele));
       this.updateAlleleStmt.executeUpdate();
+    }
+    
+    void insertNote(String note) throws SQLException {
+      this.insertNoteStmt.clearParameters();
+      this.insertNoteStmt.setString(1, gene);
+      this.insertNoteStmt.setString(2, note);
+      this.insertNoteStmt.setString(3, NoteType.FUNCTION_REFERENCE.name());
+      this.insertNoteStmt.setInt(4, this.noteIdx);
+      this.insertNoteStmt.executeUpdate();
+      this.noteIdx += 1;
     }
     
     private void setNullableText(PreparedStatement stmt, int idx, String value) throws SQLException {

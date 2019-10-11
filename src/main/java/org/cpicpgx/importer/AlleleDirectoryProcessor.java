@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.util.WorkbookWrapper;
 
 import java.sql.SQLException;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
  */
 public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from translation_note",
+      "delete from gene_note where type='" + NoteType.ALLELE_DEFINITION.name() + "'",
       "delete from allele_location_value",
       "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from sequence_location"

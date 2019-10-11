@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -276,11 +277,15 @@ public class AlleleDefinitionImporter {
       }
       sf_logger.info("created {} new alleles", m_alleles.keySet().size());
 
-      PreparedStatement noteInsert = conn.prepareStatement("insert into translation_note(geneSymbol, note) values (?,?)");
+      PreparedStatement noteInsert = conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
+      int n=0;
       for (String note : m_notes) {
         noteInsert.setString(1, m_gene);
         noteInsert.setString(2, note);
+        noteInsert.setString(3, NoteType.ALLELE_DEFINITION.name());
+        noteInsert.setInt(4, n);
         noteInsert.executeUpdate();
+        n += 1;
       }
       sf_logger.info("created {} new notes", m_notes.size());
     }
