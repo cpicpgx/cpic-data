@@ -172,7 +172,7 @@ public class AlleleDefinitionImporter {
     m_alleles = new LinkedHashMap<>();
     m_alleleFunctionMap = new LinkedHashMap<>();
     
-    for (int i=sf_alleleRowStart; i < sheet.getLastRowNum(); i++) {
+    for (int i=sf_alleleRowStart; i <= sheet.getLastRowNum(); i++) {
       try {
         Row row = sheet.getRow(i);
         if (row == null) {
