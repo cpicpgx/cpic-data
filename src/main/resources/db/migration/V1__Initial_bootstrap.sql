@@ -107,6 +107,9 @@ CREATE TABLE allele
   geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   name VARCHAR(200) NOT NULL,
   functionalStatus VARCHAR(200),
+  clinicalFunctionalStatus VARCHAR(200),
+  clinicalFunctionalSubstrate VARCHAR(200),
+  activityScore VARCHAR(50),
   pharmvarId VARCHAR(50)
 );
 
@@ -119,6 +122,9 @@ COMMENT ON COLUMN allele.id IS 'A synthetic numerical ID, auto-assigned, primary
 COMMENT ON COLUMN allele.geneSymbol IS 'The HGNC symbol of the gene the allele is for, required';
 COMMENT ON COLUMN allele.name IS 'The name of this allele, required';
 COMMENT ON COLUMN allele.functionalStatus IS 'The functional phenotype of this allele';
+COMMENT ON COLUMN allele.clinicalFunctionalStatus IS 'The functional phenotype of this allele used for clinical systems';
+COMMENT ON COLUMN allele.clinicalFunctionalSubstrate IS 'Allele clinical function substrate specificity (optional)';
+COMMENT ON COLUMN allele.activityScore IS 'Descriptor of activity score (optional)';
 COMMENT ON COLUMN allele.pharmvarId IS 'The PharmVar core allele ID for this allele';
 
 
@@ -232,10 +238,10 @@ CREATE TABLE function_reference
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   alleleid INTEGER NOT NULL REFERENCES allele(id),
-  pmid VARCHAR(50),
-  finding TEXT,
-  substrate_in_vitro TEXT[],
-  substrate_in_vivo TEXT[],
+  citations TEXT[],
+  strength TEXT,
+  findings TEXT,
+  comments TEXT,
   version INTEGER DEFAULT 1
 );
 
@@ -246,10 +252,10 @@ CREATE TRIGGER version_function_reference
 COMMENT ON TABLE function_reference IS 'A reference about this allele''s function with supporting info';
 COMMENT ON COLUMN function_reference.id IS 'The synthetic primary key for this reference';
 COMMENT ON COLUMN function_reference.alleleId IS 'The ID of the allele in the allele table this function is for';
-COMMENT ON COLUMN function_reference.pmid IS 'The PubMed ID of the citation for this function';
-COMMENT ON COLUMN function_reference.finding IS 'A finding form the publication';
-COMMENT ON COLUMN function_reference.substrate_in_vitro IS 'in vitro substrate';
-COMMENT ON COLUMN function_reference.substrate_in_vivo IS 'in vivo substrate';
+COMMENT ON COLUMN function_reference.citations IS 'An array of PubMed IDs use as citations for this functional assignment';
+COMMENT ON COLUMN function_reference.strength IS 'The strength of evidence';
+COMMENT ON COLUMN function_reference.findings IS 'Findings listed by PubMed ID';
+COMMENT ON COLUMN function_reference.comments IS 'General comments for this functional assignment';
 COMMENT ON COLUMN function_reference.version IS 'The version number, iterates on modification';
 
 
