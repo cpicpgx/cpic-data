@@ -25,10 +25,10 @@ public class DataImport {
   private String alleleDirectory = null;
   private String frequencyDirectory = null;
   private String functionDirectory = null;
-  private String diplotypeDirectory = null;
   private String recommendationDirectory = null;
   private String geneMappingDirectory = null;
   private String testAlertsDirectory = null;
+  private String geneCdsDirectory = null;
 
   private Path m_directory;
 
@@ -39,10 +39,10 @@ public class DataImport {
       options.addOption("ad", true,"allele definition subdirectory name");
       options.addOption("fd", true,"allele frequency subdirectory name");
       options.addOption("rd", true,"function reference subdirectory name");
-      options.addOption("dd", true,"diplotype-phenotype subdirectory name");
       options.addOption("dr", true,"recommendation subdirectory name");
       options.addOption("gm", true,"gene mapping subdirectory name");
       options.addOption("ta", true,"test alerts subdirectory name");
+      options.addOption("gc", true,"gene CDS subdirectory name");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
 
@@ -50,10 +50,10 @@ public class DataImport {
       processor.alleleDirectory         = cli.getOptionValue("ad");
       processor.frequencyDirectory      = cli.getOptionValue("fd");
       processor.functionDirectory       = cli.getOptionValue("rd");
-      processor.diplotypeDirectory      = cli.getOptionValue("dd");
       processor.recommendationDirectory = cli.getOptionValue("dr");
       processor.geneMappingDirectory    = cli.getOptionValue("gm");
       processor.testAlertsDirectory     = cli.getOptionValue("ta");
+      processor.geneCdsDirectory        = cli.getOptionValue("gc");
 
         processor.execute();
     } catch (ParseException e) {
@@ -89,7 +89,7 @@ public class DataImport {
     importers.add(new AlleleDirectoryProcessor().setDirectory(m_directory, alleleDirectory));
     importers.add(new AlleleFrequencyImporter().setDirectory(m_directory, frequencyDirectory));
     importers.add(new FunctionReferenceImporter().setDirectory(m_directory, functionDirectory));
-    importers.add(new DiplotypePhenotypeImporter().setDirectory(m_directory, diplotypeDirectory));
+    importers.add(new GeneCdsImporter().setDirectory(m_directory, geneCdsDirectory));
     importers.add(new RecommendationImporter().setDirectory(m_directory, recommendationDirectory));
     importers.add(new TestAlertImporter().setDirectory(m_directory, testAlertsDirectory));
     

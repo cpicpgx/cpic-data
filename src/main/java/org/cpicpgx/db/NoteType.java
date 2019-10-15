@@ -8,6 +8,7 @@ package org.cpicpgx.db;
 public enum NoteType {
   
   ALLELE_DEFINITION,
+  CDS,
   FUNCTION_REFERENCE,
   TEST_ALERT
 }

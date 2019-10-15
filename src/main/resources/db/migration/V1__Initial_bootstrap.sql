@@ -407,6 +407,7 @@ CREATE TABLE gene_phenotype
   consultationText TEXT,
   activityScore NUMERIC,
   version INTEGER DEFAULT 1,
+  notes TEXT,
 
   UNIQUE (geneSymbol, phenotype)
 );
