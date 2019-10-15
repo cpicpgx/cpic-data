@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
@@ -58,6 +59,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     sf_twoTriggerDrugs.add("RxNorm:10834"); // trimipramine
   }
   private static final String[] sf_deleteStatements = new String[]{
+      "delete from drug_note where type='" + NoteType.TEST_ALERT.name() + "'",
       "delete from test_alerts"
   };
   private static final String DEFAULT_DIRECTORY = "test_alerts";
@@ -106,16 +108,34 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {
     PreparedStatement insert = conn.prepareStatement(
         "insert into test_alerts(cds_context, trigger_condition, drugid, reference_point, alert_text) values (?, ?, ?, ?, ?)");
+    PreparedStatement insertNote = conn.prepareStatement(
+        "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
 
     String lastTrigger1 = null;
     String lastTrigger2 = null;
     String lastRefPoint = null;
     String lastContext = null;
     List<String> alerts = new ArrayList<>();
+    int noteIdx = 0;
     for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
       sf_logger.debug("reading row {}", i);
       RowWrapper row = workbook.getRow(i);
-      if (row.row == null) break;
+
+      // no text at either the beginning or the end, skip it
+      if (row.hasNoText(0) && row.hasNoText(4)) continue;
+
+      // if there's only text in the first column, it must be a note
+      if (row.hasNoText(4) && row.getNullableText(0) != null) {
+        if (!row.getNullableText(0).toLowerCase().startsWith("note")) {
+          insertNote.clearParameters();
+          insertNote.setString(1, drugId);
+          insertNote.setString(2, NoteType.TEST_ALERT.name());
+          insertNote.setInt(3, noteIdx);
+          insertNote.setString(4, row.getNullableText(0));
+          insertNote.executeUpdate();
+          noteIdx += 1;
+        }
+      }
 
       String currentTrigger1 = row.getNullableText(0);
       String currentTrigger2 = row.getNullableText(1);
@@ -126,6 +146,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       if (
           !(lastTrigger1 == null && lastTrigger2 == null)
           && (currentTrigger1 != null || currentTrigger2 != null)
+          && alerts.size() > 0
       ) {
         Array triggers = conn.createArrayOf("text", new String[]{lastTrigger1, lastTrigger2});
         Array alertArg = conn.createArrayOf("text", alerts.toArray());
@@ -140,7 +161,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         alerts.clear();
       }
 
-      if (row.hasNoText(4)) break; // alert should always have text
+      if (row.hasNoText(4)) continue; // alert should always have text
 
       lastTrigger1 = StringUtils.defaultIfBlank(currentTrigger1, lastTrigger1);
       lastTrigger2 = StringUtils.defaultIfBlank(currentTrigger2, lastTrigger2);
@@ -148,8 +169,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       lastContext = StringUtils.defaultIfBlank(currentContext, lastContext);
       if (currentAlert != null) {
         alerts.add(currentAlert);
-      } else {
-        break;
       }
     }
   }
@@ -157,6 +176,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private void processOneTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {
     PreparedStatement insert = conn.prepareStatement(
         "insert into test_alerts(cds_context, trigger_condition, drugid, alert_text, reference_point, activity_score) values (?, ?, ?, ?, ?, ?)");
+    PreparedStatement insertNote = conn.prepareStatement(
+        "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
     int contextIdx = -1;
     List<Integer> triggerIdxs = new ArrayList<>();
     Map<Integer,String> alertMap = new LinkedHashMap<>();
@@ -182,13 +203,12 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
     
-    for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
-      sf_logger.debug("reading row {}", i);
+    int rowIdx = 1;
+    for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
+      sf_logger.debug("reading row {}", rowIdx);
 
-      RowWrapper row = workbook.getRow(i);
-      if (row.hasNoText(contextIdx)) {
-        continue;
-      }
+      RowWrapper row = workbook.getRow(rowIdx);
+      if (row.hasNoText(contextIdx)) break;
 
       String context = row.getNullableText(contextIdx);
 
@@ -229,6 +249,19 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
 
       insert.executeUpdate();
+    }
+
+    int noteIdx = 0;
+    for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
+      RowWrapper row = workbook.getRow(rowIdx);
+      if (row.hasNoText(0)) continue;
+      insertNote.clearParameters();
+      insertNote.setString(1, drugId);
+      insertNote.setString(2, NoteType.TEST_ALERT.name());
+      insertNote.setInt(3, noteIdx);
+      insertNote.setString(4, row.getNullableText(0));
+      insertNote.executeUpdate();
+      noteIdx += 1;
     }
   }
 }

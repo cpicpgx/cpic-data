@@ -287,6 +287,24 @@ COMMENT ON COLUMN drug.drugbankId IS 'The DrugBank ID for this drug, optional';
 COMMENT ON COLUMN drug.umlsCui IS 'The UMLS Concept Unique ID for this drug, optional';
 COMMENT ON COLUMN drug.atcId IS 'One or more ATC IDs for this drug in an array, optional';
 
+CREATE TABLE drug_note
+(
+    drugId VARCHAR(20) REFERENCES drug(drugId) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    ordinal INTEGER NOT NULL,
+    note TEXT NOT NULL,
+    version INTEGER DEFAULT 1
+);
+CREATE TRIGGER version_drug_note
+    BEFORE UPDATE ON drug_note
+    FOR EACH ROW EXECUTE PROCEDURE increment_version();
+COMMENT ON TABLE drug_note IS 'A note about a gene';
+COMMENT ON COLUMN drug_note.drugId IS 'The ID for the drug this note is about, required';
+COMMENT ON COLUMN drug_note.type IS 'The type of information this note is about, required';
+COMMENT ON COLUMN drug_note.ordinal IS 'A number for sort order of this note compared to other notes for this drug-type';
+COMMENT ON COLUMN drug_note.note IS 'The text of the note, required';
+COMMENT ON COLUMN drug_note.version IS 'The version number, iterates on modification';
+
 
 CREATE TABLE file_artifact
 (
