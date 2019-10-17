@@ -2,7 +2,10 @@ package org.cpicpgx.exporter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.regex.Pattern;
  * @author Ryan Whaley
  */
 class AlleleDefinitionWorkbook extends AbstractWorkbook {
+  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DEFAULT_SHEET_NAME = "Definitions"; 
   private static final String CELL_PATTERN_GENE = "Gene:%s";
@@ -58,22 +62,26 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     chromoRow = sheet.nextRow();
     geneRow = sheet.nextRow();
     dbsnpRow = sheet.nextRow();
-    
+
     Row headerRow = sheet.nextRow();
     writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.geneSymbol));
     writeStringCell(headerRow, 1, CELL_HEADER_FXN);
-    
-    Matcher m = CHR_PATTERN.matcher(seqChr);
+
     String chr = "";
-    if (m.matches()) {
-      chr = m.group(1);
-      if (chr.equals("23")) {
-        chr = "X";
-      } else if (chr.equals("24")) {
-        chr = "Y";
+    if (StringUtils.isNotBlank(seqChr)) {
+      Matcher m = CHR_PATTERN.matcher(seqChr);
+      if (m.matches()) {
+        chr = m.group(1);
+        if (chr.equals("23")) {
+          chr = "X";
+        } else if (chr.equals("24")) {
+          chr = "Y";
+        }
       }
+    } else {
+      sf_logger.debug("No chr sequence ID");
     }
-    
+
     writeStringCell(nameRow,  colIdx, "Nucleotide change per gene from http://www.pharmvar.org");
     writeStringCell(proteinRow, colIdx, String.format("Effect on protein (%s)", seqPro));
     writeStringCell(chromoRow, colIdx, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2", seqChr, chr));
