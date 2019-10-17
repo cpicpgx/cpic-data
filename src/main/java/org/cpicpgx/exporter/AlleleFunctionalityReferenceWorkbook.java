@@ -1,11 +1,9 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.base.Joiner;
 import org.apache.poi.ss.usermodel.Row;
 
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A workbook of allele functionality information
@@ -18,10 +16,9 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_PATTERN = "%s-allele_functionality_reference.xlsx";
   private String geneSymbol;
   private SheetWrapper sheet;
-  private Set<String> writtenAlleles = new HashSet<>();
 
   
-  AlleleFunctionalityReferenceWorkbook(String gene, Date modified) {
+  AlleleFunctionalityReferenceWorkbook(String gene) {
     super();
     this.geneSymbol = gene;
     
@@ -29,39 +26,48 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     Row row = sheet.nextRow();
     
     writeBoldStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
-    writeBoldDateCell(row, modified);
     
     Row headerRow = sheet.nextRow();
-    writeHeaderCell(headerRow, 0, "Allele");
-    writeHeaderCell(headerRow, 1, "Allele Functional Status");
-    writeHeaderCell(headerRow, 2, "PMID");
-    writeHeaderCell(headerRow, 3, "Finding");
-    writeHeaderCell(headerRow, 4, "Drug Substrate - in vitro");
-    writeHeaderCell(headerRow, 5, "Drug Substrate - in vivo");
-    sheet.setColCount(6);
+    writeHeaderCell(headerRow, 0, "Allele/cDNA/rsID");
+    writeHeaderCell(headerRow, 1, "Activity Score (Optional)");
+    writeHeaderCell(headerRow, 2, "Allele Functional Status (Optional)");
+    writeHeaderCell(headerRow, 3, "Allele Clinical Functional Status (Required)");
+    writeHeaderCell(headerRow, 4, "Allele Clinical Function Substrate Specificity (Optional)");
+    writeHeaderCell(headerRow, 5, "PMID (Optional)");
+    writeHeaderCell(headerRow, 6, "Strength of Evidence (Optional)");
+    writeHeaderCell(headerRow, 7, "Findings (Optional)");
+    writeHeaderCell(headerRow, 8, "Comments");
+    sheet.setColCount(9);
     
-    this.colIdx = 5;
+    this.colIdx = 8;
   }
   
   String getFilename() {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
   
-  void writeAlleleRow(String allele, String function, String pmid, String finding, List<String> inVitro, List<String> inVivo) {
+  void writeAlleleRow(String allele, String activity, String function, String clinFunction, String clinSubstrate, String[] citations, String strength, String finding, String comments) {
     Row row = this.sheet.nextRow();
-    if (!writtenAlleles.contains(allele)) {
-      writeTopBorderCell(row, 0, allele);
-      writeTopBorderCell(row, 1, function);
-      writeTopBorderCell(row, 2, pmid);
-      writeTopBorderCell(row, 3, finding);
-      writeTopBorderCell(row, 4, String.join(", ", inVitro));
-      writeTopBorderCell(row, 5, String.join(", ", inVivo));
-      writtenAlleles.add(allele);
-    } else {
-      writeStringCell(row, 2, pmid, false);
-      writeStringCell(row, 3, finding, false);
-      writeStringCell(row, 4, String.join(", ", inVitro), false);
-      writeStringCell(row, 5, String.join(", ", inVivo), false);
+    writeStringCell(row, 0, allele, false);
+    writeStringCell(row, 1, activity, false);
+    writeStringCell(row, 2, function, false);
+    writeStringCell(row, 3, clinFunction, false);
+    writeStringCell(row, 4, clinSubstrate, false);
+    writeStringCell(row, 5, Joiner.on(", ").join(citations), false);
+    writeStringCell(row, 6, strength, false);
+    writeStringCell(row, 7, finding, false);
+    writeStringCell(row, 8, comments, false);
+  }
+  
+  void writeNotes(List<String> notes) {
+    if (notes == null || notes.size() == 0) return;
+    
+    this.sheet.nextRow();
+    Row row = this.sheet.nextRow();
+    writeStringCell(row, 0, "Notes:", false);
+    for (String note : notes) {
+      row = this.sheet.nextRow();
+      writeStringCell(row, 0, note, false);
     }
   }
 }
