@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("SpellCheckingInspection")
 public class AlleleDefinitionImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final int sf_variantColStart = 2;
+  private static final int sf_variantColStart = 1;
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
   private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
   private static final int sf_alleleRowStart = 7;
@@ -109,7 +109,7 @@ public class AlleleDefinitionImporter {
     Row row = sheet.getRow(2);
     m_proteinEffects = new String[m_variantColEnd];
     
-    Cell description = row.getCell(1);
+    Cell description = row.getCell(0);
     m_proteinSeqId = findSeqId(description.getStringCellValue()).orElse("");
     
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
@@ -121,7 +121,7 @@ public class AlleleDefinitionImporter {
     Row row = sheet.getRow(3);
     m_chromoPositions = new String[m_variantColEnd];
 
-    Cell description = row.getCell(1);
+    Cell description = row.getCell(0);
     m_chromoSeqId = findSeqId(description.getStringCellValue()).orElse("");
 
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
@@ -133,7 +133,7 @@ public class AlleleDefinitionImporter {
     Row row = sheet.getRow(4);
     m_genoPositions = new String[m_variantColEnd];
 
-    Cell description = row.getCell(1);
+    Cell description = row.getCell(0);
     m_geneSeqId = findSeqId(description.getStringCellValue()).orElse("");
 
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
@@ -236,6 +236,7 @@ public class AlleleDefinitionImporter {
 
       PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) values (?,?,?,?,?,?) returning (id)");
       Integer[] locIdAssignements = new Integer[m_chromoPositions.length];
+      int newLocations = 0;
       for (int i=0; i < m_chromoPositions.length; i++) {
         
         // here we want to guard against over-running the location columns
@@ -255,8 +256,9 @@ public class AlleleDefinitionImporter {
         rs.next();
         Integer locId = rs.getInt(1);
         locIdAssignements[i] = locId;
+        newLocations += 1;
       }
-      sf_logger.info("created {} new locations", m_chromoPositions.length);
+      sf_logger.info("created {} new locations", newLocations);
 
       PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(geneSymbol, name, functionalstatus) values (?,?,?) returning (id)");
       for (String alleleName : m_alleles.keySet()) {
