@@ -97,7 +97,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String functionStatus = row.getNullableText(COL_IDX_FUNCTION);
         String clinicalFunction = row.getNullableText(COL_IDX_CLINICAL_FUNCTION);
         String substrate = row.getNullableText(COL_IDX_CLINICAL_SUBSTRATE);
-        String citationClump = row.getNullableText(COL_IDX_PMID);
+        String citationClump = row.getNullableText(COL_IDX_PMID, true);
         String strength = row.getNullableText(COL_IDX_STRENGTH);
         String findings = row.getNullableText(COL_IDX_FINDINGS);
         String comments = row.getNullableText(COL_IDX_COMMENTS);
