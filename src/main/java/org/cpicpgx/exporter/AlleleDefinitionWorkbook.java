@@ -23,7 +23,6 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private static final String DEFAULT_SHEET_NAME = "Definitions"; 
   private static final String CELL_PATTERN_GENE = "Gene:%s";
   private static final String CELL_PATTERN_HEADER_ALLELE = "%s Allele";
-  private static final String CELL_HEADER_FXN = "Allele Functional Status";
   private static final String FILE_NAME_PATTERN = "%s-allele_definition_table.xlsx";
   private static final Pattern CHR_PATTERN = Pattern.compile("NC_0+(\\d+)\\.\\d{2}");
   
@@ -65,7 +64,6 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
 
     Row headerRow = sheet.nextRow();
     writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.geneSymbol));
-    writeStringCell(headerRow, 1, CELL_HEADER_FXN);
 
     String chr = "";
     if (StringUtils.isNotBlank(seqChr)) {
@@ -82,13 +80,13 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
       sf_logger.debug("No chr sequence ID");
     }
 
-    writeStringCell(nameRow,  colIdx, "Nucleotide change per gene from http://www.pharmvar.org");
-    writeStringCell(proteinRow, colIdx, String.format("Effect on protein (%s)", seqPro));
-    writeStringCell(chromoRow, colIdx, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2", seqChr, chr));
-    writeStringCell(geneRow, colIdx, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
-    writeStringCell(dbsnpRow, colIdx, "rsID");
+    writeStringCell(nameRow,  0, "Nucleotide change per gene from http://www.pharmvar.org");
+    writeStringCell(proteinRow, 0, String.format("Effect on protein (%s)", seqPro));
+    writeStringCell(chromoRow, 0, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2", seqChr, chr));
+    writeStringCell(geneRow, 0, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
+    writeStringCell(dbsnpRow, 0, "rsID");
     
-    this.sheet.setWidths(new Integer[]{20*256});
+    this.sheet.setWidths(new Integer[]{40*256});
   }
   
   /**
@@ -102,13 +100,11 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   /**
    * Write an allele row. Do this before writing allele location values
    * @param name the name of the allele (e.g. "*2")
-   * @param fxn the text of the functional status
    */
-  void writeAllele(String name, String fxn) {
+  void writeAllele(String name) {
     alleleRow = sheet.nextRow();
 
     writeStringCell(alleleRow, 0, name);
-    writeStringCell(alleleRow, 1, fxn);
   }
 
   /**
@@ -136,7 +132,6 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * @param locId the ID for this location assigned by the DB
    */
   void writeVariant(String name, String protein, String chromo, String gene, String dbSnpId, Long locId) {
-    colIdx += 1;
     writeStringCell(nameRow, colIdx, name);
     writeStringCell(proteinRow, colIdx, protein);
     writeStringCell(chromoRow, colIdx, chromo);
@@ -145,6 +140,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     
     colLocationMap.put(locId, colIdx);
     this.sheet.setColCount(colIdx+1);
+    colIdx += 1;
   }
   
   void writeNotesHeader() {

@@ -1,7 +1,5 @@
 package org.cpicpgx.exporter;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Row;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.slf4j.Logger;
@@ -70,15 +68,15 @@ public class AlleleDefinitionExporter extends BaseExporter {
         }
       
         try (
-            PreparedStatement alleleStmt = conn.prepareStatement("select name, functionalstatus, id from allele where geneSymbol=?");
+            PreparedStatement alleleStmt = conn.prepareStatement("select name, id from allele where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?");
             PreparedStatement notesStmt = conn.prepareStatement("select note from gene_note where genesymbol=? and type=? order by ordinal, note")
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
             while (rs.next()) {
-              long alleleId = rs.getLong(3);
-              workbook.writeAllele(rs.getString(1), rs.getString(2));
+              long alleleId = rs.getLong(2);
+              workbook.writeAllele(rs.getString(1));
 
               locValStmt.setLong(1, alleleId);
               try (ResultSet vrs = locValStmt.executeQuery()) {
