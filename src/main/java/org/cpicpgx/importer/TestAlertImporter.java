@@ -117,7 +117,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     String lastContext = null;
     List<String> alerts = new ArrayList<>();
     int noteIdx = 0;
-    for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
+    for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
       sf_logger.debug("reading row {}", i);
       RowWrapper row = workbook.getRow(i);
 
@@ -185,7 +185,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     int activityIdx = -1;
     
     RowWrapper headerRow = workbook.getRow(0);
-    for (int i=headerRow.row.getFirstCellNum(); i<headerRow.row.getLastCellNum(); i++) {
+    for (int i=headerRow.row.getFirstCellNum(); i<=headerRow.row.getLastCellNum(); i++) {
       String colTitle = headerRow.getNullableText(i);
       if (colTitle == null) continue;
       

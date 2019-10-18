@@ -2,6 +2,8 @@ package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
 
+import java.util.List;
+
 /**
  * A workbook containing test alert language for gene phenotypes
  *
@@ -47,6 +49,18 @@ class TestAlertWorkbook extends AbstractWorkbook {
     writeStringCell(row, colIdx++, flowRef);
     writeStringCell(row, colIdx++, context);
     writeStringCell(row, colIdx++, String.join("\n\n", alertText), wrapStyle);
+  }
+  
+  void writeNotes(List<String> notes) {
+    if (notes == null || notes.size() == 0) return;
+    
+    this.sheet.nextRow();
+    Row row = this.sheet.nextRow();
+    writeStringCell(row, 0, "Notes:", false);
+    for (String note : notes) {
+      row = this.sheet.nextRow();
+      writeStringCell(row, 0, note, false);
+    }
   }
 
   @Override
