@@ -93,7 +93,7 @@ public class FrequencyProcessor implements AutoCloseable {
     try (PreparedStatement stmt = this.conn.prepareStatement("delete from population where id not in (select population from allele_frequency)")) {
       delCount += stmt.executeUpdate();
     }
-    sf_logger.info("cleared {} unused population records", delCount);
+    sf_logger.debug("cleared {} unused population records", delCount);
   }
 
   /**
@@ -104,7 +104,7 @@ public class FrequencyProcessor implements AutoCloseable {
    * @throws SQLException can occur when writing to the DB
    */
   private void insertFrequency(RowWrapper row, Integer alleleColIdx, Long populationId) throws SQLException {
-    if (alleleColIdx == null || !colIdxAlleleIdMap.keySet().contains(alleleColIdx)) {
+    if (alleleColIdx == null || !colIdxAlleleIdMap.containsKey(alleleColIdx)) {
       throw new RuntimeException("Allele column index invalid: " + alleleColIdx);
     }
     
@@ -119,6 +119,10 @@ public class FrequencyProcessor implements AutoCloseable {
     this.insertStatement.setLong(1, alleleId);
     this.insertStatement.setLong(2, populationId);
     if (value != null) {
+      // some older frequency files use the 0-100 percentage range instead of 0-1 decimal range, convert if found
+      if (value > 1) {
+        value = value / 100;
+      }
       this.insertStatement.setDouble(3, value);
     } else {
       this.insertStatement.setNull(3, Types.DOUBLE);

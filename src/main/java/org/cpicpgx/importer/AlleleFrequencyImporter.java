@@ -48,7 +48,6 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
 
   @Override
   void processWorkbook(WorkbookWrapper workbook) {
-    sf_logger.info("Reading {}", workbook.getFileName());
     String[] nameParts = workbook.getFileName().split("_");
     processAlleles(workbook, nameParts[0]);
   }
