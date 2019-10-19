@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -126,6 +127,14 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
           dbHarness.insertNote(row.getNullableText(0));
         }
       }
+      
+      workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+        row = workbook.getRow(i);
+        java.util.Date date = row.getNullableDate(0);
+        String note = row.getNullableText(1);
+        dbHarness.insertChange(date, note);
+      }
     }
     addImportHistory(workbook.getFileName());
   }
@@ -139,6 +148,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private PreparedStatement updateAlleleStmt;
     private PreparedStatement insertStmt;
     private PreparedStatement insertNoteStmt;
+    private PreparedStatement insertChangeStmt;
     private int noteIdx = 0;
     private String gene;
     
@@ -158,6 +168,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       updateAlleleStmt = this.conn.prepareStatement("update allele set functionalstatus=?, activityScore=?, clinicalFunctionalStatus=?, clinicalFunctionalSubstrate=? where id=?");
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?, ?)");
       insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
+      insertChangeStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
     }
     
     void insert(
@@ -201,6 +212,22 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       this.insertNoteStmt.setInt(4, this.noteIdx);
       this.insertNoteStmt.executeUpdate();
       this.noteIdx += 1;
+    }
+    
+    int nHistory = 0;
+    void insertChange(java.util.Date date, String note) throws SQLException {
+      this.insertChangeStmt.clearParameters();
+      this.insertChangeStmt.setString(1, gene);
+      if (StringUtils.isNotBlank(note)) {
+        this.insertChangeStmt.setString(2, note);
+      } else {
+        this.insertChangeStmt.setString(2, "n/a");
+      }
+      this.insertChangeStmt.setString(3, NoteType.FUNCTION_REFERENCE.name());
+      this.insertChangeStmt.setInt(4, this.nHistory);
+      this.insertChangeStmt.setDate(5, new Date(date.getTime()));
+      this.insertChangeStmt.executeUpdate();
+      this.nHistory += 1;
     }
     
     private void setNullableText(PreparedStatement stmt, int idx, String value) throws SQLException {

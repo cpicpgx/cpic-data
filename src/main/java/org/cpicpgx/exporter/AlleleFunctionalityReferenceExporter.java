@@ -37,7 +37,8 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
          PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.activityscore, a.functionalstatus, a.clinicalfunctionalstatus, a.clinicalfunctionalsubstrate, " +
              "f.citations, f.strength, f.findings, f.comments " +
              "from function_reference f join allele a on f.alleleid = a.id where a.genesymbol=? order by a.id");
-         PreparedStatement noteStmt = conn.prepareStatement("select note from gene_note where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? order by ordinal");
+         PreparedStatement noteStmt = conn.prepareStatement("select note from gene_note n where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? and n.date is null order by ordinal");
+         PreparedStatement changeStmt = conn.prepareStatement("select n.date, note from gene_note n where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? and n.date is not null order by ordinal");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -73,6 +74,13 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
           }
         }
         workbook.writeNotes(notes);
+        
+        changeStmt.setString(1, symbol);
+        try (ResultSet rs = changeStmt.executeQuery()) {
+          while (rs.next()) {
+            workbook.writeHistory(rs.getDate(1), rs.getString(2));
+          }
+        }
 
         writeWorkbook(workbook);
       }

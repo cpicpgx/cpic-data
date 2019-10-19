@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import com.google.common.base.Joiner;
 import org.apache.poi.ss.usermodel.Row;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -69,5 +70,20 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
       row = this.sheet.nextRow();
       writeStringCell(row, 0, note, false);
     }
+  }
+  
+  private int nHistory = 0;
+  void writeHistory(Date date, String note) {
+    if (nHistory == 0) {
+      this.sheet = findSheet(HISTORY_SHEET_NAME);
+      Row headerRow = this.sheet.nextRow();
+      writeHeaderCell(headerRow, 0, "Date");
+      writeHeaderCell(headerRow, 1, "Note");
+    }
+    Row row = this.sheet.nextRow();
+    writeDateCell(row, 0, date);
+    writeStringCell(row, 1, note, false);
+    
+    nHistory += 1;
   }
 }
