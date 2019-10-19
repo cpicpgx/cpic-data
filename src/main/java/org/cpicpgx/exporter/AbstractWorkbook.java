@@ -19,6 +19,7 @@ import java.util.Optional;
  */
 public abstract class AbstractWorkbook {
 
+  public static final String HISTORY_SHEET_NAME = "Change log";
   private Workbook workbook;
   private CreationHelper createHelper;
   private List<SheetWrapper> sheets = new ArrayList<>();
@@ -152,6 +153,12 @@ public abstract class AbstractWorkbook {
 
   void writeBoldDateCell(Row row, Date value) {
     writeDateCell(row, value, this.boldDateStyle);
+  }
+  
+  void writeDateCell(Row row, int idx, Date value) {
+    Cell nameCell = row.createCell(idx);
+    nameCell.setCellStyle(this.dateStyle);
+    nameCell.setCellValue(value);
   }
 
   private void writeDateCell(Row row, Date value, CellStyle style) {

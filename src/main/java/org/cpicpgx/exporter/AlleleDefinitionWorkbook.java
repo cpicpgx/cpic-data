@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final String DEFAULT_SHEET_NAME = "Definitions"; 
+  private static final String DEFAULT_SHEET_NAME = "Definitions";
   private static final String CELL_PATTERN_GENE = "Gene:%s";
   private static final String CELL_PATTERN_HEADER_ALLELE = "%s Allele";
   private static final String FILE_NAME_PATTERN = "%s-allele_definition_table.xlsx";
@@ -28,6 +28,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   
   private String geneSymbol;
   private SheetWrapper sheet;
+  private SheetWrapper historySheet;
   private Row nameRow;
   private Row proteinRow;
   private Row chromoRow;
@@ -153,5 +154,19 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
       Row row = sheet.nextRow();
       writeStringCell(row, 0, StringUtils.strip(note), false);
     }
+  }
+  
+  private int nHistory = 0;
+  void writeHistory(Date date, String note) {
+    if (nHistory == 0) {
+      historySheet = this.findSheet(HISTORY_SHEET_NAME);
+      Row headerRow = historySheet.nextRow();
+      writeHeaderCell(headerRow, 0, "Date");
+      writeHeaderCell(headerRow, 1, "Note");
+    }
+    Row row = historySheet.nextRow();
+    writeDateCell(row, 0, date);
+    writeStringCell(row, 1, note,false);
+    nHistory += 1;
   }
 }

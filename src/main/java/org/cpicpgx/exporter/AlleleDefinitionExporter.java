@@ -40,6 +40,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct a.geneSymbol, g.alleleslastmodified, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid from allele a join gene g on a.geneSymbol = g.symbol order by 1");
+         PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from gene_note n where genesymbol=? and type=? and n.date is not null order by ordinal");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -70,7 +71,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
         try (
             PreparedStatement alleleStmt = conn.prepareStatement("select name, id from allele where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?");
-            PreparedStatement notesStmt = conn.prepareStatement("select note from gene_note where genesymbol=? and type=? order by ordinal, note")
+            PreparedStatement notesStmt = conn.prepareStatement("select note from gene_note n where genesymbol=? and type=? and n.date is null order by ordinal, note")
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
@@ -99,6 +100,14 @@ public class AlleleDefinitionExporter extends BaseExporter {
               String note = rs.getString(1);
               workbook.writeNote(note);
             }
+          }
+        }
+        
+        changeStmt.setString(1, symbol);
+        changeStmt.setString(2, NoteType.ALLELE_DEFINITION.name());
+        try (ResultSet rs = changeStmt.executeQuery()) {
+          while (rs.next()) {
+            workbook.writeHistory(rs.getDate(1), rs.getString(2));
           }
         }
         

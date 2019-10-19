@@ -7,6 +7,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
+import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +18,9 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,6 +66,7 @@ public class AlleleDefinitionImporter {
 
         AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
         importer.writeToDB();
+        importer.writeHistory(workbook);
       } catch (Exception ex) {
         throw new RuntimeException("Error processing file " + inputPath, ex);
       }
@@ -75,16 +76,14 @@ public class AlleleDefinitionImporter {
   }
   
   AlleleDefinitionImporter(WorkbookWrapper workbook) {
-      Sheet sheet = workbook.currentSheet;
-
-      readGene(sheet);
-      readLegacyRow(sheet);
-      readProteinRow(sheet);
-      readChromoRow(sheet);
-      readGenoRow(sheet);
-      readDbSnpRow(sheet);
-      readAlleles(sheet);
-      readNotes(sheet);
+      readGene(workbook.currentSheet);
+      readLegacyRow(workbook.currentSheet);
+      readProteinRow(workbook.currentSheet);
+      readChromoRow(workbook.currentSheet);
+      readGenoRow(workbook.currentSheet);
+      readDbSnpRow(workbook.currentSheet);
+      readAlleles(workbook.currentSheet);
+      readNotes(workbook.currentSheet);
   }
   
   private void readGene(Sheet sheet) {
@@ -219,6 +218,34 @@ public class AlleleDefinitionImporter {
         continue;
       }
       m_notes.add(row.getCell(0).toString());
+    }
+  }
+  
+  void writeHistory(WorkbookWrapper workbook) throws SQLException {
+    workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      PreparedStatement insertStmt = conn.prepareStatement("insert into gene_note (geneSymbol, type, date, note, ordinal) values (?, ?, ?, ?, ?)");
+      insertStmt.setString(1, m_gene);
+      insertStmt.setString(2, NoteType.ALLELE_DEFINITION.name());
+      
+      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+        RowWrapper row = workbook.getRow(i);
+        if (row.hasNoText(0)) continue;
+        
+        Date date = row.getNullableDate(0);
+        String note = row.getNullableText(1);
+        
+        insertStmt.setDate(3, new java.sql.Date(date.getTime()));
+        if (StringUtils.isNotBlank(note)) {
+          insertStmt.setString(4, note);
+        } else {
+          insertStmt.setString(4, "n/a");
+        }
+        insertStmt.setLong(5, i);
+        
+        insertStmt.executeUpdate();
+      }
     }
   }
   
