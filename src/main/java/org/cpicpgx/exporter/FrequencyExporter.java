@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,9 @@ public class FrequencyExporter extends BaseExporter {
           );
           PreparedStatement refFreqStmt = conn.prepareStatement(
               "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
+          PreparedStatement changeStmt = conn.prepareStatement(
+              "select n.date, note from gene_note n where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? and n.date is not null order by ordinal"
+          );
           ResultSet rs = pstmt.executeQuery()
       ) {
         // gene loop
@@ -170,6 +174,14 @@ public class FrequencyExporter extends BaseExporter {
               i += 1;
             }
             workbook.writeEthnicitySummary(allele, frequencies);
+          }
+          
+          workbook.writeNotesHeader();
+          changeStmt.setString(1, geneSymbol);
+          try (ResultSet notes = changeStmt.executeQuery()) {
+            while (notes.next()) {
+              workbook.writeNote(notes.getDate(1), notes.getString(2));
+            }
           }
           
           writeWorkbook(workbook);

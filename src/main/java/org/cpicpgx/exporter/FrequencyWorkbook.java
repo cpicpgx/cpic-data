@@ -4,10 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * This is a sheet that displays allele frequencies in different aggregate views in different tabs
@@ -33,6 +30,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private SheetWrapper sheetMethods;
   private SheetWrapper sheetAllele;
   private SheetWrapper sheetReferences;
+  private SheetWrapper sheetChanges;
   private Set<String> ethnicities = new TreeSet<>();
   
   FrequencyWorkbook(String geneSymbol) {
@@ -48,6 +46,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
     findSheet(SHEET_NAME_DIPLOTYPE);
     findSheet(SHEET_NAME_PHENOTYPE);
     sheetReferences = findSheet(SHEET_NAME_REFERENCES);
+    sheetChanges = findSheet(HISTORY_SHEET_NAME);
     
     writeMethods();
     
@@ -189,6 +188,19 @@ class FrequencyWorkbook extends AbstractWorkbook {
     for (int i = 0; i < frequencies.length; i++) {
       writeDoubleCell(row, 1+i, frequencies[i]);
     }
+  }
+  
+  void writeNotesHeader() {
+    Row row = sheetChanges.nextRow();
+    writeHeaderCell(row, 0, "Date");
+    writeHeaderCell(row, 1, "Note");
+    sheetChanges.setColCount(2);
+  }
+  
+  void writeNote(Date date, String note) {
+    Row row = sheetChanges.nextRow();
+    writeDateCell(row, 0, date);
+    writeStringCell(row, 1, note, false);
   }
 
   @Override

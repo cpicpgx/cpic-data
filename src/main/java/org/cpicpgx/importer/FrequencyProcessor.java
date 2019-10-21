@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.util.RowWrapper;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ public class FrequencyProcessor implements AutoCloseable {
 
   private PreparedStatement insertStatement;
   private PreparedStatement insertPopulation;
+  private PreparedStatement insertHistory;
   private PublicationCatalog publicationCatalog;
 
   /**
@@ -66,6 +68,10 @@ public class FrequencyProcessor implements AutoCloseable {
         this.conn.prepareStatement("insert into allele_frequency(alleleid, population, frequency, label) values (?, ?, ?, ?)");
     this.insertPopulation = 
         this.conn.prepareStatement("insert into population(ethnicity, population, populationinfo, subjecttype, subjectcount, publicationId) values (?, ?, ?, ?, ?, ?) returning (id)");
+    this.insertHistory =
+        this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+    this.insertHistory.setString(1, gene);
+    this.insertHistory.setString(3, NoteType.FUNCTION_REFERENCE.name());
     
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
@@ -172,6 +178,19 @@ public class FrequencyProcessor implements AutoCloseable {
       insertFrequency(row, colIdx, popId);
     }
     this.insertPopulation.clearParameters();
+  }
+
+  private int nHistory = 0;
+  void insertHistory(java.util.Date date, String note) throws SQLException {
+    if (StringUtils.isNotBlank(note)) {
+      insertHistory.setString(2, note);
+    } else {
+      insertHistory.setString(2, "n/a");
+    }
+    insertHistory.setInt(4, this.nHistory);
+    insertHistory.setDate(5, new Date(date.getTime()));
+    insertHistory.executeUpdate();
+    this.nHistory += 1;
   }
 
   @Override

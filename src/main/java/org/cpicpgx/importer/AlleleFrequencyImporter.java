@@ -1,10 +1,14 @@
 package org.cpicpgx.importer;
 
+import org.cpicpgx.db.NoteType;
+import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Date;
 
 /**
  * Class to read all excel files in the given directory and store the allele frequency information found in them.
@@ -16,6 +20,7 @@ import java.lang.invoke.MethodHandles;
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String[] sf_deleteStatements = new String[]{
+      "delete from gene_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
       "delete from allele_frequency",
       "delete from population"
   };
@@ -62,13 +67,24 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
     workbook.currentSheetIs("References");
     
     try (FrequencyProcessor frequencyProcessor = new FrequencyProcessor(gene, workbook.getRow(0))) {
-      for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
+      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         try {
           frequencyProcessor.insertPopulation(workbook.getRow(i));
         } catch (Exception ex) {
           throw new RuntimeException("Error parsing row " + (i+1), ex);
         }
       }
+
+      workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+        RowWrapper row = workbook.getRow(i);
+        if (row.hasNoText(0)) continue;
+        
+        Date date = row.getNullableDate(0);
+        String note = row.getNullableText(1);
+        frequencyProcessor.insertHistory(date, note);
+      }
+
       addImportHistory(workbook.getFileName());
       sf_logger.info("Successfully parsed " + gene + " frequencies");
     } catch (Exception ex) {
