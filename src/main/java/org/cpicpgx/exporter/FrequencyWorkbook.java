@@ -16,8 +16,6 @@ class FrequencyWorkbook extends AbstractWorkbook {
 
   private static final String SHEET_NAME_METHODS = "Methods and Caveats";
   private static final String SHEET_NAME_ALLELE = "Allele frequency by race";
-  private static final String SHEET_NAME_DIPLOTYPE = "Diplotype frequency by race";
-  private static final String SHEET_NAME_PHENOTYPE = "Phenotype frequency by race";
   private static final String SHEET_NAME_REFERENCES = "References";
   
   private static final String[] REFERENCE_COLUMNS = new String[]{
@@ -43,8 +41,6 @@ class FrequencyWorkbook extends AbstractWorkbook {
     
     sheetMethods = findSheet(SHEET_NAME_METHODS);
     sheetAllele = findSheet(SHEET_NAME_ALLELE);
-    findSheet(SHEET_NAME_DIPLOTYPE);
-    findSheet(SHEET_NAME_PHENOTYPE);
     sheetReferences = findSheet(SHEET_NAME_REFERENCES);
     sheetChanges = findSheet(HISTORY_SHEET_NAME);
     
