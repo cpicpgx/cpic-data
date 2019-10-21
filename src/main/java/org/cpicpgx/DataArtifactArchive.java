@@ -72,7 +72,9 @@ public class DataArtifactArchive {
     List<BaseExporter> exporters = new ArrayList<>();
     exporters.add(new AlleleDefinitionExporter());
     exporters.add(new AlleleFunctionalityReferenceExporter());
+    exporters.add(new FrequencyExporter());
     exporters.add(new DiplotypePhenotypeExporter());
+    exporters.add(new GeneCdsExporter());
     exporters.add(new GeneResourceExporter());
 
     exporters.forEach(e -> {
@@ -86,6 +88,7 @@ public class DataArtifactArchive {
 
     m_drugCollectionDirectory = getDirectoryPath(sf_drugDirPattern);
     List<BaseExporter> drugExporters = new ArrayList<>();
+    drugExporters.add(new DrugReviewExporter());
     drugExporters.add(new RecommendationExporter());
     drugExporters.add(new TestAlertExporter());
 
