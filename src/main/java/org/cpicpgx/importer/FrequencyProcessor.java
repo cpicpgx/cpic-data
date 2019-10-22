@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
@@ -162,7 +163,13 @@ public class FrequencyProcessor implements AutoCloseable {
     this.insertPopulation.setString(2, row.getNullableText(getPopIdx()));
     this.insertPopulation.setString(3, row.getNullableText(getPopInfoIdx()));
     this.insertPopulation.setString(4, row.getNullableText(getSubjTypeIdx()));
-    this.insertPopulation.setLong(5, row.getNullableLong(getNIdx()));
+    Long nSubjects = 0L;
+    try {
+      nSubjects = row.getNullableLong(getNIdx());
+    } catch (NumberFormatException ex) {
+      sf_logger.warn(ex.getMessage());
+    }
+    this.insertPopulation.setLong(5, nSubjects);
     if (publicationId != null) {
       this.insertPopulation.setInt(6, publicationId);
     } else {

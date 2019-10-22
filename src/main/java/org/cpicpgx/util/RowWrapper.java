@@ -150,6 +150,7 @@ public class RowWrapper {
    * 
    * @param cellIdx the index of a cell in this row
    * @return a {@link Long} representation of the value in the cell at the given index
+   * @throws NumberFormatException when a cell value can't be translated into a number
    */
   public Long getNullableLong(int cellIdx) {
     if (cellIdx < 0) {
@@ -169,7 +170,7 @@ public class RowWrapper {
         if (m.find()) {
           return Long.valueOf(m.group());
         } else {
-          return 0L;
+          throw new NumberFormatException("[" + cell.getStringCellValue() + "] is not a valid number in cell " + cell.getAddress());
         }
       case FORMULA:
         CellValue cellValue = formulaEvaluator.evaluate(cell);
