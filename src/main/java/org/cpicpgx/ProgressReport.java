@@ -54,10 +54,18 @@ public class ProgressReport {
 
   private void gatherStats() throws SQLException {
     try (Connection conn = ConnectionFactory.newConnection()) {
-      queryData(conn, "select genesymbol,count(*) from allele group by genesymbol order by genesymbol","Allele Definition Table");
-      queryData(conn, "select genesymbol, count(*) from function_reference r join allele a on r.alleleid = a.id group by genesymbol order by genesymbol","Allele Functionality Table");
-      queryData(conn, "select genesymbol, count(*) from diplotype_view group by genesymbol order by genesymbol","Diplotype to Phenotype Table");
-      queryData(conn, "select genesymbol, count(*) from allele_frequency f join allele a on f.alleleid = a.id group by genesymbol order by genesymbol","Frequency Table");
+      queryData(conn, 
+          "select genesymbol,count(*) from allele group by genesymbol order by genesymbol",
+          "Allele Definition Table");
+      queryData(conn, 
+          "select genesymbol, count(*) from function_reference r join allele a on r.alleleid = a.id group by genesymbol order by genesymbol",
+          "Allele Functionality Table");
+      queryData(conn, 
+          "select genesymbol, count(*) from diplotype_view group by genesymbol order by genesymbol",
+          "Diplotype to Phenotype Table");
+      queryData(conn, 
+          "select genesymbol, count(*) from allele_frequency f join allele a on f.alleleid = a.id group by genesymbol order by genesymbol",
+          "Frequency Table");
     }
   }
   
@@ -81,18 +89,22 @@ public class ProgressReport {
       for (String g : genes) {
         printer.print(g);
       }
+      printer.print("Total");
       printer.println();
       
       for (String t : typeMap.keySet()) {
         printer.print(t);
         Map<String,Integer> geneMap = typeMap.get(t);
+        int categoryTotal = 0;
         for (String g : genes) {
           if (geneMap.containsKey(g)) {
             printer.print(geneMap.get(g));
+            categoryTotal += geneMap.get(g);
           } else {
             printer.print("");
           }
         }
+        printer.print(categoryTotal);
         printer.println();
       }
     }
