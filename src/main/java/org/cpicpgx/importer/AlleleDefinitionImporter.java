@@ -40,9 +40,10 @@ public class AlleleDefinitionImporter {
   
   private String m_gene;
   private int m_variantColEnd;
-  private String m_proteinSeqId;
-  private String m_chromoSeqId;
-  private String m_geneSeqId;
+  private String m_proteinSeqId = "";
+  private String m_chromoSeqId = "";
+  private String m_geneSeqId = "";
+  private String m_mrnaSeqId = "";
   private String[] m_legacyNames;
   private String[] m_proteinEffects;
   private String[] m_chromoPositions;
@@ -98,6 +99,9 @@ public class AlleleDefinitionImporter {
     Row row = sheet.getRow(1);
     m_variantColEnd = row.getLastCellNum();
     m_legacyNames = new String[m_variantColEnd];
+
+    Cell description = row.getCell(0);
+    findSeqId(description.getStringCellValue());
     
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
       m_legacyNames[i] = getCellValue(row, i).orElse(null);
@@ -109,7 +113,7 @@ public class AlleleDefinitionImporter {
     m_proteinEffects = new String[m_variantColEnd];
     
     Cell description = row.getCell(0);
-    m_proteinSeqId = findSeqId(description.getStringCellValue()).orElse("");
+    findSeqId(description.getStringCellValue());
     
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
       m_proteinEffects[i] = getCellValue(row, i).orElse(null);
@@ -121,7 +125,7 @@ public class AlleleDefinitionImporter {
     m_chromoPositions = new String[m_variantColEnd];
 
     Cell description = row.getCell(0);
-    m_chromoSeqId = findSeqId(description.getStringCellValue()).orElse("");
+    findSeqId(description.getStringCellValue());
 
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
       m_chromoPositions[i] = getCellValue(row, i).orElse(null);
@@ -133,7 +137,7 @@ public class AlleleDefinitionImporter {
     m_genoPositions = new String[m_variantColEnd];
 
     Cell description = row.getCell(0);
-    m_geneSeqId = findSeqId(description.getStringCellValue()).orElse("");
+    findSeqId(description.getStringCellValue());
 
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
       m_genoPositions[i] = getCellValue(row, i).orElse(null);
@@ -160,12 +164,22 @@ public class AlleleDefinitionImporter {
     }
   }
   
-  private Optional<String> findSeqId(String cellContent) {
+  private void findSeqId(String cellContent) {
+    if (StringUtils.isBlank(cellContent)) return;
+    
     Matcher m = sf_seqIdPattern.matcher(cellContent);
     if (m.find()) {
-      return Optional.of(m.group());
+      String seqId = m.group();
+      if (seqId.startsWith("NG_")) {
+        m_geneSeqId = seqId;
+      } else if (seqId.startsWith("NM_")) {
+        m_mrnaSeqId = seqId;
+      } else if (seqId.startsWith("NC_")) {
+        m_chromoSeqId = seqId;
+      } else if (seqId.startsWith("NP_")) {
+        m_proteinSeqId = seqId;
+      }
     }
-    return Optional.empty();
   }
   
   private void readAlleles(Sheet sheet) {
@@ -254,11 +268,12 @@ public class AlleleDefinitionImporter {
 
       PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleleid, locationid, variantallele) values (?,?,?)");
       
-      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=? where symbol=?");
+      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,mrnaSequenceId=? where symbol=?");
       geneUpdate.setString(1, m_geneSeqId);
       geneUpdate.setString(2, m_proteinSeqId);
       geneUpdate.setString(3, m_chromoSeqId);
-      geneUpdate.setString(4, m_gene);
+      geneUpdate.setString(4, m_mrnaSeqId);
+      geneUpdate.setString(5, m_gene);
       geneUpdate.executeUpdate();
 
       PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) values (?,?,?,?,?,?) returning (id)");

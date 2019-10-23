@@ -73,6 +73,7 @@ CREATE TABLE gene
   geneSequenceId    TEXT CHECK (geneSequenceId ~ '^(NG_\S+){0,1}$'),
   proteinSequenceId TEXT CHECK (proteinSequenceId ~ '^(NP_\S+){0,1}$'),
   chromoSequenceId  TEXT CHECK (chromoSequenceId ~ '^(NC_\S+){0,1}$'),
+  mrnaSequenceId    TEXT CHECK (mrnaSequenceId ~ '^(NM_\S+){0,1}$'),
   hgncId            TEXT CHECK (hgncId ~ '^(HGNC:\d+){0,1}$'),
   ncbiId            TEXT,
   ensemblId         TEXT CHECK (ensemblId ~ '^(ENSG\d+){0,1}$'),
@@ -92,6 +93,7 @@ COMMENT ON COLUMN gene.chr IS 'Chromosome symbol. In the form chr##, where ## is
 COMMENT ON COLUMN gene.geneSequenceId IS 'The RefSeq ID for the sequence that represents this gene, starts with "NG_". No version suffix.';
 COMMENT ON COLUMN gene.proteinSequenceId IS 'The RefSeq ID for the sequence that represents the protein product of this gene, starts with "NP_". No version suffix.';
 COMMENT ON COLUMN gene.chromoSequenceId IS 'The RefSeq ID for the sequence that represents the chromosome this gene is on, starts with "NC_". No version suffix.';
+COMMENT ON COLUMN gene.mrnaSequenceId IS 'The RefSeq ID for the sequence that represents the translation of this gene, starts with "NM_". No version suffix.';
 COMMENT ON COLUMN gene.pharmgkbId IS 'The ID for this gene in PharmGKB.';
 COMMENT ON COLUMN gene.allelesLastModified IS 'The date that the allele definitions for this gene were last modified.';
 COMMENT ON COLUMN gene.functionalityReferenceLastModified IS 'The date that the functionality reference data for this gene was last modified';

@@ -39,7 +39,9 @@ public class AlleleDefinitionExporter extends BaseExporter {
    */
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement geneStmt = conn.prepareStatement("select distinct a.geneSymbol, g.alleleslastmodified, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid from allele a join gene g on a.geneSymbol = g.symbol order by 1");
+         PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.alleleslastmodified, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele a join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleleid\n" +
+             "group by g.symbol, g.alleleslastmodified, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid\n" +
+             "order by 1");
          PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from gene_note n where genesymbol=? and type=? and n.date is not null order by ordinal");
          ResultSet grs = geneStmt.executeQuery()
     ) {
@@ -49,8 +51,10 @@ public class AlleleDefinitionExporter extends BaseExporter {
         String seqChr = grs.getString(3);
         String seqPro = grs.getString(4);
         String seqGen = grs.getString(5);
+        String seqMrna = grs.getString(6);
+        Long pvCount = grs.getLong(7);
       
-        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, allelesLastModified, seqChr, seqPro, seqGen);
+        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, allelesLastModified, seqChr, seqPro, seqGen, seqMrna, pvCount);
 
         try (PreparedStatement seqLocStmt = conn.prepareStatement("select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?")) {
           seqLocStmt.setString(1, symbol);

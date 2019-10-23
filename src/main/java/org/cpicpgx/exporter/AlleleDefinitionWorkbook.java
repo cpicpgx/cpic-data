@@ -43,7 +43,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * @param gene an HGNC gene symbol
    * @param modified the Date the allele data was last modified
    */
-  AlleleDefinitionWorkbook(String gene, Date modified, String seqChr, String seqPro, String seqGen) {
+  AlleleDefinitionWorkbook(String gene, Date modified, String seqChr, String seqPro, String seqGen, String seqMrna, Long pvCount) {
     super();
     if (StringUtils.stripToNull(gene) == null) {
       throw new IllegalArgumentException("Gene must be specified");
@@ -81,7 +81,13 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
       sf_logger.debug("No chr sequence ID");
     }
 
-    writeStringCell(nameRow,  0, "Nucleotide change per gene from http://www.pharmvar.org");
+    if (pvCount > 0) {
+      writeStringCell(nameRow, 0, "Nucleotide change per gene from http://www.pharmvar.org");
+    } else if (StringUtils.isNotBlank(seqMrna)) {
+      writeStringCell(nameRow, 0, String.format("Nucleotide change on cDNA (%s)", seqMrna));
+    } else {
+      writeStringCell(nameRow, 0, "Common name");
+    }
     writeStringCell(proteinRow, 0, String.format("Effect on protein (%s)", seqPro));
     writeStringCell(chromoRow, 0, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2)", seqChr, chr));
     writeStringCell(geneRow, 0, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
@@ -115,7 +121,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * @param value the value to write to the allele-location intersecting cell
    */
   void writeAlleleLocationValue(Long locId, String value) {
-    if (!colLocationMap.keySet().contains(locId)) {
+    if (!colLocationMap.containsKey(locId)) {
       throw new IllegalArgumentException("No location with ID specified " + locId);
     }
     

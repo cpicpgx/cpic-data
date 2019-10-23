@@ -12,7 +12,9 @@ import java.io.InputStream;
 import java.security.InvalidParameterException;
 
 /**
- * Wrapper class for an Excel workbook. Helps read and setup supporting objects
+ * Wrapper class for an Excel workbook. Helps read and setup supporting objects.
+ * 
+ * During construction, this will set the <code>currentSheet</code> to the first sheet in the workbook.
  *
  * @author Ryan Whaley
  */
