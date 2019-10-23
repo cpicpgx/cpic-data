@@ -83,7 +83,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
 
     writeStringCell(nameRow,  0, "Nucleotide change per gene from http://www.pharmvar.org");
     writeStringCell(proteinRow, 0, String.format("Effect on protein (%s)", seqPro));
-    writeStringCell(chromoRow, 0, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2", seqChr, chr));
+    writeStringCell(chromoRow, 0, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2)", seqChr, chr));
     writeStringCell(geneRow, 0, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
     writeStringCell(dbsnpRow, 0, "rsID");
     
