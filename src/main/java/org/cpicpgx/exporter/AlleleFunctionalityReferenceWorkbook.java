@@ -14,7 +14,7 @@ import java.util.List;
 class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
   private static final String FUNCTION_SHEET_NAME = "Allele Function";
   private static final String CELL_PATTERN_GENE = "Gene: %s";
-  private static final String FILE_NAME_PATTERN = "%s-allele_functionality_reference.xlsx";
+  private static final String FILE_NAME_PATTERN = "%s-Allele_Functionality_Reference.xlsx";
   private String geneSymbol;
   private SheetWrapper sheet;
 
