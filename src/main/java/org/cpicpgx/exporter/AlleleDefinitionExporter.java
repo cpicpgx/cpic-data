@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
+import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Write allele definitions out to Excel XLSX files, one per gene.
@@ -79,10 +82,16 @@ public class AlleleDefinitionExporter extends BaseExporter {
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
+            
+            // parse to an intermediary map so we can sort the allele names properly
+            SortedMap<String, Long> alleleMap = new TreeMap<>(HaplotypeNameComparator.getComparator()); 
             while (rs.next()) {
-              long alleleId = rs.getLong(2);
-              workbook.writeAllele(rs.getString(1));
-
+              alleleMap.put(rs.getString(1), rs.getLong(2));
+            }
+            
+            for (String alleleName : alleleMap.keySet()) {
+              Long alleleId = alleleMap.get(alleleName);
+              workbook.writeAllele(alleleName);
               locValStmt.setLong(1, alleleId);
               try (ResultSet vrs = locValStmt.executeQuery()) {
                 while (vrs.next()) {
