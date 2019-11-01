@@ -9,8 +9,8 @@
 /.idea/shelf/
 /.idea/workspace.xml
 /build
+/logs
+/out
 /server/pgdata
 /src/main/node/node_modules
 /src/main/resources/cpicData.properties
-/out
-cpicData*.log
