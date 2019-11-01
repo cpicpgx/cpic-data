@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
  * @author Ryan Whaley
  */
 class GeneResourceWorkbook extends AbstractWorkbook {
-  private static final String NAME_TEMPLATE = "%s_Gene_Resource_Mappings.xlsx";
+  private static final String NAME_TEMPLATE = "%s-Gene_Resource_Mappings.xlsx";
   private static final String SHEET_NAME = "mapping";
   private String gene;
   private SheetWrapper sheet;
