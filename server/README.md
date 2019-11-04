@@ -9,8 +9,11 @@ The default empty DB image is published as `cpicpgx/cpic-db` to [Docker Hub](htt
 You should be able to just use that pre-built image. The rest of these 
 commands are for rebuilding and publishing that.
 
-You can update this by being logged into Docker Hub and then executing 
-the following. Build the image:
+You can update this by being logged into Docker Hub (if you're not already logged in) 
+
+    docker login
+
+Then build the image
 
     docker build -t cpicpgx/cpic-db .
 
@@ -60,6 +63,32 @@ When that's installed, do the following to run it:
 To connect to the db via the psql client
 
     psql -h 0.0.0.0 -p 5432 -U cpic
+
+
+## Clearing & Populating the server with data
+
+Make sure you're using the latest checkout of this repo and that at least the database container is up and running
+
+    gradle flywayClean
+
+This will clear the database of all data and relations.
+
+    gradle flywayMigrate
+
+This will set up all the DB objects and populate some support tables but it will still be mostly empty.
+
+    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.DataImport -d /home/cpic/cpic-support-files
+
+This will import all the data from the CPIC data files and leave the server with an initial state of data
+
+Once this is all completed, you should probably stop and restart all docker containers so documentation and API endpoints can be rebuilt.
+
+
+## Exporting a DB archive
+
+To export all data from the production CPIC server
+
+    pg_dump cpic -h db.cpicpgx.org -p 5432 -U cpic > ~/path/to/cpic_db_dump.sql
 
 
 ## File Services
