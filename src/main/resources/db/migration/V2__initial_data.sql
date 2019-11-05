@@ -227,6 +227,7 @@ RxNorm:1455099	vortioxetine	PA166122595	1455099		{""}	1
 RxNorm:11289	warfarin	PA451906	11289	DB00682	{B01AA03}	1
 RxNorm:114176	zuclopenthixol	PA452629	114176	DB01624	{N05AF05}	1
 RxNorm:2121085	siponimod	PA166182736	2121085	DB12371	{""}	1
+RxNorm:2197878	pitolisant	PA166185163	2197878	DB11642	{N07XX11}	1
 \.
 
 
@@ -749,7 +750,8 @@ YEATS4	RxNorm:5487	\N	1	D	2B		{}
 XRCC1	RxNorm:1311280	\N	2	D			{}
 VKORC1	RxNorm:11289	100425	1	A	1A	Actionable PGx	{21900891,28198005}
 G6PD	RxNorm:2054023	\N	1	A		Testing Required	{}
-CYP2C9	RxNorm:2054023	\N	1	A		Testing Required	{}
+CYP2C9	RxNorm:2121085	\N	1	A		Testing Required	{}
+CYP2D6	RxNorm:2197878	\N	1	A		Actionable PGx	{}
 \.
 
 
