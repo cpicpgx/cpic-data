@@ -81,6 +81,7 @@ public class PharmVarImporter extends BaseDirectoryImporter {
           }
           line += 1;
         }
+        addImportHistory(f.getName());
       } catch (FileNotFoundException e) {
         throw new RuntimeException("No file " + f, e);
       } catch (IOException e) {
