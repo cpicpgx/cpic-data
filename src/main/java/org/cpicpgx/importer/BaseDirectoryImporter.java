@@ -66,7 +66,9 @@ public abstract class BaseDirectoryImporter {
         delCount += stmt.executeUpdate();
       }
     }
-    sf_logger.info("Deleted {} rows", delCount);
+    if (getDeleteStatements().length > 0) {
+      sf_logger.info("Deleted {} rows", delCount);
+    }
   }
   
   static void rebuild(BaseDirectoryImporter importer, String[] args) {
