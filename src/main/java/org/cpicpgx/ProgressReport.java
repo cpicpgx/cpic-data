@@ -25,11 +25,14 @@ import java.util.*;
  */
 public class ProgressReport {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String FILE_NAME = "cpic_gene_data_count.csv";
+  private static final String GENE_FILE_NAME = "cpic_gene_data_count.csv";
+  private static final String DRUG_FILE_NAME = "cpic_drug_data_count.csv";
   
   private Path m_baseDirectory;
   private SortedSet<String> genes = new TreeSet<>();
-  private Map<String, Map<String, Integer>> typeMap = new TreeMap<>();
+  private SortedSet<String> drugs = new TreeSet<>();
+  private Map<String, Map<String, Integer>> geneDataMap = new TreeMap<>();
+  private Map<String, Map<String, Integer>> drugDataMap = new TreeMap<>();
   
 
   public static void main(String[] args) {
@@ -37,10 +40,16 @@ public class ProgressReport {
     try {
       report.parseArgs(args);
       report.gatherStats();
-      report.writeFile();
+      report.gatherDrugStats();
+      report.writeFiles();
     } catch (Exception e) {
       sf_logger.error("Error writing progress report", e);
     }
+  }
+  
+  private void writeFiles() throws IOException {
+    writeFile(GENE_FILE_NAME, genes, geneDataMap);
+    writeFile(DRUG_FILE_NAME, drugs, drugDataMap);
   }
 
   private void parseArgs(String[] args) throws ParseException {
@@ -54,7 +63,7 @@ public class ProgressReport {
 
   private void gatherStats() throws SQLException {
     try (Connection conn = ConnectionFactory.newConnection()) {
-      queryData(conn, 
+      queryData(conn,
           "select genesymbol,count(*) from allele group by genesymbol order by genesymbol",
           "Allele Definition Table");
       queryData(conn, 
@@ -66,6 +75,18 @@ public class ProgressReport {
       queryData(conn, 
           "select genesymbol, count(*) from allele_frequency f join allele a on f.alleleid = a.id group by genesymbol order by genesymbol",
           "Frequency Table");
+      queryData(conn, 
+          "select genesymbol, count(*) from gene_phenotype group by genesymbol",
+          "Gene CDS Text");
+    }
+  }
+  
+  private void gatherDrugStats() throws SQLException {
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      queryDrugData(conn, "select name, count(*) from drug where flowchart is not null group by name order by name", "Flowcharts");
+      queryDrugData(conn, "select d.name, count(distinct r.id) from recommendation r join drug d on r.drugid = d.drugid group by d.name", "Table 2 Recommendations");
+      queryDrugData(conn, "select d.name, count(distinct t.id) from test_alerts t join drug d on t.drugid = d.drugid group by d.name", "Drug Test Alerts");
+      queryDrugData(conn, "select d.name, count(distinct g.id) from guideline g join pair p on g.id = p.guidelineid join drug d on p.drugid = d.drugid group by d.name", "Guideline");
     }
   }
   
@@ -78,35 +99,45 @@ public class ProgressReport {
         genes.add(grs.getString(1));
         countMap.put(grs.getString(1), grs.getInt(2));
       }
-      typeMap.put(type, countMap);
+      geneDataMap.put(type, countMap);
     }
   }
   
-  private void writeFile() throws IOException {
-    Path filePath = m_baseDirectory.resolve(FILE_NAME);
+  private void queryDrugData(Connection conn, String query, String type) throws SQLException {
+    try (PreparedStatement geneStmt = conn.prepareStatement(query);
+         ResultSet grs = geneStmt.executeQuery()
+    ) {
+      Map<String,Integer> countMap = new HashMap<>();
+      while (grs.next()) {
+        drugs.add(grs.getString(1));
+        countMap.put(grs.getString(1), grs.getInt(2));
+      }
+      drugDataMap.put(type, countMap);
+    }
+  }
+  
+  private void writeFile(String fileName, Collection<String> objects, Map<String, Map<String, Integer>> dataMap) throws IOException {
+    Path filePath = m_baseDirectory.resolve(fileName);
     try (CSVPrinter printer = new CSVPrinter(new FileWriter(filePath.toFile()), CSVFormat.EXCEL)) {
       printer.print("");
-      for (String g : genes) {
+      for (String g : dataMap.keySet()) {
         printer.print(g);
       }
-      printer.print("Total");
       printer.println();
       
-      for (String t : typeMap.keySet()) {
-        printer.print(t);
-        Map<String,Integer> geneMap = typeMap.get(t);
-        int categoryTotal = 0;
-        for (String g : genes) {
-          if (geneMap.containsKey(g)) {
-            printer.print(geneMap.get(g));
-            categoryTotal += geneMap.get(g);
-          } else {
-            printer.print("");
-          }
+      for (String g : objects) {
+        printer.print(g);
+        for (String t : dataMap.keySet()) {
+          printer.print(dataMap.get(t).get(g));
         }
-        printer.print(categoryTotal);
         printer.println();
       }
+      
+      printer.print("Totals");
+      for (String t : dataMap.keySet()) {
+        printer.print(dataMap.get(t).values().stream().mapToInt(v -> v == null ? 0 : v).sum());
+      }
+      printer.println();
     }
     sf_logger.info("Wrote report to {}", filePath);
   }
