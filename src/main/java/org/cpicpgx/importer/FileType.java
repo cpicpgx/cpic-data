@@ -16,5 +16,6 @@ public enum FileType {
   RECOMMENDATIONS,
   RESOURCE_IDS,
   TEST_ALERTS,
+  PAIR_DIFF,
 
 }
