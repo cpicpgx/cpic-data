@@ -47,7 +47,7 @@ public class FrequencyExporter extends BaseExporter {
               "left join publication p2 on p.publicationId=p2.id\n" +
               "where a.genesymbol=? and p.ethnicity=? order by p.ethnicity, p2.year, p.population");
           PreparedStatement afStmt = conn.prepareStatement(
-              "select f.label from allele_frequency f where f.population=? and f.alleleid=?");
+              "select f.label, f.frequency from allele_frequency f where f.population=? and f.alleleid=?");
           PreparedStatement ethStmt = conn.prepareStatement(
               "select distinct population_group " +
                   "from population_frequency_view v where v.population_group != 'n/a' and v.genesymbol=?");
@@ -112,7 +112,13 @@ public class FrequencyExporter extends BaseExporter {
                   afStmt.setInt(2, alleleId);
                   try (ResultSet afrs = afStmt.executeQuery()) {
                     while (afrs.next()) {
-                      frequencies[i] = afrs.getString(1);
+                      String label = afrs.getString(1);
+                      double freq = afrs.getDouble(2);
+                      if (freq != 0) {
+                        frequencies[i] = String.format("%.4f", freq);
+                      } else {
+                        frequencies[i] = label;
+                      }
                     }
                   }
                   i += 1;
