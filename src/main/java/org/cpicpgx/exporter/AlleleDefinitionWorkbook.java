@@ -41,9 +41,8 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   /**
    * Constructor. Sets up the Apache POI objects needed to write the values to the file.
    * @param gene an HGNC gene symbol
-   * @param modified the Date the allele data was last modified
    */
-  AlleleDefinitionWorkbook(String gene, Date modified, String seqChr, String seqPro, String seqGen, String seqMrna, Long pvCount) {
+  AlleleDefinitionWorkbook(String gene, String seqChr, String seqPro, String seqGen, String seqMrna, Long pvCount) {
     super();
     if (StringUtils.stripToNull(gene) == null) {
       throw new IllegalArgumentException("Gene must be specified");
@@ -55,7 +54,6 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     Row row = sheet.nextRow();
 
     writeBoldStringCell(row, 0, String.format(CELL_PATTERN_GENE, this.geneSymbol));
-    writeBoldDateCell(row, modified);
     
     nameRow = sheet.nextRow();
     proteinRow = sheet.nextRow();

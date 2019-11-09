@@ -10,7 +10,6 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Date;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -50,14 +49,13 @@ public class AlleleDefinitionExporter extends BaseExporter {
     ) {
       while (grs.next()) {
         String symbol = grs.getString(1);
-        Date allelesLastModified = grs.getDate(2);
         String seqChr = grs.getString(3);
         String seqPro = grs.getString(4);
         String seqGen = grs.getString(5);
         String seqMrna = grs.getString(6);
         Long pvCount = grs.getLong(7);
       
-        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, allelesLastModified, seqChr, seqPro, seqGen, seqMrna, pvCount);
+        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, seqChr, seqPro, seqGen, seqMrna, pvCount);
 
         try (PreparedStatement seqLocStmt = conn.prepareStatement("select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?")) {
           seqLocStmt.setString(1, symbol);
