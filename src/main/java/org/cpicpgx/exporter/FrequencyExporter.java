@@ -45,7 +45,7 @@ public class FrequencyExporter extends BaseExporter {
               "select distinct coalesce(p2.pmid, p2.url, p2.pmcid, p2.doi), p.ethnicity, p.population, p.populationinfo, p.subjecttype, p2.authors, p2.year, p.id, p.subjectcount\n" +
               "from allele_frequency f join population p on f.population = p.id join allele a on f.alleleid = a.id\n" +
               "left join publication p2 on p.publicationId=p2.id\n" +
-              "where a.genesymbol=? and p.ethnicity=? order by p.ethnicity, p2.year, p.population");
+              "where a.genesymbol=? and p.ethnicity=? order by p.ethnicity, p2.year, p2.authors, p.population");
           PreparedStatement afStmt = conn.prepareStatement(
               "select f.label, f.frequency from allele_frequency f where f.population=? and f.alleleid=?");
           PreparedStatement ethStmt = conn.prepareStatement(
