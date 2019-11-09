@@ -20,7 +20,7 @@ import java.util.Date;
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from gene_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
+      "delete from gene_note where type='" + NoteType.ALLELE_FREQUENCY.name() + "'",
       "delete from allele_frequency",
       "delete from population"
   };

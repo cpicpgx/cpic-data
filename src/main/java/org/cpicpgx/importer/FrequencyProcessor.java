@@ -72,7 +72,7 @@ public class FrequencyProcessor implements AutoCloseable {
     this.insertHistory =
         this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
     this.insertHistory.setString(1, gene);
-    this.insertHistory.setString(3, NoteType.FUNCTION_REFERENCE.name());
+    this.insertHistory.setString(3, NoteType.ALLELE_FREQUENCY.name());
     
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
