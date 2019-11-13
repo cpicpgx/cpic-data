@@ -1,4 +1,4 @@
-package org.cpicpgx.importer;
+package org.cpicpgx.model;
 
 /**
  * An enumeration of the different types of files that the code will read or write

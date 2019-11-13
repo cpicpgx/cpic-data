@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 

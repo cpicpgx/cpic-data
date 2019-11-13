@@ -1,6 +1,6 @@
 package org.cpicpgx.db;
 
-import org.cpicpgx.importer.FileType;
+import org.cpicpgx.model.FileType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -6,6 +6,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Phenotype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

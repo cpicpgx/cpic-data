@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.cpicpgx.db.NoteType;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.WorkbookWrapper;
 
 import java.sql.SQLException;

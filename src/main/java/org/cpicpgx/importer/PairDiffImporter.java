@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

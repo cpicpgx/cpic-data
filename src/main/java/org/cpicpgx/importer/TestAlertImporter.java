@@ -5,6 +5,7 @@ import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
