@@ -2,6 +2,8 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
+import org.cpicpgx.model.EntityType;
+import org.cpicpgx.util.FileStoreClient;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,10 @@ public class AlleleDefinitionExporter extends BaseExporter {
     }
   }
 
+  EntityType getEntityCategory() {
+    return EntityType.GENE;
+  }
+
   /**
    * Export all genes with allele definitions, 1 file per gene.
    * @throws Exception can occur from IO or database activity
@@ -45,7 +51,8 @@ public class AlleleDefinitionExporter extends BaseExporter {
              "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid\n" +
              "order by 1");
          PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from gene_note n where genesymbol=? and type=? and n.date is not null order by ordinal");
-         ResultSet grs = geneStmt.executeQuery()
+         ResultSet grs = geneStmt.executeQuery();
+         FileStoreClient fileStore = new FileStoreClient()
     ) {
       while (grs.next()) {
         String symbol = grs.getString(1);
@@ -123,6 +130,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
         }
         
         writeWorkbook(workbook);
+        handleFileUpload();
       }
     }
   }

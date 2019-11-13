@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
+import org.cpicpgx.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,10 @@ public class GeneCdsExporter extends BaseExporter {
     } catch (Exception e) {
       sf_logger.error("Error exporting gene CDS information", e);
     }
+  }
+
+  EntityType getEntityCategory() {
+    return EntityType.GENE;
   }
   
   @Override
@@ -63,5 +68,6 @@ public class GeneCdsExporter extends BaseExporter {
         writeWorkbook(workbook);
       }
     }
+    handleFileUpload();
   }
 }

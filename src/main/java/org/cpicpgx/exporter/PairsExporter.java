@@ -4,6 +4,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,11 @@ public class PairsExporter extends BaseExporter {
       sf_logger.error("Couldn't parse command", e);
     }
   }
-  
+
+  EntityType getEntityCategory() {
+    return EntityType.PAIR;
+  }
+
   public void export() {
     sf_logger.debug("Will write to " + this.directory);
     

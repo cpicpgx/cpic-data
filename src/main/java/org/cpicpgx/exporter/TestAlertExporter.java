@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,11 @@ public class TestAlertExporter extends BaseExporter {
       sf_logger.error("Error exporting test alerts", ex);
     }
   }
-  
+
+  EntityType getEntityCategory() {
+    return EntityType.DRUG;
+  }
+
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select d.name, t.drugid, max(array_length(t.trigger_condition,1)) as num_alerts from test_alerts t join drug d on t.drugid = d.drugid group by d.name, t.drugid");
@@ -71,5 +76,6 @@ public class TestAlertExporter extends BaseExporter {
         writeWorkbook(workbook);
       }
     }
+    handleFileUpload();
   }
 }

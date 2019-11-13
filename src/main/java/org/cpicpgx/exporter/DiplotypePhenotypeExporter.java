@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,10 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
     } catch (Exception ex) {
       sf_logger.error("Error diplotype phenotype", ex);
     }
+  }
+
+  EntityType getEntityCategory() {
+    return EntityType.GENE;
   }
   
   public void export() throws Exception {
@@ -69,5 +74,6 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
         writeWorkbook(workbook);
       }
     }
+    handleFileUpload();
   }
 }

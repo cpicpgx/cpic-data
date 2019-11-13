@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
+import org.cpicpgx.model.EntityType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,10 @@ public class FrequencyExporter extends BaseExporter {
     } catch (Exception ex) {
       sf_logger.error("Error exporting frequencies", ex);
     }
+  }
+
+  EntityType getEntityCategory() {
+    return EntityType.GENE;
   }
   
   @Override
@@ -194,5 +199,6 @@ public class FrequencyExporter extends BaseExporter {
         }
       }
     }
+    handleFileUpload();
   }
 }
