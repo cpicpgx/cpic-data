@@ -40,6 +40,7 @@ public class DataArtifactArchive {
   private Path m_baseDirectory;
   private Path m_geneCollectionDirectory;
   private Path m_drugCollectionDirectory;
+  private boolean upload = false;
 
   public static void main(String[] args) {
     try {
@@ -54,10 +55,12 @@ public class DataArtifactArchive {
   private void parseArgs(String[] args) throws ParseException {
     Options options = new Options();
     options.addOption("d", true,"path to directory to write files to");
+    options.addOption("u", false, "flag to upload generated files to FileStore (S3)");
     CommandLineParser clParser = new DefaultParser();
     CommandLine cli = clParser.parse(options, args);
 
     m_baseDirectory = Paths.get(cli.getOptionValue("d"));
+    upload = cli.hasOption("u");
   }
   
   private void write() {
@@ -80,6 +83,7 @@ public class DataArtifactArchive {
     exporters.forEach(e -> {
       e.setDirectory(m_geneCollectionDirectory);
       try {
+        e.setUpload(upload);
         e.export();
       } catch (Exception ex) {
         throw new RuntimeException("Error exporting " + e.getClass().getSimpleName(), ex);
@@ -95,6 +99,7 @@ public class DataArtifactArchive {
     drugExporters.forEach(e -> {
       e.setDirectory(m_drugCollectionDirectory);
       try {
+        e.setUpload(upload);
         e.export();
       } catch (Exception ex) {
         throw new RuntimeException("Error exporting " + e.getClass().getSimpleName(), ex);

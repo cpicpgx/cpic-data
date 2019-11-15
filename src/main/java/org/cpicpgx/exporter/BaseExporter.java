@@ -74,6 +74,10 @@ public abstract class BaseExporter {
   public void setDirectory(Path directory) {
     this.directory = directory;
   }
+  
+  public void setUpload(boolean upload) {
+    this.upload = upload;
+  }
 
   /**
    * Gets the type of entity this exporter is related to. For example, if this export mainly deals with information 
