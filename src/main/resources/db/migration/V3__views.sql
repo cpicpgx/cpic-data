@@ -1,4 +1,4 @@
-CREATE VIEW diplotype_view AS
+CREATE OR REPLACE VIEW diplotype_view AS
 select
     p.genesymbol,
     d.diplotype,
@@ -19,7 +19,7 @@ COMMENT ON COLUMN diplotype_view.consultationText IS 'Consultation (Interpretati
 COMMENT ON COLUMN diplotype_view.activityScore IS 'The Activity Score number, optional';
 
 
-CREATE VIEW allele_guideline_view AS
+CREATE OR REPLACE VIEW allele_guideline_view AS
 select distinct
     a.genesymbol,
     a.name as allele_name,
@@ -28,7 +28,9 @@ select distinct
 from
     allele a
         join pair p on (a.genesymbol=p.genesymbol)
-        join guideline g on (g.id=p.guidelineid);
+        join guideline g on (g.id=p.guidelineid)
+where
+    a.clinicalfunctionalstatus is not null;
 
 COMMENT ON VIEW allele_guideline_view IS 'A combination of alleles and the guidelines they appear in';
 COMMENT ON COLUMN allele_guideline_view.genesymbol IS 'The HGNC symbol of the gene';
@@ -37,7 +39,7 @@ COMMENT ON COLUMN allele_guideline_view.guideline_name IS 'The name of the guide
 COMMENT ON COLUMN allele_guideline_view.guideline_url IS 'The URL to the guideline';
 
 
-CREATE VIEW population_frequency_view AS
+CREATE OR REPLACE VIEW population_frequency_view AS
 select
     a.genesymbol, a.name,
     p.ethnicity as population_group,
@@ -54,3 +56,13 @@ where
     frequency is not null
 group by
     a.genesymbol, a.name, p.ethnicity;
+
+COMMENT ON VIEW population_frequency_view IS 'An summary of frequency data by allele and major population group';
+COMMENT ON COLUMN population_frequency_view.geneSymbol IS 'The HGNC symbol of the gene';
+COMMENT ON COLUMN population_frequency_view.name IS 'The allele name';
+COMMENT ON COLUMN population_frequency_view.population_group IS 'The major grouping of population';
+COMMENT ON COLUMN population_frequency_view.subjectcount IS 'The count of subjects assigned the population group for the given allele';
+COMMENT ON COLUMN population_frequency_view.freq_weighted_avg IS 'The average frequency weighted by total subjects';
+COMMENT ON COLUMN population_frequency_view.freq_avg IS 'The unweighted average frequency (use with caution)';
+COMMENT ON COLUMN population_frequency_view.freq_max IS 'The maximum frequency observed';
+COMMENT ON COLUMN population_frequency_view.freq_min IS 'The minimum frequency observed';
