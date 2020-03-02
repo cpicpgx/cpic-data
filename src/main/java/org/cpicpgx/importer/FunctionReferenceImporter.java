@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
@@ -11,6 +12,7 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
 import java.util.HashMap;
@@ -216,7 +218,16 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     }
     
     int nHistory = 0;
-    void insertChange(java.util.Date date, String note) throws SQLException {
+
+    /**
+     * Insert a change event into the history table.
+     * @param date the date of the change, required
+     * @param note the text note to explain the change
+     * @throws SQLException can occur from bad database transaction
+     */
+    void insertChange(@Nonnull java.util.Date date, String note) throws SQLException {
+      Preconditions.checkNotNull(date, "History line %s has a blank date", this.nHistory + 1);
+
       this.insertChangeStmt.clearParameters();
       this.insertChangeStmt.setString(1, gene);
       if (StringUtils.isNotBlank(note)) {
