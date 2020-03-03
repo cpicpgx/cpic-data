@@ -10,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,16 +21,16 @@ import java.util.regex.Pattern;
  */
 public class GeneCdsImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern GENE_PATTERN = Pattern.compile("Gene:\\s*(\\w+)");
+  private static final Pattern GENE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
   private static final String[] sf_deleteStatements = new String[]{
       "delete from gene_note where type='" + NoteType.CDS.name() + "'",
       "delete from gene_phenotype"
   };
   private static final String DEFAULT_DIRECTORY = "gene_cds";
-  private static final int COL_PHENO = 0;
-  private static final int COL_EHR_PRIORITY = 1;
-  private static final int COL_CONSULTATION = 2;
-  private static final int COL_NOTES = 3;
+  private static final int COL_PHENOTYPE = 0;
+  private static final int COL_ACTIVITY_SCORE = 1;
+  private static final int COL_EHR_PRIORITY = 2;
+  private static final int COL_CONSULTATION = 3;
 
   public static void main(String[] args) {
     rebuild(new GeneCdsImporter(), args);
@@ -62,39 +60,40 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   @Override
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
     workbook.switchToSheet(0);
+    int rowIdx = 0;
+
     sf_logger.info("Reading CDS sheet: {}", workbook.currentSheet.getSheetName());
 
-    RowWrapper geneRow = workbook.getRow(0);
-    String geneText = geneRow.getNullableText(0);
+    RowWrapper headerRow = workbook.getRow(rowIdx);
+    rowIdx += 1;
+    String geneText = headerRow.getNullableText(0);
     if (geneText == null) {
       throw new NotFoundException("Couldn't find gene");
     }
-
     Matcher m = GENE_PATTERN.matcher(geneText);
     if (!m.find()) {
-      throw new NotFoundException("Couldn't find gene");
+      sf_logger.warn("No gene found for workbook {}, skipping", workbook.getFileName());
+      return;
     }
     String geneSymbol = m.group(1);
     sf_logger.debug("loading gene {}", geneSymbol);
 
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
-      // skip 2 header rows
-      int rowIdx = 2;
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-        RowWrapper row = workbook.getRow(rowIdx);
-        if (row.hasNoText(COL_PHENO)) continue;
+        RowWrapper dataRow = workbook.getRow(rowIdx);
+        if (dataRow.hasNoText(COL_PHENOTYPE)) continue;
         
-        String pheno = row.getNullableText(COL_PHENO);
-        if (pheno.toLowerCase().startsWith("notes:")) {
+        String pheno = dataRow.getNullableText(COL_PHENOTYPE);
+        if (pheno.toLowerCase().startsWith("notes")) {
           rowIdx++;
           break;
         }
 
-        String priority = row.getNullableText(COL_EHR_PRIORITY);
-        String consultation = row.getNullableText(COL_CONSULTATION);
-        String notes = row.getNullableText(COL_NOTES);
+        String priority = dataRow.getNullableText(COL_EHR_PRIORITY);
+        String consultation = dataRow.getNullableText(COL_CONSULTATION);
+        Double as = dataRow.getNullableDouble(COL_ACTIVITY_SCORE);
         
-        dbHarness.insert(pheno, priority, consultation, notes);
+        dbHarness.insert(pheno, priority, consultation, as);
       }
       
       // pick up any note rows after "Notes:" header
@@ -119,18 +118,22 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       this.conn = ConnectionFactory.newConnection();
 
       insertStmt = this.conn.prepareStatement(
-          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, notes) values (?, ?, ?, ?, ?)"
+          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityscore) values (?, ?, ?, ?, ?)"
       );
       insertNote = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
     }
 
-    void insert(String phenotype, String ehr, String consultation, String notes) throws SQLException {
+    void insert(String phenotype, String ehr, String consultation, Double activityScore) throws SQLException {
       insertStmt.clearParameters();
       insertStmt.setString(1, gene);
       insertStmt.setString(2, phenotype);
       insertStmt.setString(3, ehr);
       insertStmt.setString(4, consultation);
-      insertStmt.setString(5, notes);
+      if (activityScore != null) {
+        insertStmt.setDouble(5, activityScore);
+      } else {
+        insertStmt.setNull(5, Types.NUMERIC);
+      }
       insertStmt.executeUpdate();
     }
     
