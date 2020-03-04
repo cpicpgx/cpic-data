@@ -168,7 +168,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
       
-      updateAlleleStmt = this.conn.prepareStatement("update allele set functionalstatus=?, activityScore=?, clinicalFunctionalStatus=?, clinicalFunctionalSubstrate=? where id=?");
+      updateAlleleStmt = this.conn.prepareStatement("update allele set functionalstatus=initcap(?), activityScore=?, clinicalFunctionalStatus=initcap(?), clinicalFunctionalSubstrate=? where id=?");
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?, ?)");
       insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
       insertChangeStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
