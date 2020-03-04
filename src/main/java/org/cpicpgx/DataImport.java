@@ -90,6 +90,7 @@ public class DataImport {
     importers.add(new PharmVarImporter().setDirectory(m_directory, null));
     importers.add(new AlleleFrequencyImporter().setDirectory(m_directory, frequencyDirectory));
     importers.add(new FunctionReferenceImporter().setDirectory(m_directory, functionDirectory));
+    importers.add(new GenePhenotypeImporter().setDirectory(m_directory, recommendationDirectory));
     importers.add(new GeneCdsImporter().setDirectory(m_directory, geneCdsDirectory));
     importers.add(new RecommendationImporter().setDirectory(m_directory, recommendationDirectory));
     importers.add(new TestAlertImporter().setDirectory(m_directory, testAlertsDirectory));

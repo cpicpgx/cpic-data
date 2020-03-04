@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
+import javax.annotation.Nonnull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -48,6 +49,21 @@ public class RowWrapper {
    */
   public String getNullableText(int cellIdx) {
     return getNullableText(cellIdx, false);
+  }
+
+  /**
+   * Gets text value from the cell and will throw an exception if no value is found.
+   * @param cellIdx the index of a cell in this row, 0-based
+   * @return a {@link String} representation of the value in the cell at the given index
+   */
+  @Nonnull
+  public String getText(int cellIdx) {
+    String text = getNullableText(cellIdx, false);
+    if (text != null) {
+      return text;
+    } else {
+      throw new RuntimeException("Found unexpected null value at  column " + cellIdx);
+    }
   }
 
   /**

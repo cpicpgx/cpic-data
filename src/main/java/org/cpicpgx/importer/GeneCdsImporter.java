@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,12 +25,10 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern GENE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from gene_note where type='" + NoteType.CDS.name() + "'",
-      "delete from gene_phenotype"
+      "delete from gene_note where type='" + NoteType.CDS.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "gene_cds";
   private static final int COL_PHENOTYPE = 0;
-  private static final int COL_ACTIVITY_SCORE = 1;
   private static final int COL_EHR_PRIORITY = 2;
   private static final int COL_CONSULTATION = 3;
 
@@ -91,9 +91,8 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
 
         String priority = dataRow.getNullableText(COL_EHR_PRIORITY);
         String consultation = dataRow.getNullableText(COL_CONSULTATION);
-        Double as = dataRow.getNullableDouble(COL_ACTIVITY_SCORE);
-        
-        dbHarness.insert(pheno, priority, consultation, as);
+
+        dbHarness.insert(pheno, priority, consultation);
       }
       
       // pick up any note rows after "Notes:" header
@@ -118,22 +117,19 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       this.conn = ConnectionFactory.newConnection();
 
       insertStmt = this.conn.prepareStatement(
-          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityscore) values (?, ?, ?, ?, ?)"
+          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText) values (?, ?, ?, ?) ON CONFLICT (genesymbol, phenotype) DO UPDATE set ehrpriority=excluded.ehrpriority, consultationtext=excluded.consultationtext"
       );
       insertNote = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
     }
 
-    void insert(String phenotype, String ehr, String consultation, Double activityScore) throws SQLException {
+    void insert(String phenotype, String ehr, String consultation) throws SQLException {
+      String normalizedPhenotype = phenotype.replaceAll(this.gene + "\\s+", "");
+
       insertStmt.clearParameters();
       insertStmt.setString(1, gene);
-      insertStmt.setString(2, phenotype);
+      insertStmt.setString(2, normalizedPhenotype);
       insertStmt.setString(3, ehr);
       insertStmt.setString(4, consultation);
-      if (activityScore != null) {
-        insertStmt.setDouble(5, activityScore);
-      } else {
-        insertStmt.setNull(5, Types.NUMERIC);
-      }
       insertStmt.executeUpdate();
     }
     

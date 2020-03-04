@@ -1,3 +1,5 @@
+-- noinspection SqlDialectInspectionForFile
+
 CREATE OR REPLACE VIEW diplotype_view AS
 select
     p.genesymbol,
@@ -5,10 +7,11 @@ select
     p.phenotype,
     p.ehrpriority,
     p.consultationtext,
-    p.activityscore
+    f.totalActivityScore as activityscore
 from
     gene_phenotype p
-        join phenotype_diplotype d on p.id = d.phenotypeid;
+    join phenotype_function f on p.id = f.phenotypeId
+    join phenotype_diplotype d on f.id = d.functionPhenotypeId;
 
 COMMENT ON VIEW diplotype_view IS 'A combination of gene_phenotype and phenotype_diplotype that allows you to easily query by diplotype and see the phenotype-related data for it';
 COMMENT ON COLUMN diplotype_view.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';

@@ -407,7 +407,6 @@ CREATE TABLE gene_phenotype
   phenotype TEXT,
   ehrPriority TEXT,
   consultationText TEXT,
-  activityScore NUMERIC,
   version INTEGER DEFAULT 1,
   notes TEXT,
 
@@ -424,24 +423,48 @@ COMMENT ON COLUMN gene_phenotype.geneSymbol IS 'The HGNC symbol of the gene in t
 COMMENT ON COLUMN gene_phenotype.phenotype IS 'Coded Genotype/Phenotype Summary, optional';
 COMMENT ON COLUMN gene_phenotype.ehrPriority IS 'EHR Priority Result, optional';
 COMMENT ON COLUMN gene_phenotype.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result';
-COMMENT ON COLUMN gene_phenotype.activityScore IS 'The Activity Score number, optional';
+
+
+CREATE TABLE phenotype_function
+(
+    id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
+    phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
+    functionKey JSONB NOT NULL,
+    function1 VARCHAR NOT NULL,
+    function2 VARCHAR NOT NULL,
+    activityScore1 VARCHAR,
+    activityScore2 VARCHAR,
+    totalActivityScore VARCHAR,
+
+    UNIQUE (phenotypeId, functionKey)
+);
+
+COMMENT ON TABLE phenotype_function IS 'Gene function combinations that apply to the phenotype referenced. This table is a child of gene_phenotype.';
+COMMENT ON COLUMN phenotype_function.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN phenotype_function.phenotypeId IS 'An ID referencing the gene_phenotype this is associated with, required';
+COMMENT ON COLUMN phenotype_function.functionKey IS 'A normailized JSON versino fo the function combination for use in lookups. Should be an object with functions as properties and counts as the values. Required.';
+COMMENT ON COLUMN phenotype_function.function1 IS 'The first allele function, required';
+COMMENT ON COLUMN phenotype_function.function2 IS 'The second allele function, required';
+COMMENT ON COLUMN phenotype_function.activityScore1 IS 'The activity score for the first allele function';
+COMMENT ON COLUMN phenotype_function.activityScore2 IS 'The activity score for the second allele function';
+COMMENT ON COLUMN phenotype_function.totalActivityScore IS 'The sum activity score for the functions';
+
 
 CREATE TABLE phenotype_diplotype
 (
-  phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
-  diplotype TEXT NOT NULL,
-  version INTEGER DEFAULT 1,
-  
-  UNIQUE (phenotypeId, diplotype)
+    id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
+    functionPhenotypeId INTEGER REFERENCES phenotype_function(id) NOT NULL,
+    diplotype VARCHAR NOT NULL,
+    diplotypeKey JSONB NOT NULL,
+
+    UNIQUE (functionPhenotypeId, diplotypeKey)
 );
 
-CREATE TRIGGER version_phenotype_diplotype
-  BEFORE UPDATE ON phenotype_diplotype
-  FOR EACH ROW EXECUTE PROCEDURE increment_version();
-
-COMMENT ON TABLE phenotype_diplotype IS 'Specific diplotypes that are associated with a gene phenotype';
-COMMENT ON COLUMN phenotype_diplotype.phenotypeId IS 'An ID for a gene_phenotype record, required';
+COMMENT ON TABLE phenotype_diplotype IS 'Specific diplotypes that are associated with a gene phenotype. This table is a child of phenotype_function and distantly of gene_phenotype';
+COMMENT ON COLUMN phenotype_diplotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN phenotype_diplotype.functionPhenotypeId IS 'An ID referencing a phenotype_function record, required';
 COMMENT ON COLUMN phenotype_diplotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
+COMMENT ON COLUMN phenotype_diplotype.diplotypeKey IS 'A normalized JSON version of the diplotype for use in lookups. Should be an object with the allele names as properties and the counts as the values. Required';
 
 
 CREATE TABLE recommendation
