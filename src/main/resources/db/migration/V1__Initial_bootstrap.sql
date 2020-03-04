@@ -78,8 +78,6 @@ CREATE TABLE gene
   ncbiId            TEXT,
   ensemblId         TEXT CHECK (ensemblId ~ '^(ENSG\d+){0,1}$'),
   pharmgkbId        TEXT CHECK (pharmgkbId ~ '^(PA\d+){0,1}$'),
-  allelesLastModified                 DATE,
-  functionalityReferenceLastModified  DATE,
   version           INTEGER DEFAULT 1
 );
 
@@ -95,8 +93,6 @@ COMMENT ON COLUMN gene.proteinSequenceId IS 'The RefSeq ID for the sequence that
 COMMENT ON COLUMN gene.chromoSequenceId IS 'The RefSeq ID for the sequence that represents the chromosome this gene is on, starts with "NC_". No version suffix.';
 COMMENT ON COLUMN gene.mrnaSequenceId IS 'The RefSeq ID for the sequence that represents the translation of this gene, starts with "NM_". No version suffix.';
 COMMENT ON COLUMN gene.pharmgkbId IS 'The ID for this gene in PharmGKB.';
-COMMENT ON COLUMN gene.allelesLastModified IS 'The date that the allele definitions for this gene were last modified.';
-COMMENT ON COLUMN gene.functionalityReferenceLastModified IS 'The date that the functionality reference data for this gene was last modified';
 COMMENT ON COLUMN gene.hgncId IS 'The HGNC numerical ID number for this gene prefixed by "HGNC:"';
 COMMENT ON COLUMN gene.ncbiId IS 'The NCBI Gene (Entrez) ID number for this gene';
 COMMENT ON COLUMN gene.ensemblId IS 'The Ensembl ID for this gene';
@@ -495,6 +491,4 @@ COMMENT ON COLUMN test_alerts.population IS 'The population this test alert is a
 COMMENT ON COLUMN test_alerts.cds_context IS 'This should be either pre-test or post-text';
 COMMENT ON COLUMN test_alerts.trigger_condition IS 'An array of one more more descriptions of trigger conditions';
 COMMENT ON COLUMN test_alerts.drugId IS 'The ID of a drug this alert text is for';
-COMMENT ON COLUMN test_alerts.reference_point IS 'A reference to a labeled part of the flow chart that accompanies this alert, optional';
-COMMENT ON COLUMN test_alerts.activity_score IS 'A description of the activity score criteria, optional';
 COMMENT ON COLUMN test_alerts.alert_text IS 'An array of one or more pieces of alert text';
