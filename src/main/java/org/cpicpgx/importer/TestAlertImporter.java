@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
 import org.cpicpgx.db.NoteType;
@@ -12,57 +13,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.*;
 
 /**
- * An importer for CDS test-alert text from excel workbooks into the database.
+ * An importer for drug CDS test-alert text from excel workbooks into the database.
  * 
- * This importer is split into two different importers for two different formats of test alerts. One for a single CDS 
- * trigger, another for a double CDS trigger. The drugs that use double trigger need to be specified here.
- * 
- * A single trigger format expects columns in the following order
- * <ol>
- *   <li>CDS Trigger</li>
- *   <li>Diagram reference point (optional)</li>
- *   <li>Context</li>
- *   <li>Example alert text</li>
- *   <li>Second Example alert text (optional)</li>
- * </ol>
- * 
- * A double trigger format expects columns
- * <ol>
- *   <li>Trigger 1</li>
- *   <li>Trigger 2</li>
- *   <li>Diagram reference point</li>
- *   <li>Context</li>
- *   <li>Example alert text</li>
- * </ol>
- *
  * @author Ryan Whaley
  */
 public class TestAlertImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  // Drugs to 
-  private static final List<String> sf_twoTriggerDrugs = new ArrayList<>();
-  static {
-    sf_twoTriggerDrugs.add("RxNorm:704");   // amitriptyline
-    sf_twoTriggerDrugs.add("RxNorm:1256");  // azathioprine
-    sf_twoTriggerDrugs.add("RxNorm:2002");  // carbamazepine
-    sf_twoTriggerDrugs.add("RxNorm:2597");  // clomipramine
-    sf_twoTriggerDrugs.add("RxNorm:3638");  // doxepin
-    sf_twoTriggerDrugs.add("RxNorm:5691");  // imipramine
-    sf_twoTriggerDrugs.add("RxNorm:103");   // mercaptopurine
-    sf_twoTriggerDrugs.add("RxNorm:10485"); // thioguanine
-    sf_twoTriggerDrugs.add("RxNorm:10834"); // trimipramine
-  }
+
   private static final String[] sf_deleteStatements = new String[]{
       "delete from drug_note where type='" + NoteType.TEST_ALERT.name() + "'",
       "delete from test_alerts"
   };
+  private static final String FILE_EXTENSION = "_Pre_and_Post_Test_Alerts.xlsx";
   private static final String DEFAULT_DIRECTORY = "test_alerts";
 
   public static void main(String[] args) {
@@ -87,182 +55,127 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
   @Override
   String getFileExtensionToProcess() {
-    return EXCEL_EXTENSION;
+    return FILE_EXTENSION;
   }
   
   @Override
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
-    try (Connection conn = ConnectionFactory.newConnection()) {
-      String drugName = workbook.currentSheet.getSheetName();
-      String drugId = DbLookup.getDrugByName(conn, drugName)
-          .orElseThrow(() -> new NotFoundException("No drug for " + drugName));
-      
-      if (sf_twoTriggerDrugs.contains(drugId)) {
-        processTwoTrigger(workbook, conn, drugId);
-      } else {
-        processOneTrigger(workbook, conn, drugId);
+    for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext();) {
+      Sheet sheet = sheetIterator.next();
+      String population = sheet.getSheetName().replaceFirst("population ", "");
+      try (Connection conn = ConnectionFactory.newConnection()) {
+        processTwoTrigger(workbook, conn, population);
       }
     }
+
     addImportHistory(workbook.getFileName());
   }
 
-  private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {
+  private static final int COL_DRUG = 0;
+  private static final int COL_TRIGGER_START = 1;
+  private static final String COL_NAME_CONTEXT = "CDS Context, Relative to Genetic Testing";
+  private static final String COL_NAME_ALERT = "CDS Alert Text";
+
+  private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String population) throws Exception {
     PreparedStatement insert = conn.prepareStatement(
-        "insert into test_alerts(cds_context, trigger_condition, drugid, reference_point, alert_text) values (?, ?, ?, ?, ?)");
+        "insert into test_alerts(cds_context, trigger_condition, drugid, alert_text, population) values (?, ?, ?, ?, ?)");
     PreparedStatement insertNote = conn.prepareStatement(
         "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
+    DrugCache drugCache = new DrugCache(conn);
 
-    String lastTrigger1 = null;
-    String lastTrigger2 = null;
-    String lastRefPoint = null;
-    String lastContext = null;
-    List<String> alerts = new ArrayList<>();
-    int noteIdx = 0;
+    RowWrapper headerRow = workbook.getRow(0);
+    Map<String, Integer> triggerNames = new HashMap<>();
+    int idxContext = -1;
+    int idxAlert = -1;
+    for (int h=COL_TRIGGER_START; h<= headerRow.row.getLastCellNum(); h++) {
+      String triggerName = StringUtils.strip(headerRow.getNullableText(h));
+      if (StringUtils.isBlank(triggerName)) {
+        continue;
+      } else if (triggerName.equals(COL_NAME_CONTEXT)) {
+        idxContext = h;
+      } else if (triggerName.equals(COL_NAME_ALERT)) {
+        idxAlert = h;
+      }
+      triggerNames.put(triggerName, h);
+    }
+
+    List<String> notes = new ArrayList<>();
+    boolean noteMode = false;
     for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
       sf_logger.debug("reading row {}", i);
       RowWrapper row = workbook.getRow(i);
 
       // no text at either the beginning or the end, skip it
-      if (row.hasNoText(0) && row.hasNoText(4)) continue;
+      if (row.hasNoText(COL_DRUG) && row.hasNoText(idxAlert)) continue;
+
+      String firstValue = row.getNullableText(COL_DRUG);
+      if (firstValue.equalsIgnoreCase("notes")) {
+        noteMode = true;
+        continue;
+      }
 
       // if there's only text in the first column, it must be a note
-      if (row.hasNoText(4) && row.getNullableText(0) != null) {
-        if (!row.getNullableText(0).toLowerCase().startsWith("note")) {
-          insertNote.clearParameters();
-          insertNote.setString(1, drugId);
-          insertNote.setString(2, NoteType.TEST_ALERT.name());
-          insertNote.setInt(3, noteIdx);
-          insertNote.setString(4, row.getNullableText(0));
-          insertNote.executeUpdate();
-          noteIdx += 1;
+      if (noteMode) {
+        if (row.getNullableText(0) != null) {
+          notes.add(row.getNullableText(0));
         }
+        continue;
       }
 
-      String currentTrigger1 = row.getNullableText(0);
-      String currentTrigger2 = row.getNullableText(1);
-      String currentRefPoint = row.getNullableText(2, true);
-      String currentContext = row.getNullableText(3);
-      String currentAlert = row.getNullableText(4);
-
-      if (
-          !(lastTrigger1 == null && lastTrigger2 == null)
-          && (currentTrigger1 != null || currentTrigger2 != null)
-          && alerts.size() > 0
-      ) {
-        Array triggers = conn.createArrayOf("text", new String[]{lastTrigger1, lastTrigger2});
-        Array alertArg = conn.createArrayOf("text", alerts.toArray());
-
-        insert.setString(1, lastContext);
-        insert.setArray(2, triggers);
-        insert.setString(3, drugId);
-        insert.setString(4, lastRefPoint);
-        insert.setArray(5, alertArg);
-
-        insert.executeUpdate();
-        alerts.clear();
+      List<String> triggers = new ArrayList<>();
+      for (String triggerName : triggerNames.keySet()) {
+        triggers.add(triggerName + " = " + row.getNullableText(triggerNames.get(triggerName)));
       }
+      String drugId = drugCache.lookup(row.getNullableText(COL_DRUG));
+      Array triggerSqlArray = conn.createArrayOf("VARCHAR", triggers.toArray());
+      String context = row.getNullableText(idxContext);
+      Array alertSqlArray = conn.createArrayOf("VARCHAR", new String[]{row.getNullableText(idxAlert)});
 
-      if (row.hasNoText(4)) continue; // alert should always have text
+      insert.clearParameters();
+      insert.setString(1, context);
+      insert.setArray(2, triggerSqlArray);
+      insert.setString(3, drugId);
+      insert.setArray(4, alertSqlArray);
+      insert.setString(5, population);
+      insert.executeUpdate();
+    }
 
-      lastTrigger1 = StringUtils.defaultIfBlank(currentTrigger1, lastTrigger1);
-      lastTrigger2 = StringUtils.defaultIfBlank(currentTrigger2, lastTrigger2);
-      lastRefPoint = StringUtils.defaultIfBlank(currentRefPoint, lastRefPoint);
-      lastContext = StringUtils.defaultIfBlank(currentContext, lastContext);
-      if (currentAlert != null) {
-        alerts.add(currentAlert);
+    for (int i = 0; i < notes.size(); i++) {
+      String note = notes.get(i);
+      for (String drugId : drugCache.getIds()) {
+        insertNote.setString(1, drugId);
+        insertNote.setString(2, NoteType.TEST_ALERT.name());
+        insertNote.setInt(3, i);
+        insertNote.setString(4, note);
+        insertNote.executeUpdate();
       }
     }
   }
 
-  private void processOneTrigger(WorkbookWrapper workbook, Connection conn, String drugId) throws SQLException {
-    PreparedStatement insert = conn.prepareStatement(
-        "insert into test_alerts(cds_context, trigger_condition, drugid, alert_text, reference_point, activity_score) values (?, ?, ?, ?, ?, ?)");
-    PreparedStatement insertNote = conn.prepareStatement(
-        "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
-    int contextIdx = -1;
-    List<Integer> triggerIdxs = new ArrayList<>();
-    Map<Integer,String> alertMap = new LinkedHashMap<>();
-    int refPointIdx = -1;
-    int activityIdx = -1;
-    
-    RowWrapper headerRow = workbook.getRow(0);
-    for (int i=headerRow.row.getFirstCellNum(); i<=headerRow.row.getLastCellNum(); i++) {
-      String colTitle = headerRow.getNullableText(i);
-      if (colTitle == null) continue;
-      
-      colTitle = colTitle.toLowerCase();
-      if (colTitle.contains("flow chart")) {
-        refPointIdx = i;
-      } else if (colTitle.contains("trigger")) {
-        triggerIdxs.add(i);
-      } else if (colTitle.contains("activity")) {
-        activityIdx = i;
-      } else if (colTitle.contains("cds context")) {
-        contextIdx = i;
-      } else if (colTitle.contains("alert text")) {
-        alertMap.put(i, headerRow.getNullableText(i));
-      }
-    }
-    
-    int rowIdx = 1;
-    for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-      sf_logger.debug("reading row {}", rowIdx);
+  private static class DrugCache {
+    private Connection conn;
+    private Map<String, String> nameToIdMap = new HashMap<>();
 
-      RowWrapper row = workbook.getRow(rowIdx);
-      if (row.hasNoText(contextIdx)) break;
-
-      String context = row.getNullableText(contextIdx);
-
-      List<String> triggers = new ArrayList<>();
-      if (triggerIdxs.size() > 0) {
-        triggerIdxs.forEach((ti) -> triggers.add(row.getNullableText(ti)));
-      }
-
-      insert.setString(1, context);
-      insert.setArray(2, conn.createArrayOf("text", triggers.toArray()));
-      insert.setString(3, drugId);
-
-      if (alertMap.size()>0) {
-        List<String> alertValues = new ArrayList<>();
-        for (Integer alertIdx : alertMap.keySet()) {
-          if (alertMap.get(alertIdx).equals("CDS Alert Text")) {
-            alertValues.add(row.getNullableText(alertIdx));
-          } else {
-            alertValues.add(alertMap.get(alertIdx) + ": " + row.getNullableText(alertIdx));
-          }
-        }
-        Array alertArg = conn.createArrayOf("text", alertValues.toArray());
-        insert.setArray(4, alertArg);
-      } else {
-        insert.setNull(4, Types.ARRAY);
-      }
-
-      if (refPointIdx >= 0) {
-        insert.setString(5, row.getNullableText(refPointIdx, true));
-      } else {
-        insert.setNull(5, Types.VARCHAR);
-      }
-      
-      if (activityIdx >= 0) {
-        insert.setString(6, row.getNullableText(activityIdx));
-      } else {
-        insert.setNull(6, Types.VARCHAR);
-      }
-
-      insert.executeUpdate();
+    private DrugCache(Connection conn) {
+      this.conn = conn;
     }
 
-    int noteIdx = 0;
-    for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-      RowWrapper row = workbook.getRow(rowIdx);
-      if (row.hasNoText(0)) continue;
-      insertNote.clearParameters();
-      insertNote.setString(1, drugId);
-      insertNote.setString(2, NoteType.TEST_ALERT.name());
-      insertNote.setInt(3, noteIdx);
-      insertNote.setString(4, row.getNullableText(0));
-      insertNote.executeUpdate();
-      noteIdx += 1;
+    private String lookup(String name) throws Exception {
+      if (StringUtils.isBlank(name)) {
+        return null;
+      }
+
+      String id = nameToIdMap.get(name);
+      if (id == null) {
+        id = DbLookup.getDrugByName(conn, name)
+                .orElseThrow(() -> new NotFoundException("No drug for " + name));
+        nameToIdMap.put(name, id);
+      }
+      return id;
+    }
+
+    private Collection<String> getIds() {
+      return this.nameToIdMap.values();
     }
   }
 }

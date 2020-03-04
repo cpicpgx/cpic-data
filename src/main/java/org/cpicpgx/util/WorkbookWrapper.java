@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidParameterException;
+import java.util.Iterator;
 
 /**
  * Wrapper class for an Excel workbook. Helps read and setup supporting objects.
@@ -96,5 +97,9 @@ public class WorkbookWrapper {
 
   public void setFileName(String fileName) {
     this.fileName = fileName;
+  }
+
+  public Iterator<Sheet> getSheetIterator() {
+    return this.workbook.sheetIterator();
   }
 }

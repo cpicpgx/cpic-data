@@ -477,11 +477,10 @@ COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendat
 CREATE TABLE test_alerts
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
+  population VARCHAR,
   cds_context TEXT NOT NULL,
   trigger_condition TEXT[],
   drugId VARCHAR(20) REFERENCES drug(drugId),
-  reference_point TEXT,
-  activity_score TEXT,
   alert_text TEXT[] NOT NULL,
   version INTEGER DEFAULT 1
 );
@@ -492,6 +491,7 @@ CREATE TRIGGER version_test_alerts
 
 COMMENT ON TABLE test_alerts IS 'Example CDS test alert language';
 COMMENT ON COLUMN test_alerts.id IS 'A synthetic numerical ID, primary key';
+COMMENT ON COLUMN test_alerts.population IS 'The population this test alert is applicable to: general, adult, pediatrics, unspecified';
 COMMENT ON COLUMN test_alerts.cds_context IS 'This should be either pre-test or post-text';
 COMMENT ON COLUMN test_alerts.trigger_condition IS 'An array of one more more descriptions of trigger conditions';
 COMMENT ON COLUMN test_alerts.drugId IS 'The ID of a drug this alert text is for';
