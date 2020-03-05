@@ -175,4 +175,8 @@ public abstract class BaseDirectoryImporter {
       fileHistoryWriter.write(fileName, "imported to database from file");
     }
   }
+
+  void addImportHistory(WorkbookWrapper workbook) throws SQLException {
+    addImportHistory(workbook.getFileName());
+  }
 }

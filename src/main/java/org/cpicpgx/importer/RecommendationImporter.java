@@ -158,6 +158,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         }
       }
     }
+    addImportHistory(workbook);
   }
 
   private Map<String, Integer> getPhenotypeIndexMap(RowWrapper headerRow) {

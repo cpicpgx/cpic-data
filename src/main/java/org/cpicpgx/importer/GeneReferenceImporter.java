@@ -78,6 +78,6 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
         }
       }
     }
-    addImportHistory(workbook.getFileName());
+    addImportHistory(workbook);
   }
 }

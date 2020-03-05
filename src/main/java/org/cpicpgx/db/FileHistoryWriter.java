@@ -18,14 +18,12 @@ public class FileHistoryWriter {
   // for messages that come from input files
   public static final String SOURCE_FILE="FILE";
   
-  private PreparedStatement checkFile;
   private PreparedStatement insertFile;
   private PreparedStatement insertHistory;
   private FileType fileType;
   
   public FileHistoryWriter(Connection conn, FileType fileType) throws SQLException {
-    checkFile = conn.prepareStatement("select id from file_artifact where fileName=?");
-    insertFile = conn.prepareStatement("insert into file_artifact(type, fileName) values (?, ?) returning id");
+    insertFile = conn.prepareStatement("insert into file_artifact(type, fileName) values (?, ?) on conflict (fileName) do nothing returning id");
     insertHistory = conn.prepareStatement("insert into file_artifact_history(fileId, changeMessage, source) values (?, ?, ?)");
     this.fileType = fileType;
   }
@@ -37,24 +35,12 @@ public class FileHistoryWriter {
    * @throws SQLException can occur from DB activity
    */
   private long lookupFileId(String fileName) throws SQLException {
-    this.checkFile.clearParameters();
-    this.checkFile.setString(1, fileName);
-    ResultSet rs = this.checkFile.executeQuery();
-    Long fileId = null;
-    while (rs.next()) {
-      fileId = rs.getLong(1);
-    }
-    
-    if (fileId != null) {
-      return fileId;
-    } else {
-      this.insertFile.clearParameters();
-      this.insertFile.setString(1, this.fileType.name());
-      this.insertFile.setString(2, fileName);
-      try (ResultSet insertResult = this.insertFile.executeQuery()) {
-        insertResult.next();
-        return insertResult.getLong(1);
-      }
+    this.insertFile.clearParameters();
+    this.insertFile.setString(1, this.fileType.name());
+    this.insertFile.setString(2, fileName);
+    try (ResultSet insertResult = this.insertFile.executeQuery()) {
+      insertResult.next();
+      return insertResult.getLong(1);
     }
   }
 

@@ -44,7 +44,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
 
   @Override
   public FileType getFileType() {
-    return FileType.DIPLOTYPE_PHENOTYPE;
+    return FileType.GENE_CDS;
   }
 
   @Override
@@ -102,7 +102,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         dbHarness.insertNote(row.getNullableText(0));
       }
     }
-    addImportHistory(workbook.getFileName());
+    addImportHistory(workbook);
   }
 
   static class DbHarness implements AutoCloseable {

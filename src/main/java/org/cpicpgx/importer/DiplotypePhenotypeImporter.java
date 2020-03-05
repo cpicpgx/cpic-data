@@ -139,7 +139,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
         dbHarness.setConsultation(pheno, text);
       }
     }
-    addImportHistory(workbook.getFileName());
+    addImportHistory(workbook);
   }
 
   /**

@@ -139,7 +139,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         dbHarness.insertChange(date, note);
       }
     }
-    addImportHistory(workbook.getFileName());
+    addImportHistory(workbook);
   }
 
   /**

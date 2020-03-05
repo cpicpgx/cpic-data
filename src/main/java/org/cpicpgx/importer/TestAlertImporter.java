@@ -68,7 +68,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
 
-    addImportHistory(workbook.getFileName());
+    addImportHistory(workbook);
   }
 
   private static final int COL_DRUG = 0;

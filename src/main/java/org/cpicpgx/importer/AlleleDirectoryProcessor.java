@@ -53,7 +53,7 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
       AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
       importer.writeToDB();
       importer.writeHistory(workbook);
-      addImportHistory(workbook.getFileName());
+      addImportHistory(workbook);
     } catch (SQLException e) {
       throw new RuntimeException("Error processing " + workbook, e);
     }
