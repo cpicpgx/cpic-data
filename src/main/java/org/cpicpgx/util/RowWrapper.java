@@ -32,6 +32,10 @@ public class RowWrapper {
     this.formulaEvaluator = formulaEvaluator;
   }
 
+  public short getLastCellNum() {
+    return this.row.getLastCellNum();
+  }
+
   /**
    * Tests if the cell at the given index has text in it
    * @param cellIdx the index of a cell in this row, 0-based

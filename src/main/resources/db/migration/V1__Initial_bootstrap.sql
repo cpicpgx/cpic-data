@@ -472,10 +472,13 @@ CREATE TABLE recommendation
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   guidelineId INTEGER REFERENCES guideline(id),
   drugId VARCHAR(20) REFERENCES drug(drugId),
-  implications TEXT,
+  implications JSONB,
   drug_recommendation TEXT,
   classification VARCHAR(20),
   phenotypes JSONB,
+  activity_score JSONB,
+  population VARCHAR,
+  comments VARCHAR,
   version INTEGER DEFAULT 1
 );
 
@@ -487,10 +490,13 @@ COMMENT ON TABLE recommendation IS 'Recommendations for a gene phenotype pulled 
 COMMENT ON COLUMN recommendation.id IS 'A synthetic numerical ID, auto-assigned, primary key';
 COMMENT ON COLUMN recommendation.guidelineId IS 'The guideline this recommendation appears in';
 COMMENT ON COLUMN recommendation.drugId IS 'The drug this recommendation is for';
-COMMENT ON COLUMN recommendation.implications IS 'Implications for phenotypic measures';
+COMMENT ON COLUMN recommendation.implications IS 'Implications for phenotypic measures, this is a JSON mapping of gene to implication';
 COMMENT ON COLUMN recommendation.drug_recommendation IS 'Dosing or therapeutic recommendations, depending on particular drug';
 COMMENT ON COLUMN recommendation.classification IS 'Classification of recommendations, described in supplementary meterial';
-COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendation applies to, this is a JSON Array';
+COMMENT ON COLUMN recommendation.population IS 'The population this recommendation is applicable to';
+COMMENT ON COLUMN recommendation.comments IS 'Optional comments about the recommendation';
+COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendation applies to, this is a JSON mapping of gene to phenotype';
+COMMENT ON COLUMN recommendation.activity_score IS 'Activity score that this recommendation applies to, this is a JSON mapping of gene to score value';
 
 
 CREATE TABLE test_alerts

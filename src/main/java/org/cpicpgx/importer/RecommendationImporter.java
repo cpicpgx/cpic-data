@@ -1,38 +1,36 @@
 package org.cpicpgx.importer;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.model.FileType;
-import org.cpicpgx.util.Phenotype;
+import org.cpicpgx.util.RowWrapper;
+import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Importer class for recommendation CSV tables.
+ * Importer class for recommendation Excel workbooks.
  * 
- * This expects the CSV to follow these rules
+ * This expects the workbook to follow these rules
  * 
  * <ol>
- *   <li>The name of the file must start with the drug name followed by a period then any other text is ignored</li>
- *   <li>File names must all end in ".csv"</li>
+ *   <li>The name of the file must start with the drug name followed by a space then "recommendation""</li>
+ *   <li>Each sheet is a different "population" with a title in the form "population {name-of-population}" where only {name-of-population} is stored</li>
+ *   <li>File names must all end in ".xlsx"</li>
  *   <li>First row is a header</li>
- *   <li>First n columns are one for each n genes used to match the recommendation</li>
- *   <li>Each gene column has a header in the form "GENE_SYMBOL Phenotype"</li>
+ *   <li>n is the number of genes used in this recommendation workbook</li>
+ *   <li>First n*2 columns are column pairs of gene phenotype (GENE Phenotype) and gene activity score (GENE Activity Score)</li>
+ *   <li>THe next n columns are for Implications (GENE Implications for Phenotypic Measures)</li>
  *   <li>After gene column(s) are three columns: implication, recommendation, strength (header text doesn't matter but order does)</li>
  * </ol>
  *
@@ -40,11 +38,14 @@ import java.util.regex.Pattern;
  */
 public class RecommendationImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern DRUG_NAME_PATTERN = Pattern.compile("(\\w+).*\\.csv");
+  private static final String FILE_NAME_SUFFIX = " recommendation.xlsx";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from recommendation"
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
+  private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+Phenotype");
+  private static final Pattern IMPL_PATTERN = Pattern.compile("([\\w-]+)\\s+Implication.*");
+  private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)\\s+Activity Score.*");
 
   public static void main(String[] args) {
     rebuild(new RecommendationImporter(), args);
@@ -68,52 +69,111 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
   @Override
   String getFileExtensionToProcess() {
-    return CSV_EXTENSION;
+    return FILE_NAME_SUFFIX;
   }
 
   @Override
-  Consumer<File> getFileProcessor() {
-    return f -> {
-      sf_logger.info("Processing file {}", f);
-      Matcher m = DRUG_NAME_PATTERN.matcher(f.getName().toLowerCase());
-      if (!m.find()) {
-        sf_logger.warn("No drug name found for {}", f.getName().toLowerCase());
-        return;
-      }
-      String drug = m.group(1);
+  void processWorkbook(WorkbookWrapper workbook) throws Exception {
+    try (DbHarness dbHarness = new DbHarness()) {
+      String drugText = workbook.getFileName().replaceAll(FILE_NAME_SUFFIX, "").toLowerCase();
+      // some recommendation file names have more than one drug name in them, laod the same data for each drug
+      String[] drugNames = drugText.split("_");
 
-      List<String> geneList = new ArrayList<>();
-      try (FileReader fileReader = new FileReader(f); DbHarness dbHarness = new DbHarness()) {
-        CSVParser rows = CSVFormat.DEFAULT.parse(fileReader);
-        for (CSVRecord row : rows) {
-          if (row.getRecordNumber() == 1) {
-            for (int i = 0; i < row.size(); i++) {
-              String cellValue = row.get(i);
-              if (cellValue.endsWith(" Phenotype") && i == geneList.size()) {
-                String gene = cellValue.replaceAll(" Phenotype", "");
-                geneList.add(gene);
+      for (String drugName : drugNames) {
+        String drugId = dbHarness.lookupDrug(drugName);
+        long guidelineId = dbHarness.lookupGuideline(drugName);
+
+        sf_logger.info("Drug: {} {}", drugName, drugId);
+        sf_logger.info("Guideline: {}", guidelineId);
+        for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext(); ) {
+          Sheet sheet = sheetIterator.next();
+          workbook.currentSheetIs(sheet.getSheetName());
+          String populationName = sheet.getSheetName().replaceAll("^population\\s+", "");
+          sf_logger.info(populationName);
+
+          RowWrapper headerRow = workbook.getRow(0);
+          Map<String, Integer> phenotypeIdxMap = getPhenotypeIndexMap(headerRow);
+          Map<String, Integer> implIdxMap = new HashMap<>();
+          Map<String, Integer> asIdxMap = new HashMap<>();
+          int idxRecommendation = -1;
+          int idxClassification = -1;
+          int idxComments = -1;
+
+          for (int j = 0; j < headerRow.getLastCellNum(); j++) {
+            String cellText = headerRow.getNullableText(j);
+            if (cellText == null) continue;
+
+            // figuring out the index of each type of column
+            Matcher implMatch = IMPL_PATTERN.matcher(cellText);
+            Matcher asMatch = AS_PATTERN.matcher(cellText);
+            if (phenotypeIdxMap.size() > 1 && implMatch.matches()) {
+              implIdxMap.put(implMatch.group(1), j);
+            } else if (cellText.startsWith("Implication")) {
+              implIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
+            } else if (phenotypeIdxMap.size() > 1 && asMatch.matches()) {
+              asIdxMap.put(asMatch.group(1), j);
+            } else if (cellText.contains("Activity Score")) {
+              asIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
+            } else if (cellText.equals("Therapeutic Recommendation")) {
+              idxRecommendation = j;
+            } else if (cellText.contains("Classification of Recommendation")) {
+              idxClassification = j;
+            } else if (cellText.contains("Comments")) {
+              idxComments = j;
+            }
+          }
+
+          for (int k = 1; k <= workbook.currentSheet.getLastRowNum(); k++) {
+            try {
+              RowWrapper dataRow = workbook.getRow(k);
+              if (dataRow.hasNoText(0)) continue;
+
+              JsonObject phenotype = new JsonObject();
+              JsonObject implication = new JsonObject();
+              JsonObject activityScore = new JsonObject();
+
+              for (String gene : phenotypeIdxMap.keySet()) {
+                String normalizedPheno = WordUtils.capitalize(StringUtils.strip(dataRow.getText(phenotypeIdxMap.get(gene)).replaceAll("\\s*" + gene + "\\s*", " ")));
+                phenotype.addProperty(gene, normalizedPheno);
               }
+              for (String gene : implIdxMap.keySet()) {
+                implication.addProperty(gene, dataRow.getText(implIdxMap.get(gene)));
+              }
+              for (String gene : asIdxMap.keySet()) {
+                activityScore.addProperty(gene, dataRow.getText(asIdxMap.get(gene)));
+              }
+              dbHarness.insert(
+                  drugName,
+                  phenotype,
+                  implication,
+                  dataRow.getNullableText(idxRecommendation),
+                  dataRow.getNullableText(idxClassification),
+                  dataRow.getNullableText(idxComments),
+                  activityScore
+              );
+            } catch (RuntimeException ex) {
+              throw new RuntimeException("Error reading row " + (k + 1), ex);
             }
-          } else {
-            int columnOffset = geneList.size(); // the next 3 columns after the genes are always the same
-            Phenotype phenotype = new Phenotype();
-            for (int i = 0; i < columnOffset; i++) {
-              phenotype.with(geneList.get(i), row.get(i));
-            }
-            dbHarness.insert(drug, phenotype, row.get(columnOffset), row.get(columnOffset + 1), row.get(columnOffset + 2));
           }
         }
-        addImportHistory(f.getName());
-      } catch (IOException e) {
-        sf_logger.error("Error reading file", e);
-      } catch (SQLException e) {
-        sf_logger.error("Error writing to database", e);
-      } catch (Exception e) {
-        e.printStackTrace();
       }
-    };
+    }
   }
-  
+
+  private Map<String, Integer> getPhenotypeIndexMap(RowWrapper headerRow) {
+    Map<String, Integer> phenotypeIdxMap = new HashMap<>();
+    for (int j = 0; j < headerRow.getLastCellNum(); j++) {
+      String cellText = headerRow.getNullableText(j);
+      if (cellText == null) continue;
+
+      Matcher phenoMatch = PHENO_PATTERN.matcher(cellText);
+      if (phenoMatch.matches()) {
+        phenotypeIdxMap.put(phenoMatch.group(1), j);
+      }
+    }
+    return phenotypeIdxMap;
+  }
+
   private static class DbHarness implements AutoCloseable {
     private PreparedStatement insertStmt;
     private PreparedStatement drugLookupStmt;
@@ -122,7 +182,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     
     DbHarness() throws SQLException {
       Connection conn = ConnectionFactory.newConnection();
-      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes) values (?, ?, ?, ?, ? , ?::JSONB)");
+      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb)");
       this.drugLookupStmt = conn.prepareStatement(
           "select drugid from drug where name=?", 
           ResultSet.TYPE_SCROLL_INSENSITIVE, 
@@ -137,18 +197,15 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       closables.add(conn);
     }
     
-    void insert(String drug, Phenotype phenotype, String implications, String recommendation, String classification) {
+    void insert(String drug, JsonObject phenotype, JsonObject implication, String recommendation, String classification, String comments, JsonObject activityScore) {
       try {
         String drugId = lookupDrug(drug);
         Long guidelineId = lookupGuideline(drug);
+        this.insertStmt.clearParameters();
 
         this.insertStmt.setLong(1, guidelineId);
         this.insertStmt.setString(2, drugId);
-        if (StringUtils.isNotBlank(implications)) {
-          this.insertStmt.setString(3, implications);
-        } else {
-          this.insertStmt.setNull(3, Types.VARCHAR);
-        }
+        this.insertStmt.setString(3, implication.toString());
         if (StringUtils.isNotBlank(recommendation)) {
           this.insertStmt.setString(4, recommendation);
         } else {
@@ -160,6 +217,13 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           this.insertStmt.setNull(5, Types.VARCHAR);
         }
         this.insertStmt.setObject(6, phenotype.toString());
+
+        if (comments == null) {
+          this.insertStmt.setNull(7, Types.VARCHAR);
+        } else {
+          this.insertStmt.setString(7, comments);
+        }
+        this.insertStmt.setString(8, activityScore.toString());
         
         this.insertStmt.executeUpdate();
         
