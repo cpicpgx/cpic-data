@@ -76,8 +76,14 @@ public class ProgressReport {
           "select genesymbol, count(*) from allele_frequency f join allele a on f.alleleid = a.id group by genesymbol order by genesymbol",
           "Frequency Table");
       queryData(conn, 
-          "select genesymbol, count(*) from gene_phenotype group by genesymbol",
+          "select genesymbol, count(*) from gene_phenotype where consultationtext is not null group by genesymbol",
           "Gene CDS Text");
+      queryData(conn,
+          "select g.genesymbol, count(*) from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid group by genesymbol",
+          "Gene Phenotypes");
+      queryData(conn,
+          "select a.genesymbol, count(*) from allele a where a.pharmvarid is not null group by a.genesymbol",
+          "PharmVar Allele IDs Loaded");
     }
   }
   
