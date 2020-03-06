@@ -4,7 +4,6 @@ import org.cpicpgx.model.FileType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -23,25 +22,21 @@ public class FileHistoryWriter {
   private FileType fileType;
   
   public FileHistoryWriter(Connection conn, FileType fileType) throws SQLException {
-    insertFile = conn.prepareStatement("insert into file_artifact(type, fileName) values (?, ?) on conflict (fileName) do nothing returning id");
-    insertHistory = conn.prepareStatement("insert into file_artifact_history(fileId, changeMessage, source) values (?, ?, ?)");
+    insertFile = conn.prepareStatement("insert into file_artifact(type, fileName) values (?, ?) on conflict (fileName) do nothing");
+    insertHistory = conn.prepareStatement("insert into file_artifact_history(fileId, changeMessage, source) select id, ?, ? from file_artifact where filename=?");
     this.fileType = fileType;
   }
 
   /**
-   * Find the primary ID for a file or create a new one if this file hasn't been seen before
+   * Makes a record for the given file name. It's ok to run on the same file multiple times, it will only create one record.
    * @param fileName a String file name
-   * @return the long ID of the file
    * @throws SQLException can occur from DB activity
    */
-  private long lookupFileId(String fileName) throws SQLException {
+  private void makeFile(String fileName) throws SQLException {
     this.insertFile.clearParameters();
     this.insertFile.setString(1, this.fileType.name());
     this.insertFile.setString(2, fileName);
-    try (ResultSet insertResult = this.insertFile.executeQuery()) {
-      insertResult.next();
-      return insertResult.getLong(1);
-    }
+    this.insertFile.executeUpdate();
   }
 
   /**
@@ -64,10 +59,10 @@ public class FileHistoryWriter {
    * @throws SQLException can occur from DB activity
    */
   public void write(String fileName, String message, String source) throws SQLException {
-    long fileId = lookupFileId(fileName);
-    this.insertHistory.setLong(1, fileId);
-    this.insertHistory.setString(2, message);
-    this.insertHistory.setString(3, source);
+    makeFile(fileName);
+    this.insertHistory.setString(1, message);
+    this.insertHistory.setString(2, source);
+    this.insertHistory.setString(3, fileName);
     this.insertHistory.executeUpdate();
   }
 }
