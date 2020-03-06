@@ -1,13 +1,14 @@
 package org.cpicpgx.importer;
 
+import com.google.gson.JsonObject;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
+import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,12 +92,20 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private Connection conn;
     private PreparedStatement insertPhenotype;
     private PreparedStatement insertFunction;
+    private PreparedStatement lookupDiplotypes;
+    private PreparedStatement insertDiplotype;
     private Map<String, Integer> phenotypeCache = new HashMap<>();
 
     DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
       this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype) values (?, ?) returning id");
-      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityscore1, activityscore2, totalactivityscore) values (?, ?::jsonb, ?, ?, ?, ?, ?)");
+      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityscore1, activityscore2, totalactivityscore) values (?, ?::jsonb, ?, ?, ?, ?, ?) returning id");
+      this.lookupDiplotypes = conn.prepareStatement("select a1.name, a2.name " +
+          "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
+          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.clinicalfunctionalstatus=pf.function1 " +
+          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.clinicalfunctionalstatus=pf.function2 " +
+          "where pf.id=? order by a1.name, a2.name");
+      this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
     }
 
     void insertValues(String geneSymbol, RowWrapper row) throws SQLException {
@@ -133,7 +142,55 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       } else {
         this.insertFunction.setNull(7, Types.VARCHAR);
       }
-      this.insertFunction.executeUpdate();
+
+      try (ResultSet rs = this.insertFunction.executeQuery()) {
+        if (rs.next()) {
+          int fnId = rs.getInt(1);
+          insertDiplotypes(fnId);
+        } else {
+          throw new RuntimeException("Couldn't insert function");
+        }
+      }
+    }
+
+    /**
+     * Generates phenotype_diplotype records based off of data about phenotypes in the
+     * @param functionId the primary key ID for a phenotype
+     * @throws SQLException can occur when inserting into the DB
+     */
+    void insertDiplotypes(int functionId) throws SQLException {
+      this.lookupDiplotypes.setInt(1, functionId);
+      Set<List<String>> rawDiplotypes = new HashSet<>();
+
+      // caching the raw diplotypes ahead of time so they can be normalized. For example, *1/*2 is the same as *2/*1 so
+      // this code should reduce those two records to just one of *1/*2 thanks to the HaplotypeNameComparator
+      try (ResultSet rs = this.lookupDiplotypes.executeQuery()) {
+        while (rs.next()) {
+          List<String> rawDiplotype = new ArrayList<>();
+          rawDiplotype.add(rs.getString(1));
+          rawDiplotype.add(rs.getString(2));
+          rawDiplotype.sort(HaplotypeNameComparator.getComparator());
+          rawDiplotypes.add(rawDiplotype);
+        }
+      }
+
+      for (List<String> rawDiplotype : rawDiplotypes) {
+        String a1 = rawDiplotype.get(0);
+        String a2 = rawDiplotype.get(1);
+
+        JsonObject diplotypeKey = new JsonObject();
+        if (a1.equals(a2)) {
+          diplotypeKey.addProperty(a1, 2);
+        } else {
+          diplotypeKey.addProperty(a1, 1);
+          diplotypeKey.addProperty(a2, 1);
+        }
+
+        this.insertDiplotype.setInt(1, functionId);
+        this.insertDiplotype.setString(2, String.format("%s/%s", a1, a2));
+        this.insertDiplotype.setString(3, diplotypeKey.toString());
+        this.insertDiplotype.executeUpdate();
+      }
     }
 
     int lookupPhenotype(String gene, String phenotype) throws SQLException {

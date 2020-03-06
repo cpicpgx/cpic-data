@@ -83,7 +83,8 @@ public class DataImport {
   }
 
   private void execute() throws SQLException {
-    
+
+    // order is important in this list, later importers may add data to previously imported data
     List<BaseDirectoryImporter> importers = new ArrayList<>();
     importers.add(new GeneReferenceImporter().setDirectory(m_directory, geneMappingDirectory));
     importers.add(new AlleleDirectoryProcessor().setDirectory(m_directory, alleleDirectory));
