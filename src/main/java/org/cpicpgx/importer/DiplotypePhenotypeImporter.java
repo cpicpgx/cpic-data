@@ -11,15 +11,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses diplotype-phenotype translation files
+ * Parses diplotype-phenotype translation files.
+ *
+ * This does not actually load any data into the DB, it checks the existing files to ensure the previously
+ * manually-curated data matches the data inferred by the system.
  *
  * @author Ryan Whaley
  */
@@ -28,10 +32,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   private static final Pattern GENE_PATTERN = Pattern.compile("(\\w+)\\s*Diplotype");
   private static final int COL_IDX_DIP = 0;
   private static final String DIPLOTYPE_SEPARATOR = "/";
-  private static final String[] sf_deleteStatements = new String[]{
-      "delete from phenotype_diplotype",
-      "delete from gene_phenotype"
-  };
+  private static final String[] sf_deleteStatements = new String[]{};
   private static final String DEFAULT_DIRECTORY = "diplotype_phenotype_tables";
 
   public static void main(String[] args) {
@@ -94,6 +95,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     String geneSymbol = m.group(1);
     sf_logger.debug("loading gene {}", geneSymbol);
 
+    int rowsProcessed = 0;
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
@@ -112,33 +114,12 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
         } catch (PSQLException ex) {
           sf_logger.warn("found duplicate " + dip + " on row " + (i+1));
         }
+        rowsProcessed += 1;
       }
+      sf_logger.info("    {} rows processed", rowsProcessed);
+      sf_logger.info("    {} diplotypes match failed", dbHarness.getFailCount());
     }
 
-    // default CDS language should be on the second sheet
-    workbook.switchToSheet(1);
-
-    if (workbook.currentSheet == null) {
-      sf_logger.warn("No CDS sheet for {}", geneSymbol);
-      return;
-    }
-
-    sf_logger.info("Reading sheet for CDS: {}", workbook.currentSheet.getSheetName());
-    
-    int phenoCol = geneSymbol.equals("CYP2D6") ? 1 : 0;
-    int textCol = geneSymbol.equals("CYP2D6") ? 3 : 2;
-
-    try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
-      for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
-        RowWrapper row = workbook.getRow(i);
-        String pheno = row.getNullableText(phenoCol);
-        String text = row.getNullableText(textCol);
-        
-        if (pheno == null || text == null) continue;
-        
-        dbHarness.setConsultation(pheno, text);
-      }
-    }
     addImportHistory(workbook);
   }
 
@@ -166,9 +147,8 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     private Connection conn;
     private String gene;
     private PreparedStatement insertStmt;
-    private PreparedStatement insertDipStmt;
-    private PreparedStatement updateTextStmt;
-    private Map<String, Integer> phenoIdMap = new HashMap<>();
+    private PreparedStatement findDiplotype;
+    private int failCount = 0;
 
     DbHarness(String gene) throws SQLException {
       this.gene = gene;
@@ -177,67 +157,40 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       insertStmt = this.conn.prepareStatement(
           "insert into gene_phenotype(geneSymbol, phenotype, activityscore, ehrPriority) values (?, ?, ?, ?) returning(id)"
       );
-      insertDipStmt = this.conn.prepareStatement(
-          "insert into phenotype_diplotype(phenotypeid, diplotype) values (?, ?)"
-      );
-      updateTextStmt = this.conn.prepareStatement(
-          "update gene_phenotype set consultationtext=? where genesymbol=? and phenotype=?"
+      this.findDiplotype = this.conn.prepareStatement(
+          "select p.phenotype, f.totalactivityscore, d.id, p.ehrpriority from gene_phenotype p " +
+              "    join phenotype_function f on p.id = f.phenotypeId " +
+              "    join phenotype_diplotype d on f.id = d.functionPhenotypeId where p.genesymbol=? and d.diplotype=?"
       );
     }
 
     void insert(String diplotype, String phenotype, Double activity, String ehr) throws SQLException {
       String phenoStripped = stripPhenotype(phenotype);
-      Integer phenoId = this.phenoIdMap.get(phenoStripped);
 
-      if (phenoId == null) {
-        this.insertStmt.clearParameters();
-        this.insertStmt.setString(1, this.gene);
+      findDiplotype.setString(1, gene);
+      findDiplotype.setString(2, diplotype);
+      try (ResultSet rs = findDiplotype.executeQuery()) {
+        if (rs.next()) {
+          String existingPhenotype = rs.getString(1);
+          String existingActivityScore = rs.getString(2);
+          String existingEhrPriority = rs.getString(4);
 
-        if (phenoStripped != null) {
-          if (!phenotype.equals(gene + " " + phenoStripped) && !phenotype.equals(phenoStripped)) {
-            sf_logger.warn("phenotype modified: {} >> {}", phenotype, phenoStripped);
+          if (!phenoStripped.equalsIgnoreCase(existingPhenotype)) {
+            sf_logger.info("{} {}: P:{}<>{} AS:{}<>{}", gene, diplotype, phenoStripped, existingPhenotype, activity, existingActivityScore);
+            failCount += 1;
           }
-          this.insertStmt.setString(2, phenoStripped);
-        } else {
-          this.insertStmt.setNull(2, Types.VARCHAR);
-        }
+          if (!ehr.equalsIgnoreCase(existingEhrPriority) && !(ehr.equals("none") && existingEhrPriority == null)) {
+            sf_logger.info("{} {}: EHR:{}<>{}", gene, diplotype, ehr, existingEhrPriority);
+            failCount += 1;
+          }
 
-        if (activity != null) {
-          this.insertStmt.setDouble(3, activity);
-        } else {
-          this.insertStmt.setNull(3, Types.NUMERIC);
+          if (rs.next()) {
+            throw new RuntimeException("Unexpected second result for " + gene + " " + diplotype);
+          }
         }
-
-        if (ehr != null) {
-          this.insertStmt.setString(4, ehr);
-        } else {
-          this.insertStmt.setNull(4, Types.VARCHAR);
-        }
-
-        try (ResultSet rs = this.insertStmt.executeQuery()) {
-          rs.next();
-          phenoId = rs.getInt(1);
-          this.phenoIdMap.put(phenoStripped, phenoId);
-        }
-      }
-      
-      insertDipStmt.setInt(1, phenoId);
-      insertDipStmt.setString(2, diplotype);
-      insertDipStmt.executeUpdate();
-
-      if (!isHom(diplotype)) {
-        insertDipStmt.setString(2, flipDip(diplotype));
-        insertDipStmt.executeUpdate();
       }
     }
     
-    void setConsultation(String phenotype, String consultationText) throws SQLException {
-      this.updateTextStmt.setString(1, consultationText);
-      this.updateTextStmt.setString(2, this.gene);
-      this.updateTextStmt.setString(3, stripPhenotype(phenotype));
-      this.updateTextStmt.executeUpdate();
-    }
-
     String stripPhenotype(String pheno) {
       if (pheno == null) {
         return null;
@@ -257,9 +210,16 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       if (this.insertStmt != null) {
         this.insertStmt.close();
       }
+      if (this.findDiplotype != null) {
+        this.findDiplotype.close();
+      }
       if (this.conn != null) {
         this.conn.close();
       }
+    }
+
+    public int getFailCount() {
+      return failCount;
     }
   }
 }
