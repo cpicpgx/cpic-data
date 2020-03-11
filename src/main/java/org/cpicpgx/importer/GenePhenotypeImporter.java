@@ -33,6 +33,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
   private static final int COL_A2_SCORE = 3;
   private static final int COL_TOTAL_SCORE = 4;
   private static final int COL_PHENO = 5;
+  private static final int COL_DESC = 6;
 
   public static void main(String[] args) {
     rebuild(new GenePhenotypeImporter(), args);
@@ -93,17 +94,24 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private PreparedStatement insertPhenotype;
     private PreparedStatement insertFunction;
     private PreparedStatement lookupDiplotypes;
+    private PreparedStatement lookupDiplotypesByScore;
     private PreparedStatement insertDiplotype;
     private Map<String, Integer> phenotypeCache = new HashMap<>();
+    private boolean useScoreLookup = false;
 
     DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
       this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype) values (?, ?) returning id");
-      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityscore1, activityscore2, totalactivityscore) values (?, ?::jsonb, ?, ?, ?, ?, ?) returning id");
+      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityscore1, activityscore2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
       this.lookupDiplotypes = conn.prepareStatement("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.clinicalfunctionalstatus=pf.function1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.clinicalfunctionalstatus=pf.function2 " +
+          "where pf.id=? order by a1.name, a2.name");
+      this.lookupDiplotypesByScore = conn.prepareStatement("select a1.name, a2.name " +
+          "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
+          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityscore=pf.activityscore1 " +
+          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 " +
           "where pf.id=? order by a1.name, a2.name");
       this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
     }
@@ -114,6 +122,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       String a1Score = row.getNullableText(COL_A1_SCORE);
       String a2Score = row.getNullableText(COL_A2_SCORE);
       String totalScore = row.getNullableText(COL_TOTAL_SCORE);
+      String description = row.getNullableText(COL_DESC);
       int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO));
 
       String fnKey;
@@ -129,6 +138,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       this.insertFunction.setString(4, a2Fn);
       if (a1Score != null) {
         this.insertFunction.setString(5, a1Score);
+        this.useScoreLookup = true;
       } else {
         this.insertFunction.setNull(5, Types.VARCHAR);
       }
@@ -141,6 +151,11 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
         this.insertFunction.setString(7, totalScore);
       } else {
         this.insertFunction.setNull(7, Types.VARCHAR);
+      }
+      if (description != null) {
+        this.insertFunction.setString(8, description);
+      } else {
+        this.insertFunction.setNull(8, Types.VARCHAR);
       }
 
       try (ResultSet rs = this.insertFunction.executeQuery()) {
@@ -159,12 +174,14 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
      * @throws SQLException can occur when inserting into the DB
      */
     void insertDiplotypes(int functionId) throws SQLException {
-      this.lookupDiplotypes.setInt(1, functionId);
+      PreparedStatement lookup = this.useScoreLookup ? this.lookupDiplotypesByScore : this.lookupDiplotypes;
+
+      lookup.setInt(1, functionId);
       Set<List<String>> rawDiplotypes = new HashSet<>();
 
       // caching the raw diplotypes ahead of time so they can be normalized. For example, *1/*2 is the same as *2/*1 so
       // this code should reduce those two records to just one of *1/*2 thanks to the HaplotypeNameComparator
-      try (ResultSet rs = this.lookupDiplotypes.executeQuery()) {
+      try (ResultSet rs = lookup.executeQuery()) {
         while (rs.next()) {
           List<String> rawDiplotype = new ArrayList<>();
           rawDiplotype.add(rs.getString(1));

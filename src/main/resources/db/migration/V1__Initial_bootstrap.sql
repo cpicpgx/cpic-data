@@ -430,13 +430,12 @@ CREATE TABLE phenotype_function
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
     phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
     functionKey JSONB NOT NULL,
-    function1 VARCHAR NOT NULL,
-    function2 VARCHAR NOT NULL,
-    activityScore1 VARCHAR,
-    activityScore2 VARCHAR,
-    totalActivityScore VARCHAR,
-
-    UNIQUE (phenotypeId, functionKey)
+    function1 TEXT NOT NULL,
+    function2 TEXT NOT NULL,
+    activityScore1 TEXT,
+    activityScore2 TEXT,
+    totalActivityScore TEXT,
+    description TEXT
 );
 
 COMMENT ON TABLE phenotype_function IS 'Gene function combinations that apply to the phenotype referenced. This table is a child of gene_phenotype.';
@@ -448,6 +447,7 @@ COMMENT ON COLUMN phenotype_function.function2 IS 'The second allele function, r
 COMMENT ON COLUMN phenotype_function.activityScore1 IS 'The activity score for the first allele function';
 COMMENT ON COLUMN phenotype_function.activityScore2 IS 'The activity score for the second allele function';
 COMMENT ON COLUMN phenotype_function.totalActivityScore IS 'The sum activity score for the functions';
+COMMENT ON COLUMN phenotype_function.description IS 'A description of the diplotypes associated with this phenotype';
 
 
 CREATE TABLE phenotype_diplotype
