@@ -31,10 +31,10 @@ class DiplotypeWorkbook extends AbstractWorkbook {
   
   void writeDiplotype(String diplotype, String phenotype, String ehr, String activity) {
     Row row = dataSheet.nextRow();
-    writeStringCell(row, 0, diplotype);
+    writeStringCell(row, 0, diplotype, false);
     writeStringCell(row, 1, phenotype);
     writeStringCell(row, 2, ehr);
-    writeStringCell(row, 3, activity);
+    writeStringCell(row, 3, activity, false);
   }
   
   void writeInterpretation(String phenotype, String ehr, String interpreation) {

@@ -1,14 +1,21 @@
 package org.cpicpgx.exporter;
 
+import org.apache.commons.collections4.ComparatorUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
+import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.sawano.java.text.AlphanumericComparator;
 
 import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Exports files, by gene, of the diplotype to phenotype assignments.
@@ -44,20 +51,19 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
         DiplotypeWorkbook workbook = new DiplotypeWorkbook(gene);
         
         dipStmt.setString(1, gene);
+        Map<String, String[]> dipMap = new TreeMap<>(new AlphanumericComparator(Locale.ENGLISH));
         try (ResultSet rs = dipStmt.executeQuery()) {
           while (rs.next()) {
             String diplotype = rs.getString(1);
             String phenotype = rs.getString(2);
             String ehr = rs.getString(3);
-            
-            int activityScore = rs.getInt(4);
-            String activity = "N/A";
-            if (!rs.wasNull()) {
-              activity = String.valueOf(activityScore);
-            }
-
-            workbook.writeDiplotype(diplotype, phenotype, ehr, activity);
+            String activity = rs.getString(4);
+            dipMap.put(diplotype, new String[]{diplotype, phenotype, ehr, activity});
           }
+        }
+        for (String key : dipMap.keySet()) {
+          String[] fields = dipMap.get(key);
+          workbook.writeDiplotype(fields[0], fields[1], fields[2], fields[3]);
         }
 
         phenoStmt.setString(1, gene);
