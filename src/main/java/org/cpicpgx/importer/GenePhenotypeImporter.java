@@ -81,7 +81,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
         }
         try {
           dbHarness.insertValues(geneSymbol, dataRow);
-        } catch (SQLException e) {
+        } catch (Exception e) {
           throw new RuntimeException("Error processing row " + (i+1), e);
         }
       }
@@ -127,6 +127,8 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO));
 
       this.useScoreLookup = (a1Score != null);
+
+      validateScoreData(a1Score, a2Score, totalScore);
 
       this.insertFunction.setInt(1, phenoId);
       if (useScoreLookup) {
@@ -243,6 +245,48 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       } else {
         return score.toLowerCase();
       }
+    }
+
+    /**
+     * Do some quick validation of score values if they are present
+     * @param score1 first score
+     * @param score2 second score
+     * @param total the total of the first and second score
+     */
+    private void validateScoreData(String score1, String score2, String total) {
+      // if score is not used, nothing to do
+      if (!this.useScoreLookup) return;
+
+      // if score data is missing throw an exception
+      if (score1 == null || score2 == null || total == null) {
+        throw new RuntimeException("Score data is missing");
+      }
+
+      // if "n/a" values are present
+      if (score1.equalsIgnoreCase(NA) || score2.equalsIgnoreCase(NA)) {
+        // the total must be "n/a"
+        if (!total.equalsIgnoreCase(NA)){
+          throw new RuntimeException("n/a score is not consistent");
+        } else {
+          // nothing left to check for n/a values
+          return;
+        }
+      }
+
+      // do some simple math to make sure the values are consistent
+      if (convertScore(score1) + convertScore(score2) != convertScore(total)) {
+        throw new RuntimeException("scores don't add up to total");
+      }
+    }
+
+    /**
+     * Try to convert a string score into a computable double
+     * @param score a score that may possibly contain a ≥ character
+     * @return a double representation of a score
+     */
+    private static double convertScore(String score) {
+      String strippedScore = score.replaceAll("≥", "");
+      return Double.parseDouble(strippedScore);
     }
 
     @Override

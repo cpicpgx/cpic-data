@@ -35,6 +35,7 @@ import java.util.function.Consumer;
  */
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  static final String NA = "n/a";
   static final String EXCEL_EXTENSION = ".xlsx";
 
   private Path directory;
