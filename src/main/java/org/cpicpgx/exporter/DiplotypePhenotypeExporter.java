@@ -1,9 +1,7 @@
 package org.cpicpgx.exporter;
 
-import org.apache.commons.collections4.ComparatorUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
-import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
@@ -12,7 +10,6 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
