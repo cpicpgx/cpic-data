@@ -244,7 +244,11 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     
     private void setNullableText(PreparedStatement stmt, int idx, String value) throws SQLException {
       if (StringUtils.isNotBlank(value)) {
-        stmt.setString(idx, value);
+        if (value.equals("N/A")) {
+          stmt.setString(idx, "n/a");
+        } else {
+          stmt.setString(idx, value);
+        }
       } else {
         stmt.setNull(idx, Types.VARCHAR);
       }

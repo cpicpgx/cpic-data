@@ -110,8 +110,8 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           "where pf.id=? order by a1.name, a2.name");
       this.lookupDiplotypesByScore = conn.prepareStatement("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
-          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityscore=pf.activityscore1 " +
-          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 " +
+          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityscore=pf.activityscore1 and a1.clinicalfunctionalstatus=pf.function1 " +
+          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 and a2.clinicalfunctionalstatus=pf.function2 " +
           "where pf.id=? order by a1.name, a2.name");
       this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
     }
@@ -119,21 +119,14 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     void insertValues(String geneSymbol, RowWrapper row) throws SQLException {
       String a1Fn = row.getText(COL_A1_FN);
       String a2Fn = row.getText(COL_A2_FN);
-      String a1Score = row.getNullableText(COL_A1_SCORE);
-      String a2Score = row.getNullableText(COL_A2_SCORE);
-      String totalScore = row.getNullableText(COL_TOTAL_SCORE);
+      String a1Score = normalizeScore(row.getNullableText(COL_A1_SCORE));
+      String a2Score = normalizeScore(row.getNullableText(COL_A2_SCORE));
+      String totalScore = normalizeScore(row.getNullableText(COL_TOTAL_SCORE));
       String description = row.getNullableText(COL_DESC);
       int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO));
 
-      String fnKey;
-      if (a1Fn.equals(a2Fn)) {
-        fnKey = "{\""+a1Fn+"\": 2}";
-      } else {
-        fnKey = "{\""+a1Fn+"\": 1, \""+a2Fn+"\": 1}";
-      }
-
       this.insertFunction.setInt(1, phenoId);
-      this.insertFunction.setString(2, fnKey);
+      this.insertFunction.setString(2, makeFunctionKey(a1Fn, a2Fn, a1Score, a2Score));
       this.insertFunction.setString(3, a1Fn);
       this.insertFunction.setString(4, a2Fn);
       if (a1Score != null) {
@@ -228,6 +221,17 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
             throw new RuntimeException("Couldn't insert phenotype");
           }
         }
+      }
+    }
+
+    private static String normalizeScore(String score) {
+      if (score == null) {
+        return null;
+      }
+      if (score.equals("0.0")) {
+        return "0";
+      } else {
+        return score.toLowerCase();
       }
     }
 

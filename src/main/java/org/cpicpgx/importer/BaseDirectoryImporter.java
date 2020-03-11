@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
@@ -178,5 +179,24 @@ public abstract class BaseDirectoryImporter {
 
   void addImportHistory(WorkbookWrapper workbook) throws SQLException {
     addImportHistory(workbook.getFileName());
+  }
+
+  static String makeFunctionKey(String f1, String f2, String as1, String as2) {
+    JsonObject key = new JsonObject();
+    if (f1.equals(f2)) {
+      key.addProperty(f1, 2);
+    } else {
+      key.addProperty(f1, 1);
+      key.addProperty(f2, 1);
+    }
+    if (as1 != null) {
+      if (as1.equals(as2)) {
+        key.addProperty(as1, 2);
+      } else {
+        key.addProperty(as1, 1);
+        key.addProperty(as2, 1);
+      }
+    }
+    return key.toString();
   }
 }
