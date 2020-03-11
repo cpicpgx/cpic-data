@@ -36,8 +36,7 @@ import java.util.function.Consumer;
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   static final String EXCEL_EXTENSION = ".xlsx";
-  static final String CSV_EXTENSION = ".csv";
-  
+
   private Path directory;
 
   /**
@@ -183,11 +182,13 @@ public abstract class BaseDirectoryImporter {
 
   static String makeFunctionKey(String f1, String f2, String as1, String as2) {
     JsonObject key = new JsonObject();
-    if (f1.equals(f2)) {
-      key.addProperty(f1, 2);
-    } else {
-      key.addProperty(f1, 1);
-      key.addProperty(f2, 1);
+    if (f1 != null) {
+      if (f1.equals(f2)) {
+        key.addProperty(f1, 2);
+      } else {
+        key.addProperty(f1, 1);
+        key.addProperty(f2, 1);
+      }
     }
     if (as1 != null) {
       if (as1.equals(as2)) {

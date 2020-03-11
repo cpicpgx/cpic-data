@@ -5,7 +5,7 @@ import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
-import org.pharmgkb.common.comparator.HaplotypeNameComparator;
+import se.sawano.java.text.AlphanumericComparator;
 
 import java.sql.*;
 import java.util.*;
@@ -98,6 +98,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private PreparedStatement insertDiplotype;
     private Map<String, Integer> phenotypeCache = new HashMap<>();
     private boolean useScoreLookup = false;
+    private Set<String> loadedDiplotypes = new HashSet<>();
 
     DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
@@ -110,8 +111,8 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           "where pf.id=? order by a1.name, a2.name");
       this.lookupDiplotypesByScore = conn.prepareStatement("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
-          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityscore=pf.activityscore1 and a1.clinicalfunctionalstatus=pf.function1 " +
-          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 and a2.clinicalfunctionalstatus=pf.function2 " +
+          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityscore=pf.activityscore1 " +
+          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 " +
           "where pf.id=? order by a1.name, a2.name");
       this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
     }
@@ -125,13 +126,18 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       String description = row.getNullableText(COL_DESC);
       int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO));
 
+      this.useScoreLookup = (a1Score != null);
+
       this.insertFunction.setInt(1, phenoId);
-      this.insertFunction.setString(2, makeFunctionKey(a1Fn, a2Fn, a1Score, a2Score));
+      if (useScoreLookup) {
+        this.insertFunction.setString(2, makeFunctionKey(null, null, a1Score, a2Score));
+      } else {
+        this.insertFunction.setString(2, makeFunctionKey(a1Fn, a2Fn, null, null));
+      }
       this.insertFunction.setString(3, a1Fn);
       this.insertFunction.setString(4, a2Fn);
       if (a1Score != null) {
         this.insertFunction.setString(5, a1Score);
-        this.useScoreLookup = true;
       } else {
         this.insertFunction.setNull(5, Types.VARCHAR);
       }
@@ -173,13 +179,13 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       Set<List<String>> rawDiplotypes = new HashSet<>();
 
       // caching the raw diplotypes ahead of time so they can be normalized. For example, *1/*2 is the same as *2/*1 so
-      // this code should reduce those two records to just one of *1/*2 thanks to the HaplotypeNameComparator
+      // this code should reduce those two records to just one of *1/*2 thanks to the AlphanumericComparator
       try (ResultSet rs = lookup.executeQuery()) {
         while (rs.next()) {
           List<String> rawDiplotype = new ArrayList<>();
           rawDiplotype.add(rs.getString(1));
           rawDiplotype.add(rs.getString(2));
-          rawDiplotype.sort(HaplotypeNameComparator.getComparator());
+          rawDiplotype.sort(new AlphanumericComparator(Locale.ENGLISH));
           rawDiplotypes.add(rawDiplotype);
         }
       }
@@ -188,18 +194,22 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
         String a1 = rawDiplotype.get(0);
         String a2 = rawDiplotype.get(1);
 
-        JsonObject diplotypeKey = new JsonObject();
-        if (a1.equals(a2)) {
-          diplotypeKey.addProperty(a1, 2);
-        } else {
-          diplotypeKey.addProperty(a1, 1);
-          diplotypeKey.addProperty(a2, 1);
-        }
+        String diplotypeText = String.format("%s/%s", a1, a2);
+        if (!this.loadedDiplotypes.contains(diplotypeText)) {
+          JsonObject diplotypeKey = new JsonObject();
+          if (a1.equals(a2)) {
+            diplotypeKey.addProperty(a1, 2);
+          } else {
+            diplotypeKey.addProperty(a1, 1);
+            diplotypeKey.addProperty(a2, 1);
+          }
 
-        this.insertDiplotype.setInt(1, functionId);
-        this.insertDiplotype.setString(2, String.format("%s/%s", a1, a2));
-        this.insertDiplotype.setString(3, diplotypeKey.toString());
-        this.insertDiplotype.executeUpdate();
+          this.insertDiplotype.setInt(1, functionId);
+          this.insertDiplotype.setString(2, diplotypeText);
+          this.insertDiplotype.setString(3, diplotypeKey.toString());
+          this.insertDiplotype.executeUpdate();
+          this.loadedDiplotypes.add(diplotypeText);
+        }
       }
     }
 
