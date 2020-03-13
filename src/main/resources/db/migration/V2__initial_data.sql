@@ -403,7 +403,7 @@ ABCB1	RxNorm:6851	\N	1	C/D	2A		{}
 ABCB1	RxNorm:7052	\N	1	C/D	2B		{}
 ABCB1	RxNorm:7804	\N	1	C/D	2B		{}
 ABCC4	RxNorm:117466	\N	1	D	2B		{}
-ABCG2	RxNorm:301542	\N	2	B	2B		{}
+ABCG2	RxNorm:301542	\N	3	B	2A		{}
 ABL2	RxNorm:11118	\N	2	B			{}
 ACE	RxNorm:1998	\N	1	D	2A		{}
 ADD1	RxNorm:4603	\N	1	D	2B		{}
@@ -484,7 +484,8 @@ CYP2C9	RxNorm:140587	\N	1	B	2A	Actionable PGx	{}
 CYP2C9	RxNorm:154	\N	1	B	2A		{}
 CYP2C9	RxNorm:1665509	\N	1	C		Actionable PGx	{}
 CYP2C9	RxNorm:1731031	\N	1	C		Actionable PGx	{}
-CYP2C9	RxNorm:2121085	\N	1	A		Testing required	{}
+CYP2C9	RxNorm:2054023	\N	3	A			{}
+CYP2C9	RxNorm:2121085	\N	2	A	\N	Testing required	{}
 CYP2C9	RxNorm:3355	\N	1	C	2A		{}
 CYP2C9	RxNorm:4502	\N	1	B/C	3	Actionable PGx	{}
 CYP2C9	RxNorm:8183	100412	1	A	1A	Actionable PGx	{25099164}
@@ -504,7 +505,7 @@ CYP2D6	RxNorm:15996	\N	1	B	2A		{}
 CYP2D6	RxNorm:1658314	\N	1	B		Actionable PGx	{}
 CYP2D6	RxNorm:1665509	\N	1	C		Actionable PGx	{}
 CYP2D6	RxNorm:20352	\N	1	C	3	Actionable PGx	{}
-CYP2D6	RxNorm:2197878	\N	1	A		Actionable PGx	{}
+CYP2D6	RxNorm:2197878	\N	1	A	\N	Actionable PGx	{}
 CYP2D6	RxNorm:2597	100414	1	B	1A	Actionable PGx	{23486447,27997040}
 CYP2D6	RxNorm:26225	100417	1	A	1A	Informative PGx	{28002639}
 CYP2D6	RxNorm:2626	\N	1	C		Actionable PGx	{}
@@ -529,7 +530,7 @@ CYP2D6	RxNorm:5093	\N	1	C	3		{}
 CYP2D6	RxNorm:5691	100414	1	B	1A	Actionable PGx	{23486447,27997040}
 CYP2D6	RxNorm:61381	\N	1	C	3		{}
 CYP2D6	RxNorm:68091	\N	1	C	3		{}
-CYP2D6	RxNorm:6901	\N	1	B	4		{}
+CYP2D6	RxNorm:6901	\N	2	B/C	4		{}
 CYP2D6	RxNorm:69120	\N	1	C		Informative PGx	{}
 CYP2D6	RxNorm:6918	\N	1	C	2A	Informative PGx	{}
 CYP2D6	RxNorm:704	100414	1	A	1A	Actionable PGx	{23486447,27997040}
@@ -581,7 +582,7 @@ G6PD	RxNorm:10831	\N	1	B	3	Actionable PGx	{}
 G6PD	RxNorm:1151	\N	1	C			{}
 G6PD	RxNorm:139462	\N	1	B			{}
 G6PD	RxNorm:1424911	\N	1	B/C		Actionable PGx	{}
-G6PD	RxNorm:2054023	\N	1	A		Testing required	{}
+G6PD	RxNorm:2054023	\N	2	A		Testing required	{}
 G6PD	RxNorm:2348	\N	1	B	3		{}
 G6PD	RxNorm:2393	\N	1	B	3	Actionable PGx	{}
 G6PD	RxNorm:2404	\N	1	B		Actionable PGx	{}
@@ -594,7 +595,7 @@ G6PD	RxNorm:4053	\N	1	B			{}
 G6PD	RxNorm:4815	\N	1	B	3	Actionable PGx	{}
 G6PD	RxNorm:4821	\N	1	B		Actionable PGx	{}
 G6PD	RxNorm:52582	\N	1	B			{}
-G6PD	RxNorm:5521	\N	1	B			{}
+G6PD	RxNorm:5521	\N	2	B		Actionable PGx	{}
 G6PD	RxNorm:6387	\N	1	B/C			{}
 G6PD	RxNorm:6572	\N	1	B		Actionable PGx	{}
 G6PD	RxNorm:6694	\N	1	B	3		{}
@@ -645,7 +646,7 @@ HLA-DRB1	RxNorm:53654	\N	1	C	2B		{}
 HMGCR	ATC:C10AA	\N	1	D	2A		{}
 HPRT1	RxNorm:7145	\N	1	B		Actionable PGx	{}
 HTR1A	RxNorm:32937	\N	1	D	2B		{}
-HTR2A	ATC:N06A	\N	1	D	2B		{}
+HTR2A	ATC:N06A	\N	2	D	3		{}
 HTR2A	RxNorm:2556	\N	1	D	2B		{}
 HTR2C	RxNorm:2626	\N	1	D	2B		{}
 HTR2C	RxNorm:35636	\N	1	D	2B		{}
@@ -687,13 +688,13 @@ NQO1	RxNorm:4492	\N	1	D	2A		{}
 NT5C2	RxNorm:12574	\N	1	D	2B		{}
 NUDT15	RxNorm:103	100428	1	A	1A	Testing recommended	{21270794,23422873,30447069}
 NUDT15	RxNorm:10485	100428	1	A		Testing recommended	{21270794,23422873,30447069}
-NUDT15	RxNorm:1256	100428	1	A	1A		{21270794,23422873,30447069}
-OPRM1	RxNorm:10689	\N	1	C/D	2B		{}
-OPRM1	RxNorm:4337	\N	1	C/D	2B		{}
+NUDT15	RxNorm:1256	100428	2	A	1A	Testing recommended	{21270794,23422873,30447069}
+OPRM1	RxNorm:10689	\N	2	C/D	3		{}
+OPRM1	RxNorm:4337	\N	2	C/D	3		{}
 OPRM1	RxNorm:448	\N	1	C/D	2B		{}
-OPRM1	RxNorm:480	\N	1	C/D	2B		{}
+OPRM1	RxNorm:480	\N	2	C/D	3		{}
 OPRM1	RxNorm:6813	\N	1	C/D	3		{}
-OPRM1	RxNorm:7052	\N	1	C/D	2B		{}
+OPRM1	RxNorm:7052	\N	2	C/D	3		{}
 OPRM1	RxNorm:7242	\N	1	C/D	2B		{}
 OPRM1	RxNorm:7243	\N	1	C/D	3		{}
 OTC	RxNorm:11118	\N	1	B		Actionable PGx	{}
@@ -717,10 +718,10 @@ SEMA3C	RxNorm:51499	\N	1	D	2B		{}
 SERPINC1	RxNorm:711942	\N	1	C		Actionable PGx	{}
 SLC28A3	ATC:L01DB	\N	1	D	2B		{}
 SLC47A2	RxNorm:6809	\N	1	D	3		{}
-SLC6A4	RxNorm:2556	\N	1	B/C	2A		{}
-SLC6A4	RxNorm:321988	\N	1	B/C	2A		{}
+SLC6A4	RxNorm:2556	\N	2	B/C	2B		{}
+SLC6A4	RxNorm:321988	\N	2	B/C	2B		{}
 SLCO1B1	RxNorm:301542	\N	1	C	2A	Actionable PGx	{}
-SLCO1B1	RxNorm:36567	100426	1	A	1A	Informative PGx	{22617227,24918167}
+SLCO1B1	RxNorm:36567	100426	2	A	1A		{22617227,24918167}
 SLCO1B1	RxNorm:42463	\N	1	C	2A		{}
 SLCO1B1	RxNorm:596723	\N	1	B	2A		{}
 SLCO1B1	RxNorm:6851	\N	1	C	2A		{}
@@ -744,7 +745,7 @@ UGT1A1	RxNorm:51499	\N	1	A	2A	Actionable PGx	{}
 UGT1A1	RxNorm:662281	\N	1	C	3	Actionable PGx	{}
 UGT1A1	RxNorm:714438	\N	1	B/C	3	Actionable PGx	{}
 UGT1A4	RxNorm:28439	\N	1	D	2B		{}
-UGT2B15	RxNorm:7781	\N	1	D	2B		{}
+UGT2B15	RxNorm:7781	\N	2	D	3		{}
 UMPS	RxNorm:4492	\N	1	D	2B		{}
 VDR	RxNorm:253453	\N	1	D	2A		{}
 VDR	RxNorm:9344	\N	1	D	2A		{}
