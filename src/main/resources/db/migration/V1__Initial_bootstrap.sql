@@ -18,8 +18,8 @@ CREATE TABLE guideline
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   version INTEGER DEFAULT 1,
-  name VARCHAR(200) UNIQUE NOT NULL,
-  url VARCHAR(200) UNIQUE,
+  name TEXT UNIQUE NOT NULL,
+  url TEXT UNIQUE,
   pharmgkbId TEXT[]
 );
 
@@ -39,9 +39,9 @@ CREATE TABLE publication
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   guidelineId INTEGER REFERENCES guideline(id),
-  title VARCHAR(200) UNIQUE,
+  title TEXT UNIQUE,
   authors TEXT[],
-  journal VARCHAR(200),
+  journal TEXT,
   month INTEGER,
   page VARCHAR(50),
   volume VARCHAR(50),
@@ -103,10 +103,10 @@ CREATE TABLE allele
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   version INTEGER DEFAULT 1,
   geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
-  name VARCHAR(200) NOT NULL,
-  functionalStatus VARCHAR(200),
-  clinicalFunctionalStatus VARCHAR(200),
-  clinicalFunctionalSubstrate VARCHAR(200),
+  name TEXT NOT NULL,
+  functionalStatus TEXT,
+  clinicalFunctionalStatus TEXT,
+  clinicalFunctionalSubstrate TEXT,
   activityScore VARCHAR(50),
   pharmvarId VARCHAR(50)
 );
@@ -130,10 +130,10 @@ CREATE TABLE sequence_location
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   version INTEGER DEFAULT 1,
-  name VARCHAR(200),
-  chromosomeLocation VARCHAR(200),
-  geneLocation VARCHAR(200),
-  proteinLocation VARCHAR(200),
+  name TEXT,
+  chromosomeLocation TEXT,
+  geneLocation TEXT,
+  proteinLocation TEXT,
   geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   dbSnpId VARCHAR(20)
 );
@@ -155,7 +155,7 @@ CREATE TABLE allele_location_value
 (
   alleleid INTEGER NOT NULL REFERENCES allele(id),
   locationid INTEGER NOT NULL REFERENCES sequence_location(id),
-  variantAllele VARCHAR(200) NOT NULL,
+  variantAllele TEXT NOT NULL,
   version INTEGER DEFAULT 1
 );
 
@@ -191,10 +191,10 @@ CREATE TABLE population
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   publicationId INTEGER REFERENCES publication(id),
-  ethnicity VARCHAR(50) NOT NULL,
-  population VARCHAR(200),
-  populationInfo VARCHAR(500),
-  subjectType VARCHAR(500),
+  ethnicity TEXT NOT NULL,
+  population TEXT,
+  populationInfo TEXT,
+  subjectType TEXT,
   subjectCount INTEGER DEFAULT 0,
   version INTEGER DEFAULT 1
 );
@@ -219,7 +219,7 @@ CREATE TABLE allele_frequency
   alleleid INTEGER NOT NULL REFERENCES allele(id),
   population INTEGER NOT NULL REFERENCES population(id),
   frequency NUMERIC,
-  label VARCHAR(50),
+  label TEXT,
   version INTEGER DEFAULT 1,
 
   UNIQUE (alleleid, population)
@@ -265,7 +265,7 @@ COMMENT ON COLUMN function_reference.version IS 'The version number, iterates on
 CREATE TABLE drug
 (
   drugId VARCHAR(20) PRIMARY KEY NOT NULL,
-  name VARCHAR(200) NOT NULL UNIQUE,
+  name TEXT NOT NULL UNIQUE,
   pharmgkbId VARCHAR(20),
   rxnormId VARCHAR(20),
   drugbankId VARCHAR(20),
@@ -353,7 +353,7 @@ CREATE TABLE pair
   version INTEGER DEFAULT 1,
   level VARCHAR(5) NOT NULL,
   pgkbCALevel VARCHAR(5),
-  pgxTesting VARCHAR(50),
+  pgxTesting TEXT,
   citations TEXT[],
 
   UNIQUE (geneSymbol, drugId)
@@ -454,7 +454,7 @@ CREATE TABLE phenotype_diplotype
 (
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
     functionPhenotypeId INTEGER REFERENCES phenotype_function(id) NOT NULL,
-    diplotype VARCHAR NOT NULL,
+    diplotype TEXT NOT NULL,
     diplotypeKey JSONB NOT NULL,
 
     UNIQUE (functionPhenotypeId, diplotypeKey)
@@ -477,8 +477,8 @@ CREATE TABLE recommendation
   classification VARCHAR(20),
   phenotypes JSONB,
   activity_score JSONB,
-  population VARCHAR,
-  comments VARCHAR,
+  population TEXT,
+  comments TEXT,
   version INTEGER DEFAULT 1
 );
 
@@ -502,7 +502,7 @@ COMMENT ON COLUMN recommendation.activity_score IS 'Activity score that this rec
 CREATE TABLE test_alerts
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  population VARCHAR,
+  population TEXT,
   cds_context TEXT NOT NULL,
   trigger_condition TEXT[],
   drugId VARCHAR(20) REFERENCES drug(drugId),
