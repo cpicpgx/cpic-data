@@ -34,4 +34,16 @@ public class ConnectionFactory {
   static String makeJdbcUrl() {
     return String.format(sf_dbUrl, sf_host);
   }
+
+  static String getJdbcAddress() {
+    return String.format("jdbc:postgresql://%s/cpic", sf_host);
+  }
+
+  static String getUser() {
+    return sf_user;
+  }
+
+  static String getPass() {
+    return sf_pass;
+  }
 }

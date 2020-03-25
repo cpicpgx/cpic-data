@@ -6,7 +6,6 @@ buildscript {
 
 plugins {
     id 'net.nemerosa.versioning' version '2.8.2'
-    id 'org.flywaydb.flyway' version '6.3.0'
 }
 
 group 'org.cpicpgx'
@@ -37,6 +36,8 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.672'
     // https://mvnrepository.com/artifact/se.sawano.java/alphanumeric-comparator
     compile group: 'se.sawano.java', name: 'alphanumeric-comparator', version: '1.4.1'
+    // https://mvnrepository.com/artifact/org.flywaydb/flyway-core
+    compile group: 'org.flywaydb', name: 'flyway-core', version: '6.3.2'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
@@ -49,9 +50,4 @@ jar {
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
-}
-
-flyway {
-    url = 'jdbc:postgresql://'+System.getenv('CPIC_DB')+'/cpic'
-    user = 'cpic'
 }

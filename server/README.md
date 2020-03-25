@@ -69,11 +69,11 @@ To connect to the db via the psql client
 
 Make sure you're using the latest checkout of this repo and that at least the database container is up and running
 
-    gradle flywayClean
+    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.db.FlywayClean
 
 This will clear the database of all data and relations.
 
-    gradle flywayMigrate
+    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.db.FlywayMigrate
 
 This will set up all the DB objects and populate some support tables but it will still be mostly empty.
 

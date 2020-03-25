@@ -28,12 +28,10 @@ This will place a compiled jar in the `build/libs` directory.
 
 ### Bootstrapping the DB
 
-This project uses Flyway configured through Gradle to set up the DB. Schema definition files are found in the `src/resources/db/migration` directory. Run the following to build the db:
-
-You will need to set the Flyway "user" value (and possibly password). The best way is via an envvar called `FLYWAY_USER` but read the docs for other methods.
+This project uses Flyway to set up the DB. Schema definition files are found in the `src/resources/db/migration` directory. Run the following to build the db:
 
 ```sh
-gradle flywayMigrate -i
+java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.db.FlywayMigrate
 ```
 
 ### Bootstrapping Information
