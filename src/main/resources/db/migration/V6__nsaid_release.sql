@@ -1,0 +1,31 @@
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:16689','PA166049185','16689','DB06736','{M01AB16}','aceclofenac');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:5640','PA449957','5640','DB01050','{C01EB16}','ibuprofen');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:5781','PA449982','5781','DB00328','{C01EB03}','indomethacin');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:20890','PA165958395','20890','DB06725','{M01AC05}','lornoxicam');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('ATC:M01AH06','PA164769031','','DB01283','{M01AH06}','lumiracoxib');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:41493','PA450353','41493','DB00814','{M01AC06}','meloxicam');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:3523','PA166128206','3523','DB04817','{N02BB02}','metamizole');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:31448','PA450572','31448','DB00461','{M01AX01}','nabumetone');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:7258','PA450595','7258','DB00788','{M01AE56}','naproxen');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:8356','PA450985','8356','DB00554','{M01AC01}','piroxicam');
+insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:37790','PA131890','37790','DB00469','{M01AC02}','tenoxicam');
+
+insert into guideline(name, url, pharmgkbid) values ('CYP2C9 and NSAIDs', 'https://cpicpgx.org/cpic-guideline-for-nsaids-based-on-cyp2c9-genotype/', '{PA166191841}');
+
+update pair set level='A',guidelineid=(select id from guideline where name='CYP2C9 and NSAIDs'),citations='{32189324}' where genesymbol='CYP2C9' and drugid=(select drug.drugid from drug where name='celecoxib');
+update pair set level='C',guidelineid=(select id from guideline where name='CYP2C9 and NSAIDs'),citations='{32189324}' where genesymbol='CYP2C9' and drugid=(select drug.drugid from drug where name='diclofenac');
+update pair set level='A',guidelineid=(select id from guideline where name='CYP2C9 and NSAIDs'),citations='{32189324}' where genesymbol='CYP2C9' and drugid=(select drug.drugid from drug where name='flurbiprofen');
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C8',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name='diclofenac' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name='aspirin' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C8',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name = 'ibuprofen' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name = 'aceclofenac' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'A','{32189324}' from drug d, guideline g where d.name = 'ibuprofen' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name = 'indomethacin' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'A','{32189324}' from drug d, guideline g where d.name = 'lornoxicam' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name = 'lumiracoxib' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'A','{32189324}' from drug d, guideline g where d.name = 'meloxicam' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name = 'metamizole' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name = 'nabumetone' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'C','{32189324}' from drug d, guideline g where d.name = 'naproxen' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'A','{32189324}' from drug d, guideline g where d.name = 'piroxicam' and g.name='CYP2C9 and NSAIDs';
+insert into pair(genesymbol, drugid, guidelineid, level, citations) select 'CYP2C9',d.drugid,g.id,'A/B','{32189324}' from drug d, guideline g where d.name = 'tenoxicam' and g.name='CYP2C9 and NSAIDs';
