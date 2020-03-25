@@ -584,7 +584,7 @@ G6PD	RxNorm:139462	\N	1	B			{}
 G6PD	RxNorm:1424911	\N	1	B/C		Actionable PGx	{}
 G6PD	RxNorm:2054023	\N	2	A		Testing required	{}
 G6PD	RxNorm:2348	\N	1	B	3		{}
-G6PD	RxNorm:2393	\N	1	B	3	Actionable PGx	{}
+G6PD	RxNorm:2393	\N	1	C	3	Actionable PGx	{}
 G6PD	RxNorm:2404	\N	1	B		Actionable PGx	{}
 G6PD	RxNorm:2551	\N	1	B	4		{}
 G6PD	RxNorm:25789	\N	1	B		Actionable PGx	{}
