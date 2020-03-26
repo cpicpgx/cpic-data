@@ -37,7 +37,7 @@ public class TestAlertExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select d.name, t.drugid, max(array_length(t.trigger_condition,1)) as num_alerts from test_alerts t join drug d on t.drugid = d.drugid group by d.name, t.drugid");
-         PreparedStatement alertStmt = conn.prepareStatement("select t.trigger_condition, t.reference_point, t.cds_context, t.alert_text from test_alerts t where t.drugid=?");
+         PreparedStatement alertStmt = conn.prepareStatement("select t.trigger_condition, t.cds_context, t.alert_text from test_alerts t where t.drugid=?");
          PreparedStatement noteStmt = conn.prepareStatement("select note from drug_note where drugId=? order by ordinal");
          ResultSet grs = geneStmt.executeQuery()
     ) {
@@ -56,8 +56,7 @@ public class TestAlertExporter extends BaseExporter {
             workbook.writeAlert(
                 (String[])ars.getArray(1).getArray(),
                 ars.getString(2),
-                ars.getString(3),
-                (String[])ars.getArray(4).getArray());
+                (String[])ars.getArray(3).getArray());
             alertCount++;
           }
           sf_logger.info("Wrote {} alerts", alertCount);

@@ -40,13 +40,12 @@ class TestAlertWorkbook extends AbstractWorkbook {
     this.sheet.setWidths(columnSizes);
   }
   
-  void writeAlert(String[] triggers, String flowRef, String context, String[] alertText) {
+  void writeAlert(String[] triggers, String context, String[] alertText) {
     this.colIdx = 0;
     Row row = this.sheet.nextRow();
     for (String trigger : triggers) {
       writeStringCell(row, colIdx++, trigger, false);
     }
-    writeStringCell(row, colIdx++, flowRef);
     writeStringCell(row, colIdx++, context);
     writeStringCell(row, colIdx++, String.join("\n\n", alertText), wrapStyle);
   }
