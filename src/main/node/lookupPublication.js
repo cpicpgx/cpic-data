@@ -11,7 +11,7 @@ axios.get(
   'https://api.pharmgkb.org/v1/preview/data/literature/',
   {params: {view: 'base', "crossReferences.resourceId": pmid, 'crossReferences.resource': 'PubMed'}})
   .then((r) => {
-    const lit = r.data[0];
+    const lit = r.data.data[0];
     const authors = '{' + lit.authors.map((a) => `"${a}"`).join(",") + '}';
     const fields = [
       lit.title,
@@ -23,5 +23,7 @@ axios.get(
       lit.year,
       pmid
     ];
+    console.log('COPY publication (title, authors, journal, month, page, volume, year, pmid) FROM stdin;');
     console.log(fields.join('\t'));
+    console.log('\\.');
   });
