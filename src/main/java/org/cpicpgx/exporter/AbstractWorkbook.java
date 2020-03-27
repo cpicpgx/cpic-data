@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
@@ -194,6 +195,13 @@ public abstract class AbstractWorkbook {
     Cell nameCell = row.createCell(colIdx);
     nameCell.setCellValue(StringUtils.strip(value));
     nameCell.setCellStyle(style);
+  }
+
+  void writeMergedNoteCell(Row row, String value, int lastCol) {
+    Cell noteCell = row.createCell(0);
+    noteCell.setCellValue(StringUtils.strip(value));
+    noteCell.setCellStyle(leftTextStyle);
+    row.getSheet().addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, lastCol));
   }
   
   void writeIntegerCell(Row row, int colIdx, int value) {

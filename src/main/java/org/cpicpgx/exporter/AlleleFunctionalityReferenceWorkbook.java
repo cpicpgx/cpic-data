@@ -68,7 +68,7 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     writeStringCell(row, 0, "Notes:", false);
     for (String note : notes) {
       row = this.sheet.nextRow();
-      writeStringCell(row, 0, note, false);
+      writeMergedNoteCell(row, note, 8);
     }
   }
   

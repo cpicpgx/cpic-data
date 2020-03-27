@@ -156,7 +156,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   void writeNote(String note) {
     if (note != null) {
       Row row = sheet.nextRow();
-      writeStringCell(row, 0, StringUtils.strip(note), false);
+      writeMergedNoteCell(row, StringUtils.strip(note), 5);
     }
   }
   
