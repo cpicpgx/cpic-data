@@ -62,7 +62,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     dbsnpRow = sheet.nextRow();
 
     Row headerRow = sheet.nextRow();
-    writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.geneSymbol));
+    writeStringCell(headerRow, 0, String.format(CELL_PATTERN_HEADER_ALLELE, this.geneSymbol), leftTextStyle);
 
     String chr = "";
     if (StringUtils.isNotBlank(seqChr)) {
@@ -80,16 +80,16 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     }
 
     if (pvCount > 0) {
-      writeStringCell(nameRow, 0, "Nucleotide change per gene from http://www.pharmvar.org");
+      writeStringCell(nameRow, 0, "Nucleotide change per gene from http://www.pharmvar.org", leftTextStyle);
     } else if (StringUtils.isNotBlank(seqMrna)) {
-      writeStringCell(nameRow, 0, String.format("Nucleotide change on cDNA (%s)", seqMrna));
+      writeStringCell(nameRow, 0, String.format("Nucleotide change on cDNA (%s)", seqMrna), leftTextStyle);
     } else {
       writeStringCell(nameRow, 0, "Common name");
     }
-    writeStringCell(proteinRow, 0, String.format("Effect on protein (%s)", seqPro));
-    writeStringCell(chromoRow, 0, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2)", seqChr, chr));
-    writeStringCell(geneRow, 0, String.format("Position at %s (%s RefSeqGene)", seqGen, gene));
-    writeStringCell(dbsnpRow, 0, "rsID");
+    writeStringCell(proteinRow, 0, String.format("Effect on protein (%s)", seqPro), leftTextStyle);
+    writeStringCell(chromoRow, 0, String.format("Position at %s (Homo sapiens chromosome %s, GRCh38.p2)", seqChr, chr), wrapStyle);
+    writeStringCell(geneRow, 0, String.format("Position at %s (%s RefSeqGene)", seqGen, gene), wrapStyle);
+    writeStringCell(dbsnpRow, 0, "rsID", leftTextStyle);
     
     this.sheet.setWidths(new Integer[]{40*256});
   }
@@ -109,7 +109,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   void writeAllele(String name) {
     alleleRow = sheet.nextRow();
 
-    writeStringCell(alleleRow, 0, name);
+    writeStringCell(alleleRow, 0, name, leftTextStyle);
   }
 
   /**

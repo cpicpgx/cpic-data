@@ -26,7 +26,7 @@ public abstract class AbstractWorkbook {
   private CellStyle dateStyle;
   private CellStyle boldDateStyle;
   private CellStyle centerTextStyle;
-  private CellStyle leftTextStyle;
+  CellStyle leftTextStyle;
   private CellStyle rightNumberStyle;
   private CellStyle decimalNumberStyle;
   private CellStyle headerStyle;
