@@ -25,16 +25,16 @@ class DiplotypeWorkbook extends AbstractWorkbook {
     
     writeHeaderCell(row, 0, String.format("%s Diplotype", this.gene));
     writeHeaderCell(row, 1, "Coded Diplotype/Phenotype Summary");
-    writeHeaderCell(row, 2, "EHR Priority Notation");
-    writeHeaderCell(row, 3, "Activity Score");
+    writeHeaderCell(row, 2, "Activity Score");
+    writeHeaderCell(row, 3, "EHR Priority Notation");
   }
   
   void writeDiplotype(String diplotype, String phenotype, String ehr, String activity) {
     Row row = dataSheet.nextRow();
     writeStringCell(row, 0, diplotype, false);
     writeStringCell(row, 1, phenotype);
-    writeStringCell(row, 2, ehr);
-    writeStringCell(row, 3, activity, false);
+    writeStringCell(row, 2, activity, false);
+    writeStringCell(row, 3, ehr);
   }
   
   void writeInterpretation(String phenotype, String ehr, String interpreation) {
