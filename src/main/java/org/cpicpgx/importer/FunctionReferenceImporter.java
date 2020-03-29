@@ -12,7 +12,6 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
 import java.util.HashMap;
@@ -227,7 +226,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
      * @param note the text note to explain the change
      * @throws SQLException can occur from bad database transaction
      */
-    void insertChange(@Nonnull java.util.Date date, String note) throws SQLException {
+    void insertChange(java.util.Date date, String note) throws SQLException {
       Preconditions.checkNotNull(date, "History line %s has a blank date", this.nHistory + 1);
 
       this.insertChangeStmt.clearParameters();
