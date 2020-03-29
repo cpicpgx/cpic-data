@@ -41,7 +41,12 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation group: 'com.google.guava', name: 'guava', version: '28.2-jre'
 
-    testCompileOnly group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.1'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 jar {

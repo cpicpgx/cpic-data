@@ -1,14 +1,14 @@
 package org.cpicpgx.util;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Testing methods from the {@link RowWrapper} class that helps read data from Excel rows
