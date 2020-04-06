@@ -1,7 +1,6 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;

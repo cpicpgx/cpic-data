@@ -3,7 +3,9 @@ package org.cpicpgx.importer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A class for storing Publication information in the database 
