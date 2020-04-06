@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
@@ -75,6 +76,8 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Error parsing row " + (i+1), ex);
         }
       }
+
+      writeNotes(EntityType.GENE, gene, workbook.getNotes());
 
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {

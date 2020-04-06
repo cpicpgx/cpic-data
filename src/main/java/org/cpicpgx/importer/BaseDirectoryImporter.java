@@ -5,6 +5,8 @@ import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.FileHistoryWriter;
+import org.cpicpgx.db.NoteType;
+import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -51,6 +54,28 @@ public abstract class BaseDirectoryImporter {
    * @return a {@link FileType} enum value
    */
   abstract FileType getFileType();
+
+  /**
+   * Gets the type of Note for this importer based on {@link BaseDirectoryImporter#getFileType()}
+   * @return a {@link NoteType} enum value
+   * @throws RuntimeException when notes are not supported
+   */
+  NoteType getNoteType() {
+    switch (getFileType()) {
+      case ALLELE_DEFINITION:
+        return NoteType.ALLELE_DEFINITION;
+      case FREQUENCIES:
+        return NoteType.ALLELE_FREQUENCY;
+      case GENE_CDS:
+        return NoteType.CDS;
+      case ALLELE_FUNCTION_REFERENCE:
+        return NoteType.FUNCTION_REFERENCE;
+      case TEST_ALERTS:
+        return NoteType.TEST_ALERT;
+      default:
+        throw new RuntimeException("Notes are not supported");
+    }
+  }
   
   abstract String[] getDeleteStatements();
   
@@ -200,5 +225,43 @@ public abstract class BaseDirectoryImporter {
       }
     }
     return key.toString();
+  }
+
+  /**
+   * Writes the supplied list of notes to the DB for the given type/id pair
+   * @param entityType the type of object to note, either gene or drug
+   * @param entityId the ID of the object to note
+   * @param notes a List of String notes
+   * @throws SQLException can occur from DB inserts
+   */
+  void writeNotes(EntityType entityType, String entityId, List<String> notes) throws SQLException {
+    if (notes == null || notes.size() == 0) return;
+
+    String insertSqlTemplate = "insert into %s(%s, note, type, ordinal) values (?, ?, ?, ?)";
+    String insertSql;
+    switch (entityType) {
+      case GENE:
+        insertSql = String.format(insertSqlTemplate, "gene_note", "genesymbol");
+        break;
+      case DRUG:
+        insertSql = String.format(insertSqlTemplate, "drug_note", "drugid");
+        break;
+      default:
+        throw new RuntimeException(String.format("Type not supported: %s", entityType.name()));
+    }
+
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      PreparedStatement noteInsert = conn.prepareStatement(insertSql);
+      int n = 0;
+      for (String note : notes) {
+        noteInsert.setString(1, entityId);
+        noteInsert.setString(2, note);
+        noteInsert.setString(3, getNoteType().name());
+        noteInsert.setInt(4, n);
+        noteInsert.executeUpdate();
+        n += 1;
+      }
+      sf_logger.info("created {} new notes", notes.size());
+    }
   }
 }

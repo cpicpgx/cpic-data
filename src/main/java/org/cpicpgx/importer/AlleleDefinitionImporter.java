@@ -18,9 +18,11 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,8 +38,7 @@ public class AlleleDefinitionImporter {
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
   private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
   private static final int sf_alleleRowStart = 7;
-  private static final String sf_notes = "NOTES:";
-  
+
   private String m_gene;
   private int m_variantColEnd;
   private String m_proteinSeqId = "";
@@ -51,8 +52,6 @@ public class AlleleDefinitionImporter {
   private String[] m_dbSnpIds;
   private Map<String,Map<Integer,String>> m_alleles;
   private Map<String,String> m_alleleFunctionMap;
-  private int m_notesRowStart = -1;
-  private List<String> m_notes;
 
   public static void main(String[] args) {
     try {
@@ -67,6 +66,7 @@ public class AlleleDefinitionImporter {
 
         AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
         importer.writeToDB();
+        importer.writeNotes(workbook);
         importer.writeHistory(workbook);
       } catch (Exception ex) {
         throw new RuntimeException("Error processing file " + inputPath, ex);
@@ -77,14 +77,17 @@ public class AlleleDefinitionImporter {
   }
   
   AlleleDefinitionImporter(WorkbookWrapper workbook) {
-      readGene(workbook.currentSheet);
-      readLegacyRow(workbook.currentSheet);
-      readProteinRow(workbook.currentSheet);
-      readChromoRow(workbook.currentSheet);
-      readGenoRow(workbook.currentSheet);
-      readDbSnpRow(workbook.currentSheet);
-      readAlleles(workbook.currentSheet);
-      readNotes(workbook.currentSheet);
+    readGene(workbook.currentSheet);
+    readLegacyRow(workbook.currentSheet);
+    readProteinRow(workbook.currentSheet);
+    readChromoRow(workbook.currentSheet);
+    readGenoRow(workbook.currentSheet);
+    readDbSnpRow(workbook.currentSheet);
+    readAlleles(workbook.currentSheet);
+  }
+
+  String getGene() {
+    return m_gene;
   }
   
   private void readGene(Sheet sheet) {
@@ -198,8 +201,7 @@ public class AlleleDefinitionImporter {
           continue;
         }
         String alleleName = alleleNameOpt.get();
-        if (alleleName.length() == 0 || alleleName.contains(sf_notes)) {
-          m_notesRowStart = i;
+        if (alleleName.length() == 0) {
           break;
         }
 
@@ -219,22 +221,25 @@ public class AlleleDefinitionImporter {
       }
     }
   }
-  
-  private void readNotes(Sheet sheet) {
-    m_notes = new ArrayList<>();
-    for (int i = m_notesRowStart+1; m_notesRowStart > 0 && i < sheet.getLastRowNum(); i++) {
-      Row row = sheet.getRow(i);
-      if (row == null) {
-        continue;
+
+  private void writeNotes(WorkbookWrapper workbook) throws SQLException {
+    List<String> notes = workbook.getNotes();
+
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      PreparedStatement noteInsert = conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
+      int n = 0;
+      for (String note : notes) {
+        noteInsert.setString(1, m_gene);
+        noteInsert.setString(2, note);
+        noteInsert.setString(3, NoteType.ALLELE_DEFINITION.name());
+        noteInsert.setInt(4, n);
+        noteInsert.executeUpdate();
+        n += 1;
       }
-      Cell cell = row.getCell(0);
-      if (cell == null || cell.getStringCellValue().length() == 0 || cell.getStringCellValue().contains(sf_notes)) {
-        continue;
-      }
-      m_notes.add(row.getCell(0).toString());
+      sf_logger.info("created {} new notes", notes.size());
     }
   }
-  
+
   void writeHistory(WorkbookWrapper workbook) throws SQLException {
     workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
 
@@ -296,7 +301,7 @@ public class AlleleDefinitionImporter {
         seqLocInsert.setString(6, m_gene);
         ResultSet rs = seqLocInsert.executeQuery();
         rs.next();
-        Integer locId = rs.getInt(1);
+        int locId = rs.getInt(1);
         locIdAssignements[i] = locId;
         newLocations += 1;
       }
@@ -320,18 +325,6 @@ public class AlleleDefinitionImporter {
         }
       }
       sf_logger.info("created {} new alleles", m_alleles.keySet().size());
-
-      PreparedStatement noteInsert = conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
-      int n=0;
-      for (String note : m_notes) {
-        noteInsert.setString(1, m_gene);
-        noteInsert.setString(2, note);
-        noteInsert.setString(3, NoteType.ALLELE_DEFINITION.name());
-        noteInsert.setInt(4, n);
-        noteInsert.executeUpdate();
-        n += 1;
-      }
-      sf_logger.info("created {} new notes", m_notes.size());
     }
   }
 

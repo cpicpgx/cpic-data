@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.cpicpgx.db.NoteType;
+import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.WorkbookWrapper;
 
@@ -52,6 +53,7 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
     try {
       AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
       importer.writeToDB();
+      writeNotes(EntityType.GENE, importer.getGene(), workbook.getNotes());
       importer.writeHistory(workbook);
       addImportHistory(workbook);
     } catch (SQLException e) {

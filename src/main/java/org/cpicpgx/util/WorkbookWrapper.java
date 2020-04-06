@@ -1,16 +1,15 @@
 package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Wrapper class for an Excel workbook. Helps read and setup supporting objects.
@@ -20,7 +19,8 @@ import java.util.Iterator;
  * @author Ryan Whaley
  */
 public class WorkbookWrapper {
-  
+  public static final String NOTES_SHEET_NAME = "Notes";
+
   private Workbook workbook;
   private FormulaEvaluator formulaEvaluator;
   private String fileName = null;
@@ -30,9 +30,8 @@ public class WorkbookWrapper {
    * Constructor
    * @param in an {@link InputStream} for the excel file
    * @throws IOException can occur when reading the file
-   * @throws InvalidFormatException can occur if the file is not an excel file
    */
-  public WorkbookWrapper(InputStream in) throws IOException, InvalidFormatException {
+  public WorkbookWrapper(InputStream in) throws IOException {
     if (in == null) {
       throw new InvalidParameterException("No valid input stream specified");
     }
@@ -44,6 +43,7 @@ public class WorkbookWrapper {
   /**
    * Set the current sheet by sheet name. The current sheet can be accessed from {@link WorkbookWrapper#currentSheet}.
    * @param name the name of the sheet
+   * @throws InvalidParameterException when there is no sheet with the given name or when no sheet name is specified
    */
   public void currentSheetIs(String name) {
     if (StringUtils.isBlank(name)) {
@@ -101,5 +101,33 @@ public class WorkbookWrapper {
 
   public Iterator<Sheet> getSheetIterator() {
     return this.workbook.sheetIterator();
+  }
+
+  /**
+   * Reads all the notes in the workbook. This will look for a sheet named {@link WorkbookWrapper#NOTES_SHEET_NAME}. It
+   * will assume the first row is a title row and read the first non-empty cell of every subsequent row.
+   * @return a List of note strings
+   */
+  public List<String> getNotes() {
+    try {
+      currentSheetIs(NOTES_SHEET_NAME);
+    } catch (InvalidParameterException ex) {
+      return Collections.emptyList();
+    }
+
+    List<String> notes = new ArrayList<>();
+    // intentionally skip first header row
+    for (int i = 1; i <= currentSheet.getLastRowNum(); i++) {
+      Row row = currentSheet.getRow(i);
+      if (row == null) {
+        continue;
+      }
+      Cell cell = row.getCell(0);
+      if (cell == null || cell.getStringCellValue().length() == 0) {
+        continue;
+      }
+      notes.add(StringUtils.strip(row.getCell(0).toString()));
+    }
+    return notes;
   }
 }
