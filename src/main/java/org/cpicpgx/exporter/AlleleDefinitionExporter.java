@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,10 @@ public class AlleleDefinitionExporter extends BaseExporter {
     } catch (Exception ex) {
       sf_logger.error("Error exporting allele definitions", ex);
     }
+  }
+
+  FileType getFileType() {
+    return FileType.ALLELE_DEFINITION;
   }
 
   EntityType getEntityCategory() {
@@ -116,7 +121,8 @@ public class AlleleDefinitionExporter extends BaseExporter {
         
         writeWorkbook(workbook);
       }
+      handleFileUpload();
+      addExportEvent(conn);
     }
-    handleFileUpload();
   }
 }

@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
@@ -30,6 +31,10 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
     } catch (Exception ex) {
       sf_logger.error("Error diplotype phenotype", ex);
     }
+  }
+
+  FileType getFileType() {
+    return FileType.DIPLOTYPE_PHENOTYPE;
   }
 
   EntityType getEntityCategory() {
@@ -76,7 +81,8 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
         
         writeWorkbook(workbook);
       }
+      handleFileUpload();
+      addExportEvent(conn);
     }
-    handleFileUpload();
   }
 }

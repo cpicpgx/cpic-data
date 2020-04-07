@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,10 @@ public class TermsExporter extends BaseExporter {
     }
   }
 
+  FileType getFileType() {
+    return FileType.TERMS;
+  }
+
   EntityType getEntityCategory() {
     return EntityType.TERM;
   }
@@ -48,6 +53,8 @@ public class TermsExporter extends BaseExporter {
         );
       }
       writeWorkbook(workbook);
+      handleFileUpload();
+      addExportEvent(conn);
     }
   }
 }

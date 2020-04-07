@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,10 @@ public class DrugReviewExporter extends BaseExporter {
     } catch (Exception e) {
       sf_logger.error("Error exporting drug review", e);
     }
+  }
+
+  FileType getFileType() {
+    return FileType.DRUG_REVIEW;
   }
 
   EntityType getEntityCategory() {
@@ -53,7 +58,8 @@ public class DrugReviewExporter extends BaseExporter {
         workbook.writeDrug(name, id, pgkb, rxnorm, drugbank, atc);
       }
       writeWorkbook(workbook);
+      handleFileUpload();
+      addExportEvent(conn);
     }
-    handleFileUpload();
   }
 }

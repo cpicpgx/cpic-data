@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,10 @@ public class RecommendationExporter extends BaseExporter {
     } catch (Exception ex) {
       sf_logger.error("Error exporting recommendations", ex);
     }
+  }
+
+  FileType getFileType() {
+    return FileType.RECOMMENDATIONS;
   }
 
   EntityType getEntityCategory() {
@@ -60,6 +65,8 @@ public class RecommendationExporter extends BaseExporter {
         
         writeWorkbook(workbook);
       }
+      handleFileUpload();
+      addExportEvent(conn);
     }
   }
 }

@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,10 @@ public class PairsExporter extends BaseExporter {
     }
   }
 
+  FileType getFileType() {
+    return FileType.PAIRS;
+  }
+
   EntityType getEntityCategory() {
     return EntityType.PAIR;
   }
@@ -76,6 +81,7 @@ public class PairsExporter extends BaseExporter {
           }
         }
       }
+      addExportEvent(conn);
     } catch (IOException e) {
       sf_logger.error("Couldn't write to filesystem", e);
     } catch (SQLException e) {

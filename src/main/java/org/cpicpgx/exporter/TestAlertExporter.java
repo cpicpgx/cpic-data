@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,10 @@ public class TestAlertExporter extends BaseExporter {
     } catch (Exception ex) {
       sf_logger.error("Error exporting test alerts", ex);
     }
+  }
+
+  FileType getFileType() {
+    return FileType.TEST_ALERTS;
   }
 
   EntityType getEntityCategory() {
@@ -64,7 +69,8 @@ public class TestAlertExporter extends BaseExporter {
 
         writeWorkbook(workbook);
       }
+      handleFileUpload();
+      addExportEvent(conn);
     }
-    handleFileUpload();
   }
 }

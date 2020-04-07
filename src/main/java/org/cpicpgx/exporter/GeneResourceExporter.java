@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,10 @@ public class GeneResourceExporter extends BaseExporter {
     } catch (Exception ex) {
       sf_logger.error("Error exporting gene resource files", ex);
     }
+  }
+
+  FileType getFileType() {
+    return FileType.GENE_RESOURCE;
   }
 
   EntityType getEntityCategory() {
@@ -55,7 +60,8 @@ public class GeneResourceExporter extends BaseExporter {
         
         writeWorkbook(workbook);
       }
+      handleFileUpload();
+      addExportEvent(conn);
     }
-    handleFileUpload();
   }
 }

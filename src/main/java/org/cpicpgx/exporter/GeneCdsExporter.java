@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,10 @@ public class GeneCdsExporter extends BaseExporter {
     } catch (Exception e) {
       sf_logger.error("Error exporting gene CDS information", e);
     }
+  }
+
+  FileType getFileType() {
+    return FileType.GENE_CDS;
   }
 
   EntityType getEntityCategory() {
@@ -61,7 +66,8 @@ public class GeneCdsExporter extends BaseExporter {
 
         writeWorkbook(workbook);
       }
+      handleFileUpload();
+      addExportEvent(conn);
     }
-    handleFileUpload();
   }
 }

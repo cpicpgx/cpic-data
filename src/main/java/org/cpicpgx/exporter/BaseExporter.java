@@ -2,8 +2,10 @@ package org.cpicpgx.exporter;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.db.FileHistoryWriter;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.FileStoreClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,12 @@ public abstract class BaseExporter {
   protected Path directory;
   private boolean upload = false;
   private List<Path> generatedFiles = new ArrayList<>();
+
+  /**
+   * The type of file this exports
+   * @return a {@link FileType}
+   */
+  abstract FileType getFileType();
 
   /**
    * Parse arguments from the command line.
@@ -185,5 +193,15 @@ public abstract class BaseExporter {
       }
     }
     return notes;
+  }
+
+  void addExportEvent(Connection conn) throws SQLException {
+    FileHistoryWriter fileHistoryWriter = new FileHistoryWriter(conn, getFileType());
+    for (Path generatedFile : generatedFiles) {
+      fileHistoryWriter.write(generatedFile.getFileName().toString(), "exported from DB");
+      if (upload) {
+        fileHistoryWriter.write(generatedFile.getFileName().toString(), "uploaded to S3");
+      }
+    }
   }
 }
