@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +10,6 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An exporter for writing test alerts to an excel sheet grouped by drug.
@@ -38,7 +37,6 @@ public class TestAlertExporter extends BaseExporter {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select d.name, t.drugid, max(array_length(t.trigger_condition,1)) as num_alerts from test_alerts t join drug d on t.drugid = d.drugid group by d.name, t.drugid");
          PreparedStatement alertStmt = conn.prepareStatement("select t.trigger_condition, t.cds_context, t.alert_text from test_alerts t where t.drugid=?");
-         PreparedStatement noteStmt = conn.prepareStatement("select note from drug_note where drugId=? order by ordinal");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -62,15 +60,7 @@ public class TestAlertExporter extends BaseExporter {
           sf_logger.info("Wrote {} alerts", alertCount);
         }
         
-        noteStmt.clearParameters();
-        noteStmt.setString(1, drugId);
-        List<String> notes = new ArrayList<>();
-        try (ResultSet rsNote = noteStmt.executeQuery()) {
-          while (rsNote.next()) {
-            notes.add(rsNote.getString(1));
-          }
-        }
-        workbook.writeNotes(notes);
+        workbook.writeNotes(queryDrugNotes(conn, drugId, NoteType.TEST_ALERT));
 
         writeWorkbook(workbook);
       }

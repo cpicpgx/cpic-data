@@ -81,7 +81,6 @@ public class AlleleDefinitionExporter extends BaseExporter {
         try (
             PreparedStatement alleleStmt = conn.prepareStatement("select name, id from allele where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?");
-            PreparedStatement notesStmt = conn.prepareStatement("select note from gene_note n where genesymbol=? and type=? and n.date is null order by ordinal, note")
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
@@ -103,21 +102,9 @@ public class AlleleDefinitionExporter extends BaseExporter {
               }
             }
           }
-          notesStmt.setString(1, symbol);
-          notesStmt.setString(2, NoteType.ALLELE_DEFINITION.name());
-          try (ResultSet rs = notesStmt.executeQuery()) {
-            boolean wroteHeader = false;
-            while (rs.next()) {
-              if (!wroteHeader) {
-                workbook.writeNote("");
-                workbook.writeNotesHeader();
-                wroteHeader = true;
-              }
-              String note = rs.getString(1);
-              workbook.writeNote(note);
-            }
-          }
         }
+
+        workbook.writeNotes(queryGeneNotes(conn, symbol, NoteType.ALLELE_DEFINITION));
         
         changeStmt.setString(1, symbol);
         changeStmt.setString(2, NoteType.ALLELE_DEFINITION.name());

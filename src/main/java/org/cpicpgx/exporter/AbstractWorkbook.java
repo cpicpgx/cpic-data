@@ -21,6 +21,7 @@ import java.util.Optional;
 public abstract class AbstractWorkbook {
 
   public static final String HISTORY_SHEET_NAME = "Change log";
+  public static final String NOTES_SHEET_NAME = "Notes";
   private Workbook workbook;
   private CreationHelper createHelper;
   private List<SheetWrapper> sheets = new ArrayList<>();
@@ -35,6 +36,7 @@ public abstract class AbstractWorkbook {
   private CellStyle topBorderStyle;
   private CellStyle highlightStyle;
   private CellStyle highlightDoubleStyle;
+  private CellStyle noteStyle;
   CellStyle wrapStyle;
 
   int colIdx = 1;
@@ -63,6 +65,12 @@ public abstract class AbstractWorkbook {
     this.leftTextStyle.setAlignment(HorizontalAlignment.LEFT);
     this.leftTextStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.leftTextStyle.setFont(newFont);
+
+    this.noteStyle = this.workbook.createCellStyle();
+    this.noteStyle.setAlignment(HorizontalAlignment.LEFT);
+    this.noteStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.noteStyle.setWrapText(true);
+    this.noteStyle.setFont(newFont);
 
     this.rightNumberStyle = this.workbook.createCellStyle();
     this.rightNumberStyle.setAlignment(HorizontalAlignment.RIGHT);
@@ -200,10 +208,16 @@ public abstract class AbstractWorkbook {
   void writeMergedNoteCell(Row row, String value, int lastCol) {
     Cell noteCell = row.createCell(0);
     noteCell.setCellValue(StringUtils.strip(value));
-    noteCell.setCellStyle(leftTextStyle);
+    noteCell.setCellStyle(noteStyle);
     row.getSheet().addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, lastCol));
   }
   
+  void writeNoteCell(Row row, String value) {
+    Cell noteCell = row.createCell(0);
+    noteCell.setCellValue(StringUtils.strip(value));
+    noteCell.setCellStyle(noteStyle);
+  }
+
   void writeIntegerCell(Row row, int colIdx, int value) {
     Cell cell = row.createCell(colIdx);
     cell.setCellValue(value);
@@ -251,5 +265,25 @@ public abstract class AbstractWorkbook {
    */
   void write(OutputStream out) throws IOException {
     getWorkbook().write(out);
+  }
+
+  /**
+   * Create the "Notes" tab and populate it with note lines
+   * @param notes a List of notes to write, one per line
+   */
+  void writeNotes(List<String> notes) {
+    SheetWrapper sheet = findSheet(NOTES_SHEET_NAME);
+
+    Row headerRow = sheet.nextRow();
+    writeHeaderCell(headerRow, 0, NOTES_SHEET_NAME);
+
+    for (String note : notes) {
+      Row noteRow = sheet.nextRow();
+      noteRow.setRowStyle(noteStyle);
+      writeNoteCell(noteRow, note);
+      noteRow.setHeight((short)-1);
+    }
+
+    sheet.sheet.setColumnWidth(0, 100 * 256);
   }
 }

@@ -60,18 +60,6 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     writeStringCell(row, 8, comments, false);
   }
   
-  void writeNotes(List<String> notes) {
-    if (notes == null || notes.size() == 0) return;
-    
-    this.sheet.nextRow();
-    Row row = this.sheet.nextRow();
-    writeStringCell(row, 0, "Notes:", false);
-    for (String note : notes) {
-      row = this.sheet.nextRow();
-      writeMergedNoteCell(row, note, 8);
-    }
-  }
-  
   private int nHistory = 0;
   void writeHistory(Date date, String note) {
     if (nHistory == 0) {

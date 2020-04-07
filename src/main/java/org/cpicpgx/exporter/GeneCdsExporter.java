@@ -39,8 +39,7 @@ public class GeneCdsExporter extends BaseExporter {
         Connection conn = ConnectionFactory.newConnection();
         PreparedStatement geneStmt = conn.prepareStatement("select distinct p.genesymbol from gene_phenotype p");
         ResultSet geneRs = geneStmt.executeQuery();
-        PreparedStatement cdsStmt = conn.prepareStatement("select phenotype, ehrpriority, consultationtext, notes from gene_phenotype where genesymbol=?");
-        PreparedStatement noteStmt = conn.prepareStatement("select note from gene_note n where type='"+ NoteType.CDS +"' and genesymbol=? and n.date is null order by ordinal")
+        PreparedStatement cdsStmt = conn.prepareStatement("select phenotype, ehrpriority, consultationtext, notes from gene_phenotype where genesymbol=?")
     ) {
       while (geneRs.next()) {
         String geneSymbol = geneRs.getString(1);
@@ -58,12 +57,7 @@ public class GeneCdsExporter extends BaseExporter {
           }
         }
         
-        noteStmt.setString(1, geneSymbol);
-        try (ResultSet notesRs = noteStmt.executeQuery()) {
-          while (notesRs.next()) {
-            workbook.writeNote(notesRs.getString(1));
-          }
-        }
+        workbook.writeNotes(queryGeneNotes(conn, geneSymbol, NoteType.CDS));
 
         writeWorkbook(workbook);
       }

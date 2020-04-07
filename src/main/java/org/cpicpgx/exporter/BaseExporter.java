@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.util.FileStoreClient;
 import org.slf4j.Logger;
@@ -13,6 +14,10 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +28,7 @@ import java.util.List;
  */
 public abstract class BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  
+
   protected Path directory;
   private boolean upload = false;
   private List<Path> generatedFiles = new ArrayList<>();
@@ -128,5 +133,57 @@ public abstract class BaseExporter {
       }
       
     }
+  }
+
+  /**
+   * Get the notes for a given gene and note type
+   * @param conn an open Database connection
+   * @param symbol a gene symbol
+   * @param type the note type to query for
+   * @return an ordered list of notes
+   * @throws SQLException can occur from database query
+   */
+  List<String> queryGeneNotes(Connection conn, String symbol, NoteType type) throws SQLException {
+    List<String> notes = new ArrayList<>();
+    try (
+        PreparedStatement noteStmt = conn.prepareStatement(
+            "select n.note from gene_note n where genesymbol=? and type=? and n.date is null order by ordinal"
+        )
+    ) {
+      noteStmt.setString(1, symbol);
+      noteStmt.setString(2, type.name());
+      try (ResultSet rs = noteStmt.executeQuery()) {
+        while (rs.next()) {
+          notes.add(rs.getString(1));
+        }
+      }
+    }
+    return notes;
+  }
+
+  /**
+   * Get the notes for a given drug and note type
+   * @param conn an open Database connection
+   * @param drugId the ID of the drug to query for
+   * @param type the note type to query for
+   * @return an ordered list of notes
+   * @throws SQLException can occur from database query
+   */
+  List<String> queryDrugNotes(Connection conn, String drugId, NoteType type) throws SQLException {
+    List<String> notes = new ArrayList<>();
+    try (
+        PreparedStatement noteStmt = conn.prepareStatement(
+            "select n.note from drug_note n where drugid=? and type=? and n.date is null order by ordinal"
+        )
+    ) {
+      noteStmt.setString(1, drugId);
+      noteStmt.setString(2, type.name());
+      try (ResultSet rs = noteStmt.executeQuery()) {
+        while (rs.next()) {
+          notes.add(rs.getString(1));
+        }
+      }
+    }
+    return notes;
   }
 }

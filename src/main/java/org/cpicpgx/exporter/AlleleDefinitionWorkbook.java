@@ -1,7 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,19 +147,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     this.sheet.setColCount(colIdx+1);
     colIdx += 1;
   }
-  
-  void writeNotesHeader() {
-    Row row = sheet.nextRow();
-    writeBoldStringCell(row, 0, "NOTES:");
-  }
 
-  void writeNote(String note) {
-    if (note != null) {
-      Row row = sheet.nextRow();
-      writeMergedNoteCell(row, StringUtils.strip(note), 5);
-    }
-  }
-  
   private int nHistory = 0;
   void writeHistory(Date date, String note) {
     if (nHistory == 0) {

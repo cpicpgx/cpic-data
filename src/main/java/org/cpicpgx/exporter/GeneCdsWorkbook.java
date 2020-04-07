@@ -41,16 +41,4 @@ class GeneCdsWorkbook extends AbstractWorkbook {
     writeStringCell(headerRow, 2, consultation, false);
     writeStringCell(headerRow, 3, notes, false);
   }
-  
-  private int nNote = 0;
-  void writeNote(String note) {
-    if (nNote == 0) {
-      this.sheetWrapper.nextRow();
-      Row headerRow = this.sheetWrapper.nextRow();
-      writeStringCell(headerRow, 0, "Note", false);
-    }
-    Row row = this.sheetWrapper.nextRow();
-    writeStringCell(row, 0, note, false);
-    nNote += 1;
-  }
 }
