@@ -95,8 +95,9 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         idxContext = h;
       } else if (triggerName.equals(COL_NAME_ALERT)) {
         idxAlert = h;
+      } else {
+        triggerNames.put(triggerName, h);
       }
-      triggerNames.put(triggerName, h);
     }
 
     List<String> notes = new ArrayList<>();
