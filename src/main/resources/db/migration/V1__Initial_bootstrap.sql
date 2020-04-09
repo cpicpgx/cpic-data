@@ -98,32 +98,26 @@ COMMENT ON COLUMN gene.ncbiId IS 'The NCBI Gene (Entrez) ID number for this gene
 COMMENT ON COLUMN gene.ensemblId IS 'The Ensembl ID for this gene';
 
 
-CREATE TABLE allele
+create table allele_definition
 (
-  id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  version INTEGER DEFAULT 1,
-  geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
-  name TEXT NOT NULL,
-  functionalStatus TEXT,
-  clinicalFunctionalStatus TEXT,
-  clinicalFunctionalSubstrate TEXT,
-  activityScore VARCHAR(50),
-  pharmvarId VARCHAR(50)
+    id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
+    version INTEGER DEFAULT 1,
+    geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
+    name TEXT NOT NULL,
+    pharmvarId VARCHAR(50),
+
+    constraint allele_definition_unique UNIQUE (geneSymbol, name)
 );
 
-CREATE TRIGGER version_allele
-  BEFORE UPDATE ON allele
-  FOR EACH ROW EXECUTE PROCEDURE increment_version();
+CREATE TRIGGER version_allele_definition
+    BEFORE UPDATE ON allele_definition
+    FOR EACH ROW EXECUTE PROCEDURE increment_version();
 
-COMMENT ON TABLE allele IS 'An allele of a gene';
-COMMENT ON COLUMN allele.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN allele.geneSymbol IS 'The HGNC symbol of the gene the allele is for, required';
-COMMENT ON COLUMN allele.name IS 'The name of this allele, required';
-COMMENT ON COLUMN allele.functionalStatus IS 'The functional phenotype of this allele';
-COMMENT ON COLUMN allele.clinicalFunctionalStatus IS 'The functional phenotype of this allele used for clinical systems';
-COMMENT ON COLUMN allele.clinicalFunctionalSubstrate IS 'Allele clinical function substrate specificity, optional';
-COMMENT ON COLUMN allele.activityScore IS 'Descriptor of activity score, optional';
-COMMENT ON COLUMN allele.pharmvarId IS 'The PharmVar core allele ID for this allele';
+COMMENT ON TABLE allele_definition IS 'The definition for an allele of a gene';
+COMMENT ON COLUMN allele_definition.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN allele_definition.geneSymbol IS 'The HGNC symbol of the gene the allele is for, required';
+COMMENT ON COLUMN allele_definition.name IS 'The name of this allele, required';
+COMMENT ON COLUMN allele_definition.pharmvarId IS 'The PharmVar core allele ID for this allele';
 
 
 CREATE TABLE sequence_location
@@ -153,17 +147,52 @@ COMMENT ON COLUMN sequence_location.dbSnpId IS 'The DBSNP identifier (rs#) for t
 
 CREATE TABLE allele_location_value
 (
-  alleleid INTEGER NOT NULL REFERENCES allele(id),
-  locationid INTEGER NOT NULL REFERENCES sequence_location(id),
+  alleleDefinitionId INTEGER NOT NULL REFERENCES allele_definition(id),
+  locationId INTEGER NOT NULL REFERENCES sequence_location(id),
   variantAllele TEXT NOT NULL,
   version INTEGER DEFAULT 1
 );
 
-CREATE TRIGGER version_pallele_location_value
+CREATE TRIGGER version_allele_location_value
   BEFORE UPDATE ON allele_location_value
   FOR EACH ROW EXECUTE PROCEDURE increment_version();
 
 COMMENT ON TABLE allele_location_value IS 'The change at a specific location for a specific allele';
+COMMENT ON COLUMN allele_location_value.alleleDefinitionId IS 'The reference to the allele this variant is on';
+COMMENT ON COLUMN allele_location_value.locationId IS 'The reference to the location this variant is for';
+COMMENT ON COLUMN allele_location_value.variantAllele IS 'The allele of this location for the allele';
+COMMENT ON COLUMN allele_location_value.version IS 'The version number, iterates on modification';
+
+
+CREATE TABLE allele
+(
+    id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
+    version INTEGER DEFAULT 1,
+    geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
+    name TEXT NOT NULL,
+    functionalStatus TEXT,
+    clinicalFunctionalStatus TEXT,
+    clinicalFunctionalSubstrate TEXT,
+    activityScore VARCHAR(50),
+    definitionId INTEGER NOT NULL REFERENCES allele_definition(id),
+
+    constraint allele_unique UNIQUE (geneSymbol, name)
+);
+
+CREATE TRIGGER version_allele
+    BEFORE UPDATE ON allele
+    FOR EACH ROW EXECUTE PROCEDURE increment_version();
+
+COMMENT ON TABLE allele IS 'An allele of a gene';
+COMMENT ON COLUMN allele.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN allele.version IS 'The version number, iterates on modification';
+COMMENT ON COLUMN allele.geneSymbol IS 'The HGNC symbol of the gene the allele is for, required';
+COMMENT ON COLUMN allele.name IS 'The name of this allele, required';
+COMMENT ON COLUMN allele.functionalStatus IS 'The functional phenotype of this allele';
+COMMENT ON COLUMN allele.clinicalFunctionalStatus IS 'The functional phenotype of this allele used for clinical systems';
+COMMENT ON COLUMN allele.clinicalFunctionalSubstrate IS 'Allele clinical function substrate specificity, optional';
+COMMENT ON COLUMN allele.activityScore IS 'Descriptor of activity score, optional';
+COMMENT ON COLUMN allele.definitionId IS 'The reference to the definition for this allele';
 
 
 CREATE TABLE gene_note

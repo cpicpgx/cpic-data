@@ -1,6 +1,6 @@
 create view data_progress as
 select 'Gene' as object_class, 'Allele Definition Data' as data_type, genesymbol as object_name, count(*) as n
-from allele
+from allele_definition
 group by genesymbol
 union all
 select 'Gene' as object_class, 'Allele Functionality Data' as data_type, genesymbol as object_name, count(*) as n
@@ -28,7 +28,7 @@ from gene_phenotype g
 group by genesymbol
 union all
 select 'Gene' as object_class, 'PharmVar Allele IDs' as data_type, a.genesymbol as object_name, count(*) as n
-from allele a
+from allele_definition a
 where a.pharmvarid is not null
 group by a.genesymbol
 union all

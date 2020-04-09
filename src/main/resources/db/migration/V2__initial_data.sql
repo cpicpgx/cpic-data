@@ -818,9 +818,16 @@ Phenotype: high-risk genotype status	Negative	High-risk allele not detected	No c
 \.
 
 -- these alleles don't have an allele definition file so manually import them
-COPY allele (geneSymbol, name) FROM stdin;
-HLA-A	*31:01
-HLA-B	*15:02
-HLA-B	*57:01
-HLA-B	*58:01
+COPY allele_definition (id, geneSymbol, name) FROM stdin;
+9000	HLA-A	*31:01
+9001	HLA-B	*15:02
+9002	HLA-B	*57:01
+9003	HLA-B	*58:01
+\.
+
+COPY allele (geneSymbol, name, definitionId) FROM stdin;
+HLA-A	*31:01	9000
+HLA-B	*15:02	9001
+HLA-B	*57:01	9002
+HLA-B	*58:01	9003
 \.
