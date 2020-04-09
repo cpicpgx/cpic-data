@@ -17,7 +17,7 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
   private static final String[] sf_deleteStatements = new String[]{
       "delete from gene_note where type='" + NoteType.ALLELE_DEFINITION.name() + "'",
       "delete from allele_location_value",
-      "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
+      "delete from allele_definition where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from sequence_location"
   };
   private static final String DEFAULT_DIRECTORY = "allele_definition_tables";

@@ -101,7 +101,7 @@ public class PharmVarImporter extends BaseDirectoryImporter {
       Connection conn = ConnectionFactory.newConnection();
       closables.add(conn);
 
-      updateStmt = conn.prepareStatement("update allele set pharmvarId=? where geneSymbol=? and name=?");
+      updateStmt = conn.prepareStatement("update allele_definition set pharmvarId=? where geneSymbol=? and name=?");
       closables.add(updateStmt);
     }
     

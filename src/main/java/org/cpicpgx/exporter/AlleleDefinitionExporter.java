@@ -51,7 +51,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
    */
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele a join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleleid\n" +
+         PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele_definition a join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleledefinitionid\n" +
              "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid\n" +
              "order by 1");
          PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from gene_note n where genesymbol=? and type=? and n.date is not null order by ordinal");
@@ -84,8 +84,8 @@ public class AlleleDefinitionExporter extends BaseExporter {
         }
       
         try (
-            PreparedStatement alleleStmt = conn.prepareStatement("select name, id from allele where geneSymbol=?");
-            PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleleid=?");
+            PreparedStatement alleleStmt = conn.prepareStatement("select name, id from allele_definition where geneSymbol=?");
+            PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleledefinitionid=?");
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {

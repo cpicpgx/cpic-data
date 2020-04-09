@@ -51,7 +51,6 @@ public class AlleleDefinitionImporter {
   private String[] m_genoPositions;
   private String[] m_dbSnpIds;
   private Map<String,Map<Integer,String>> m_alleles;
-  private Map<String,String> m_alleleFunctionMap;
 
   public static void main(String[] args) {
     try {
@@ -187,8 +186,7 @@ public class AlleleDefinitionImporter {
   
   private void readAlleles(Sheet sheet) {
     m_alleles = new LinkedHashMap<>();
-    m_alleleFunctionMap = new LinkedHashMap<>();
-    
+
     for (int i=sf_alleleRowStart; i <= sheet.getLastRowNum(); i++) {
       try {
         Row row = sheet.getRow(i);
@@ -204,9 +202,6 @@ public class AlleleDefinitionImporter {
         if (alleleName.length() == 0) {
           break;
         }
-
-        String alleleFunction = getCellValue(row, 1).orElse(null);
-        m_alleleFunctionMap.put(alleleName, alleleFunction);
 
         Map<Integer, String> definition = new LinkedHashMap<>();
         for (int j = sf_variantColStart; j < m_variantColEnd; j++) {
@@ -271,7 +266,7 @@ public class AlleleDefinitionImporter {
   void writeToDB() throws SQLException {
     try (Connection conn = ConnectionFactory.newConnection()) {
 
-      PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleleid, locationid, variantallele) values (?,?,?)");
+      PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleledefinitionid, locationid, variantallele) values (?,?,?)");
       
       PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,mrnaSequenceId=? where symbol=?");
       geneUpdate.setString(1, m_geneSeqId);
@@ -307,11 +302,10 @@ public class AlleleDefinitionImporter {
       }
       sf_logger.info("created {} new locations", newLocations);
 
-      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(geneSymbol, name, functionalstatus) values (?,?,?) returning (id)");
+      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name) values (?,?) returning (id)");
       for (String alleleName : m_alleles.keySet()) {
         alleleInsert.setString(1, m_gene);
         alleleInsert.setString(2, alleleName);
-        alleleInsert.setString(3, m_alleleFunctionMap.get(alleleName));
         ResultSet rs = alleleInsert.executeQuery();
         rs.next();
         int alleleId = rs.getInt(1);

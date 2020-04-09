@@ -12,6 +12,7 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_geneLabelPattern = Pattern.compile("GENE:\\s(\\w+)");
+  private static final Pattern sf_alleleNamePattern = Pattern.compile("^(.+?)([x≥](\\d+|N))?$");
   private static final int COL_IDX_ALLELE = 0;
   private static final int COL_IDX_ACTIVITY = 1;
   private static final int COL_IDX_FUNCTION = 2;
@@ -39,6 +41,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
   private static final String[] sf_deleteStatements = new String[]{
       "delete from function_reference",
+      "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from gene_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
   };
   private static final String DEFAULT_DIRECTORY = "allele_functionality_reference";
@@ -143,13 +146,26 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     addImportHistory(workbook);
   }
 
+  static String parseAlleleDefinitionName(@Nonnull String name) {
+    if (StringUtils.isBlank(name)) {
+      return null;
+    }
+
+    Matcher m = sf_alleleNamePattern.matcher(name);
+    if (m.matches()) {
+      return StringUtils.strip(m.group(1));
+    } else {
+      throw new RuntimeException("Allele name not in expected format");
+    }
+  }
+
   /**
    * Private class for handling DB interactions
    */
   static class DbHarness implements AutoCloseable {
     private Connection conn;
     private Map<String, Long> alleleNameMap = new HashMap<>();
-    private PreparedStatement updateAlleleStmt;
+    private PreparedStatement insertAlleleStmt;
     private PreparedStatement insertStmt;
     private PreparedStatement insertNoteStmt;
     private PreparedStatement insertChangeStmt;
@@ -160,7 +176,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
 
-      try (PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?")) {
+      try (PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele_definition where geneSymbol=?")) {
         pstmt.setString(1, gene);
         try (ResultSet rs = pstmt.executeQuery()) {
           while (rs.next()) {
@@ -168,11 +184,19 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
           }
         }
       }
-      
-      updateAlleleStmt = this.conn.prepareStatement("update allele set functionalstatus=initcap(?), activityScore=?, clinicalFunctionalStatus=initcap(?), clinicalFunctionalSubstrate=? where id=?");
+
+      insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityscore, clinicalfunctionalstatus, clinicalFunctionalSubstrate) values (?, ?, ?, initcap(?), ?, initcap(?), ?) returning id");
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?, ?)");
       insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
       insertChangeStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+    }
+
+    private Long lookupAlleleDefinitionId(String alleleName) {
+      String alleleDefinitionName = parseAlleleDefinitionName(alleleName);
+      if (!this.alleleNameMap.containsKey(alleleDefinitionName)) {
+        throw new RuntimeException("Missing allele defintiion for " + gene + " " + alleleDefinitionName);
+      }
+      return this.alleleNameMap.get(alleleDefinitionName);
     }
     
     void insert(
@@ -186,26 +210,34 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String findings,
         String comments
     ) throws SQLException {
-      if (!this.alleleNameMap.containsKey(allele)) {
-        sf_logger.warn("No allele defined with name {}", allele);
-        return;
+      Long alleleDefinitionId = lookupAlleleDefinitionId(allele);
+
+      this.insertAlleleStmt.clearParameters();
+      this.insertAlleleStmt.setString(1, this.gene);
+      this.insertAlleleStmt.setString(2, allele);
+      this.insertAlleleStmt.setLong(3, alleleDefinitionId);
+      this.insertAlleleStmt.setString(4, normalizeFunction(alleleFunction));
+      setNullableText(this.insertAlleleStmt, 5, activityScore);
+      setNullableText(this.insertAlleleStmt, 6, clinicalFunction);
+      setNullableText(this.insertAlleleStmt, 7, substrate);
+      Long alleleId = null;
+      try (ResultSet rs = this.insertAlleleStmt.executeQuery()) {
+        while (rs.next()) {
+          alleleId = rs.getLong(1);
+        }
+      }
+      if (alleleId == null) {
+        throw new RuntimeException("No allele inserted");
       }
 
+
       this.insertStmt.clearParameters();
-      this.insertStmt.setLong(1, this.alleleNameMap.get(allele));
+      this.insertStmt.setLong(1, alleleId);
       this.insertStmt.setArray(2, conn.createArrayOf("TEXT", pmids));
       setNullableText(this.insertStmt, 3, strength);
       setNullableText(this.insertStmt, 4, findings);
       setNullableText(this.insertStmt, 5, comments);
       this.insertStmt.executeUpdate();
-
-      this.updateAlleleStmt.clearParameters();
-      this.updateAlleleStmt.setString(1, normalizeFunction(alleleFunction));
-      setNullableText(this.updateAlleleStmt, 2, activityScore);
-      setNullableText(this.updateAlleleStmt, 3, clinicalFunction);
-      setNullableText(this.updateAlleleStmt, 4, substrate);
-      this.updateAlleleStmt.setLong(5, this.alleleNameMap.get(allele));
-      this.updateAlleleStmt.executeUpdate();
     }
     
     void insertNote(String note) throws SQLException {
