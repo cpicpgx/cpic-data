@@ -201,10 +201,10 @@ public class FrequencyExporter extends BaseExporter {
           }
           
           writeWorkbook(workbook);
+          addFileExportHistory(workbook.getFilename(), new String[]{geneSymbol});
         }
       }
       handleFileUpload();
-      addExportEvent(conn);
     }
   }
 }

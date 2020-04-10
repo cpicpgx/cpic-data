@@ -55,7 +55,6 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
       importer.writeToDB();
       writeNotes(EntityType.GENE, importer.getGene(), workbook.getNotes());
       importer.writeHistory(workbook);
-      addImportHistory(workbook);
     } catch (SQLException e) {
       throw new RuntimeException("Error processing " + workbook, e);
     }

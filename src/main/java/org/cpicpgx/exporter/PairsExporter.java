@@ -81,11 +81,13 @@ public class PairsExporter extends BaseExporter {
           }
         }
       }
-      addExportEvent(conn);
+      addFileExportHistory(sf_defaultFileName, new String[]{});
     } catch (IOException e) {
       sf_logger.error("Couldn't write to filesystem", e);
     } catch (SQLException e) {
       sf_logger.error("Couldn't query the DB", e);
+    } catch (Exception e) {
+      sf_logger.error("Error making pairs", e);
     }
     
     sf_logger.info("Wrote pairs to: {}", pairsFile);

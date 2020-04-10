@@ -119,8 +119,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       sf_logger.info("    {} rows processed", rowsProcessed);
       sf_logger.info("    {} diplotypes match failed", dbHarness.getFailCount());
     }
-
-    addImportHistory(workbook);
   }
 
   /**
@@ -146,7 +144,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   static class DbHarness implements AutoCloseable {
     private Connection conn;
     private String gene;
-    private PreparedStatement insertStmt;
     private PreparedStatement findDiplotype;
     private int failCount = 0;
 
@@ -154,9 +151,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
 
-      insertStmt = this.conn.prepareStatement(
-          "insert into gene_phenotype(geneSymbol, phenotype, activityscore, ehrPriority) values (?, ?, ?, ?) returning(id)"
-      );
       this.findDiplotype = this.conn.prepareStatement(
           "select p.phenotype, f.totalactivityscore, d.id, p.ehrpriority from gene_phenotype p " +
               "    join phenotype_function f on p.id = f.phenotypeId " +
@@ -207,9 +201,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
 
     @Override
     public void close() throws Exception {
-      if (this.insertStmt != null) {
-        this.insertStmt.close();
-      }
       if (this.findDiplotype != null) {
         this.findDiplotype.close();
       }

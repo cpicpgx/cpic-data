@@ -99,10 +99,6 @@ public abstract class BaseExporter {
    */
   abstract EntityType getEntityCategory();
   
-  void addGeneratedFile(Path filePath) {
-    generatedFiles.add(filePath);
-  }
-
   /**
    * The method that will export files
    * @throws Exception can occur from querying the DB
@@ -195,13 +191,9 @@ public abstract class BaseExporter {
     return notes;
   }
 
-  void addExportEvent(Connection conn) throws SQLException {
-    FileHistoryWriter fileHistoryWriter = new FileHistoryWriter(conn, getFileType());
-    for (Path generatedFile : generatedFiles) {
-      fileHistoryWriter.write(generatedFile.getFileName().toString(), "exported from DB");
-      if (upload) {
-        fileHistoryWriter.write(generatedFile.getFileName().toString(), "uploaded to S3");
-      }
+  void addFileExportHistory(String fileName, String[] entityIds) throws Exception {
+    try (FileHistoryWriter historyWriter = new FileHistoryWriter(getFileType())) {
+      historyWriter.writeExport(fileName, entityIds);
     }
   }
 }

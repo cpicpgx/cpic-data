@@ -82,13 +82,12 @@ public class PharmVarImporter extends BaseDirectoryImporter {
           }
           line += 1;
         }
-        addImportHistory(f.getName());
       } catch (FileNotFoundException e) {
         throw new RuntimeException("No file " + f, e);
       } catch (IOException e) {
         throw new RuntimeException("Error reading " + f, e);
-      } catch (SQLException e) {
-        throw new RuntimeException("Error with database", e);
+      } catch (Exception e) {
+        throw new RuntimeException("Error importing PharmVar", e);
       }
     };
   }

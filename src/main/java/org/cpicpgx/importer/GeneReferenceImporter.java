@@ -53,7 +53,7 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
         String idType = row.getNullableText(2);
         String idValue = row.getNullableText(3, true);
         String symbolValue = row.getNullableText(0);
-      
+
         PreparedStatement updateStmt = null;
         if (idValue != null) {
           switch (idType) {
@@ -78,6 +78,5 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
         }
       }
     }
-    addImportHistory(workbook);
   }
 }

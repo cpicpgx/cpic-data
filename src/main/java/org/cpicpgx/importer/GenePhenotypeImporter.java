@@ -86,7 +86,6 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
         }
       }
     }
-    addImportHistory(workbook);
   }
 
   static class DbHarness implements AutoCloseable {

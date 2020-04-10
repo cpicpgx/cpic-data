@@ -102,7 +102,6 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         dbHarness.insertNote(row.getNullableText(0));
       }
     }
-    addImportHistory(workbook);
   }
 
   static class DbHarness implements AutoCloseable {

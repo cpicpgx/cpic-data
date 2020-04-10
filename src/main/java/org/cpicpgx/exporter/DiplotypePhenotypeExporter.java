@@ -80,9 +80,9 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
         }
         
         writeWorkbook(workbook);
+        addFileExportHistory(workbook.getFilename(), new String[]{gene});
       }
       handleFileUpload();
-      addExportEvent(conn);
     }
   }
 }

@@ -64,9 +64,9 @@ public class RecommendationExporter extends BaseExporter {
         }
         
         writeWorkbook(workbook);
+        addFileExportHistory(workbook.getFilename(), new String[]{drugId});
       }
       handleFileUpload();
-      addExportEvent(conn);
     }
   }
 }

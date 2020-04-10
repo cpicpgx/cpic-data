@@ -59,7 +59,7 @@ public class DrugReviewExporter extends BaseExporter {
       }
       writeWorkbook(workbook);
       handleFileUpload();
-      addExportEvent(conn);
+      addFileExportHistory(workbook.getFilename(), new String[]{});
     }
   }
 }

@@ -65,10 +65,9 @@ public class PhenotypesExporter extends BaseExporter {
           }
         }
         writeWorkbook(phenotypesWorkbook);
+        addFileExportHistory(phenotypesWorkbook.getFilename(), new String[]{gene});
       }
-
       handleFileUpload();
-      addExportEvent(conn);
     }
   }
 }

@@ -59,9 +59,9 @@ public class GeneResourceExporter extends BaseExporter {
         workbook.writeMapping("PharmGKB", "PharmGKB ID", pgkb);
         
         writeWorkbook(workbook);
+        addFileExportHistory(workbook.getFilename(), new String[]{symbol});
       }
       handleFileUpload();
-      addExportEvent(conn);
     }
   }
 }

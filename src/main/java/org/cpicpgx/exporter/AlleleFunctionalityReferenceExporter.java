@@ -82,9 +82,9 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
         }
 
         writeWorkbook(workbook);
+        addFileExportHistory(workbook.getFilename(), new String[]{symbol});
       }
       handleFileUpload();
-      addExportEvent(conn);
     }
   }
 }

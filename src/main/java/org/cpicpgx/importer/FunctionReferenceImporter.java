@@ -69,7 +69,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     return sf_deleteStatements;
   }
 
-  void processWorkbook(WorkbookWrapper workbook) throws NotFoundException, SQLException {
+  void processWorkbook(WorkbookWrapper workbook) throws Exception {
     int rowIdx = 0;
 
     RowWrapper row = null;
@@ -143,7 +143,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         dbHarness.insertChange(date, note);
       }
     }
-    addImportHistory(workbook);
   }
 
   static String parseAlleleDefinitionName(@Nonnull String name) {

@@ -71,7 +71,6 @@ public class PairDiffImporter extends BaseDirectoryImporter {
             sf_logger.info("{} changes applied to {}", changes, pairDiff.name);
           }
         }
-        addImportHistory(f.getName());
       } catch (Exception e) {
         throw new RuntimeException("Error reading diffs", e);
       }

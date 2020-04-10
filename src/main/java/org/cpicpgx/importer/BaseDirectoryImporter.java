@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.FileHistoryWriter;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
@@ -187,23 +186,6 @@ public abstract class BaseDirectoryImporter {
     if (this.directory.toFile().listFiles() == null) {
       throw new IllegalArgumentException("Directory is empty " + this.directory);
     }
-  }
-
-  /**
-   * This will add a message to the history for a file with a default message saying the data was imported at the 
-   * current time
-   * @param fileName the file to log was imported
-   * @throws SQLException can occur from DB interaction
-   */
-  void addImportHistory(String fileName) throws SQLException {
-    try (Connection conn = ConnectionFactory.newConnection()) {
-      FileHistoryWriter fileHistoryWriter = new FileHistoryWriter(conn, getFileType());
-      fileHistoryWriter.write(fileName, "imported to database from file");
-    }
-  }
-
-  void addImportHistory(WorkbookWrapper workbook) throws SQLException {
-    addImportHistory(workbook.getFileName());
   }
 
   static String makeFunctionKey(String f1, String f2, String as1, String as2) {

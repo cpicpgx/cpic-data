@@ -67,8 +67,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         processTwoTrigger(workbook, conn, population);
       }
     }
-
-    addImportHistory(workbook);
   }
 
   private static final int COL_DRUG = 0;
