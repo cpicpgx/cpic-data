@@ -8,10 +8,10 @@ import org.apache.poi.ss.usermodel.Row;
  * @author Ryan Whaley
  */
 class TestAlertWorkbook extends AbstractWorkbook {
-  private static final String FILE_NAME_TEMPLATE = "%s_Pre_and_Post_Test_Alerts.xlsx";
+  private static final String FILE_NAME_TEMPLATE = "%s-Pre_and_Post_Test_Alerts.xlsx";
   
-  private String drug;
-  private SheetWrapper sheet;
+  private final String drug;
+  private final SheetWrapper sheet;
   
   TestAlertWorkbook(String drug, int numTriggers) {
     super();
@@ -21,6 +21,7 @@ class TestAlertWorkbook extends AbstractWorkbook {
     this.colIdx = 0;
     
     Row headerRow = this.sheet.nextRow();
+    writeHeaderCell(headerRow, colIdx++, "Drug Ordered");
     if (numTriggers == 1) {
       writeHeaderCell(headerRow, colIdx++, "Trigger Condition");
     } else {
@@ -38,9 +39,10 @@ class TestAlertWorkbook extends AbstractWorkbook {
     this.sheet.setWidths(columnSizes);
   }
   
-  void writeAlert(String[] triggers, String context, String[] alertText) {
+  void writeAlert(String[] triggers, String context, String[] alertText, String drugName) {
     this.colIdx = 0;
     Row row = this.sheet.nextRow();
+    writeStringCell(row, colIdx++, drugName);
     for (String trigger : triggers) {
       writeStringCell(row, colIdx++, trigger, false);
     }

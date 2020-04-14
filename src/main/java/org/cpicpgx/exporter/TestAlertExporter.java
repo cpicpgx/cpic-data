@@ -59,7 +59,8 @@ public class TestAlertExporter extends BaseExporter {
             workbook.writeAlert(
                 (String[])ars.getArray(1).getArray(),
                 ars.getString(2),
-                (String[])ars.getArray(3).getArray());
+                (String[])ars.getArray(3).getArray(),
+                drugName);
             alertCount++;
           }
           sf_logger.info("Wrote {} alerts", alertCount);

@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.Row;
  */
 class RecommendationWorkbook extends AbstractWorkbook {
   
-  private static final String FILE_NAME_TEMPLATE = "%s_Recommendations.xlsx";
+  private static final String FILE_NAME_TEMPLATE = "%s-Recommendations.xlsx";
   private static final String SHEET_NAME = "Recommendations";
   
   private SheetWrapper sheet;
