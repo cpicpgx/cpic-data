@@ -108,17 +108,17 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             Matcher asMatch = AS_PATTERN.matcher(cellText);
             if (phenotypeIdxMap.size() > 1 && implMatch.matches()) {
               implIdxMap.put(implMatch.group(1), j);
-            } else if (cellText.startsWith("Implication")) {
+            } else if (cellText.toLowerCase().startsWith("implication")) {
               implIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
             } else if (phenotypeIdxMap.size() > 1 && asMatch.matches()) {
               asIdxMap.put(asMatch.group(1), j);
-            } else if (cellText.contains("Activity Score")) {
+            } else if (cellText.toLowerCase().contains("activity score")) {
               asIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
-            } else if (cellText.equals("Therapeutic Recommendation")) {
+            } else if (cellText.equalsIgnoreCase("Therapeutic Recommendation")) {
               idxRecommendation = j;
-            } else if (cellText.contains("Classification of Recommendation")) {
+            } else if (cellText.toLowerCase().contains("classification of recommendation")) {
               idxClassification = j;
-            } else if (cellText.contains("Comments")) {
+            } else if (cellText.toLowerCase().contains("comments")) {
               idxComments = j;
             }
           }
