@@ -9,7 +9,7 @@ public class FlywayClean {
 
   public static void main(String[] args) {
     Flyway flyway = Flyway.configure().dataSource(
-        ConnectionFactory.getJdbcAddress(),
+        ConnectionFactory.getJdbcUrl(),
         ConnectionFactory.getUser(),
         ConnectionFactory.getPass()
     ).load();

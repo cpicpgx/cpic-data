@@ -13,7 +13,7 @@ public class ConnectionFactoryTest {
   
   @Test
   public void testMakeJdbcUrl() {
-    assertNotNull(ConnectionFactory.makeJdbcUrl());
+    assertNotNull(ConnectionFactory.getJdbcUrl());
     assertNotNull(ConnectionFactory.getUser());
   }
 }

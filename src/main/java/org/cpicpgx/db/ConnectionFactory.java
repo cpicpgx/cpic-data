@@ -23,15 +23,11 @@ public class ConnectionFactory {
    * @throws SQLException can occur if there is a problem connecting to the database
    */
   public static Connection newConnection() throws SQLException {
-    return DriverManager.getConnection(String.format(makeJdbcUrl(), sf_host), sf_user, sf_pass);
+    return DriverManager.getConnection(String.format(getJdbcUrl(), sf_host), sf_user, sf_pass);
   }
   
-  static String makeJdbcUrl() {
+  static String getJdbcUrl() {
     return String.format(sf_dbUrl, sf_host);
-  }
-
-  static String getJdbcAddress() {
-    return String.format("jdbc:postgresql://%s/cpic", sf_host);
   }
 
   static String getUser() {
