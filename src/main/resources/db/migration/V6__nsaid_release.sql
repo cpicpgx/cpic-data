@@ -10,7 +10,7 @@ insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values (
 insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:8356','PA450985','8356','DB00554','{M01AC01}','piroxicam');
 insert into drug(drugid, pharmgkbid, rxnormid, drugbankid, atcid, name) values ('RxNorm:37790','PA131890','37790','DB00469','{M01AC02}','tenoxicam');
 
-insert into guideline(name, url, pharmgkbid) values ('CYP2C9 and NSAIDs', 'https://cpicpgx.org/cpic-guideline-for-nsaids-based-on-cyp2c9-genotype/', '{PA166191841}');
+insert into guideline(name, url, pharmgkbid) values ('CYP2C9 and NSAIDs', 'https://cpicpgx.org/guidelines/cpic-guideline-for-nsaids-based-on-cyp2c9-genotype/', '{PA166191841}');
 
 update pair set level='A',guidelineid=(select id from guideline where name='CYP2C9 and NSAIDs'),citations='{32189324}' where genesymbol='CYP2C9' and drugid=(select drug.drugid from drug where name='celecoxib');
 update pair set level='C',guidelineid=(select id from guideline where name='CYP2C9 and NSAIDs'),citations='{32189324}' where genesymbol='CYP2C9' and drugid=(select drug.drugid from drug where name='diclofenac');

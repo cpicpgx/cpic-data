@@ -380,7 +380,7 @@ COPY guideline (id, version, name, url, pharmgkbid) FROM stdin;
 100410	3	CYP2C19 and Voriconazole	https://cpicpgx.org/guidelines/guideline-for-voriconazole-and-cyp2c19/	{PA166161537}
 100417	3	CYP2D6 and Ondansetron and Tropisetron	https://cpicpgx.org/guidelines/guideline-for-ondansetron-and-tropisetron-and-cyp2d6-genotype/	{PA166161954,PA166161955}
 100415	3	CYP2D6 and Tamoxifen	https://cpicpgx.org/guidelines/cpic-guideline-for-tamoxifen-based-on-cyp2d6-genotype/	{PA166176068}
-104243	3	CYP2D6 and Atomoxetine	https://cpicpgx.org/cpic-guideline-for-atomoxetine-based-on-cyp2d6-genotype/	{PA166181885}
+104243	3	CYP2D6 and Atomoxetine	https://cpicpgx.org/guidelines/cpic-guideline-for-atomoxetine-based-on-cyp2d6-genotype/	{PA166181885}
 100427	3	RYR1, CACNA1S and Volatile anesthetic agents and Succinylcholine	https://cpicpgx.org/guidelines/cpic-guideline-for-ryr1-and-cacna1s/	{PA166180457}
 100425	3	CYP2C9, VKORC1, CYP4F2 and Warfarin	https://cpicpgx.org/guidelines/guideline-for-warfarin-and-cyp2c9-and-vkorc1/	{PA166104949}
 100412	3	CYP2C9, HLA-B and Phenytoin 	https://cpicpgx.org/guidelines/guideline-for-phenytoin-and-cyp2c9-and-hla-b/	{PA166122806}
