@@ -13,7 +13,13 @@ __Seriously, you don't want to use this yet.__
 
 This project assumes you're running a Postgres 9+ database for loading/querying data.
 
-Look in `src/main/resources`, copy `cpicData.properties.sample` to `cpicData.properties`, and fill in the appropriate values for your database.
+Configuration is handled through environment variables. Here's what needs to be set:
+
+- _CPIC_DB_ = the hostname for the db server (default `localhost`)
+- _CPIC_USER_ = the postgresql role name to connect as (default `cpic`)
+- _CPIC_PASS_ = the password for the postgresql role (default blank)
+
+For local development you won't need to specify these. Set them if you want to connect to a different DB (e.g. push to prod). 
 
 ## Running
 

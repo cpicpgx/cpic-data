@@ -1,9 +1,10 @@
 package org.cpicpgx.db;
 
+import com.google.common.base.MoreObjects;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
 
 /**
  * This class is a factory for creating new {@link Connection} objects for the Postgres database.
@@ -12,18 +13,12 @@ import java.util.ResourceBundle;
  */
 public class ConnectionFactory {
   private static final String sf_dbUrl = "jdbc:postgresql://%s/cpic";
-  private static ResourceBundle resources = ResourceBundle.getBundle("cpicData");
-  private static String sf_host;
-  private static String sf_user;
-  private static String sf_pass;
-  static {
-    sf_host = resources.getString("db.host");
-    sf_user = resources.getString("db.user");
-    sf_pass = resources.getString("db.pass");
-  }
+  private static final String sf_host = MoreObjects.firstNonNull(System.getenv("CPIC_DB"), "localhost");
+  private static final String sf_user = MoreObjects.firstNonNull(System.getenv("CPIC_USER"), "cpic");
+  private static final String sf_pass = MoreObjects.firstNonNull(System.getenv("CPIC_PASS"), "");
 
   /**
-   * Makes a new {@link Connection}. All connection information comes from the <code>cpicData.properties</code> file.
+   * Makes a new {@link Connection}. All connection information defaults to local DB but also can override with environment variables.
    * @return a new, opened JDBC database {@link Connection}
    * @throws SQLException can occur if there is a problem connecting to the database
    */
