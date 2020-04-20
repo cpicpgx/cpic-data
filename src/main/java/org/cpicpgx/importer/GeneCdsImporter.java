@@ -62,7 +62,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
     workbook.switchToSheet(0);
     int rowIdx = 0;
 
-    sf_logger.info("Reading CDS sheet: {}", workbook.currentSheet.getSheetName());
+    sf_logger.debug("Reading CDS sheet: {}", workbook.currentSheet.getSheetName());
 
     RowWrapper headerRow = workbook.getRow(rowIdx);
     rowIdx += 1;

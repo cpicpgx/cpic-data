@@ -93,7 +93,7 @@ public abstract class BaseDirectoryImporter {
       }
     }
     if (getDeleteStatements().length > 0) {
-      sf_logger.info("Deleted {} rows", delCount);
+      sf_logger.info("Deleted {} rows for {}", delCount, getFileType().name());
     }
   }
   
@@ -243,7 +243,7 @@ public abstract class BaseDirectoryImporter {
         noteInsert.executeUpdate();
         n += 1;
       }
-      sf_logger.info("created {} new notes", notes.size());
+      sf_logger.debug("created {} new notes", notes.size());
     }
   }
 }

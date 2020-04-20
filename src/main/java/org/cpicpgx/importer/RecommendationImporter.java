@@ -83,13 +83,13 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         String drugId = dbHarness.lookupDrug(drugName);
         long guidelineId = dbHarness.lookupGuideline(drugName);
 
-        sf_logger.info("Drug: {} {}", drugName, drugId);
-        sf_logger.info("Guideline: {}", guidelineId);
+        sf_logger.debug("Drug: {} {}", drugName, drugId);
+        sf_logger.debug("Guideline: {}", guidelineId);
         for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext(); ) {
           Sheet sheet = sheetIterator.next();
           workbook.currentSheetIs(sheet.getSheetName());
           String populationName = sheet.getSheetName().replaceAll("^population\\s+", "");
-          sf_logger.info(populationName);
+          sf_logger.debug(populationName);
 
           RowWrapper headerRow = workbook.getRow(0);
           Map<String, Integer> phenotypeIdxMap = getPhenotypeIndexMap(headerRow);

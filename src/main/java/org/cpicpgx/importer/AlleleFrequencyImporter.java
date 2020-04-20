@@ -89,7 +89,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
         frequencyProcessor.insertHistory(date, note);
       }
 
-      sf_logger.info("Successfully parsed " + gene + " frequencies");
+      sf_logger.debug("Successfully parsed " + gene + " frequencies");
     } catch (Exception ex) {
       sf_logger.error("Error saving to DB", ex);
     }

@@ -231,7 +231,7 @@ public class AlleleDefinitionImporter {
         noteInsert.executeUpdate();
         n += 1;
       }
-      sf_logger.info("created {} new notes", notes.size());
+      sf_logger.debug("created {} new notes", notes.size());
     }
   }
 
@@ -300,7 +300,7 @@ public class AlleleDefinitionImporter {
         locIdAssignements[i] = locId;
         newLocations += 1;
       }
-      sf_logger.info("created {} new locations", newLocations);
+      sf_logger.debug("created {} new locations", newLocations);
 
       PreparedStatement alleleInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name) values (?,?) returning (id)");
       for (String alleleName : m_alleles.keySet()) {
@@ -318,7 +318,7 @@ public class AlleleDefinitionImporter {
           joinTableInsert.executeUpdate();
         }
       }
-      sf_logger.info("created {} new alleles", m_alleles.keySet().size());
+      sf_logger.debug("created {} new alleles", m_alleles.keySet().size());
     }
   }
 

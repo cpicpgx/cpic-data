@@ -112,7 +112,7 @@ public class PharmVarImporter extends BaseDirectoryImporter {
       updateStmt.setString(3, allele);
       int n = updateStmt.executeUpdate();
       if (n == 0) {
-        sf_logger.info("PharmVar allele not in CPIC: {} {}", gene, allele);
+        sf_logger.warn("PharmVar allele not in CPIC: {} {}", gene, allele);
       }
     }
 
