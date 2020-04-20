@@ -29,10 +29,10 @@ public class ProgressReport {
   private static final String DRUG_FILE_NAME = "cpic_drug_data_count.csv";
   
   private Path m_baseDirectory;
-  private SortedSet<String> genes = new TreeSet<>();
-  private SortedSet<String> drugs = new TreeSet<>();
-  private Map<String, Map<String, Integer>> geneDataMap = new TreeMap<>();
-  private Map<String, Map<String, Integer>> drugDataMap = new TreeMap<>();
+  private final SortedSet<String> genes = new TreeSet<>();
+  private final SortedSet<String> drugs = new TreeSet<>();
+  private final Map<String, Map<String, Integer>> geneDataMap = new TreeMap<>();
+  private final Map<String, Map<String, Integer>> drugDataMap = new TreeMap<>();
   
 
   public static void main(String[] args) {
@@ -82,7 +82,7 @@ public class ProgressReport {
           "select g.genesymbol, count(*) from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid group by genesymbol",
           "Gene Phenotypes");
       queryData(conn,
-          "select a.genesymbol, count(*) from allele a where a.pharmvarid is not null group by a.genesymbol",
+          "select a.genesymbol, count(*) from allele_definition a where a.pharmvarid is not null group by a.genesymbol",
           "PharmVar Allele IDs Loaded");
     }
   }
@@ -126,22 +126,30 @@ public class ProgressReport {
     Path filePath = m_baseDirectory.resolve(fileName);
     try (CSVPrinter printer = new CSVPrinter(new FileWriter(filePath.toFile()), CSVFormat.EXCEL)) {
       printer.print("");
+      Map<String,Integer> totalCounts = new HashMap<>();
       for (String g : dataMap.keySet()) {
         printer.print(g);
+        totalCounts.put(g, 0);
       }
       printer.println();
       
       for (String g : objects) {
         printer.print(g);
         for (String t : dataMap.keySet()) {
-          printer.print(dataMap.get(t).get(g));
+          Integer count = dataMap.get(t).get(g);
+          if (count != null && count > 0) {
+            printer.print("✅");
+            totalCounts.put(t, totalCounts.get(t) + 1);
+          } else {
+            printer.print("");
+          }
         }
         printer.println();
       }
       
       printer.print("Totals");
       for (String t : dataMap.keySet()) {
-        printer.print(dataMap.get(t).values().stream().mapToInt(v -> v == null ? 0 : v).sum());
+        printer.print(totalCounts.get(t));
       }
       printer.println();
     }
