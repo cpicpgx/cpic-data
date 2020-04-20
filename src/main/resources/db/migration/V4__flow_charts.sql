@@ -1,9 +1,3 @@
-alter table drug add flowChart TEXT;
-COMMENT ON COLUMN drug.flowChart IS 'URL for the flow chart image of this drug';
-
-alter table gene add flowChart TEXT;
-COMMENT ON COLUMN gene.flowChart IS 'URL for the flow chart image of this gene';
-
 UPDATE drug SET flowchart = 'http://files.cpicpgx.org/images/flow_chart/5-Fluorouracil_CDS_Flow_Chart.jpg' WHERE drugid='RxNorm:4492';
 UPDATE drug SET flowchart = 'http://files.cpicpgx.org/images/flow_chart/6-Mercaptopurine_CDS_Flow_Chart.jpg' WHERE drugid='RxNorm:103';
 UPDATE drug SET flowchart = 'http://files.cpicpgx.org/images/flow_chart/Abacavir_CDS_Flow_Chart.jpg' WHERE drugid='RxNorm:190521';

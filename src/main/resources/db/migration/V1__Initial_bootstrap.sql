@@ -300,6 +300,7 @@ CREATE TABLE drug
   drugbankId VARCHAR(20),
   atcId TEXT[],
   umlsCui VARCHAR(20),
+  flowChart TEXT,
   version INTEGER DEFAULT 1
 );
 
@@ -315,6 +316,7 @@ COMMENT ON COLUMN drug.rxnormId IS 'The RxNorm ID for this drug, optional';
 COMMENT ON COLUMN drug.drugbankId IS 'The DrugBank ID for this drug, optional';
 COMMENT ON COLUMN drug.umlsCui IS 'The UMLS Concept Unique ID for this drug, optional';
 COMMENT ON COLUMN drug.atcId IS 'One or more ATC IDs for this drug in an array, optional';
+COMMENT ON COLUMN drug.flowChart IS 'URL for the flow chart image of this drug';
 
 CREATE TABLE drug_note
 (
