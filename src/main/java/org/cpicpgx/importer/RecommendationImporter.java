@@ -89,7 +89,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           Sheet sheet = sheetIterator.next();
           workbook.currentSheetIs(sheet.getSheetName());
           String populationName = sheet.getSheetName().replaceAll("^population\\s+", "");
-          sf_logger.debug(populationName);
+          if (StringUtils.isBlank(populationName)) {
+            populationName = "general";
+          }
 
           RowWrapper headerRow = workbook.getRow(0);
           Map<String, Integer> phenotypeIdxMap = getPhenotypeIndexMap(headerRow);
@@ -149,7 +151,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                   dataRow.getNullableText(idxRecommendation),
                   dataRow.getNullableText(idxClassification),
                   dataRow.getNullableText(idxComments),
-                  activityScore
+                  activityScore,
+                  populationName
               );
             } catch (RuntimeException ex) {
               throw new RuntimeException("Error reading row " + (k + 1), ex);
@@ -182,7 +185,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     
     DbHarness() throws SQLException {
       Connection conn = ConnectionFactory.newConnection();
-      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb)");
+      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score, population) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?)");
       this.drugLookupStmt = conn.prepareStatement(
           "select drugid from drug where name=?", 
           ResultSet.TYPE_SCROLL_INSENSITIVE, 
@@ -197,7 +200,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       closables.add(conn);
     }
     
-    void insert(String drug, JsonObject phenotype, JsonObject implication, String recommendation, String classification, String comments, JsonObject activityScore) {
+    void insert(String drug, JsonObject phenotype, JsonObject implication, String recommendation, String classification, String comments, JsonObject activityScore, String population) {
       try {
         String drugId = lookupDrug(drug);
         Long guidelineId = lookupGuideline(drug);
@@ -224,6 +227,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           this.insertStmt.setString(7, comments);
         }
         this.insertStmt.setString(8, activityScore.toString());
+        this.insertStmt.setString(9, population);
         
         this.insertStmt.executeUpdate();
         
