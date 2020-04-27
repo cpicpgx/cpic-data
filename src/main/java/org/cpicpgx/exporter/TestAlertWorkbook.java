@@ -29,7 +29,6 @@ class TestAlertWorkbook extends AbstractWorkbook {
         writeHeaderCell(headerRow, colIdx++, "Trigger Condition " + i);
       }
     }
-    writeHeaderCell(headerRow, colIdx++, "Flow Chart Reference Point");
     writeHeaderCell(headerRow, colIdx++, "CDS Context, Relative to Genetic Testing");
     writeHeaderCell(headerRow, colIdx++, "CDS Alert Text");
     
