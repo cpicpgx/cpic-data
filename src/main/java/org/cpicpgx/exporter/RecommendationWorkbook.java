@@ -2,6 +2,9 @@ package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * A representation of a Recommendation workbook
  *
@@ -10,35 +13,55 @@ import org.apache.poi.ss.usermodel.Row;
 class RecommendationWorkbook extends AbstractWorkbook {
   
   private static final String FILE_NAME_TEMPLATE = "%s-Recommendations.xlsx";
-  private static final String SHEET_NAME = "Recommendations";
-  
-  private SheetWrapper sheet;
-  private String drug;
-  
-  RecommendationWorkbook(String drug) {
-    super();
-    
-    this.sheet = findSheet(SHEET_NAME);
-    this.drug = drug;
 
+  private SheetWrapper sheet;
+  private final String drug;
+  private final Set<String> genes;
+  
+  RecommendationWorkbook(String drug, Set<String> genes) {
+    super();
+    this.drug = drug;
+    this.genes = genes;
+  }
+
+  void setupSheet(String population) {
+    this.sheet = findSheet(population);
+
+    int colIdx = 0;
     Row headerRow = this.sheet.nextRow();
-    writeHeaderCell(headerRow, 0, "Phenotype");
-    writeHeaderCell(headerRow, 1, "Implication");
-    writeHeaderCell(headerRow, 2, "Therapeutic Recommendation");
-    writeHeaderCell(headerRow, 3, "Classification of Recommendation");
-    this.sheet.setColCount(4);
-    
-    Integer[] columnSizes = new Integer[4];
-    columnSizes[1] = 60*256;
-    this.sheet.setWidths(columnSizes);
+    for (String gene : genes) {
+      writeHeaderCell(headerRow, colIdx++, gene + " Phenotype");
+      writeHeaderCell(headerRow, colIdx++, gene + " Activity Score");
+    }
+    for (String gene : genes) {
+      writeHeaderCell(headerRow, colIdx++, gene + " Implication for Phenotypic Measures");
+    }
+    writeHeaderCell(headerRow, colIdx++, "Therapeutic Recommendation");
+    writeHeaderCell(headerRow, colIdx++, "Classification of Recommendation");
+    writeHeaderCell(headerRow, colIdx++, "Comments");
+    this.sheet.setColCount(colIdx);
   }
   
-  void writeRec(String pheno, String impl, String rec, String classification) {
+  void writeRec(
+      Map<String,String> phenotypeMap,
+      Map<String,String> activityMap,
+      Map<String,String> implicationMap,
+      String rec,
+      String classification,
+      String comments
+  ) {
     Row row = this.sheet.nextRow();
-    writeStringCell(row, 0, pheno, false);
-    writeStringCell(row, 1, impl, this.wrapStyle);
-    writeStringCell(row, 2, rec, false);
-    writeStringCell(row, 3, classification, false);
+    int colIdx = 0;
+    for (String gene : this.genes) {
+      writeStringCell(row, colIdx++, phenotypeMap.get(gene), false);
+      writeStringCell(row, colIdx++, activityMap.get(gene), this.wrapStyle);
+    }
+    for (String gene : this.genes) {
+      writeStringCell(row, colIdx++, implicationMap.get(gene), false);
+    }
+    writeStringCell(row, colIdx++, rec, false);
+    writeStringCell(row, colIdx++, classification, false);
+    writeStringCell(row, colIdx, comments, false);
   }
 
   @Override
