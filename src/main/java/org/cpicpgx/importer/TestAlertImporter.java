@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
@@ -17,6 +18,8 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An importer for drug CDS test-alert text from excel workbooks into the database.
@@ -30,6 +33,9 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       "delete from drug_note where type='" + NoteType.TEST_ALERT.name() + "'",
       "delete from test_alerts"
   };
+  private static final Pattern sf_activityScorePattern = Pattern.compile("^(.+)?[Aa]ctivity [Ss]core$");
+  private static final Pattern sf_phenotypePattern = Pattern.compile("^(.+)?[Pp]henotype$");
+
   private static final String FILE_EXTENSION = "_Pre_and_Post_Test_Alerts.xlsx";
   private static final String DEFAULT_DIRECTORY = "test_alerts";
 
@@ -57,7 +63,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   String getFileExtensionToProcess() {
     return FILE_EXTENSION;
   }
-  
+
   @Override
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
     for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext();) {
@@ -76,13 +82,16 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
   private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String population) throws Exception {
     PreparedStatement insert = conn.prepareStatement(
-        "insert into test_alerts(cds_context, trigger_condition, drugid, alert_text, population) values (?, ?, ?, ?, ?)");
+        "insert into test_alerts(cds_context, genes, drugid, alert_text, population, activity_score, phenotype) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb)");
     PreparedStatement insertNote = conn.prepareStatement(
         "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
     DrugCache drugCache = new DrugCache(conn);
 
     RowWrapper headerRow = workbook.getRow(0);
-    Map<String, Integer> triggerNames = new HashMap<>();
+
+    Map<String, Integer> activityCols = new TreeMap<>();
+    Map<String, Integer> phenotypeCols = new TreeMap<>();
+
     int idxContext = -1;
     int idxAlert = -1;
     for (int h=COL_TRIGGER_START; h<= headerRow.row.getLastCellNum(); h++) {
@@ -94,7 +103,15 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       } else if (triggerName.equals(COL_NAME_ALERT)) {
         idxAlert = h;
       } else {
-        triggerNames.put(triggerName, h);
+        Matcher activityMatch = sf_activityScorePattern.matcher(triggerName);
+        Matcher phenotypeMatch = sf_phenotypePattern.matcher(triggerName);
+        if (activityMatch.matches()) {
+          activityCols.put(StringUtils.strip(activityMatch.group(1)), h);
+        } else if (phenotypeMatch.matches()) {
+          phenotypeCols.put(StringUtils.strip(phenotypeMatch.group(1)), h);
+        } else {
+          throw new RuntimeException("Trigger column not in expected format: " + triggerName);
+        }
       }
     }
 
@@ -121,21 +138,29 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         continue;
       }
 
-      List<String> triggers = new ArrayList<>();
-      for (String triggerName : triggerNames.keySet()) {
-        triggers.add(triggerName + " = " + row.getNullableText(triggerNames.get(triggerName)));
+      JsonObject activityJson = new JsonObject();
+      for (String gene : activityCols.keySet()) {
+        activityJson.addProperty(gene, row.getText(activityCols.get(gene)));
       }
+
+      JsonObject phenotypeJson = new JsonObject();
+      for (String gene : phenotypeCols.keySet()) {
+        phenotypeJson.addProperty(gene, row.getText(phenotypeCols.get(gene)));
+      }
+
       String drugId = drugCache.lookup(row.getNullableText(COL_DRUG));
-      Array triggerSqlArray = conn.createArrayOf("VARCHAR", triggers.toArray());
+      Array geneArray = conn.createArrayOf("VARCHAR", activityCols.keySet().toArray());
       String context = row.getNullableText(idxContext);
       Array alertSqlArray = conn.createArrayOf("VARCHAR", new String[]{row.getNullableText(idxAlert)});
 
       insert.clearParameters();
       insert.setString(1, context);
-      insert.setArray(2, triggerSqlArray);
+      insert.setArray(2, geneArray);
       insert.setString(3, drugId);
       insert.setArray(4, alertSqlArray);
       insert.setString(5, population);
+      insert.setString(6, activityJson.toString());
+      insert.setString(7, phenotypeJson.toString());
       insert.executeUpdate();
     }
 
@@ -152,8 +177,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   }
 
   private static class DrugCache {
-    private Connection conn;
-    private Map<String, String> nameToIdMap = new HashMap<>();
+    private final Connection conn;
+    private final Map<String, String> nameToIdMap = new HashMap<>();
 
     private DrugCache(Connection conn) {
       this.conn = conn;

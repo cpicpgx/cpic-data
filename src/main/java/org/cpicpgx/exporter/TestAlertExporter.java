@@ -1,5 +1,7 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
@@ -8,9 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Type;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.TreeMap;
 
 /**
  * An exporter for writing test alerts to an excel sheet grouped by drug.
@@ -39,33 +44,51 @@ public class TestAlertExporter extends BaseExporter {
   }
 
   public void export() throws Exception {
+    Gson gson = new Gson();
+    //noinspection UnstableApiUsage
+    Type stringMapType = new TypeToken<TreeMap<String, String>>(){}.getType();
+
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement geneStmt = conn.prepareStatement("select d.name, t.drugid, max(array_length(t.trigger_condition,1)) as num_alerts from test_alerts t join drug d on t.drugid = d.drugid group by d.name, t.drugid");
-         PreparedStatement alertStmt = conn.prepareStatement("select t.trigger_condition, t.cds_context, t.alert_text from test_alerts t where t.drugid=?");
+         PreparedStatement alertStmt = conn.prepareStatement("select t.cds_context, t.alert_text, t.activity_score, t.phenotype from test_alerts t where t.drugid=? and t.population=?");
+         PreparedStatement popStmt = conn.prepareStatement("select distinct population, genes from test_alerts where drugid=? order by 1");
+         PreparedStatement geneStmt = conn.prepareStatement("select distinct d.name, t.drugid from test_alerts t join drug d on t.drugid = d.drugid");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
         String drugName = grs.getString(1);
         String drugId = grs.getString(2);
-        int triggerCount = grs.getInt(3);
         sf_logger.info("Writing {}", drugName);
 
-        TestAlertWorkbook workbook = new TestAlertWorkbook(drugName, triggerCount);
-        alertStmt.setString(1, drugId);
-        
-        try (ResultSet ars = alertStmt.executeQuery()) {
-          int alertCount = 0;
-          while (ars.next()) {
-            workbook.writeAlert(
-                (String[])ars.getArray(1).getArray(),
-                ars.getString(2),
-                (String[])ars.getArray(3).getArray(),
-                drugName);
-            alertCount++;
+        popStmt.setString(1, drugId);
+
+        // initialize the workbook
+        TestAlertWorkbook workbook = new TestAlertWorkbook(drugName);
+
+        try (ResultSet prs = popStmt.executeQuery()) {
+          while (prs.next()) {
+            String population = prs.getString(1);
+            Array geneSqlArray = prs.getArray(2);
+            String[] geneArray = (String[])geneSqlArray.getArray();
+
+            // add a sheet to the work book and write headers
+            workbook.writeSheet(population, geneArray);
+
+            alertStmt.setString(1, drugId);
+            alertStmt.setString(2, population);
+            try (ResultSet ars = alertStmt.executeQuery()) {
+              while (ars.next()) {
+                workbook.writeAlert(
+                    geneArray,
+                    ars.getString(1),
+                    (String[])ars.getArray(2).getArray(),
+                    drugName,
+                    gson.fromJson(ars.getString(3), stringMapType),
+                    gson.fromJson(ars.getString(4), stringMapType)
+                );
+              }
+            }
           }
-          sf_logger.info("Wrote {} alerts", alertCount);
         }
-        
         workbook.writeNotes(queryDrugNotes(conn, drugId, NoteType.TEST_ALERT));
 
         writeWorkbook(workbook);

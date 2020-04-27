@@ -535,7 +535,9 @@ CREATE TABLE test_alerts
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   population TEXT,
   cds_context TEXT NOT NULL,
-  trigger_condition TEXT[],
+  genes TEXT[],
+  phenotype JSONB,
+  activity_score JSONB,
   drugId VARCHAR(20) REFERENCES drug(drugId),
   alert_text TEXT[] NOT NULL,
   version INTEGER DEFAULT 1
@@ -549,6 +551,8 @@ COMMENT ON TABLE test_alerts IS 'Example CDS test alert language';
 COMMENT ON COLUMN test_alerts.id IS 'A synthetic numerical ID, primary key';
 COMMENT ON COLUMN test_alerts.population IS 'The population this test alert is applicable to: general, adult, pediatrics, unspecified';
 COMMENT ON COLUMN test_alerts.cds_context IS 'This should be either pre-test or post-text';
-COMMENT ON COLUMN test_alerts.trigger_condition IS 'An array of one more more descriptions of trigger conditions';
+COMMENT ON COLUMN test_alerts.genes IS 'One or more genes this test alert uses for trigger conditions';
+COMMENT ON COLUMN test_alerts.phenotype IS 'A JSON object of gene symbol keys to phenotype description';
+COMMENT ON COLUMN test_alerts.activity_score IS 'A JSON object of gene symbol keys to gene activity score';
 COMMENT ON COLUMN test_alerts.drugId IS 'The ID of a drug this alert text is for';
 COMMENT ON COLUMN test_alerts.alert_text IS 'An array of one or more pieces of alert text';
