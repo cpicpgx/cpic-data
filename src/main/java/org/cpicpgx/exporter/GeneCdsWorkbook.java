@@ -10,8 +10,8 @@ import org.apache.poi.ss.usermodel.Row;
 class GeneCdsWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_PATTERN = "%s-CDS.xlsx";
   private static final String SHEET_NAME = "CDS";
-  private String geneSymbol;
-  private SheetWrapper sheetWrapper;
+  private final String geneSymbol;
+  private final SheetWrapper sheetWrapper;
 
   GeneCdsWorkbook(String geneSymbol) {
     super();
@@ -22,11 +22,11 @@ class GeneCdsWorkbook extends AbstractWorkbook {
     writeHeaderCell(geneRow, 0, "Gene: " + geneSymbol);
     Row headerRow = sheetWrapper.nextRow();
     writeHeaderCell(headerRow, 0, "Phenotype");
-    writeHeaderCell(headerRow, 1, "EHR Priority Result Notation");
-    writeHeaderCell(headerRow, 2, "Consultation (Interpretation) Text Provided with Test Result");
-    writeHeaderCell(headerRow, 3, "Notes");
+    writeHeaderCell(headerRow, 1, "Activity Score");
+    writeHeaderCell(headerRow, 2, "EHR Priority Result Notation");
+    writeHeaderCell(headerRow, 3, "Consultation (Interpretation) Text Provided with Test Result");
     sheetWrapper.setColCount(4);
-    sheetWrapper.setWidths(new Integer[]{50*256, 50*256, 150*256, 150*256});
+    sheetWrapper.setWidths(new Integer[]{50*256, 50*256, 50*256, 150*256});
   }
   
   @Override
@@ -34,11 +34,11 @@ class GeneCdsWorkbook extends AbstractWorkbook {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
   
-  void writeConsultation(String phenotype, String priority, String consultation, String notes) {
+  void writeConsultation(String phenotype, String priority, String consultation, String activityScore) {
     Row headerRow = sheetWrapper.nextRow();
     writeStringCell(headerRow, 0, phenotype);
-    writeStringCell(headerRow, 1, priority);
-    writeStringCell(headerRow, 2, consultation, false);
-    writeStringCell(headerRow, 3, notes, false);
+    writeStringCell(headerRow, 1, activityScore);
+    writeStringCell(headerRow, 2, priority);
+    writeStringCell(headerRow, 3, consultation, false);
   }
 }

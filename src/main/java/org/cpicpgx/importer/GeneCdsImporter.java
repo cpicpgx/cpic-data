@@ -29,6 +29,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   };
   private static final String DEFAULT_DIRECTORY = "gene_cds";
   private static final int COL_PHENOTYPE = 0;
+  private static final int COL_ACTIVITY = 1;
   private static final int COL_EHR_PRIORITY = 2;
   private static final int COL_CONSULTATION = 3;
 
@@ -82,6 +83,8 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
         RowWrapper dataRow = workbook.getRow(rowIdx);
         if (dataRow.hasNoText(COL_PHENOTYPE)) continue;
+
+        String activity = dataRow.getNullableText(COL_ACTIVITY);
         
         String pheno = dataRow.getNullableText(COL_PHENOTYPE);
         if (pheno.toLowerCase().startsWith("notes")) {
@@ -92,7 +95,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         String priority = dataRow.getNullableText(COL_EHR_PRIORITY);
         String consultation = dataRow.getNullableText(COL_CONSULTATION);
 
-        dbHarness.insert(pheno, priority, consultation);
+        dbHarness.insert(pheno, activity, priority, consultation);
       }
       
       // pick up any note rows after "Notes:" header
@@ -105,10 +108,10 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   }
 
   static class DbHarness implements AutoCloseable {
-    private Connection conn;
-    private String gene;
-    private PreparedStatement insertStmt;
-    private PreparedStatement insertNote;
+    private final Connection conn;
+    private final String gene;
+    private final PreparedStatement insertStmt;
+    private final PreparedStatement insertNote;
     private int noteOrdinal = 0;
 
     DbHarness(String gene) throws SQLException {
@@ -116,12 +119,12 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       this.conn = ConnectionFactory.newConnection();
 
       insertStmt = this.conn.prepareStatement(
-          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText) values (?, ?, ?, ?) ON CONFLICT (genesymbol, phenotype) DO UPDATE set ehrpriority=excluded.ehrpriority, consultationtext=excluded.consultationtext"
+          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityScore) values (?, ?, ?, ?, ?) ON CONFLICT (genesymbol, phenotype, activityScore) DO UPDATE set ehrpriority=excluded.ehrpriority, consultationtext=excluded.consultationtext"
       );
       insertNote = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
     }
 
-    void insert(String phenotype, String ehr, String consultation) throws SQLException {
+    void insert(String phenotype, String activity, String ehr, String consultation) throws SQLException {
       String normalizedPhenotype = phenotype.replaceAll(this.gene + "\\s+", "");
 
       insertStmt.clearParameters();
@@ -129,6 +132,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       insertStmt.setString(2, normalizedPhenotype);
       insertStmt.setString(3, ehr);
       insertStmt.setString(4, consultation);
+      insertStmt.setString(5, activity);
       insertStmt.executeUpdate();
     }
     

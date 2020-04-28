@@ -436,22 +436,23 @@ CREATE TABLE gene_phenotype
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
   phenotype TEXT,
+  activityScore TEXT,
   ehrPriority TEXT,
   consultationText TEXT,
   version INTEGER DEFAULT 1,
-  notes TEXT,
 
-  UNIQUE (geneSymbol, phenotype)
+  UNIQUE (geneSymbol, phenotype, activityScore)
 );
 
 CREATE TRIGGER version_gene_phenotype
   BEFORE UPDATE ON gene_phenotype
   FOR EACH ROW EXECUTE PROCEDURE increment_version();
 
-COMMENT ON TABLE gene_phenotype IS 'Possible phenotype values for a gene';
+COMMENT ON TABLE gene_phenotype IS 'Possible phenotype values for a gene. The gene + phenotype + activity score should be unique.';
 COMMENT ON COLUMN gene_phenotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
 COMMENT ON COLUMN gene_phenotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
 COMMENT ON COLUMN gene_phenotype.phenotype IS 'Coded Genotype/Phenotype Summary, optional';
+COMMENT ON COLUMN gene_phenotype.activityScore IS 'Activity score, optional';
 COMMENT ON COLUMN gene_phenotype.ehrPriority IS 'EHR Priority Result, optional';
 COMMENT ON COLUMN gene_phenotype.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result';
 

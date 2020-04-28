@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
@@ -89,19 +90,19 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
   }
 
   static class DbHarness implements AutoCloseable {
-    private Connection conn;
-    private PreparedStatement insertPhenotype;
-    private PreparedStatement insertFunction;
-    private PreparedStatement lookupDiplotypes;
-    private PreparedStatement lookupDiplotypesByScore;
-    private PreparedStatement insertDiplotype;
-    private Map<String, Integer> phenotypeCache = new HashMap<>();
+    private final Connection conn;
+    private final PreparedStatement insertPhenotype;
+    private final PreparedStatement insertFunction;
+    private final PreparedStatement lookupDiplotypes;
+    private final PreparedStatement lookupDiplotypesByScore;
+    private final PreparedStatement insertDiplotype;
+    private final Map<String, Integer> phenotypeCache = new HashMap<>();
     private boolean useScoreLookup = false;
-    private Set<String> loadedDiplotypes = new HashSet<>();
+    private final Set<String> loadedDiplotypes = new HashSet<>();
 
     DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
-      this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype) values (?, ?) returning id");
+      this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
       this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityscore1, activityscore2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
       this.lookupDiplotypes = conn.prepareStatement("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
@@ -123,7 +124,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       String a2Score = normalizeScore(row.getNullableText(COL_A2_SCORE));
       String totalScore = normalizeScore(row.getNullableText(COL_TOTAL_SCORE));
       String description = row.getNullableText(COL_DESC);
-      int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO));
+      int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO), totalScore);
 
       this.useScoreLookup = (a1Score != null);
 
@@ -214,14 +215,16 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       }
     }
 
-    int lookupPhenotype(String gene, String phenotype) throws SQLException {
+    int lookupPhenotype(String gene, String phenotype, String score) throws SQLException {
       String normalizedPhenotype = phenotype.replaceAll(gene + "\\s", "");
+      String normalizedScore = StringUtils.isBlank(score) ? "n/a" : score;
 
       if (phenotypeCache.containsKey(normalizedPhenotype)) {
         return phenotypeCache.get(normalizedPhenotype);
       } else {
         this.insertPhenotype.setString(1, gene);
         this.insertPhenotype.setString(2, normalizedPhenotype);
+        this.insertPhenotype.setString(3, normalizedScore);
 
         try (ResultSet rs = this.insertPhenotype.executeQuery()) {
           if (rs.next()) {

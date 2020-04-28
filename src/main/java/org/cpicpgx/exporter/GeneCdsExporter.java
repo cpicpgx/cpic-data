@@ -44,7 +44,7 @@ public class GeneCdsExporter extends BaseExporter {
         Connection conn = ConnectionFactory.newConnection();
         PreparedStatement geneStmt = conn.prepareStatement("select distinct p.genesymbol from gene_phenotype p");
         ResultSet geneRs = geneStmt.executeQuery();
-        PreparedStatement cdsStmt = conn.prepareStatement("select phenotype, ehrpriority, consultationtext, notes from gene_phenotype where genesymbol=?")
+        PreparedStatement cdsStmt = conn.prepareStatement("select phenotype, ehrpriority, consultationtext, activityScore from gene_phenotype where genesymbol=? order by activityscore desc, phenotype")
     ) {
       while (geneRs.next()) {
         String geneSymbol = geneRs.getString(1);
