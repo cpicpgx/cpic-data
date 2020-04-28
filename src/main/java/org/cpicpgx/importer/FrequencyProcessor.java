@@ -24,15 +24,15 @@ import java.util.Map;
 public class FrequencyProcessor implements AutoCloseable {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
-  private Connection conn;
-  private Map<Integer, Long> colIdxAlleleIdMap = new HashMap<>();
-  private int colStartOffset = 0;
-  
+  private final Connection conn;
+  private final Map<Integer, Long> colIdxAlleleIdMap = new HashMap<>();
+  private final PreparedStatement insertStatement;
+  private final PreparedStatement insertPopulation;
+  private final PreparedStatement insertHistory;
+  private final PreparedStatement updateMethods;
+  private final PublicationCatalog publicationCatalog;
 
-  private PreparedStatement insertStatement;
-  private PreparedStatement insertPopulation;
-  private PreparedStatement insertHistory;
-  private PublicationCatalog publicationCatalog;
+  private int colStartOffset = 0;
 
   /**
    * Construct the FrequencyProcessor
@@ -72,7 +72,10 @@ public class FrequencyProcessor implements AutoCloseable {
         this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
     this.insertHistory.setString(1, gene);
     this.insertHistory.setString(3, NoteType.ALLELE_FREQUENCY.name());
-    
+    this.updateMethods =
+        this.conn.prepareStatement("update gene set frequencyMethods=? where symbol=?");
+    this.updateMethods.setString(2, gene);
+
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
       if (StringUtils.isNotBlank(cellText) && cellText.contains("Authors")) {
@@ -197,6 +200,13 @@ public class FrequencyProcessor implements AutoCloseable {
     insertHistory.setDate(5, new Date(date.getTime()));
     insertHistory.executeUpdate();
     this.nHistory += 1;
+  }
+
+  void updateMethods(String methodsText) throws SQLException {
+    if (!StringUtils.isBlank(methodsText)) {
+      this.updateMethods.setString(1, methodsText);
+      this.updateMethods.executeUpdate();
+    }
   }
 
   @Override

@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.EntityType;
@@ -10,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.security.InvalidParameterException;
 import java.util.Date;
+import java.util.StringJoiner;
 
 /**
  * Class to read all excel files in the given directory and store the allele frequency information found in them.
@@ -88,6 +91,33 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
         String note = row.getNullableText(1);
         frequencyProcessor.insertHistory(date, note);
       }
+
+      boolean foundSheet = false;
+      try {
+        workbook.currentSheetIs("Methods and caveats");
+        foundSheet = true;
+      } catch (InvalidParameterException ex) {
+        // drop the exception
+      }
+      try {
+        workbook.currentSheetIs("Methods");
+        foundSheet = true;
+      } catch (InvalidParameterException ex) {
+        // drop the exception
+      }
+      if (!foundSheet) {
+        throw new RuntimeException("Could not find methods sheet");
+      }
+      StringJoiner methodsText = new StringJoiner("\n");
+      for (int i = 0; i < workbook.currentSheet.getLastRowNum(); i++) {
+        RowWrapper row = workbook.getRow(i);
+        if (row.hasNoText(0)) {
+          methodsText.add("");
+        } else {
+          methodsText.add(StringUtils.defaultIfBlank(row.getNullableText(0), ""));
+        }
+      }
+      frequencyProcessor.updateMethods(methodsText.toString());
 
       sf_logger.debug("Successfully parsed " + gene + " frequencies");
     } catch (Exception ex) {

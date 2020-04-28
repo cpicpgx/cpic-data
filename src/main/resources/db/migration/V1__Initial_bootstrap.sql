@@ -78,6 +78,7 @@ CREATE TABLE gene
   ncbiId            TEXT,
   ensemblId         TEXT CHECK (ensemblId ~ '^(ENSG\d+){0,1}$'),
   pharmgkbId        TEXT CHECK (pharmgkbId ~ '^(PA\d+){0,1}$'),
+  frequencyMethods  TEXT,
   version           INTEGER DEFAULT 1
 );
 
@@ -95,6 +96,7 @@ COMMENT ON COLUMN gene.mrnaSequenceId IS 'The RefSeq ID for the sequence that re
 COMMENT ON COLUMN gene.pharmgkbId IS 'The ID for this gene in PharmGKB.';
 COMMENT ON COLUMN gene.hgncId IS 'The HGNC numerical ID number for this gene prefixed by "HGNC:"';
 COMMENT ON COLUMN gene.ncbiId IS 'The NCBI Gene (Entrez) ID number for this gene';
+COMMENT ON COLUMN gene.frequencyMethods IS 'Text documentation of the methods and caveats for allele frequency data';
 COMMENT ON COLUMN gene.ensemblId IS 'The Ensembl ID for this gene';
 
 
