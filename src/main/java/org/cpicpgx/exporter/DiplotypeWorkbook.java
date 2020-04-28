@@ -11,8 +11,8 @@ class DiplotypeWorkbook extends AbstractWorkbook {
   private static final String NAME_TEMPLATE = "%s-Diplotype_Phenotype_Table.xlsx";
   private static final String SHEET_NAME = "Diplotypes";
   private static final String NOTES_SHEET_NAME = "Interpretation Consult Note";
-  private String gene;
-  private SheetWrapper dataSheet;
+  private final String gene;
+  private final SheetWrapper dataSheet;
   private SheetWrapper noteSheet = null;
   
   DiplotypeWorkbook(String gene) {
@@ -52,6 +52,7 @@ class DiplotypeWorkbook extends AbstractWorkbook {
   private SheetWrapper getNoteSheet() {
     if (this.noteSheet == null) {
       this.noteSheet = findSheet(NOTES_SHEET_NAME);
+      this.noteSheet.setColCount(3);
       Row headerRow = this.noteSheet.nextRow();
       writeHeaderCell(headerRow, 0, "Coded Genotype/Phenotype Summary");
       writeHeaderCell(headerRow, 1, "EHR Priority Result Notation");
