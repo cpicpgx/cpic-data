@@ -274,7 +274,7 @@ CREATE TABLE function_reference
   alleleid INTEGER NOT NULL REFERENCES allele(id),
   citations TEXT[],
   strength TEXT,
-  findings TEXT,
+  findings JSONB,
   comments TEXT,
   version INTEGER DEFAULT 1
 );

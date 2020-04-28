@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import com.google.common.base.Preconditions;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
@@ -110,20 +111,25 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
         String[] citations = new String[0];
         if (StringUtils.isNotBlank(citationClump)) {
-          citations = citationClump.split(";");
+          citations = citationClump.split("[;\\.]");
         }
-        
-        dbHarness.insert(
-            alleleName,
-            activityScore,
-            functionStatus,
-            clinicalFunction,
-            substrate,
-            citations,
-            strength,
-            findings,
-            comments
-        );
+
+        try {
+          dbHarness.insert(
+              alleleName,
+              activityScore,
+              functionStatus,
+              clinicalFunction,
+              substrate,
+              citations,
+              strength,
+              findings,
+              comments
+          );
+        }
+        catch (RuntimeException ex) {
+          throw new RuntimeException("Error on row " + (rowIdx + 1), ex);
+        }
       }
       
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
@@ -162,15 +168,15 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
    * Private class for handling DB interactions
    */
   static class DbHarness implements AutoCloseable {
-    private Connection conn;
-    private Map<String, Long> alleleNameMap = new HashMap<>();
-    private PreparedStatement insertAlleleStmt;
-    private PreparedStatement insertStmt;
-    private PreparedStatement insertNoteStmt;
-    private PreparedStatement insertChangeStmt;
+    private final Connection conn;
+    private final Map<String, Long> alleleNameMap = new HashMap<>();
+    private final PreparedStatement insertAlleleStmt;
+    private final PreparedStatement insertStmt;
+    private final PreparedStatement insertNoteStmt;
+    private final PreparedStatement insertChangeStmt;
+    private final String gene;
     private int noteIdx = 0;
-    private String gene;
-    
+
     DbHarness(String gene) throws SQLException {
       this.gene = gene;
       this.conn = ConnectionFactory.newConnection();
@@ -185,7 +191,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       }
 
       insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityscore, clinicalfunctionalstatus, clinicalFunctionalSubstrate) values (?, ?, ?, initcap(?), ?, initcap(?), ?) returning id");
-      insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?, ?)");
+      insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?::jsonb, ?)");
       insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
       insertChangeStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
     }
@@ -234,9 +240,38 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       this.insertStmt.setLong(1, alleleId);
       this.insertStmt.setArray(2, conn.createArrayOf("TEXT", pmids));
       setNullableText(this.insertStmt, 3, strength);
-      setNullableText(this.insertStmt, 4, findings);
+      setNullableText(this.insertStmt, 4, reformatFindings(findings));
       setNullableText(this.insertStmt, 5, comments);
       this.insertStmt.executeUpdate();
+    }
+
+    static String reformatFindings(String findings) {
+      if (StringUtils.isBlank(findings)) {
+        return null;
+      } else {
+        return parseFindingsObject(findings).toString();
+      }
+    }
+
+    private static final String pmidRegex = "\\d{7,8}";
+    private static final Pattern pmidPattern = Pattern.compile(pmidRegex);
+    static JsonObject parseFindingsObject(String findings) {
+      JsonObject findingsObject = new JsonObject();
+
+      String[] descriptions = findings.split(pmidRegex);
+      Matcher matcher = pmidPattern.matcher(findings);
+
+      int n = 0;
+      while (matcher.find()) {
+        n += 1;
+        String pmid = StringUtils.substring(findings, matcher.start(), matcher.end());
+        String description = "";
+        if (descriptions.length > n) {
+          description = StringUtils.strip(descriptions[n], ":; \n");
+        }
+        findingsObject.addProperty(pmid, description);
+      }
+      return findingsObject;
     }
     
     void insertNote(String note) throws SQLException {
