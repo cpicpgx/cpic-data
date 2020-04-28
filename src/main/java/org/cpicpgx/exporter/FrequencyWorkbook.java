@@ -17,19 +17,17 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private static final String SHEET_NAME_METHODS = "Methods and Caveats";
   private static final String SHEET_NAME_ALLELE = "Allele frequency by race";
   private static final String SHEET_NAME_REFERENCES = "References";
-  
+
   private static final String[] REFERENCE_COLUMNS = new String[]{
       "Authors", "Year", "PMID", "Major ethnicity", "Population", "Add'l population info", "Subject type", "N subjects genotyped"
   };
 
-  private static ResourceBundle resources = ResourceBundle.getBundle("frequencyExport");
-  
-  private String geneSymbol;
-  private SheetWrapper sheetMethods;
-  private SheetWrapper sheetAllele;
-  private SheetWrapper sheetReferences;
-  private SheetWrapper sheetChanges;
-  private Set<String> ethnicities = new TreeSet<>();
+  private final String geneSymbol;
+  private final SheetWrapper sheetMethods;
+  private final SheetWrapper sheetAllele;
+  private final SheetWrapper sheetReferences;
+  private final SheetWrapper sheetChanges;
+  private final Set<String> ethnicities = new TreeSet<>();
   
   FrequencyWorkbook(String geneSymbol) {
     super();
@@ -39,46 +37,20 @@ class FrequencyWorkbook extends AbstractWorkbook {
     }
     this.geneSymbol = geneSymbol;
     
-    sheetMethods = findSheet(SHEET_NAME_METHODS);
     sheetAllele = findSheet(SHEET_NAME_ALLELE);
     sheetReferences = findSheet(SHEET_NAME_REFERENCES);
+    sheetMethods = findSheet(SHEET_NAME_METHODS);
     sheetChanges = findSheet(HISTORY_SHEET_NAME);
-    
-    writeMethods();
-    
   }
   
-  private void writeMethods() {
+  void writeMethods(String methods) {
     sheetMethods.setColCount(1);
     sheetMethods.setWidths(new Integer[]{100*256});
-    Row row = sheetMethods.nextRow();
-    writeHeaderCell(row, 0, resources.getString("methods.title"));
-    sheetMethods.nextRow();
-    row = sheetMethods.nextRow();
-    writeStringCell(row, 0, resources.getString("methods.text"), this.wrapStyle);
-    sheetMethods.nextRow();
-    row = sheetMethods.nextRow();
-    writeHeaderCell(row, 0, resources.getString("cavaets.title"));
-    sheetMethods.nextRow();
-    row = sheetMethods.nextRow();
-    writeBoldStringCell(row, 0, resources.getString("cavaets.sampling.title"));
-    row = sheetMethods.nextRow();
-    writeStringCell(row, 0, resources.getString("cavaets.sampling.text"), this.wrapStyle);
-    sheetMethods.nextRow();
-    row = sheetMethods.nextRow();
-    writeBoldStringCell(row, 0, resources.getString("cavaets.star1.title"));
-    row = sheetMethods.nextRow();
-    writeStringCell(row, 0, resources.getString("cavaets.star1.text"), this.wrapStyle);
-    sheetMethods.nextRow();
-    row = sheetMethods.nextRow();
-    writeBoldStringCell(row, 0, resources.getString("cavaets.dippheno.title"));
-    row = sheetMethods.nextRow();
-    writeStringCell(row, 0, resources.getString("cavaets.dippheno.text"), this.wrapStyle);
-    sheetMethods.nextRow();
-    row = sheetMethods.nextRow();
-    writeBoldStringCell(row, 0, resources.getString("cavaets.ethnicity.title"));
-    row = sheetMethods.nextRow();
-    writeStringCell(row, 0, resources.getString("cavaets.ethnicity.text"), this.wrapStyle);
+
+    for (String line : methods.split("\n")) {
+      Row row = sheetMethods.nextRow();
+      writeStringCell(row, 0, line, wrapStyle);
+    }
   }
   
   void writeReferenceHeader(Set<String> alleles) {

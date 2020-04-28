@@ -69,6 +69,9 @@ public class FrequencyExporter extends BaseExporter {
           PreparedStatement changeStmt = conn.prepareStatement(
               "select n.date, note from gene_note n where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? and n.date is not null order by ordinal"
           );
+          PreparedStatement geneStmt = conn.prepareStatement(
+              "select frequencyMethods from gene where symbol=?"
+          );
           ResultSet rs = pstmt.executeQuery()
       ) {
         // gene loop
@@ -191,7 +194,8 @@ public class FrequencyExporter extends BaseExporter {
             }
             workbook.writeEthnicitySummary(allele, frequencies);
           }
-          
+
+          // writing the notes
           workbook.writeNotesHeader();
           changeStmt.setString(1, geneSymbol);
           try (ResultSet notes = changeStmt.executeQuery()) {
@@ -199,7 +203,19 @@ public class FrequencyExporter extends BaseExporter {
               workbook.writeNote(notes.getDate(1), notes.getString(2));
             }
           }
-          
+
+          // writing the methods for this gene
+          geneStmt.setString(1, geneSymbol);
+          String methods;
+          try (ResultSet grs = geneStmt.executeQuery()) {
+            if (grs.next()) {
+              methods = grs.getString(1);
+            } else {
+              throw new RuntimeException("No methods text found in DB");
+            }
+          }
+          workbook.writeMethods(methods);
+
           writeWorkbook(workbook);
           addFileExportHistory(workbook.getFilename(), new String[]{geneSymbol});
         }
