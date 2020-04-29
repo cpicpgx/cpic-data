@@ -80,9 +80,9 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     }
 
     if (pvCount > 0) {
-      writeStringCell(nameRow, 0, "Nucleotide change per gene from http://www.pharmvar.org", leftTextStyle);
+      writeStringCell(nameRow, 0, "Nucleotide change per gene from http://www.pharmvar.org", wrapStyle);
     } else if (StringUtils.isNotBlank(seqMrna)) {
-      writeStringCell(nameRow, 0, String.format("Nucleotide change on cDNA (%s)", seqMrna), leftTextStyle);
+      writeStringCell(nameRow, 0, String.format("Nucleotide change on cDNA (%s)", seqMrna), wrapStyle);
     } else {
       writeStringCell(nameRow, 0, "Common name");
     }
