@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +30,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_geneLabelPattern = Pattern.compile("GENE:\\s(\\w+)");
   private static final Pattern sf_alleleNamePattern = Pattern.compile("^(.+?)([x≥](\\d+|N))?$");
+  private static final Pattern sf_pmidPattern = Pattern.compile("^\\d+$");
   private static final int COL_IDX_ALLELE = 0;
   private static final int COL_IDX_ACTIVITY = 1;
   private static final int COL_IDX_FUNCTION = 2;
@@ -109,9 +110,15 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String findings = row.getNullableText(COL_IDX_FINDINGS);
         String comments = row.getNullableText(COL_IDX_COMMENTS);
 
-        String[] citations = new String[0];
+        List<String> citationList = new ArrayList<>();
         if (StringUtils.isNotBlank(citationClump)) {
-          citations = citationClump.split("[;\\.]");
+          for (String citation : citationClump.split("[;,\\.]")) {
+            String pmid = StringUtils.strip(citation);
+            if (!sf_pmidPattern.matcher(pmid).matches()) {
+              throw new RuntimeException("PMID not valid: [" + pmid + "] in row " + (rowIdx + 1));
+            }
+            citationList.add(StringUtils.strip(citation));
+          }
         }
 
         try {
@@ -121,7 +128,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
               functionStatus,
               clinicalFunction,
               substrate,
-              citations,
+              citationList.toArray(new String[0]),
               strength,
               findings,
               comments
