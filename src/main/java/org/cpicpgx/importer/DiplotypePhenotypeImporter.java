@@ -79,15 +79,25 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
     for (int i = 1; i <= headerRow.row.getLastCellNum(); i++) {
       if (headerRow.hasNoText(i)) continue;
       String headerText = headerRow.getNullableText(i);
-      if (headerText.contains("Phenotype Summary")) {
+      if (headerText.toLowerCase().contains("phenotype")) {
         phenoIdx = i;
-      } else if (headerText.contains("Activity")) {
+      } else if (headerText.toLowerCase().contains("activity")) {
         activityIdx = i;
-      } else if (headerText.contains("EHR Priority")) {
+      } else if (headerText.toLowerCase().contains("ehr priority")) {
         ehrIdx = i;
       }
     }
-    
+
+    if (phenoIdx < 0) {
+      throw new NotFoundException("Couldn't find phenotype column");
+    }
+    if (activityIdx < 0) {
+      throw new NotFoundException("Couldn't find activity column");
+    }
+    if (ehrIdx < 0) {
+      throw new NotFoundException("Couldn't find EHR priority column");
+    }
+
     Matcher m = GENE_PATTERN.matcher(geneText);
     if (!m.find()) {
       throw new NotFoundException("Couldn't find gene");
@@ -106,8 +116,8 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
 
         String dip = row.getNullableText(COL_IDX_DIP);
         String pheno = row.getNullableText(phenoIdx);
-        Double activity = activityIdx >= 0 ? row.getNullableDouble(activityIdx) : null;
-        String ehr = ehrIdx >= 0 ? row.getNullableText(ehrIdx) : null;
+        Double activity = row.getNullableDouble(activityIdx);
+        String ehr = row.getNullableText(ehrIdx);
 
         try {
           dbHarness.insert(dip, pheno, activity, ehr);
@@ -142,9 +152,9 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   }
 
   static class DbHarness implements AutoCloseable {
-    private Connection conn;
-    private String gene;
-    private PreparedStatement findDiplotype;
+    private final Connection conn;
+    private final String gene;
+    private final PreparedStatement findDiplotype;
     private int failCount = 0;
 
     DbHarness(String gene) throws SQLException {
