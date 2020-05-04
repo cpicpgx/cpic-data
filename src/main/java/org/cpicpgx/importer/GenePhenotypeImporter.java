@@ -1,7 +1,6 @@
 package org.cpicpgx.importer;
 
 import com.google.gson.JsonObject;
-import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
@@ -217,14 +216,13 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
 
     int lookupPhenotype(String gene, String phenotype, String score) throws SQLException {
       String normalizedPhenotype = phenotype.replaceAll(gene + "\\s", "");
-      String normalizedScore = StringUtils.isBlank(score) ? "n/a" : score;
 
       if (phenotypeCache.containsKey(normalizedPhenotype)) {
         return phenotypeCache.get(normalizedPhenotype);
       } else {
         this.insertPhenotype.setString(1, gene);
         this.insertPhenotype.setString(2, normalizedPhenotype);
-        this.insertPhenotype.setString(3, normalizedScore);
+        this.insertPhenotype.setString(3, normalizeScore(score));
 
         try (ResultSet rs = this.insertPhenotype.executeQuery()) {
           if (rs.next()) {
@@ -235,17 +233,6 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
             throw new RuntimeException("Couldn't insert phenotype");
           }
         }
-      }
-    }
-
-    private static String normalizeScore(String score) {
-      if (score == null) {
-        return null;
-      }
-      if (score.equals("0.0")) {
-        return "0";
-      } else {
-        return score.toLowerCase();
       }
     }
 

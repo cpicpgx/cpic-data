@@ -84,7 +84,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         RowWrapper dataRow = workbook.getRow(rowIdx);
         if (dataRow.hasNoText(COL_PHENOTYPE)) continue;
 
-        String activity = dataRow.getNullableText(COL_ACTIVITY);
+        String activity = normalizeScore(dataRow.getNullableText(COL_ACTIVITY));
         
         String pheno = dataRow.getNullableText(COL_PHENOTYPE);
         if (pheno.toLowerCase().startsWith("notes")) {

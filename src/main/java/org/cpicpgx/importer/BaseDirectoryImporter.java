@@ -11,6 +11,7 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 /**
  * Abstract class for classes that want to crawl all files in a directory and do something with them. This should be 
@@ -37,6 +39,7 @@ import java.util.function.Consumer;
  */
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+\\.?\\d*$");
   static final String NA = "n/a";
   static final String EXCEL_EXTENSION = ".xlsx";
 
@@ -244,6 +247,27 @@ public abstract class BaseDirectoryImporter {
         n += 1;
       }
       sf_logger.debug("created {} new notes", notes.size());
+    }
+  }
+
+  /**
+   * Normalize activity score Strings before they can be inserted into the DB. Null values are allowed since not all
+   * genes use activity scores. Normalize the strings to strip trailing ".0" so all sources will agree. Also, blank
+   * Strings will return as null.
+   *
+   * @param score an optionally null score string
+   * @return a normalized score string
+   */
+  @Nullable
+  static String normalizeScore(@Nullable String score) {
+    if (StringUtils.isBlank(score)) {
+      return null;
+    } else {
+      if (score.toLowerCase().equals(NA) || sf_activityScorePattern.matcher(score).matches()) {
+        return score.replaceAll("\\.0$", "");
+      } else {
+        throw new RuntimeException("Activity score not in expected format: " + score);
+      }
     }
   }
 }
