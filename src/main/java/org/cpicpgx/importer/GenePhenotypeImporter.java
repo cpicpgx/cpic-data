@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import com.google.gson.JsonObject;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
@@ -95,6 +96,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private final PreparedStatement lookupDiplotypes;
     private final PreparedStatement lookupDiplotypesByScore;
     private final PreparedStatement insertDiplotype;
+    private final PreparedStatement lookupGene;
     private final Map<String, Integer> phenotypeCache = new HashMap<>();
     private boolean useScoreLookup = false;
     private final Set<String> loadedDiplotypes = new HashSet<>();
@@ -114,44 +116,41 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 " +
           "where pf.id=? order by a1.name, a2.name");
       this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
+      this.lookupGene = conn.prepareStatement("select lookupMethod from gene where symbol=?");
     }
 
     void insertValues(String geneSymbol, RowWrapper row) throws SQLException {
+      this.lookupGene.setString(1, geneSymbol);
+      try (ResultSet rs = this.lookupGene.executeQuery()) {
+        while (rs.next()) {
+          LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
+          if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
+            this.useScoreLookup = true;
+          }
+        }
+      }
+
       String a1Fn = row.getText(COL_A1_FN);
       String a2Fn = row.getText(COL_A2_FN);
-      String a1Score = normalizeScore(row.getNullableText(COL_A1_SCORE));
-      String a2Score = normalizeScore(row.getNullableText(COL_A2_SCORE));
-      String totalScore = normalizeScore(row.getNullableText(COL_TOTAL_SCORE));
+      String a1Score = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A1_SCORE))).orElse(NA);
+      String a2Score = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A2_SCORE))).orElse(NA);
+      String totalScore = Optional.ofNullable(normalizeScore(row.getNullableText(COL_TOTAL_SCORE))).orElse(NA);
       String description = row.getNullableText(COL_DESC);
       int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO), totalScore);
-
-      this.useScoreLookup = (a1Score != null);
 
       validateScoreData(a1Score, a2Score, totalScore);
 
       this.insertFunction.setInt(1, phenoId);
-      if (useScoreLookup) {
+      if (this.useScoreLookup) {
         this.insertFunction.setString(2, makeFunctionKey(null, null, a1Score, a2Score));
       } else {
         this.insertFunction.setString(2, makeFunctionKey(a1Fn, a2Fn, null, null));
       }
       this.insertFunction.setString(3, a1Fn);
       this.insertFunction.setString(4, a2Fn);
-      if (a1Score != null) {
-        this.insertFunction.setString(5, a1Score);
-      } else {
-        this.insertFunction.setNull(5, Types.VARCHAR);
-      }
-      if (a2Score != null) {
-        this.insertFunction.setString(6, a2Score);
-      } else {
-        this.insertFunction.setNull(6, Types.VARCHAR);
-      }
-      if (totalScore != null) {
-        this.insertFunction.setString(7, totalScore);
-      } else {
-        this.insertFunction.setNull(7, Types.VARCHAR);
-      }
+      this.insertFunction.setString(5, a1Score);
+      this.insertFunction.setString(6, a2Score);
+      this.insertFunction.setString(7, totalScore);
       if (description != null) {
         this.insertFunction.setString(8, description);
       } else {
