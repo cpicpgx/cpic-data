@@ -21,12 +21,12 @@ class GeneCdsWorkbook extends AbstractWorkbook {
     Row geneRow = sheetWrapper.nextRow();
     writeHeaderCell(geneRow, 0, "Gene: " + geneSymbol);
     Row headerRow = sheetWrapper.nextRow();
-    writeHeaderCell(headerRow, 0, "Phenotype");
+    writeHeaderCell(headerRow, 0, this.geneSymbol + " Phenotype");
     writeHeaderCell(headerRow, 1, "Activity Score");
     writeHeaderCell(headerRow, 2, "EHR Priority Result Notation");
     writeHeaderCell(headerRow, 3, "Consultation (Interpretation) Text Provided with Test Result");
     sheetWrapper.setColCount(4);
-    sheetWrapper.setWidths(new Integer[]{50*256, 50*256, 50*256, 150*256});
+    sheetWrapper.setWidths(new Integer[]{50*256, 50*256, 50*256, 80*256});
   }
   
   @Override
@@ -36,9 +36,9 @@ class GeneCdsWorkbook extends AbstractWorkbook {
   
   void writeConsultation(String phenotype, String priority, String consultation, String activityScore) {
     Row headerRow = sheetWrapper.nextRow();
-    writeStringCell(headerRow, 0, phenotype);
+    writeStringCell(headerRow, 0, this.geneSymbol + " " + phenotype);
     writeStringCell(headerRow, 1, activityScore);
     writeStringCell(headerRow, 2, priority);
-    writeStringCell(headerRow, 3, consultation, false);
+    writeStringCell(headerRow, 3, consultation, wrapStyle);
   }
 }
