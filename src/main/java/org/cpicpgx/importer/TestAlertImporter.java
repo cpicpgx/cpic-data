@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
@@ -145,7 +146,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
       JsonObject phenotypeJson = new JsonObject();
       for (String gene : phenotypeCols.keySet()) {
-        phenotypeJson.addProperty(gene, row.getText(phenotypeCols.get(gene)));
+        String phenotype = WordUtils.capitalize(row.getText(phenotypeCols.get(gene)).replaceAll(gene + " ", ""));
+        phenotypeJson.addProperty(gene, phenotype);
       }
 
       String drugId = drugCache.lookup(row.getNullableText(COL_DRUG));
