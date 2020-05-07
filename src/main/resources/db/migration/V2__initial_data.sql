@@ -364,7 +364,7 @@ TNF	chr6	NG_007462	NP_000585	\N	HGNC:11892	7124	ENSG00000232810	PA435	2\.
 
 COPY guideline (id, version, name, url, pharmgkbid) FROM stdin;
 100428	3	TPMT, NUDT15 and Thiopurines	https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/	{PA166104933,PA166104945,PA166104965}
-100411	3	CYP2C19 and Clopidogrel 	https://cpicpgx.org/guidelines/guideline-for-clopidogrel-and-cyp2c19/	{PA166104948}
+100411	3	CYP2C19 and Clopidogrel	https://cpicpgx.org/guidelines/guideline-for-clopidogrel-and-cyp2c19/	{PA166104948}
 100416	3	CYP2D6 and Codeine	https://cpicpgx.org/guidelines/guideline-for-codeine-and-cyp2d6/	{PA166104996}
 100421	3	HLA-B and Abacavir	https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/	{PA166104997}
 100414	3	CYP2D6, CYP2C19 and Tricyclic Antidepressants	https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/	{PA166104998,PA166104999,PA166105000,PA166105001,PA166105002,PA166105006,PA166105007}
@@ -383,7 +383,7 @@ COPY guideline (id, version, name, url, pharmgkbid) FROM stdin;
 104243	3	CYP2D6 and Atomoxetine	https://cpicpgx.org/guidelines/cpic-guideline-for-atomoxetine-based-on-cyp2d6-genotype/	{PA166181885}
 100427	3	RYR1, CACNA1S and Volatile anesthetic agents and Succinylcholine	https://cpicpgx.org/guidelines/cpic-guideline-for-ryr1-and-cacna1s/	{PA166180457}
 100425	3	CYP2C9, VKORC1, CYP4F2 and Warfarin	https://cpicpgx.org/guidelines/guideline-for-warfarin-and-cyp2c9-and-vkorc1/	{PA166104949}
-100412	3	CYP2C9, HLA-B and Phenytoin 	https://cpicpgx.org/guidelines/guideline-for-phenytoin-and-cyp2c9-and-hla-b/	{PA166122806}
+100412	3	CYP2C9, HLA-B and Phenytoin	https://cpicpgx.org/guidelines/guideline-for-phenytoin-and-cyp2c9-and-hla-b/	{PA166122806}
 100419	4	DPYD and Fluoropyrimidines	https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/	{PA166109594,PA166122686,PA166122687}
 104245	1	CYP2B6 and efavirenz	https://cpicpgx.org/guidelines/cpic-guideline-for-efavirenz-based-on-cyp2b6-genotype/	{PA166182603}
 \.
