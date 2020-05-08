@@ -7,7 +7,9 @@ select
     p.phenotype,
     p.ehrpriority,
     p.consultationtext,
-    f.totalActivityScore as activityscore
+    f.totalActivityScore as activityscore,
+    f.function1,
+    f.function2
 from
     gene_phenotype p
     join phenotype_function f on p.id = f.phenotypeId
@@ -20,6 +22,8 @@ COMMENT ON COLUMN diplotype_view.phenotype IS 'Coded Genotype/Phenotype Summary,
 COMMENT ON COLUMN diplotype_view.ehrPriority IS 'EHR Priority Result, optional';
 COMMENT ON COLUMN diplotype_view.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result, optional';
 COMMENT ON COLUMN diplotype_view.activityScore IS 'The Activity Score number, optional';
+COMMENT ON COLUMN diplotype_view.function1 IS 'A functional assignment of one of the alleles, optional';
+COMMENT ON COLUMN diplotype_view.function2 IS 'A functional assignment of one of the alleles, optional';
 
 
 CREATE OR REPLACE VIEW allele_guideline_view AS
