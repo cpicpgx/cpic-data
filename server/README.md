@@ -46,6 +46,10 @@ To shut down the docker-compose services (in any configuration):
 
     docker-compose down
 
+To restart the services with the same configuration that started them:
+
+    docker-compose restart
+
 ### Running just the database
 
 To set up (and run) just a docker container of the database only
