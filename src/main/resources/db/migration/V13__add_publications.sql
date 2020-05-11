@@ -1,0 +1,4 @@
+COPY publication (title, authors, journal, month, page, volume, year, pmid) FROM stdin;
+Developing knowledge resources to support precision medicine: principles from the Clinical Pharmacogenetics Implementation Consortium (CPIC).	{"Hoffman James M","Dunnenberger Henry M","Kevin Hicks J","Caudle Kelly E","Whirl Carrillo Michelle","Freimuth Robert R","Williams Marc S","Klein Teri E","Peterson Josh F"}	Journal of the American Medical Informatics Association : JAMIA	7			2016	27026620
+Evidence and resources to implement pharmacogenetic knowledge for precision medicine.	{"Caudle Kelly E","Gammal Roseann S","Whirl-Carrillo Michelle","Hoffman James M","Relling Mary V","Klein Teri E"}	American journal of health-system pharmacy : AJHP : official journal of the American Society of Health-System Pharmacists	12			2016	27864205
+\.
