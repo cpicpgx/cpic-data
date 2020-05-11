@@ -79,6 +79,7 @@ public class DataArtifactArchive {
     exporters.add(new DiplotypePhenotypeExporter());
     exporters.add(new GeneCdsExporter());
     exporters.add(new GeneResourceExporter());
+    exporters.add(new DrugResourceExporter());
     exporters.add(new PhenotypesExporter());
 
     exporters.forEach(e -> {
