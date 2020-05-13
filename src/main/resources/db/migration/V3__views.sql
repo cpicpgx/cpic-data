@@ -1,4 +1,5 @@
 -- noinspection SqlDialectInspectionForFile
+SET ROLE cpic;
 
 CREATE OR REPLACE VIEW diplotype_view AS
 select

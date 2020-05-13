@@ -1,3 +1,5 @@
+SET ROLE cpic;
+
 create view file_status as
 select a.*, history.latest_change
 from file_artifact a

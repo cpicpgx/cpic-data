@@ -1,3 +1,5 @@
+SET ROLE cpic;
+
 create view data_progress as
 select 'Gene' as object_class, 'Allele Definition Data' as data_type, genesymbol as object_name, count(*) as n
 from allele_definition

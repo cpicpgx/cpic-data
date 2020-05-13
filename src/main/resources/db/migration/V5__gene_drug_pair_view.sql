@@ -1,3 +1,5 @@
+SET ROLE cpic;
+
 CREATE VIEW gene_drug_pair AS
 select
     d.name as drugname,
