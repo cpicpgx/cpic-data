@@ -4,6 +4,8 @@ services:
     restart: always
     environment:
       PGRST_DB_URI: postgres://cpic_api:cpicapi@cpic.crecwpuzatdq.us-east-1.rds.amazonaws.com:5432/cpic
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_SERVER_PROXY_URI: https://api.cpicpgx.org/v1
   swagger:
     restart: always
     environment:
