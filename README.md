@@ -7,11 +7,29 @@ This repo contains all the DDL and code for defining the [CPIC](https://cpicpgx.
 __:warning: This repo is under active development and, thus, only useful for testing purposes. When this message disappears and a __production__ release is on the Releases tab then it will be ready for use. Until then, this is for evaluation only. :warning:__
 
 
+## Important Links
+
+### Get Data/Code
+
+If you want to get a copy of the data or code, [check the releases](https://github.com/cpicpgx/cpic-data/releases).
+
+### Read the Docs
+
+If you want more information about how CPIC data works, [read the wiki](https://github.com/cpicpgx/cpic-data/wiki).
+
+### Bugs/Discussion
+
+If you found a bug or need to discuss something, [check the issues](https://github.com/cpicpgx/cpic-data/issues).
+
 ## Setup
+
+This section (and the next) are only applicable if you want to build the database from scratch. If you're importing a 
+pre-built database export or using the API you don't need to do any of this. However, if you're interested in seeing an 
+example of how to work with the datbase in Java code, follow along.
 
 This project assumes you're running a Postgres 9+ database for loading/querying data.
 
-Configuration is handled through environment variables. Here's what needs to be set:
+Configuration happens with environment variables. Here's what needs to be set:
 
 - _CPIC_DB_ = the hostname for the db server (default `localhost`)
 - _CPIC_USER_ = the postgresql role name to connect as (default `cpic`)
