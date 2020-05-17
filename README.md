@@ -2,11 +2,9 @@
 
 This repo contains all the DDL and code for defining the [CPIC](https://cpicpgx.org) data model and populating it with data.
 
-## WARNING: NOT READY FOR USE :exclamation:  :exclamation:  :exclamation:
+## :exclamation:  :exclamation:  :exclamation: WARNING: ALPHA TESTING ONLY :exclamation:  :exclamation:  :exclamation:
 
-__:warning: This repo is under active development and, thus, not ready for any useful purpose. When this message disappears and a production release is on the Releases tab then it will be ready for review. :warning:__
-
-__Seriously, you don't want to use this yet.__
+__:warning: This repo is under active development and, thus, only useful for testing purposes. When this message disappears and a __production__ release is on the Releases tab then it will be ready for use. Until then, this is for evaluation only. :warning:__
 
 
 ## Setup
@@ -25,16 +23,26 @@ For local development you won't need to specify these. Set them if you want to c
 
 Some steps below will require a compiled version (jar) of this project. Use gradle to build the jar file:
 
-```sh
-gradle jar
+```shell script
+./gradlew jar
 ```
 
-This will place a compiled jar in the `build/libs` directory.
+or if you're on windows
+
+```shell script
+gradlew.bat jar
+```
+
+This will place a compiled "fat" jar (includes all dependencies) in the `build/libs` directory.
 
 
 ### Bootstrapping the DB
 
-This project uses Flyway to set up the DB. Schema definition files are found in the `src/resources/db/migration` directory. Run the following to build the db:
+If you have an export of the database you do not need to do this. The export has all structure and data already. This 
+section is for creating a bootstrap, mostly-empty version of the database.
+
+This project uses Flyway to set up the DB. Schema definition files are in the `src/resources/db/migration` directory.
+Run the following to build the db:
 
 ```sh
 java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.db.FlywayMigrate
@@ -42,7 +50,7 @@ java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.db.FlywayMigrate
 
 ### Bootstrapping Information
 
-There are multiple gene-specific data files, each with their own importer class. The entry points to load gene-specific data are in the `org.cpicpgx.importer` package. Check the javadocs on the individual importer classes for command-line parameters.
+There are multiple entity-specific data files, each with their own importer class. The entry points to load gene-specific data are in the `org.cpicpgx.importer` package. Check the javadocs on the individual importer classes for command-line parameters.
 
 To load all data at once, use the `DataImport` class. This takes a `-d` parameter that is a directory with the following sub-folders containing excel files:
 
@@ -50,6 +58,7 @@ To load all data at once, use the `DataImport` class. This takes a `-d` paramete
 - allele_functionality_reference
 - diplotype_phenotype_tables
 - frequency_table
+- gene_CDS
 - gene_resource_mappings
 - recommendation_tables
 - test_alerts
@@ -78,4 +87,4 @@ To export JSON files that cache data for the website, just the following node sc
 node src/main/node/writeData.js **PATH_TO_EXISTING_DIRECTORY**
 ```
 
-By default it will use the production API. If you want to use a local development API set the `API` envvar to `dev`.
+By default, it will use the production API. If you want to use a local development API set the `API` envvar to `dev`.
