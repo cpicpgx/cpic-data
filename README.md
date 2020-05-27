@@ -27,7 +27,7 @@ This section (and the next) are only applicable if you want to build the databas
 pre-built database export or using the API you don't need to do any of this. However, if you're interested in seeing an 
 example of how to work with the datbase in Java code, follow along.
 
-This project assumes you're running a Postgres 9+ database for loading/querying data.
+This project assumes you're running a Postgres 11+ database for loading/querying data.
 
 Configuration happens with environment variables. Here's what needs to be set:
 
