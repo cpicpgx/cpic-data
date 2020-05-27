@@ -74,14 +74,14 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     }
     String geneSymbol = m.group(1);
 
-    try (DbHarness dbHarness = new DbHarness()) {
+    try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       for (int i = 2; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper dataRow = workbook.getRow(i);
         if (dataRow.hasNoText(0)) {
           continue;
         }
         try {
-          dbHarness.insertValues(geneSymbol, dataRow);
+          dbHarness.insertValues(dataRow);
         } catch (Exception e) {
           throw new RuntimeException("Error processing row " + (i+1), e);
         }
@@ -96,12 +96,13 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private final PreparedStatement lookupDiplotypes;
     private final PreparedStatement lookupDiplotypesByScore;
     private final PreparedStatement insertDiplotype;
-    private final PreparedStatement lookupGene;
+    private final String geneSymbol;
     private final Map<String, Integer> phenotypeCache = new HashMap<>();
     private boolean useScoreLookup = false;
     private final Set<String> loadedDiplotypes = new HashSet<>();
 
-    DbHarness() throws SQLException {
+    DbHarness(String geneSymbol) throws SQLException {
+      this.geneSymbol = geneSymbol;
       this.conn = ConnectionFactory.newConnection();
       this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
       this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityscore1, activityscore2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
@@ -116,27 +117,28 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 " +
           "where pf.id=? order by a1.name, a2.name");
       this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
-      this.lookupGene = conn.prepareStatement("select lookupMethod from gene where symbol=?");
-    }
 
-    void insertValues(String geneSymbol, RowWrapper row) throws SQLException {
-      this.lookupGene.setString(1, geneSymbol);
-      try (ResultSet rs = this.lookupGene.executeQuery()) {
-        while (rs.next()) {
-          LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
-          if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
-            this.useScoreLookup = true;
+      try (PreparedStatement lookupGene = conn.prepareStatement("select lookupMethod from gene where symbol=?")) {
+        lookupGene.setString(1, geneSymbol);
+        try (ResultSet rs = lookupGene.executeQuery()) {
+          while (rs.next()) {
+            LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
+            if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
+              this.useScoreLookup = true;
+            }
           }
         }
       }
+    }
 
+    void insertValues(RowWrapper row) throws SQLException {
       String a1Fn = row.getText(COL_A1_FN);
       String a2Fn = row.getText(COL_A2_FN);
       String a1Score = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A1_SCORE))).orElse(NA);
       String a2Score = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A2_SCORE))).orElse(NA);
       String totalScore = Optional.ofNullable(normalizeScore(row.getNullableText(COL_TOTAL_SCORE))).orElse(NA);
       String description = row.getNullableText(COL_DESC);
-      int phenoId = lookupPhenotype(geneSymbol, row.getText(COL_PHENO), totalScore);
+      int phenoId = lookupPhenotype(row.getText(COL_PHENO), totalScore);
 
       validateScoreData(a1Score, a2Score, totalScore);
 
@@ -213,20 +215,27 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       }
     }
 
-    int lookupPhenotype(String gene, String phenotype, String score) throws SQLException {
-      String normalizedPhenotype = phenotype.replaceAll(gene + "\\s", "");
-
-      if (phenotypeCache.containsKey(normalizedPhenotype)) {
-        return phenotypeCache.get(normalizedPhenotype);
+    int lookupPhenotype(String phenotype, String score) throws SQLException {
+      String normalizedPhenotype = phenotype.replaceAll(this.geneSymbol + "\\s", "");
+      String normalizedScore = normalizeScore(score);
+      String lookupKey;
+      if (useScoreLookup) {
+        lookupKey = normalizedScore;
       } else {
-        this.insertPhenotype.setString(1, gene);
+        lookupKey = normalizedPhenotype;
+      }
+
+      if (phenotypeCache.containsKey(lookupKey)) {
+        return phenotypeCache.get(lookupKey);
+      } else {
+        this.insertPhenotype.setString(1, this.geneSymbol);
         this.insertPhenotype.setString(2, normalizedPhenotype);
-        this.insertPhenotype.setString(3, normalizeScore(score));
+        this.insertPhenotype.setString(3, normalizedScore);
 
         try (ResultSet rs = this.insertPhenotype.executeQuery()) {
           if (rs.next()) {
             int phenoId = rs.getInt(1);
-            this.phenotypeCache.put(normalizedPhenotype, phenoId);
+            this.phenotypeCache.put(lookupKey, phenoId);
             return phenoId;
           } else {
             throw new RuntimeException("Couldn't insert phenotype");
