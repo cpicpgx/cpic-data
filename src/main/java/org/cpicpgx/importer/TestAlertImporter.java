@@ -152,7 +152,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
       String drugId = drugCache.lookup(row.getNullableText(COL_DRUG));
       Array geneArray = conn.createArrayOf("VARCHAR", activityCols.keySet().toArray());
-      String context = row.getNullableText(idxContext);
+      String context = StringUtils.replace(row.getNullableText(idxContext), "Test", "test");
       Array alertSqlArray = conn.createArrayOf("VARCHAR", new String[]{row.getNullableText(idxAlert)});
 
       insert.clearParameters();
