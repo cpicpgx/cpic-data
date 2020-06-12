@@ -25,7 +25,7 @@ public class FlywayMigrate {
           ConnectionFactory.getJdbcUrl(),
           ConnectionFactory.getUser(),
           ConnectionFactory.getPass()
-      ).load();
+      ).schemas(ConnectionFactory.getSchema()).load();
 
       if (cli.hasOption("r")) {
         sf_logger.info("Cleaning DB, as requested");
