@@ -44,7 +44,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
   private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+Phenotype");
-  private static final Pattern IMPL_PATTERN = Pattern.compile("([\\w-]+)\\s+Implication.*");
+  private static final Pattern IMPL_PATTERN = Pattern.compile("([\\w-]+)\\s+[Ii]mplication.*");
   private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)\\s+Activity Score.*");
 
   public static void main(String[] args) {
