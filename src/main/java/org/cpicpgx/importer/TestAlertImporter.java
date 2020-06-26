@@ -69,6 +69,10 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
     for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext();) {
       Sheet sheet = sheetIterator.next();
+      if (!sheet.getSheetName().startsWith("population ")) {
+        throw new RuntimeException("Sheet name does not start with \"population\": " + sheet.getSheetName());
+      }
+
       String population = sheet.getSheetName().replaceFirst("population ", "");
       try (Connection conn = ConnectionFactory.newConnection()) {
         processTwoTrigger(workbook, conn, population);
@@ -107,6 +111,10 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         Matcher activityMatch = sf_activityScorePattern.matcher(triggerName);
         Matcher phenotypeMatch = sf_phenotypePattern.matcher(triggerName);
         if (activityMatch.matches()) {
+          String activityGene = StringUtils.stripToNull(activityMatch.group(1));
+          if (activityGene == null) {
+            throw new RuntimeException("No gene specified in the activity column " + (h + 1));
+          }
           activityCols.put(StringUtils.strip(activityMatch.group(1)), h);
         } else if (phenotypeMatch.matches()) {
           phenotypeCols.put(StringUtils.strip(phenotypeMatch.group(1)), h);
@@ -162,6 +170,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       insert.setArray(4, alertSqlArray);
       insert.setString(5, population);
       insert.setString(6, activityJson.toString());
+      //noinspection JpaQueryApiInspection
       insert.setString(7, phenotypeJson.toString());
       insert.executeUpdate();
     }
