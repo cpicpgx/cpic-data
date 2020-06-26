@@ -28,4 +28,7 @@
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>
+
+<!--    If you need to see debug statements for packages/classes here's an example -->
+<!--    <logger name="org.cpicpgx.importer" level="DEBUG" />-->
 </configuration>

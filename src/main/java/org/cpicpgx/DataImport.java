@@ -65,6 +65,7 @@ public class DataImport {
     // order is important in this list, later importers may add data to previously imported data
     List<BaseDirectoryImporter> importers = new ArrayList<>();
     importers.add(new GeneReferenceImporter().setDirectory(m_directory, null));
+    importers.add(new DrugImporter().setDirectory(m_directory, null));
     importers.add(new AlleleDirectoryProcessor().setDirectory(m_directory, null));
     importers.add(new PharmVarImporter().setDirectory(m_directory, null));
     importers.add(new FunctionReferenceImporter().setDirectory(m_directory, null));
