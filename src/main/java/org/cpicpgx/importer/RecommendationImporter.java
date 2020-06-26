@@ -88,6 +88,10 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext(); ) {
           Sheet sheet = sheetIterator.next();
           workbook.currentSheetIs(sheet.getSheetName());
+          if (!sheet.getSheetName().startsWith("population")) {
+            throw new RuntimeException("Improper sheet name: " + sheet.getSheetName());
+          }
+
           String populationName = sheet.getSheetName().replaceAll("^population\\s+", "");
           if (StringUtils.isBlank(populationName)) {
             populationName = "general";
@@ -173,6 +177,10 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       if (phenoMatch.matches()) {
         phenotypeIdxMap.put(phenoMatch.group(1), j);
       }
+    }
+
+    if (phenotypeIdxMap.size() == 0) {
+      throw new RuntimeException("Phenotype column not in expected format");
     }
     return phenotypeIdxMap;
   }
