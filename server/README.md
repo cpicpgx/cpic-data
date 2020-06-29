@@ -24,14 +24,16 @@ you're not added as a contributor to the repo)
 
 ### Running CPIC API services
 
-To run all the services (DB/Postgrest/Swagger) on your 
-__local dev machine__ use _docker-compose_:
+To run the API services (Postgrest/Swagger) on your __local dev machine__ use `docker-compose`. This relies on the host 
+OS running the PostgreSQL database so make sure that's up and running before starting the API.
+
+The API and swagger docs can be started using the command:
 
     docker-compose up -d
 
-This will run in daemon mode so you won't see logs, if you want to see 
-logs remove the `-d`. This reads settings from the `docker-compose.yml` 
-and `docker-compose.override.yml` files.
+This will run in daemon mode so you won't see logs on stdout (but can [through docker](https://docs.docker.com/engine/reference/commandline/logs/)).
+If you want to see logs on stdout remove the `-d`. This reads settings from the `docker-compose.yml` and 
+`docker-compose.override.yml` files.
 
 When you're ready to run this on a __production server__ use:
 
