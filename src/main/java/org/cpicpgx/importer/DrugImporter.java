@@ -33,7 +33,7 @@ public class DrugImporter extends BaseDirectoryImporter {
   private static final int ROW_ATC = 3;
   private static final int ROW_PGKB = 4;
   private static final int COL_NAME = 0;
-  private static final int COL_ID = 1;
+  private static final int COL_ID = 3;
 
   public static void main(String[] args) {
     rebuild(new DrugImporter(), args);
@@ -105,7 +105,7 @@ public class DrugImporter extends BaseDirectoryImporter {
         }
       }
 
-      try (PreparedStatement insert = conn.prepareStatement("insert into drug(drugid, name, pharmgkbid, rxnormid, drugbankid, atcid) values (?, ?, ?, ?, ?, ?) on conflict (drugid) do update set pharmgkbid=excluded.pharmgkbid, rxnormid=excluded.rxnormid, atcId=excluded.atcid")) {
+      try (PreparedStatement insert = conn.prepareStatement("insert into drug(drugid, name, pharmgkbid, rxnormid, drugbankid, atcid) values (?, ?, ?, ?, ?, ?) on conflict (drugid) do update set drugbankid=excluded.drugBankid, pharmgkbid=excluded.pharmgkbid, rxnormid=excluded.rxnormid, atcId=excluded.atcid")) {
         insert.setString(1, drugId);
         insert.setString(2, drugName);
         if (pgkbId != null) {
