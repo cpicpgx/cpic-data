@@ -32,7 +32,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
   private static final String[] sf_deleteStatements = new String[]{
       "delete from drug_note where type='" + NoteType.TEST_ALERT.name() + "'",
-      "delete from test_alerts"
+      "delete from test_alert"
   };
   private static final Pattern sf_activityScorePattern = Pattern.compile("^(.+)?[Aa]ctivity [Ss]core$");
   private static final Pattern sf_phenotypePattern = Pattern.compile("^(.+)?[Pp]henotype$");
@@ -87,7 +87,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
   private void processTwoTrigger(WorkbookWrapper workbook, Connection conn, String population) throws Exception {
     PreparedStatement insert = conn.prepareStatement(
-        "insert into test_alerts(cds_context, genes, drugid, alert_text, population, activity_score, phenotype) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb)");
+        "insert into test_alert(cds_context, genes, drugid, alert_text, population, activity_score, phenotype) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb)");
     PreparedStatement insertNote = conn.prepareStatement(
         "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
     DrugCache drugCache = new DrugCache(conn);

@@ -91,7 +91,7 @@ public class ProgressReport {
     try (Connection conn = ConnectionFactory.newConnection()) {
       queryDrugData(conn, "select name, count(*) from drug where flowchart is not null group by name order by name", "Flowcharts");
       queryDrugData(conn, "select d.name, count(distinct r.id) from recommendation r join drug d on r.drugid = d.drugid group by d.name", "Table 2 Recommendations");
-      queryDrugData(conn, "select d.name, count(distinct t.id) from test_alerts t join drug d on t.drugid = d.drugid group by d.name", "Drug Test Alerts");
+      queryDrugData(conn, "select d.name, count(distinct t.id) from test_alert t join drug d on t.drugid = d.drugid group by d.name", "Drug Test Alerts");
       queryDrugData(conn, "select d.name, count(distinct g.id) from guideline g join pair p on g.id = p.guidelineid join drug d on p.drugid = d.drugid group by d.name", "Guideline");
     }
   }

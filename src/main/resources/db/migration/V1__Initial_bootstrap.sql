@@ -535,7 +535,7 @@ COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendat
 COMMENT ON COLUMN recommendation.activity_score IS 'Activity score that this recommendation applies to, this is a JSON mapping of gene to score value';
 
 
-CREATE TABLE test_alerts
+CREATE TABLE test_alert
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   population TEXT,
@@ -548,16 +548,16 @@ CREATE TABLE test_alerts
   version INTEGER DEFAULT 1
 );
 
-CREATE TRIGGER version_test_alerts
-  BEFORE UPDATE ON test_alerts
+CREATE TRIGGER version_test_alert
+  BEFORE UPDATE ON test_alert
   FOR EACH ROW EXECUTE PROCEDURE increment_version();
 
-COMMENT ON TABLE test_alerts IS 'Example CDS test alert language';
-COMMENT ON COLUMN test_alerts.id IS 'A synthetic numerical ID, primary key';
-COMMENT ON COLUMN test_alerts.population IS 'The population this test alert is applicable to: general, adult, pediatrics, unspecified';
-COMMENT ON COLUMN test_alerts.cds_context IS 'This should be either "Pre-test", "Post-test" or "No CDS". This field is non-null';
-COMMENT ON COLUMN test_alerts.genes IS 'One or more genes this test alert uses for trigger conditions';
-COMMENT ON COLUMN test_alerts.phenotype IS 'A JSON object of gene symbol keys to phenotype description';
-COMMENT ON COLUMN test_alerts.activity_score IS 'A JSON object of gene symbol keys to gene activity score';
-COMMENT ON COLUMN test_alerts.drugId IS 'The ID of a drug this alert text is for';
-COMMENT ON COLUMN test_alerts.alert_text IS 'An array of one or more pieces of alert text';
+COMMENT ON TABLE test_alert IS 'Example CDS test alert language';
+COMMENT ON COLUMN test_alert.id IS 'A synthetic numerical ID, primary key';
+COMMENT ON COLUMN test_alert.population IS 'The population this test alert is applicable to: general, adult, pediatrics, unspecified';
+COMMENT ON COLUMN test_alert.cds_context IS 'This should be either "Pre-test", "Post-test" or "No CDS". This field is non-null';
+COMMENT ON COLUMN test_alert.genes IS 'One or more genes this test alert uses for trigger conditions';
+COMMENT ON COLUMN test_alert.phenotype IS 'A JSON object of gene symbol keys to phenotype description';
+COMMENT ON COLUMN test_alert.activity_score IS 'A JSON object of gene symbol keys to gene activity score';
+COMMENT ON COLUMN test_alert.drugId IS 'The ID of a drug this alert text is for';
+COMMENT ON COLUMN test_alert.alert_text IS 'An array of one or more pieces of alert text';

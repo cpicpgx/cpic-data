@@ -38,7 +38,7 @@ select 'Drug' as object_class, 'Flowcharts' as data_type, name as object_name, c
 union all
 select 'Drug' as object_class, 'Table 2 Recommendations' as data_type, d.name as object_name, count(distinct r.id) as n from recommendation r join drug d on r.drugid = d.drugid group by d.name
 union all
-select 'Drug' as object_class, 'Drug Test Alerts' as data_type, d.name as object_name, count(distinct t.id) as n from test_alerts t join drug d on t.drugid = d.drugid group by d.name
+select 'Drug' as object_class, 'Drug Test Alerts' as data_type, d.name as object_name, count(distinct t.id) as n from test_alert t join drug d on t.drugid = d.drugid group by d.name
 union all
 select 'Drug' as object_class, 'Guideline' as data_type, d.name as object_name, count(distinct g.id) as n from guideline g join pair p on g.id = p.guidelineid join drug d on p.drugid = d.drugid group by d.name
 ;
