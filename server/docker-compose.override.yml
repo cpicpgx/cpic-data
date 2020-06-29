@@ -2,17 +2,7 @@ version: '2'
 services:
   server:
     environment:
-      PGRST_DB_URI: postgres://cpic_api:cpicapi@db:5432/cpic
-    links:
-    - db:db
-    depends_on:
-    - db
-  db:
-    image: cpicpgx/cpic-db
-    ports:
-    - "5432:5432"
-    volumes:
-    - "./pgdata:/var/lib/postgresql/data"
+      PGRST_DB_URI: postgres://cpic_api:cpicapi@host.docker.internal:5432/cpic
   swagger:
     environment:
       API_URL: http://localhost:3000/
