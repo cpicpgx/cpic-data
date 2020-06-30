@@ -101,7 +101,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         if (row.hasNoText(COL_IDX_ALLELE) || row.getNullableText(COL_IDX_ALLELE).toLowerCase().startsWith("note")) break;
         
         String alleleName = row.getNullableText(COL_IDX_ALLELE);
-        String activityScore = row.getNullableText(COL_IDX_ACTIVITY);
+        String activityScore = normalizeScore(row.getNullableText(COL_IDX_ACTIVITY));
         String functionStatus = row.getNullableText(COL_IDX_FUNCTION);
         String clinicalFunction = row.getNullableText(COL_IDX_CLINICAL_FUNCTION);
         String substrate = row.getNullableText(COL_IDX_CLINICAL_SUBSTRATE);
