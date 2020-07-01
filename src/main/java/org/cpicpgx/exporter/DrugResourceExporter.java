@@ -48,10 +48,16 @@ public class DrugResourceExporter extends BaseExporter {
         ) {
       while (rs.next()) {
         DrugResourceWorkbook workbook = new DrugResourceWorkbook(rs.getString(2));
+
+        String[] atcCodes = new String[0];
+        if (rs.getArray(6) != null) {
+          atcCodes = (String[])rs.getArray(6).getArray();
+        }
+
         workbook.writeMapping(
             rs.getString(4),
             rs.getString(5),
-            (String[])rs.getArray(6).getArray(),
+            atcCodes,
             rs.getString(3)
         );
 

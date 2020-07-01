@@ -53,9 +53,9 @@ public class DrugReviewExporter extends BaseExporter {
         String pgkb = grs.getString(3);
         String rxnorm = grs.getString(4);
         String drugbank = grs.getString(5);
-        String[] atc = (String[])grs.getArray(6).getArray();
-        
-        workbook.writeDrug(name, id, pgkb, rxnorm, drugbank, atc);
+        String[] atcCodes = grs.getArray(6) == null ? new String[0] : (String[])grs.getArray(6).getArray();
+
+        workbook.writeDrug(name, id, pgkb, rxnorm, drugbank, atcCodes);
       }
       writeWorkbook(workbook);
       handleFileUpload();
