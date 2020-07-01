@@ -180,11 +180,11 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
           String existingEhrPriority = rs.getString(4);
 
           if (!phenoStripped.equalsIgnoreCase(existingPhenotype)) {
-            sf_logger.info("{} {}: P:{}<>{} AS:{}<>{}", gene, diplotype, phenoStripped, existingPhenotype, activity, existingActivityScore);
+            sf_logger.info("{} {}:\n\tPhenotype: [{}] in file vs [{}] in DB\n\tActivity Score: [{}] in file vs [{}] in DB", gene, diplotype, phenoStripped, existingPhenotype, activity, existingActivityScore);
             failCount += 1;
           }
           if (!ehr.equalsIgnoreCase(existingEhrPriority) && !(ehr.equals("none") && existingEhrPriority == null)) {
-            sf_logger.info("{} {}: EHR:{}<>{}", gene, diplotype, ehr, existingEhrPriority);
+            sf_logger.info("{} {}:\n\tEHR: [{}] in file vs [{}] in DB", gene, diplotype, ehr, existingEhrPriority);
             failCount += 1;
           }
 
