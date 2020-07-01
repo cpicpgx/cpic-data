@@ -263,7 +263,10 @@ public abstract class BaseDirectoryImporter {
     if (StringUtils.isBlank(score)) {
       return null;
     } else {
-      if (score.toLowerCase().equals(NA) || sf_activityScorePattern.matcher(score).matches()) {
+      if (score.toLowerCase().equals(NA)) {
+        return NA;
+      }
+      else if (sf_activityScorePattern.matcher(score).matches()) {
         return score.replaceAll("\\.0$", "");
       } else {
         throw new RuntimeException("Activity score not in expected format: " + score);
