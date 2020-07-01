@@ -37,11 +37,12 @@ class DiplotypeWorkbook extends AbstractWorkbook {
     writeStringCell(row, 3, ehr);
   }
   
-  void writeInterpretation(String phenotype, String ehr, String interpreation) {
+  void writeInterpretation(String phenotype, String ehr, String interpreation, String activityScore) {
     Row row = getNoteSheet().nextRow();
     writeStringCell(row, 0, phenotype);
-    writeStringCell(row, 1, ehr);
-    writeStringCell(row, 2, interpreation, this.wrapStyle);
+    writeStringCell(row, 1, activityScore);
+    writeStringCell(row, 2, ehr);
+    writeStringCell(row, 3, interpreation, this.wrapStyle);
   }
   
   @Override
@@ -52,11 +53,12 @@ class DiplotypeWorkbook extends AbstractWorkbook {
   private SheetWrapper getNoteSheet() {
     if (this.noteSheet == null) {
       this.noteSheet = findSheet(NOTES_SHEET_NAME);
-      this.noteSheet.setColCount(3);
+      this.noteSheet.setColCount(4);
       Row headerRow = this.noteSheet.nextRow();
       writeHeaderCell(headerRow, 0, "Coded Genotype/Phenotype Summary");
-      writeHeaderCell(headerRow, 1, "EHR Priority Result Notation");
-      writeHeaderCell(headerRow, 2, "Consultation (Interpretation) Text Provided with Test Result");
+      writeHeaderCell(headerRow, 1, "Activity Score");
+      writeHeaderCell(headerRow, 2, "EHR Priority Result Notation");
+      writeHeaderCell(headerRow, 3, "Consultation (Interpretation) Text Provided with Test Result");
     }
     return this.noteSheet;
   }
