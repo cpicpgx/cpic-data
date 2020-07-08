@@ -12,6 +12,10 @@
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V2__initial_data.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/R__apply_permissions.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__Initial_bootstrap.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V5__gene_drug_pair_view.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V8__data_progress_view.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V9__file_view.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V11__guideline_in_drug_model.sql" />
             </array>
           </option>
         </State>
