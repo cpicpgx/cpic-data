@@ -16,6 +16,7 @@
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V8__data_progress_view.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V9__file_view.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V11__guideline_in_drug_model.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V17__activity_value_change.sql" />
             </array>
           </option>
         </State>

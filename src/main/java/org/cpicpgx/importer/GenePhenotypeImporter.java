@@ -30,8 +30,8 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
 
   private static final int COL_A1_FN = 0;
   private static final int COL_A2_FN = 1;
-  private static final int COL_A1_SCORE = 2;
-  private static final int COL_A2_SCORE = 3;
+  private static final int COL_A1_VALUE = 2;
+  private static final int COL_A2_VALUE = 3;
   private static final int COL_TOTAL_SCORE = 4;
   private static final int COL_PHENO = 5;
   private static final int COL_DESC = 6;
@@ -105,7 +105,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       this.geneSymbol = geneSymbol;
       this.conn = ConnectionFactory.newConnection();
       this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
-      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityscore1, activityscore2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
+      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
       this.lookupDiplotypes = conn.prepareStatement("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.clinicalfunctionalstatus=pf.function1 " +
@@ -113,8 +113,8 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           "where pf.id=? order by a1.name, a2.name");
       this.lookupDiplotypesByScore = conn.prepareStatement("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
-          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityscore=pf.activityscore1 " +
-          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityscore=pf.activityscore2 " +
+          "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityvalue=pf.activityvalue1 " +
+          "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityvalue=pf.activityvalue2 " +
           "where pf.id=? order by a1.name, a2.name");
       this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
 
@@ -134,24 +134,24 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     void insertValues(RowWrapper row) throws SQLException {
       String a1Fn = row.getText(COL_A1_FN);
       String a2Fn = row.getText(COL_A2_FN);
-      String a1Score = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A1_SCORE))).orElse(NA);
-      String a2Score = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A2_SCORE))).orElse(NA);
+      String a1Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A1_VALUE))).orElse(NA);
+      String a2Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A2_VALUE))).orElse(NA);
       String totalScore = Optional.ofNullable(normalizeScore(row.getNullableText(COL_TOTAL_SCORE))).orElse(NA);
       String description = row.getNullableText(COL_DESC);
       int phenoId = lookupPhenotype(row.getText(COL_PHENO), totalScore);
 
-      validateScoreData(a1Score, a2Score, totalScore);
+      validateScoreData(a1Value, a2Value, totalScore);
 
       this.insertFunction.setInt(1, phenoId);
       if (this.useScoreLookup) {
-        this.insertFunction.setString(2, makeFunctionKey(null, null, a1Score, a2Score));
+        this.insertFunction.setString(2, makeFunctionKey(null, null, a1Value, a2Value));
       } else {
         this.insertFunction.setString(2, makeFunctionKey(a1Fn, a2Fn, null, null));
       }
       this.insertFunction.setString(3, a1Fn);
       this.insertFunction.setString(4, a2Fn);
-      this.insertFunction.setString(5, a1Score);
-      this.insertFunction.setString(6, a2Score);
+      this.insertFunction.setString(5, a1Value);
+      this.insertFunction.setString(6, a2Value);
       this.insertFunction.setString(7, totalScore);
       if (description != null) {
         this.insertFunction.setString(8, description);

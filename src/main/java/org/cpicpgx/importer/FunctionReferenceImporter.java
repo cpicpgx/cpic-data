@@ -101,7 +101,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         if (row.hasNoText(COL_IDX_ALLELE) || row.getNullableText(COL_IDX_ALLELE).toLowerCase().startsWith("note")) break;
         
         String alleleName = row.getNullableText(COL_IDX_ALLELE);
-        String activityScore = normalizeScore(row.getNullableText(COL_IDX_ACTIVITY));
+        String activityValue = normalizeScore(row.getNullableText(COL_IDX_ACTIVITY));
         String functionStatus = row.getNullableText(COL_IDX_FUNCTION);
         String clinicalFunction = row.getNullableText(COL_IDX_CLINICAL_FUNCTION);
         String substrate = row.getNullableText(COL_IDX_CLINICAL_SUBSTRATE);
@@ -124,7 +124,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         try {
           dbHarness.insert(
               alleleName,
-              activityScore,
+              activityValue,
               functionStatus,
               clinicalFunction,
               substrate,
@@ -197,7 +197,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
 
-      insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityscore, clinicalfunctionalstatus, clinicalFunctionalSubstrate) values (?, ?, ?, initcap(?), ?, initcap(?), ?) returning id");
+      insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate) values (?, ?, ?, initcap(?), ?, initcap(?), ?) returning id");
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?::jsonb, ?)");
       insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
       insertChangeStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
@@ -213,7 +213,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     
     void insert(
         String allele,
-        String activityScore,
+        String activityValue,
         String alleleFunction,
         String clinicalFunction,
         String substrate,
@@ -229,7 +229,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       this.insertAlleleStmt.setString(2, allele);
       this.insertAlleleStmt.setLong(3, alleleDefinitionId);
       this.insertAlleleStmt.setString(4, normalizeFunction(alleleFunction));
-      setNullableText(this.insertAlleleStmt, 5, activityScore);
+      setNullableText(this.insertAlleleStmt, 5, activityValue);
       setNullableText(this.insertAlleleStmt, 6, clinicalFunction);
       setNullableText(this.insertAlleleStmt, 7, substrate);
       Long alleleId = null;
