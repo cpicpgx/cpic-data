@@ -52,12 +52,8 @@ public class GeneResourceExporter extends BaseExporter {
         String pgkb = grs.getString(5);
         
         GeneResourceWorkbook workbook = new GeneResourceWorkbook(symbol);
-        workbook.writeMapping("HGNC", "Symbol", symbol);
-        workbook.writeMapping("HGNC", "HGNC ID", hgnc);
-        workbook.writeMapping("NCBI", "Gene ID", ncbi);
-        workbook.writeMapping("Ensembl", "Ensembl ID", ensembl);
-        workbook.writeMapping("PharmGKB", "PharmGKB ID", pgkb);
-        
+        workbook.writeIds(hgnc, ncbi, ensembl, pgkb);
+
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{symbol});
       }

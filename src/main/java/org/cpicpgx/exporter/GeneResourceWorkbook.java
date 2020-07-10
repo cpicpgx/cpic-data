@@ -28,6 +28,14 @@ class GeneResourceWorkbook extends AbstractWorkbook {
     
     this.colIdx = 3;
   }
+
+  void writeIds(String hgncId, String ncbiId, String ensemblId, String pharmgkbId) {
+    writeMapping("HGNC", "Symbol", this.gene);
+    writeMapping("HGNC", "HGNC ID", hgncId);
+    writeMapping("NCBI", "Gene ID", ncbiId);
+    writeMapping("Ensembl", "Ensembl ID", ensemblId);
+    writeMapping("PharmGKB", "PharmGKB ID", pharmgkbId);
+  }
   
   void writeMapping(String source, String type, String code) {
     Row row = this.sheet.nextRow();
