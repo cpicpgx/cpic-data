@@ -26,7 +26,6 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private final SheetWrapper sheetMethods;
   private final SheetWrapper sheetAllele;
   private final SheetWrapper sheetReferences;
-  private final SheetWrapper sheetChanges;
   private final Set<String> ethnicities = new TreeSet<>();
   
   FrequencyWorkbook(String geneSymbol) {
@@ -40,7 +39,6 @@ class FrequencyWorkbook extends AbstractWorkbook {
     sheetAllele = findSheet(SHEET_NAME_ALLELE);
     sheetReferences = findSheet(SHEET_NAME_REFERENCES);
     sheetMethods = findSheet(SHEET_NAME_METHODS);
-    sheetChanges = findSheet(HISTORY_SHEET_NAME);
   }
   
   void writeMethods(String methods) {
@@ -156,19 +154,6 @@ class FrequencyWorkbook extends AbstractWorkbook {
     for (int i = 0; i < frequencies.length; i++) {
       writeDoubleCell(row, 1+i, frequencies[i]);
     }
-  }
-  
-  void writeNotesHeader() {
-    Row row = sheetChanges.nextRow();
-    writeHeaderCell(row, 0, "Date");
-    writeHeaderCell(row, 1, "Note");
-    sheetChanges.setColCount(2);
-  }
-  
-  void writeNote(Date date, String note) {
-    Row row = sheetChanges.nextRow();
-    writeDateCell(row, 0, date);
-    writeStringCell(row, 1, note, false);
   }
 
   @Override

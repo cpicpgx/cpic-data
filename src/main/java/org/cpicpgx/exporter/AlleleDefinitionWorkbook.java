@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -92,6 +91,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     writeStringCell(dbsnpRow, 0, "rsID", leftTextStyle);
     
     this.sheet.setWidths(new Integer[]{40*256});
+    this.sheet.setColCount(1);
   }
   
   /**
@@ -146,19 +146,5 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     colLocationMap.put(locId, colIdx);
     this.sheet.setColCount(colIdx+1);
     colIdx += 1;
-  }
-
-  private int nHistory = 0;
-  void writeHistory(Date date, String note) {
-    if (nHistory == 0) {
-      historySheet = this.findSheet(HISTORY_SHEET_NAME);
-      Row headerRow = historySheet.nextRow();
-      writeHeaderCell(headerRow, 0, "Date");
-      writeHeaderCell(headerRow, 1, "Note");
-    }
-    Row row = historySheet.nextRow();
-    writeDateCell(row, 0, date);
-    writeStringCell(row, 1, note,false);
-    nHistory += 1;
   }
 }

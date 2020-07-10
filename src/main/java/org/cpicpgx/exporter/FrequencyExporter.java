@@ -196,11 +196,10 @@ public class FrequencyExporter extends BaseExporter {
           }
 
           // writing the notes
-          workbook.writeNotesHeader();
           changeStmt.setString(1, geneSymbol);
           try (ResultSet notes = changeStmt.executeQuery()) {
             while (notes.next()) {
-              workbook.writeNote(notes.getDate(1), notes.getString(2));
+              workbook.writeHistory(notes.getDate(1), notes.getString(2));
             }
           }
 

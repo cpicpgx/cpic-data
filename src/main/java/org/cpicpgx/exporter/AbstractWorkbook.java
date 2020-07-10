@@ -143,7 +143,13 @@ public abstract class AbstractWorkbook {
   List<SheetWrapper> getSheets() {
     return this.sheets;
   }
-  
+
+  /**
+   * Finds a {@link SheetWrapper} with the given name. If the sheet doesn't exist, it will be created with the given
+   * name.
+   * @param name the name of the sheet
+   * @return a {@link SheetWrapper} instance
+   */
   SheetWrapper findSheet(String name) {
     if (name == null) return null;
     
@@ -285,5 +291,20 @@ public abstract class AbstractWorkbook {
     }
 
     sheet.sheet.setColumnWidth(0, 100 * 256);
+  }
+
+  void writeHistory(Date date, String note) {
+    boolean sheetExists = this.getSheets().stream().anyMatch((s) -> s.getName().equals(HISTORY_SHEET_NAME));
+    SheetWrapper historySheet = this.findSheet(HISTORY_SHEET_NAME);
+    historySheet.setWidths(new Integer[]{20*256, 100*256});
+    historySheet.setColCount(2);
+    if (!sheetExists) {
+      Row headerRow = historySheet.nextRow();
+      writeHeaderCell(headerRow, 0, "Date");
+      writeHeaderCell(headerRow, 1, "Note");
+    }
+    Row row = historySheet.nextRow();
+    writeDateCell(row, 0, date);
+    writeStringCell(row, 1, note,false);
   }
 }

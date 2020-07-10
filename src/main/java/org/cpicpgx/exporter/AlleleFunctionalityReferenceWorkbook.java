@@ -3,8 +3,6 @@ package org.cpicpgx.exporter;
 import com.google.common.base.Joiner;
 import org.apache.poi.ss.usermodel.Row;
 
-import java.util.Date;
-
 /**
  * A workbook of allele functionality information
  *
@@ -15,7 +13,7 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
   private static final String CELL_PATTERN_GENE = "Gene: %s";
   private static final String FILE_NAME_PATTERN = "%s-Allele_Functionality_Reference.xlsx";
   private final String geneSymbol;
-  private SheetWrapper sheet;
+  private final SheetWrapper sheet;
 
   
   AlleleFunctionalityReferenceWorkbook(String gene) {
@@ -57,20 +55,5 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     writeStringCell(row, 6, strength, false);
     writeStringCell(row, 7, finding, false);
     writeStringCell(row, 8, comments, false);
-  }
-  
-  private int nHistory = 0;
-  void writeHistory(Date date, String note) {
-    if (nHistory == 0) {
-      this.sheet = findSheet(HISTORY_SHEET_NAME);
-      Row headerRow = this.sheet.nextRow();
-      writeHeaderCell(headerRow, 0, "Date");
-      writeHeaderCell(headerRow, 1, "Note");
-    }
-    Row row = this.sheet.nextRow();
-    writeDateCell(row, 0, date);
-    writeStringCell(row, 1, note, false);
-    
-    nHistory += 1;
   }
 }
