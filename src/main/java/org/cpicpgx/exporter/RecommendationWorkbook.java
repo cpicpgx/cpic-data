@@ -34,7 +34,7 @@ class RecommendationWorkbook extends AbstractWorkbook {
       writeHeaderCell(headerRow, colIdx++, gene + " Activity Score");
     }
     for (String gene : genes) {
-      writeHeaderCell(headerRow, colIdx++, gene + " Implication for Phenotypic Measures");
+      writeHeaderCell(headerRow, colIdx++, gene + " Implications for Phenotypic Measures");
     }
     writeHeaderCell(headerRow, colIdx++, "Therapeutic Recommendation");
     writeHeaderCell(headerRow, colIdx++, "Classification of Recommendation");
