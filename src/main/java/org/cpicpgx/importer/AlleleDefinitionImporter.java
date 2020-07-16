@@ -245,9 +245,12 @@ public class AlleleDefinitionImporter {
       
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
-        if (row.hasNoText(0)) continue;
+        if (row.hasNoText(0) ^ row.hasNoText(1)) {
+          throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
+        }
+        else if (row.hasNoText(0)) continue;
         
-        Date date = row.getNullableDate(0);
+        Date date = row.getDate(0);
         String note = row.getNullableText(1);
         
         insertStmt.setDate(3, new java.sql.Date(date.getTime()));

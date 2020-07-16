@@ -74,6 +74,8 @@ public abstract class BaseDirectoryImporter {
         return NoteType.FUNCTION_REFERENCE;
       case TEST_ALERTS:
         return NoteType.TEST_ALERT;
+      case RECOMMENDATIONS:
+        return NoteType.RECOMMENDATIONS;
       default:
         throw new RuntimeException("Notes are not supported");
     }
@@ -87,16 +89,16 @@ public abstract class BaseDirectoryImporter {
    * Calling this method 
    */
   public void clearAllData() throws SQLException {
-    Connection conn = ConnectionFactory.newConnection();
-
-    int delCount = 0;
-    for (String deleteStmt : getDeleteStatements()) {
-      try (PreparedStatement stmt = conn.prepareStatement(deleteStmt)) {
-        delCount += stmt.executeUpdate();
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      int delCount = 0;
+      for (String deleteStmt : getDeleteStatements()) {
+        try (PreparedStatement stmt = conn.prepareStatement(deleteStmt)) {
+          delCount += stmt.executeUpdate();
+        }
       }
-    }
-    if (getDeleteStatements().length > 0) {
-      sf_logger.info("Deleted {} rows for {}", delCount, getFileType().name());
+      if (getDeleteStatements().length > 0) {
+        sf_logger.info("Deleted {} rows for {}", delCount, getFileType().name());
+      }
     }
   }
   

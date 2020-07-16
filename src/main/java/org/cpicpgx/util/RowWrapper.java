@@ -19,7 +19,7 @@ public class RowWrapper {
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy");
   
   public Row row;
-  private FormulaEvaluator formulaEvaluator;
+  private final FormulaEvaluator formulaEvaluator;
 
   /**
    * Constructor. Requires a formula evaluator so we can get a value out of Formula columns
@@ -64,7 +64,8 @@ public class RowWrapper {
     if (text != null) {
       return text;
     } else {
-      throw new RuntimeException("Found unexpected null value at  column " + cellIdx);
+      Cell cell = this.row.getCell(cellIdx);
+      throw new RuntimeException("Found unexpected null value at " + cell.getAddress());
     }
   }
 
@@ -246,6 +247,22 @@ public class RowWrapper {
     }
     
     return cell.getDateCellValue();
+  }
+
+  /**
+   * Gets a date value from the cell at the given cell index and will throw a {@link RuntimeException} if the value is
+   * not present. Can also throw an exception if the content is not a Date
+   * @param cellIdx the index of the cell to the value for
+   * @return a Date value represented in the cell
+   * @throws RuntimeException if the cell is not date-formatted or the cell is blank
+   */
+  public Date getDate(int cellIdx) {
+    Date date = getNullableDate(cellIdx);
+    if (date == null) {
+      Cell cell = this.row.getCell(cellIdx);
+      throw new RuntimeException("No date in " + cell.getAddress());
+    }
+    return date;
   }
 
   /**

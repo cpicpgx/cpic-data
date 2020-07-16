@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -54,6 +55,7 @@ public class RecommendationExporter extends BaseExporter {
         PreparedStatement geneStmt = conn.prepareStatement("select distinct jsonb_object_keys(phenotypes) from recommendation where drugid=?");
         PreparedStatement popStmt = conn.prepareStatement("select distinct population from recommendation where drugid=?");
         PreparedStatement recStmt = conn.prepareStatement("select r.phenotypes, r.drug_recommendation, r.implications, r.classification, r.activity_score, r.comments from recommendation r where r.drugid=? and r.population=?");
+        PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from drug_note n where drugid=? and type=? and n.date is not null order by ordinal");
         ResultSet drs = drugStmt.executeQuery()
     ) {
       while (drs.next()) {
@@ -101,6 +103,15 @@ public class RecommendationExporter extends BaseExporter {
             }
           }
         }
+
+        changeStmt.setString(1, drugId);
+        changeStmt.setString(2, NoteType.RECOMMENDATIONS.name());
+        try (ResultSet rs = changeStmt.executeQuery()) {
+          while (rs.next()) {
+            workbook.writeHistory(rs.getDate(1), rs.getString(2));
+          }
+        }
+
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{drugId});
       }

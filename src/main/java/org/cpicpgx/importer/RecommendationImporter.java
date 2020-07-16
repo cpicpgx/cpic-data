@@ -1,11 +1,14 @@
 package org.cpicpgx.importer;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
@@ -14,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,21 +78,30 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
   @Override
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
-    try (DbHarness dbHarness = new DbHarness()) {
-      String drugText = workbook.getFileName().replaceAll(FILE_NAME_SUFFIX, "").toLowerCase();
-      // some recommendation file names have more than one drug name in them, laod the same data for each drug
-      String[] drugNames = drugText.split("_");
+    String drugText = workbook.getFileName().replaceAll(FILE_NAME_SUFFIX, "").toLowerCase();
+    // some recommendation file names have more than one drug name in them, load the same data for each drug
+    String[] drugNames = drugText.split("_");
 
-      for (String drugName : drugNames) {
-        String drugId = dbHarness.lookupDrug(drugName);
-        long guidelineId = dbHarness.lookupGuideline(drugName);
-
-        sf_logger.debug("Drug: {} {}", drugName, drugId);
-        sf_logger.debug("Guideline: {}", guidelineId);
+    for (String drugName : drugNames) {
+      try (DbHarness dbHarness = new DbHarness(drugName)) {
         for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext(); ) {
           Sheet sheet = sheetIterator.next();
           workbook.currentSheetIs(sheet.getSheetName());
-          if (!sheet.getSheetName().startsWith("population")) {
+
+          if (sheet.getSheetName().equals(AbstractWorkbook.HISTORY_SHEET_NAME)) {
+            for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+              RowWrapper row = workbook.getRow(i);
+              if (row.hasNoText(0) ^ row.hasNoText(1)) {
+                throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
+              } else if (row.hasNoText(0)) continue;
+
+              java.util.Date date = row.getDate(0);
+              String note = row.getNullableText(1);
+              dbHarness.insertChange(date, note);
+            }
+            continue;
+          }
+          else if (!sheet.getSheetName().startsWith("population")) {
             throw new RuntimeException("Improper sheet name: " + sheet.getSheetName());
           }
 
@@ -149,7 +162,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 activityScore.addProperty(gene, dataRow.getText(asIdxMap.get(gene)));
               }
               dbHarness.insert(
-                  drugName,
                   phenotype,
                   implication,
                   dataRow.getNullableText(idxRecommendation),
@@ -186,32 +198,52 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   }
 
   private static class DbHarness implements AutoCloseable {
-    private PreparedStatement insertStmt;
-    private PreparedStatement drugLookupStmt;
-    private PreparedStatement guidelineLookupStmt;
-    private List<AutoCloseable> closables = new ArrayList<>();
+    private final PreparedStatement insertStmt;
+    private final PreparedStatement insertChangeStmt;
+    private final List<AutoCloseable> closables = new ArrayList<>();
+    private final String drugId;
+    private final Long guidelineId;
     
-    DbHarness() throws SQLException {
+    DbHarness(String drugName) throws Exception {
       Connection conn = ConnectionFactory.newConnection();
       this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score, population) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?)");
-      this.drugLookupStmt = conn.prepareStatement(
-          "select drugid from drug where name=?", 
-          ResultSet.TYPE_SCROLL_INSENSITIVE, 
+      insertChangeStmt = conn.prepareStatement("insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+
+      PreparedStatement drugLookupStmt = conn.prepareStatement(
+          "select drugid from drug where name=?",
+          ResultSet.TYPE_SCROLL_INSENSITIVE,
           ResultSet.CONCUR_READ_ONLY);
-      this.guidelineLookupStmt = conn.prepareStatement(
-          "select distinct p.guidelineid from pair p join drug d on p.drugid = d.drugid where d.name=? and p.guidelineid is not null", 
-          ResultSet.TYPE_SCROLL_INSENSITIVE, 
+      drugLookupStmt.setString(1, drugName);
+      ResultSet rs = drugLookupStmt.executeQuery();
+      if (rs.first()) {
+        drugId = rs.getString(1);
+      } else {
+        throw new NotFoundException("Couldn't find drug " + drugName);
+      }
+
+      PreparedStatement guidelineLookupStmt = conn.prepareStatement(
+          "select distinct p.guidelineid from pair p join drug d on p.drugid = d.drugid where d.name=? and p.guidelineid is not null",
+          ResultSet.TYPE_SCROLL_INSENSITIVE,
           ResultSet.CONCUR_READ_ONLY);
-      closables.add(this.guidelineLookupStmt);
-      closables.add(this.drugLookupStmt);
+      guidelineLookupStmt.setString(1, drugName);
+      ResultSet grs = guidelineLookupStmt.executeQuery();
+      if (grs.first()) {
+        if (!grs.isLast()) {
+          throw new NotFoundException("Couldn't find just 1 guideline for " + drugName);
+        }
+        guidelineId = grs.getLong(1);
+      } else {
+        throw new NotFoundException("Couldn't find guideline");
+      }
+
+      sf_logger.debug("Drug: {}; Drug ID: {}; Guideline ID: {}", drugName, drugId, guidelineId);
+
       closables.add(this.insertStmt);
       closables.add(conn);
     }
     
-    void insert(String drug, JsonObject phenotype, JsonObject implication, String recommendation, String classification, String comments, JsonObject activityScore, String population) {
+    void insert(JsonObject phenotype, JsonObject implication, String recommendation, String classification, String comments, JsonObject activityScore, String population) {
       try {
-        String drugId = lookupDrug(drug);
-        Long guidelineId = lookupGuideline(drug);
         this.insertStmt.clearParameters();
 
         this.insertStmt.setLong(1, guidelineId);
@@ -244,29 +276,28 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       }
     }
     
-    private String lookupDrug(String name) throws SQLException, NotFoundException {
-      this.drugLookupStmt.clearParameters();
-      this.drugLookupStmt.setString(1, name);
-      ResultSet rs = this.drugLookupStmt.executeQuery();
-      if (rs.first()) {
-        return rs.getString(1);
-      } else {
-        throw new NotFoundException("Couldn't find drug " + name);
-      }
-    }
+    int nHistory = 0;
+    /**
+     * Insert a change event into the history table.
+     * @param date the date of the change, required
+     * @param note the text note to explain the change
+     * @throws SQLException can occur from bad database transaction
+     */
+    void insertChange(java.util.Date date, String note) throws SQLException {
+      Preconditions.checkNotNull(date, "History line %s has a blank date", this.nHistory + 1);
 
-    private Long lookupGuideline(String name) throws SQLException, NotFoundException {
-      this.guidelineLookupStmt.clearParameters();
-      this.guidelineLookupStmt.setString(1, name);
-      ResultSet rs = this.guidelineLookupStmt.executeQuery();
-      if (rs.first()) {
-        if (!rs.isLast()) {
-          throw new NotFoundException("Couldn't find just 1 guideline for " + name);
-        }
-        return rs.getLong(1);
+      this.insertChangeStmt.clearParameters();
+      this.insertChangeStmt.setString(1, drugId);
+      if (StringUtils.isNotBlank(note)) {
+        this.insertChangeStmt.setString(2, note);
       } else {
-        throw new NotFoundException("Couldn't find guideline");
+        this.insertChangeStmt.setString(2, "n/a");
       }
+      this.insertChangeStmt.setString(3, NoteType.RECOMMENDATIONS.name());
+      this.insertChangeStmt.setInt(4, this.nHistory);
+      this.insertChangeStmt.setDate(5, new Date(date.getTime()));
+      this.insertChangeStmt.executeUpdate();
+      this.nHistory += 1;
     }
 
     @Override

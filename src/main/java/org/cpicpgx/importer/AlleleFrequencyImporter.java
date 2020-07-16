@@ -57,7 +57,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   }
 
   @Override
-  void processWorkbook(WorkbookWrapper workbook) {
+  void processWorkbook(WorkbookWrapper workbook) throws Exception {
     String[] nameParts = workbook.getFileName().split("_");
     processAlleles(workbook, nameParts[0]);
   }
@@ -68,7 +68,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
    * @param workbook The workbook to read
    * @param gene The symbol of the gene the alleles in this workbook are for
    */
-  private void processAlleles(WorkbookWrapper workbook, String gene) {
+  private void processAlleles(WorkbookWrapper workbook, String gene) throws Exception {
     workbook.currentSheetIs("References");
     
     try (FrequencyProcessor frequencyProcessor = new FrequencyProcessor(gene, workbook.getRow(0))) {
@@ -85,9 +85,12 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
-        if (row.hasNoText(0)) continue;
+        if (row.hasNoText(0) ^ row.hasNoText(1)) {
+          throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
+        }
+        else if (row.hasNoText(0)) continue;
         
-        Date date = row.getNullableDate(0);
+        Date date = row.getDate(0);
         String note = row.getNullableText(1);
         frequencyProcessor.insertHistory(date, note);
       }
@@ -120,8 +123,6 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       frequencyProcessor.updateMethods(methodsText.toString());
 
       sf_logger.debug("Successfully parsed " + gene + " frequencies");
-    } catch (Exception ex) {
-      sf_logger.error("Error saving to DB", ex);
     }
   }
 }
