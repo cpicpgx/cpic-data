@@ -140,7 +140,7 @@ public class GuidelineStarterPack {
     String fromClause = aliases.keySet().stream().map(a -> "gene_phenotype " + a).collect(Collectors.joining(" cross join "));
     String whereClause = aliases.keySet().stream().map(a -> a + ".genesymbol='"+aliases.get(a)+"' ").collect(Collectors.joining(" and "));
 
-    String query = String.format("select %s from %s where %s", selectClause, fromClause, whereClause);
+    String query = String.format("select distinct %s from %s where %s", selectClause, fromClause, whereClause);
 
     Map<String, String> phenoMap = new TreeMap<>();
     Map<String, String> scoreMap = new TreeMap<>();
@@ -171,7 +171,7 @@ public class GuidelineStarterPack {
     String fromClause = aliases.keySet().stream().map(a -> "gene_phenotype " + a).collect(Collectors.joining(" cross join "));
     String whereClause = aliases.keySet().stream().map(a -> a + ".genesymbol='"+aliases.get(a)+"' ").collect(Collectors.joining(" and "));
 
-    String query = String.format("select %s from %s where %s", selectClause, fromClause, whereClause);
+    String query = String.format("select distinct %s from %s where %s", selectClause, fromClause, whereClause);
 
     Map<String, String> phenoMap = new TreeMap<>();
     Map<String, String> scoreMap = new TreeMap<>();
