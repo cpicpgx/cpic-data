@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
  *   <li>First n*2 columns are column pairs of gene phenotype (GENE Phenotype) and gene activity score (GENE Activity Score)</li>
  *   <li>THe next n columns are for Implications (GENE Implications for Phenotypic Measures)</li>
  *   <li>After gene column(s) are three columns: implication, recommendation, strength (header text doesn't matter but order does)</li>
+ *   <li>If only on one gene, the implication column does not need to mention the gene. If more than one gene, the implication column headers must start with the gene symbol</li>
  * </ol>
  *
  * @author Ryan Whaley
@@ -128,7 +129,11 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             if (phenotypeIdxMap.size() > 1 && implMatch.matches()) {
               implIdxMap.put(implMatch.group(1), j);
             } else if (cellText.toLowerCase().startsWith("implication")) {
-              implIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
+              if (phenotypeIdxMap.size() == 1) {
+                implIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
+              } else {
+                throw new RuntimeException("Multi-gene recommendation sheet needs one 'Implications' column per gene");
+              }
             } else if (phenotypeIdxMap.size() > 1 && asMatch.matches()) {
               asIdxMap.put(asMatch.group(1), j);
             } else if (cellText.toLowerCase().contains("activity score")) {
