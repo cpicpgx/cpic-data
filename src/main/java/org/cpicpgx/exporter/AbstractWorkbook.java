@@ -22,21 +22,21 @@ public abstract class AbstractWorkbook {
 
   public static final String HISTORY_SHEET_NAME = "Change log";
   public static final String NOTES_SHEET_NAME = "Notes";
-  private Workbook workbook;
-  private CreationHelper createHelper;
-  private List<SheetWrapper> sheets = new ArrayList<>();
-  private CellStyle dateStyle;
-  private CellStyle boldDateStyle;
-  private CellStyle centerTextStyle;
+  private final Workbook workbook;
+  private final CreationHelper createHelper;
+  private final List<SheetWrapper> sheets = new ArrayList<>();
+  private final CellStyle dateStyle;
+  private final CellStyle boldDateStyle;
+  private final CellStyle centerTextStyle;
   CellStyle leftTextStyle;
   CellStyle rightNumberStyle;
-  private CellStyle decimalNumberStyle;
-  private CellStyle headerStyle;
-  private CellStyle boldStyle;
-  private CellStyle topBorderStyle;
-  private CellStyle highlightStyle;
-  private CellStyle highlightDoubleStyle;
-  private CellStyle noteStyle;
+  private final CellStyle decimalNumberStyle;
+  private final CellStyle headerStyle;
+  private final CellStyle boldStyle;
+  private final CellStyle topBorderStyle;
+  private final CellStyle highlightStyle;
+  private final CellStyle highlightDoubleStyle;
+  private final CellStyle noteStyle;
   CellStyle wrapStyle;
 
   int colIdx = 1;
