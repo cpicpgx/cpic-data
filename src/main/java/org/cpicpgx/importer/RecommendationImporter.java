@@ -45,7 +45,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String FILE_NAME_SUFFIX = " recommendation.xlsx";
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from recommendation"
+      "delete from recommendation",
+      "delete from drug_note where type='" + NoteType.RECOMMENDATIONS.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
   private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+Phenotype");
