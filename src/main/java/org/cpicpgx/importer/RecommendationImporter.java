@@ -158,6 +158,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
               for (String gene : phenotypeIdxMap.keySet()) {
                 String normalizedPheno = WordUtils.capitalize(StringUtils.strip(dataRow.getText(phenotypeIdxMap.get(gene)).replaceAll("\\s*" + gene + "\\s*", " ")));
+                if (!dbHarness.findPhenotype(gene, normalizedPheno)) {
+                  sf_logger.warn("Phenotype not found in allele table for {} {}", gene, normalizedPheno);
+                }
                 phenotype.addProperty(gene, normalizedPheno);
               }
               for (String gene : implIdxMap.keySet()) {
@@ -205,14 +208,17 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   private static class DbHarness implements AutoCloseable {
     private final PreparedStatement insertStmt;
     private final PreparedStatement insertChangeStmt;
+    private final PreparedStatement findPhenotype;
     private final List<AutoCloseable> closables = new ArrayList<>();
     private final String drugId;
     private final Long guidelineId;
+    private final Map<String,Integer> phenotypeCache = new HashMap<>();
     
     DbHarness(String drugName) throws Exception {
       Connection conn = ConnectionFactory.newConnection();
       this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score, population) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?)");
-      insertChangeStmt = conn.prepareStatement("insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+      this.insertChangeStmt = conn.prepareStatement("insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+      this.findPhenotype = conn.prepareStatement("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
 
       PreparedStatement drugLookupStmt = conn.prepareStatement(
           "select drugid from drug where name=?",
@@ -243,8 +249,27 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
       sf_logger.debug("Drug: {}; Drug ID: {}; Guideline ID: {}", drugName, drugId, guidelineId);
 
+      closables.add(this.findPhenotype);
+      closables.add(this.insertChangeStmt);
       closables.add(this.insertStmt);
       closables.add(conn);
+    }
+
+    boolean findPhenotype(String gene, String phenotype) throws SQLException {
+      String key = gene + phenotype;
+
+      if (phenotypeCache.containsKey(key)) {
+        return true;
+      } else {
+        findPhenotype.setString(1, gene);
+        findPhenotype.setString(2, phenotype);
+        try (ResultSet rs = findPhenotype.executeQuery()) {
+          rs.next();
+          int count = rs.getInt(1);
+          phenotypeCache.put(key, count);
+          return count > 0;
+        }
+      }
     }
     
     void insert(JsonObject phenotype, JsonObject implication, String recommendation, String classification, String comments, JsonObject activityScore, String population) {
