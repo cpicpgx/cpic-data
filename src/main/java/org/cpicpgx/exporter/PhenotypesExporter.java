@@ -42,7 +42,7 @@ public class PhenotypesExporter extends BaseExporter {
         Connection conn = ConnectionFactory.newConnection();
         PreparedStatement stmt = conn.prepareStatement("select distinct p.genesymbol from gene_phenotype p join phenotype_function pf on p.id = pf.phenotypeid order by 1");
         ResultSet rs = stmt.executeQuery();
-        PreparedStatement pstmt = conn.prepareStatement("select function1, function2, activityscore1, activityscore2, totalactivityscore, phenotype, description\n" +
+        PreparedStatement pstmt = conn.prepareStatement("select function1, function2, activityvalue1, activityvalue2, totalactivityscore, phenotype, description\n" +
             "from gene_phenotype p join phenotype_function pf on p.id = pf.phenotypeid\n" +
             "where p.genesymbol=?")
     ) {
