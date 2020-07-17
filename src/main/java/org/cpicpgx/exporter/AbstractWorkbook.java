@@ -154,7 +154,7 @@ public abstract class AbstractWorkbook {
     if (name == null) return null;
     
     Optional<SheetWrapper> sheet = sheets.stream()
-        .filter(s -> s.getName().equals("name"))
+        .filter(s -> s.getName().equalsIgnoreCase(name))
         .findFirst();
     
     if (sheet.isPresent()) {
