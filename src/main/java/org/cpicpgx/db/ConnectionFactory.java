@@ -21,7 +21,7 @@ public class ConnectionFactory {
   private static final String sf_user = MoreObjects.firstNonNull(System.getenv("CPIC_USER"), "cpic");
   private static final String sf_pass = MoreObjects.firstNonNull(System.getenv("CPIC_PASS"), "");
   private static final String sf_db = MoreObjects.firstNonNull(System.getenv("CPIC_DB"), "cpic");
-  private static final String sf_schema = MoreObjects.firstNonNull(System.getenv("CPIC_SCHEMA"), "public");
+  private static final String sf_schema = MoreObjects.firstNonNull(System.getenv("CPIC_SCHEMA"), "cpic");
 
   /**
    * Makes a new {@link Connection}. All connection information defaults to local DB but also can override with environment variables.

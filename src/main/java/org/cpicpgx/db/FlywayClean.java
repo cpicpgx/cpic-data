@@ -12,7 +12,7 @@ public class FlywayClean {
         ConnectionFactory.getJdbcUrl(),
         ConnectionFactory.getUser(),
         ConnectionFactory.getPass()
-    ).load();
+    ).schemas(ConnectionFactory.getSchema()).defaultSchema(ConnectionFactory.getSchema()).load();
     flyway.clean();
   }
 }
