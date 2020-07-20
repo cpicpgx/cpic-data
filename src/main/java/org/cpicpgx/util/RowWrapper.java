@@ -65,6 +65,9 @@ public class RowWrapper {
       return text;
     } else {
       Cell cell = this.row.getCell(cellIdx);
+      if (cell == null) {
+        cell = this.row.createCell(cellIdx);
+      }
       throw new RuntimeException("Found unexpected null value at " + cell.getAddress());
     }
   }
