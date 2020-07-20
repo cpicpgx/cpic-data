@@ -49,7 +49,7 @@ public class PairsExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.PAIRS;
   }
 

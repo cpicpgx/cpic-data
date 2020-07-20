@@ -30,7 +30,7 @@ public class DrugResourceExporter extends BaseExporter {
   }
 
   @Override
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.DRUG_RESOURCE;
   }
 

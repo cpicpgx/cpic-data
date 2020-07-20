@@ -36,7 +36,7 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.DIPLOTYPE_PHENOTYPE;
   }
 

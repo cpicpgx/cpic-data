@@ -36,7 +36,7 @@ public class RecommendationExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.RECOMMENDATIONS;
   }
 

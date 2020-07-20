@@ -35,7 +35,7 @@ public class FrequencyExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.FREQUENCIES;
   }
 

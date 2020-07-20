@@ -29,7 +29,7 @@ public class TermsExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.TERMS;
   }
 

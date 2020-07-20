@@ -29,7 +29,7 @@ public class PhenotypesExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.GENE_PHENOTYPE;
   }
 

@@ -39,7 +39,7 @@ public abstract class BaseExporter {
    * The type of file this exports
    * @return a {@link FileType}
    */
-  abstract FileType getFileType();
+  public abstract FileType getFileType();
 
   /**
    * Parse arguments from the command line.

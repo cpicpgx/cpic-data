@@ -30,7 +30,7 @@ public class GeneCdsExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.GENE_CDS;
   }
 

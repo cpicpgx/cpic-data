@@ -33,7 +33,7 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
   
   @Override
   public FileType getFileType() {
-    return FileType.RESOURCE_IDS;
+    return FileType.GENE_RESOURCE;
   }
 
   @Override

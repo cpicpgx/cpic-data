@@ -35,7 +35,7 @@ public class TestAlertExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.TEST_ALERTS;
   }
 

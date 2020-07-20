@@ -31,7 +31,7 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.ALLELE_FUNCTION_REFERENCE;
   }
 

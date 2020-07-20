@@ -20,7 +20,6 @@ public enum FileType {
   PAIRS,
   PHARMVAR,
   RECOMMENDATIONS,
-  RESOURCE_IDS,
   TERMS,
   TEST_ALERTS,
   PAIR_DIFF,

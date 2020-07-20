@@ -29,7 +29,7 @@ public class GeneResourceExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.GENE_RESOURCE;
   }
 

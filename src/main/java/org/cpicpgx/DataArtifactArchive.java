@@ -32,14 +32,10 @@ public class DataArtifactArchive {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final SimpleDateFormat sf_dateFormat = new SimpleDateFormat("yyyy-MM-dd");
   private static final String sf_dirNamePattern = "cpic_information";
-  private static final String sf_geneDirPattern = sf_dirNamePattern + "/genes";
-  private static final String sf_drugDirPattern = sf_dirNamePattern + "/drugs";
   private static final String sf_readmeFilename = "README.txt";
   private static final String sf_timeFile = "The contents these files were queried on %s. For more information visit https://cpicpgx.org";
   
   private Path m_baseDirectory;
-  private Path m_geneCollectionDirectory;
-  private Path m_drugCollectionDirectory;
   private boolean upload = false;
 
   public static void main(String[] args) {
@@ -71,7 +67,6 @@ public class DataArtifactArchive {
       throw new IllegalPathStateException("Not a directory: " + m_baseDirectory);
     }
     
-    m_geneCollectionDirectory = getDirectoryPath(sf_geneDirPattern);
     List<BaseExporter> exporters = new ArrayList<>();
     exporters.add(new AlleleDefinitionExporter());
     exporters.add(new AlleleFunctionalityReferenceExporter());
@@ -80,26 +75,14 @@ public class DataArtifactArchive {
     exporters.add(new GeneCdsExporter());
     exporters.add(new GeneResourceExporter());
     exporters.add(new PhenotypesExporter());
+    exporters.add(new DrugReviewExporter());
+    exporters.add(new DrugResourceExporter());
+    exporters.add(new RecommendationExporter());
+    exporters.add(new TestAlertExporter());
 
     exporters.forEach(e -> {
-      e.setDirectory(m_geneCollectionDirectory);
-      try {
-        e.setUpload(upload);
-        e.export();
-      } catch (Exception ex) {
-        throw new RuntimeException("Error exporting " + e.getClass().getSimpleName(), ex);
-      }
-    });
-
-    m_drugCollectionDirectory = getDirectoryPath(sf_drugDirPattern);
-    List<BaseExporter> drugExporters = new ArrayList<>();
-    drugExporters.add(new DrugReviewExporter());
-    drugExporters.add(new DrugResourceExporter());
-    drugExporters.add(new RecommendationExporter());
-    drugExporters.add(new TestAlertExporter());
-
-    drugExporters.forEach(e -> {
-      e.setDirectory(m_drugCollectionDirectory);
+      Path dirPath = getDirectoryPath(sf_dirNamePattern + "/" + e.getFileType().name().toLowerCase());
+      e.setDirectory(dirPath);
       try {
         e.setUpload(upload);
         e.export();

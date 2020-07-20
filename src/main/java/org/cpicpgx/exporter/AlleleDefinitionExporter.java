@@ -37,7 +37,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.ALLELE_DEFINITION;
   }
 

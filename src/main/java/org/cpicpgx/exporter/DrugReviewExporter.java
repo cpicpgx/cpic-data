@@ -29,7 +29,7 @@ public class DrugReviewExporter extends BaseExporter {
     }
   }
 
-  FileType getFileType() {
+  public FileType getFileType() {
     return FileType.DRUG_REVIEW;
   }
 
