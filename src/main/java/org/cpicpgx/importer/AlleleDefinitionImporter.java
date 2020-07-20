@@ -203,6 +203,10 @@ public class AlleleDefinitionImporter {
           break;
         }
 
+        if (alleleName.toLowerCase().startsWith("notes")) {
+          throw new RuntimeException("Notes exist in the allele definition sheet, move to a separate tab");
+        }
+
         Map<Integer, String> definition = new LinkedHashMap<>();
         for (int j = sf_variantColStart; j < m_variantColEnd; j++) {
           final int arrayIdx = j;

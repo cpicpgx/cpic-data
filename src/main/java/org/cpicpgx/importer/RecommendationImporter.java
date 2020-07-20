@@ -1,11 +1,12 @@
 package org.cpicpgx.importer;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
@@ -15,9 +16,10 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,14 +46,15 @@ import java.util.regex.Pattern;
 public class RecommendationImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String FILE_NAME_SUFFIX = " recommendation.xlsx";
+  private static final String NO_RESULT = "No Result";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from recommendation",
       "delete from drug_note where type='" + NoteType.RECOMMENDATIONS.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
-  private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+Phenotype");
+  private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
   private static final Pattern IMPL_PATTERN = Pattern.compile("([\\w-]+)\\s+[Ii]mplication.*");
-  private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)\\s+Activity Score.*");
+  private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)\\s+[Aa]ctivity [Ss]core.*");
 
   public static void main(String[] args) {
     rebuild(new RecommendationImporter(), args);
@@ -148,33 +151,50 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             }
           }
 
+          if (asIdxMap.size() != implIdxMap.size() || implIdxMap.size() != phenotypeIdxMap.size()) {
+            sf_logger.warn("phenotype/score/implication maps do not match");
+          } else {
+            asIdxMap.size();
+            phenotypeIdxMap.size();
+          }
+
           for (int k = 1; k <= workbook.currentSheet.getLastRowNum(); k++) {
             try {
               RowWrapper dataRow = workbook.getRow(k);
               if (dataRow.hasNoText(0)) continue;
 
-              JsonObject phenotype = new JsonObject();
-              JsonObject implication = new JsonObject();
-              JsonObject activityScore = new JsonObject();
+              Map<String,String> phenotype = new HashMap<>();
+              Map<String,String> implication = new HashMap<>();
+              Map<String,String> activityScore = new HashMap<>();
 
               for (String gene : phenotypeIdxMap.keySet()) {
                 String normalizedPheno = WordUtils.capitalize(StringUtils.strip(dataRow.getText(phenotypeIdxMap.get(gene)).replaceAll("\\s*" + gene + "\\s*", " ")));
-                if (!dbHarness.findPhenotype(gene, normalizedPheno)) {
+                if (!normalizedPheno.equals(NO_RESULT) && !dbHarness.findPhenotype(gene, normalizedPheno)) {
                   sf_logger.warn("Phenotype not found in allele table for {} {}", gene, normalizedPheno);
                 }
-                phenotype.addProperty(gene, normalizedPheno);
+                phenotype.put(gene, normalizedPheno);
               }
+
+              // Validate not all "No Result" in multi-gene rec
+              if (phenotype.size() > 1 && phenotype.values().stream().allMatch((v) -> v.equals(NO_RESULT))) {
+                sf_logger.warn("Row {} contains all No Result", k + 1);
+              }
+              // Validate no use of "No Result in single-gene rec
+              if (phenotype.size() == 1 && phenotype.containsValue(NO_RESULT)) {
+                sf_logger.warn("Single-gene recommendations should not use 'No Result'");
+              }
+
               for (String gene : implIdxMap.keySet()) {
-                implication.addProperty(gene, dataRow.getText(implIdxMap.get(gene)));
+                implication.put(gene, dataRow.getText(implIdxMap.get(gene)));
               }
               for (String gene : asIdxMap.keySet()) {
-                activityScore.addProperty(gene, dataRow.getText(asIdxMap.get(gene)));
+                activityScore.put(gene, dataRow.getText(asIdxMap.get(gene)));
               }
               dbHarness.insert(
                   phenotype,
                   implication,
-                  dataRow.getNullableText(idxRecommendation),
-                  dataRow.getNullableText(idxClassification),
+                  dataRow.getText(idxRecommendation),
+                  normalizeClassification(dataRow.getText(idxClassification)),
                   dataRow.getNullableText(idxComments),
                   activityScore,
                   populationName
@@ -185,6 +205,15 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           }
         }
       }
+    }
+  }
+
+  @Nonnull
+  private String normalizeClassification(@Nonnull String classification) {
+    if (classification.equals(NA)) {
+      return NA;
+    } else {
+      return WordUtils.capitalize(classification);
     }
   }
 
@@ -210,16 +239,20 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     private final PreparedStatement insertStmt;
     private final PreparedStatement insertChangeStmt;
     private final PreparedStatement findPhenotype;
+    private final PreparedStatement findLookup;
     private final List<AutoCloseable> closables = new ArrayList<>();
     private final String drugId;
     private final Long guidelineId;
     private final Map<String,Integer> phenotypeCache = new HashMap<>();
+    private final Map<String, LookupMethod> geneLookupCache = new HashMap<>();
+    private final Gson gson = new Gson();
     
     DbHarness(String drugName) throws Exception {
       Connection conn = ConnectionFactory.newConnection();
       this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score, population) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?)");
       this.insertChangeStmt = conn.prepareStatement("insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
       this.findPhenotype = conn.prepareStatement("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
+      this.findLookup = conn.prepareStatement("select lookupmethod from gene where symbol=?");
 
       PreparedStatement drugLookupStmt = conn.prepareStatement(
           "select drugid from drug where name=?",
@@ -250,6 +283,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
       sf_logger.debug("Drug: {}; Drug ID: {}; Guideline ID: {}", drugName, drugId, guidelineId);
 
+      closables.add(this.findLookup);
       closables.add(this.findPhenotype);
       closables.add(this.insertChangeStmt);
       closables.add(this.insertStmt);
@@ -272,14 +306,42 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         }
       }
     }
+
+    LookupMethod findLookup(String gene) throws SQLException {
+      if (geneLookupCache.containsKey(gene)) {
+        return geneLookupCache.get(gene);
+      } else {
+        this.findLookup.setString(1, gene);
+        try (ResultSet rs = this.findLookup.executeQuery()) {
+          if (rs.next()) {
+            LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
+            geneLookupCache.put(gene, lookupMethod);
+            return lookupMethod;
+          } else {
+            throw new RuntimeException("No gene data for " + gene);
+          }
+        }
+      }
+    }
     
-    void insert(JsonObject phenotype, JsonObject implication, String recommendation, String classification, String comments, JsonObject activityScore, String population) {
+    void insert(Map<String,String> phenotype, Map<String,String> implication, String recommendation, String classification, String comments, Map<String,String> activityScore, String population) {
       try {
         this.insertStmt.clearParameters();
 
+        // Validate that activity score genes have activity score values filled in
+        for (String gene : activityScore.keySet()) {
+          LookupMethod lookupMethod = findLookup(gene);
+          if (lookupMethod == LookupMethod.ACTIVITY_SCORE && activityScore.get(gene).equals(NA)) {
+            String genePhenotype = phenotype.get(gene);
+            if (!genePhenotype.equals("Indeterminate") && !genePhenotype.equals(NO_RESULT)) {
+              sf_logger.warn("{} is an activity gene but has a missing activity value for {} {}", gene, population, gson.toJson(phenotype));
+            }
+          }
+        }
+
         this.insertStmt.setLong(1, guidelineId);
         this.insertStmt.setString(2, drugId);
-        this.insertStmt.setString(3, implication.toString());
+        this.insertStmt.setString(3, gson.toJson(implication));
         if (StringUtils.isNotBlank(recommendation)) {
           this.insertStmt.setString(4, recommendation);
         } else {
@@ -290,14 +352,14 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         } else {
           this.insertStmt.setNull(5, Types.VARCHAR);
         }
-        this.insertStmt.setObject(6, phenotype.toString());
+        this.insertStmt.setObject(6, gson.toJson(phenotype));
 
         if (comments == null) {
           this.insertStmt.setNull(7, Types.VARCHAR);
         } else {
           this.insertStmt.setString(7, comments);
         }
-        this.insertStmt.setString(8, activityScore.toString());
+        this.insertStmt.setString(8, gson.toJson(activityScore));
         this.insertStmt.setString(9, population);
         
         this.insertStmt.executeUpdate();

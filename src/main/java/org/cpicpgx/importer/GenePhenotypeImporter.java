@@ -6,8 +6,11 @@ import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
 
+import java.lang.invoke.MethodHandles;
 import java.sql.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -19,6 +22,7 @@ import java.util.regex.Pattern;
  * @author Ryan Whaley
  */
 public class GenePhenotypeImporter extends BaseDirectoryImporter {
+  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String FILE_SUFFIX = "_phenotypes.xlsx";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from phenotype_diplotype",
@@ -139,6 +143,10 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       String totalScore = Optional.ofNullable(normalizeScore(row.getNullableText(COL_TOTAL_SCORE))).orElse(NA);
       String description = row.getNullableText(COL_DESC);
       int phenoId = lookupPhenotype(row.getText(COL_PHENO), totalScore);
+
+      if (description == null) {
+        sf_logger.warn("Missing description for {}", row.getText(COL_PHENO));
+      }
 
       validateScoreData(a1Value, a2Value, totalScore);
 

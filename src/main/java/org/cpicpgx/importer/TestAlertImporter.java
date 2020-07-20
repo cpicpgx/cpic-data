@@ -1,11 +1,12 @@
 package org.cpicpgx.importer;
 
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -14,12 +15,11 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -128,6 +128,18 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
 
+    if (activityCols.size() != phenotypeCols.size()) {
+      sf_logger.warn("activity and phenotype columns do not match");
+    }
+    if (idxContext == -1) {
+      sf_logger.warn("no context column found");
+    }
+    if (idxAlert == -1) {
+      sf_logger.warn("no alert text column found");
+    }
+
+    dbHarness.addGenes(activityCols.keySet());
+
     boolean noteMode = false;
     for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
       sf_logger.debug("reading row {}", i);
@@ -150,20 +162,20 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         continue;
       }
 
-      JsonObject activityJson = new JsonObject();
+      Map<String, String> activityJson = new HashMap<>();
       for (String gene : activityCols.keySet()) {
-        activityJson.addProperty(gene, row.getText(activityCols.get(gene)));
+        activityJson.put(gene, row.getText(activityCols.get(gene)));
       }
 
-      JsonObject phenotypeJson = new JsonObject();
+      Map<String,String> phenotypeJson = new HashMap<>();
       for (String gene : phenotypeCols.keySet()) {
         String phenotype = WordUtils.capitalize(row.getText(phenotypeCols.get(gene)).replaceAll(gene + " ", ""));
-        phenotypeJson.addProperty(gene, phenotype);
+        phenotypeJson.put(gene, phenotype);
       }
 
-      String context = StringUtils.replace(row.getNullableText(idxContext), "Test", "test");
+      String context = StringUtils.replace(row.getText(idxContext), "Test", "test");
 
-      dbHarness.writeAlert(context, activityCols.keySet(), row.getText(COL_DRUG), row.getNullableText(idxAlert), population, activityJson, phenotypeJson);
+      dbHarness.writeAlert(context, activityCols.keySet(), row.getText(COL_DRUG), row.getText(idxAlert), population, activityJson, phenotypeJson);
     }
   }
 
@@ -185,8 +197,12 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     private final PreparedStatement insert;
     private final PreparedStatement insertNote;
     private final PreparedStatement insertChangeStmt;
+    private final PreparedStatement findLookup;
+    private final PreparedStatement findPhenotypes;
     private final Map<String, String> nameToIdMap = new HashMap<>();
+    private final Set<String> activityGenes = new HashSet<>();
     private final List<AutoCloseable> closables = new ArrayList<>();
+    private final Gson gson = new Gson();
 
     private DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
@@ -196,10 +212,14 @@ public class TestAlertImporter extends BaseDirectoryImporter {
           "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
       this.insertChangeStmt = conn.prepareStatement(
           "insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+      this.findLookup = conn.prepareStatement("select lookupmethod from gene where symbol=?");
+      this.findPhenotypes = conn.prepareStatement("select phenotype from gene_phenotype where genesymbol=?");
 
       closables.add(this.insert);
       closables.add(this.insertNote);
       closables.add(this.insertChangeStmt);
+      closables.add(this.findLookup);
+      closables.add(this.findPhenotypes);
       closables.add(conn);
     }
 
@@ -214,6 +234,14 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         insertNote.executeUpdate();
       }
       noteOrdinal += 1;
+    }
+
+    private void addGenes(Collection<String> genes) throws SQLException {
+      for (String gene : genes) {
+        if (findLookup(gene) == LookupMethod.ACTIVITY_SCORE) {
+          activityGenes.add(gene);
+        }
+      }
     }
 
     private void writeHistory(Date date, String note, int ordinal) throws SQLException {
@@ -232,9 +260,15 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
 
-    private void writeAlert(String context, Set<String> genes, String drugName, String alertText, String population, JsonObject activityJson, JsonObject phenotypeJson) throws SQLException {
+    private void writeAlert(String context, Set<String> genes, String drugName, String alertText, String population, Map<String,String> activityMap, Map<String,String> phenotypeMap) throws SQLException {
       Array geneArray = conn.createArrayOf("VARCHAR", genes.toArray());
       Array alertSqlArray = conn.createArrayOf("VARCHAR", new String[]{alertText});
+
+      for (String gene : activityGenes) {
+        if (activityMap.get(gene).equals(NA) && !phenotypeMap.get(gene).equals("Indeterminate") && !phenotypeMap.get(gene).startsWith("No Result")) {
+          sf_logger.warn("activity gene has no activity score assigned for {}", gson.toJson(phenotypeMap));
+        }
+      }
 
       insert.clearParameters();
       insert.setString(1, context);
@@ -242,8 +276,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       insert.setString(3, lookup(drugName));
       insert.setArray(4, alertSqlArray);
       insert.setString(5, population);
-      insert.setString(6, activityJson.toString());
-      insert.setString(7, phenotypeJson.toString());
+      insert.setString(6, gson.toJson(activityMap));
+      insert.setString(7, gson.toJson(phenotypeMap));
       insert.executeUpdate();
     }
 
@@ -259,6 +293,19 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         nameToIdMap.put(name, id);
       }
       return id;
+    }
+
+    @Nullable
+    LookupMethod findLookup(String gene) throws SQLException {
+      this.findLookup.setString(1, gene);
+      try (ResultSet rs = this.findLookup.executeQuery()) {
+        if (rs.next()) {
+          return LookupMethod.valueOf(rs.getString(1));
+        } else {
+          sf_logger.warn("no gene data for {}", gene);
+          return null;
+        }
+      }
     }
 
     @Override

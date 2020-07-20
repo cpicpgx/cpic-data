@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
@@ -20,6 +21,7 @@ import java.sql.Date;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Class to parse references for functional assignments from a directory of excel files.
@@ -93,7 +95,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     }
     
     sf_logger.debug("This sheet is for {}, {}", geneSymbol, row.getNullableText(1));
-    
+
+    List<String> noFunctionAlleles = new ArrayList<>();
     rowIdx += 2; // move down 2 rows and start reading;
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
@@ -109,6 +112,10 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String strength = row.getNullableText(COL_IDX_STRENGTH);
         String findings = row.getNullableText(COL_IDX_FINDINGS);
         String comments = row.getNullableText(COL_IDX_COMMENTS);
+
+        if (clinicalFunction == null) {
+          noFunctionAlleles.add(alleleName);
+        }
 
         List<String> citationList = new ArrayList<>();
         if (StringUtils.isNotBlank(citationClump)) {
@@ -158,6 +165,10 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         dbHarness.insertChange(date, note);
       }
     }
+
+    if (noFunctionAlleles.size() > 0) {
+      sf_logger.warn("No clinical function assigned to {}", String.join("; ", noFunctionAlleles));
+    }
   }
 
   static String parseAlleleDefinitionName(@Nonnull String name) {
@@ -184,6 +195,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private final PreparedStatement insertNoteStmt;
     private final PreparedStatement insertChangeStmt;
     private final String gene;
+    private final LookupMethod geneLookupMethod;
     private int noteIdx = 0;
 
     DbHarness(String gene) throws SQLException {
@@ -199,6 +211,18 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
 
+      try (PreparedStatement pstmt = this.conn.prepareStatement("select lookupmethod from gene where symbol=?")) {
+        pstmt.setString(1, gene);
+        try (ResultSet rs = pstmt.executeQuery()) {
+          if (rs.next()) {
+            this.geneLookupMethod = LookupMethod.valueOf(rs.getString(1));
+          } else {
+            sf_logger.warn("Gene lookup method not found for " + gene);
+            this.geneLookupMethod = null;
+          }
+        }
+      }
+
       insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate) values (?, ?, ?, initcap(?), ?, initcap(?), ?) returning id");
       insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?::jsonb, ?)");
       insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
@@ -208,7 +232,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private Long lookupAlleleDefinitionId(String alleleName) {
       String alleleDefinitionName = parseAlleleDefinitionName(alleleName);
       if (!this.alleleNameMap.containsKey(alleleDefinitionName)) {
-        throw new RuntimeException("Missing allele defintiion for " + gene + " " + alleleDefinitionName);
+        throw new RuntimeException("Missing allele definition for " + gene + " " + alleleDefinitionName);
       }
       return this.alleleNameMap.get(alleleDefinitionName);
     }
@@ -225,6 +249,10 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String comments
     ) throws SQLException {
       Long alleleDefinitionId = lookupAlleleDefinitionId(allele);
+
+      if (StringUtils.isBlank(activityValue) && geneLookupMethod == LookupMethod.ACTIVITY_SCORE) {
+        sf_logger.warn("{} is missing an activity score", allele);
+      }
 
       this.insertAlleleStmt.clearParameters();
       this.insertAlleleStmt.setString(1, this.gene);

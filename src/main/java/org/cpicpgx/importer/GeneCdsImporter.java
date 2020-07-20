@@ -92,8 +92,8 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
           break;
         }
 
-        String priority = dataRow.getNullableText(COL_EHR_PRIORITY);
-        String consultation = dataRow.getNullableText(COL_CONSULTATION);
+        String priority = dataRow.getText(COL_EHR_PRIORITY);
+        String consultation = dataRow.getText(COL_CONSULTATION);
 
         dbHarness.insert(pheno, activity, priority, consultation);
       }
