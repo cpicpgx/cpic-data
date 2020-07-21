@@ -3,7 +3,7 @@ DATED_NAME = $(ARCHIVE_NAME)-$(shell date +'%Y%m%d').sql
 
 dump:
 	mkdir -p out
-	pg_dump cpic -f out/${DATED_NAME} --no-privileges --schema=public --no-owner
+	pg_dump cpic -f out/${DATED_NAME} --no-privileges --schema=cpic --no-owner
 
 upload:
 	gzip out/${DATED_NAME}
