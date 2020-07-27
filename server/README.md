@@ -1,7 +1,72 @@
 # CPIC Services
 
+The following documentation is for people maintaining the CPIC database and API services. Most people will not find this 
+useful but if you're curious how the services work or looking for examples of how to run your own services you may 
+find something useful here.
+
+If you're looking for how to use CPIC data, go read [the main README for this repo](../README.md).
+
+
+## Running DB/API
+
+The database should be run on a PostgreSQL 12 instance. It may work on other versions but they have not been tested. 
+PostgreSQL is available on most OS's, [read the OS-specific documentation](https://www.postgresql.org/download/) for 
+instructions.
+
+The PostgREST API can be run on most major OS. Read the docs for 
+[instructions on installation](http://postgrest.org/en/v7.0.0/tutorials/tut0.html). This directory contains a 
+`postgrest.conf` file that you can use as an example for running PostgREST.
+
+If you want to run the services via docker find the instructions below.
+
+
+## Clearing & Populating the server with data
+
+Make sure you're using the latest checkout of this repo and that at least the database container is up and running
+
+    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.db.FlywayClean
+
+This will clear the database of all data and relations.
+
+    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.db.FlywayMigrate
+
+This will set up all the DB objects and populate some support tables but it will still be mostly empty.
+
+    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.DataImport -d /home/cpic/cpic-support-files
+
+This will import all the data from the CPIC data files and leave the server with an initial state of data
+
+Once this is all completed, you should probably stop and restart all docker containers so documentation and API endpoints can be rebuilt.
+
+
+## Exporting a DB archive
+
+To export all data from the production CPIC server from a client machine:
+
+    pg_dump cpic -h db.cpicpgx.org -p 5432 -U cpic > ~/path/to/cpic_db_dump.sql
+
+This has been put into a Makefile that can be run from the server itself so making a db dump is:
+
+    make dump
+
+
+## File Services
+
+CPIC files are stored and distributed from an AWS S3 bucket accessible via http. The files are available via the `files.cpicpgx.org` domain.
+
+- `/data` - data files that are used to help render cpicpgx.org website. These are files generated from data in the database.
+- `/images` - static image assets to be used on the website or in reports.
+  - `/test_alerts` - graphics used in the Pre- and Post- test alert files.
+- `/reports` - report files generated from data in the database, mostly stored in Excel or CSV formatted files.
+  - `/archive` - timestamped tarball archives of the files that appear in this directory 
+  - `/drugs` - drug-centric reports
+  - `/genes` - gene-centric reports
+
+
 ## Running DB/API with Docker
 
+If you can't run PostgreSQL or PostgREST on your OS for some reason you could try running the services via Docker
+instead. This works well for a dev environment, but should probably not be used for a production environment.
 
 ### Creating the cpic-db image
 
@@ -52,6 +117,9 @@ To restart the services with the same configuration that started them:
 
     docker-compose restart
 
+By default, the API is run on port 3000 and exposed to the host. So you should be able to make requests to
+`http://localhost:3000` for API calls. The port number can be reconfigured in `docker-compose.yml`.
+
 ### Running just the database
 
 To set up (and run) just a docker container of the database only
@@ -69,42 +137,3 @@ When that's installed, do the following to run it:
 To connect to the db via the psql client
 
     psql -h 0.0.0.0 -p 5432 -U cpic
-
-
-## Clearing & Populating the server with data
-
-Make sure you're using the latest checkout of this repo and that at least the database container is up and running
-
-    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.db.FlywayClean
-
-This will clear the database of all data and relations.
-
-    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.db.FlywayMigrate
-
-This will set up all the DB objects and populate some support tables but it will still be mostly empty.
-
-    java -jar build/libs/<Current CpicData Build>.jar org.cpicpgx.DataImport -d /home/cpic/cpic-support-files
-
-This will import all the data from the CPIC data files and leave the server with an initial state of data
-
-Once this is all completed, you should probably stop and restart all docker containers so documentation and API endpoints can be rebuilt.
-
-
-## Exporting a DB archive
-
-To export all data from the production CPIC server
-
-    pg_dump cpic -h db.cpicpgx.org -p 5432 -U cpic > ~/path/to/cpic_db_dump.sql
-
-
-## File Services
-
-CPIC files are stored and distributed from an AWS S3 bucket accessible via http. The files are available via the `files.cpicpgx.org` domain.
-
-- `/data` - data files that are used to help render cpicpgx.org website. These are files generated from data in the database.
-- `/images` - static image assets to be used on the website or in reports.
-  - `/test_alerts` - graphics used in the Pre- and Post- test alert files.
-- `/reports` - report files generated from data in the database, mostly stored in Excel or CSV formatted files.
-  - `/archive` - timestamped tarball archives of the files that appear in this directory 
-  - `/drugs` - drug-centric reports
-  - `/genes` - gene-centric reports
