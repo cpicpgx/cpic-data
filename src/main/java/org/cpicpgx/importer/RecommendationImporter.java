@@ -53,8 +53,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
   private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
-  private static final Pattern IMPL_PATTERN = Pattern.compile("([\\w-]+)\\s+[Ii]mplication.*");
-  private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)\\s+[Aa]ctivity [Ss]core.*");
+  private static final Pattern IMPL_PATTERN = Pattern.compile("([\\w-]+)?\\s*[Ii]mplication.*");
+  private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)?\\s*[Aa]ctivity [Ss]core.*");
+  private static final Pattern ALLELE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Aa]llele.*");
 
   public static void main(String[] args) {
     rebuild(new RecommendationImporter(), args);
@@ -116,9 +117,12 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           }
 
           RowWrapper headerRow = workbook.getRow(0);
-          Map<String, Integer> phenotypeIdxMap = getPhenotypeIndexMap(headerRow);
+
+          // caching column indexes for different types of data
+          Map<String, Integer> phenotypeIdxMap = new HashMap<>();
           Map<String, Integer> implIdxMap = new HashMap<>();
           Map<String, Integer> asIdxMap = new HashMap<>();
+          Map<String, Integer> alleleIdxMap = new HashMap<>();
           int idxRecommendation = -1;
           int idxClassification = -1;
           int idxComments = -1;
@@ -127,35 +131,66 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             String cellText = headerRow.getNullableText(j);
             if (cellText == null) continue;
 
-            // figuring out the index of each type of column
             Matcher implMatch = IMPL_PATTERN.matcher(cellText);
             Matcher asMatch = AS_PATTERN.matcher(cellText);
-            if (phenotypeIdxMap.size() > 1 && implMatch.matches()) {
-              implIdxMap.put(implMatch.group(1), j);
-            } else if (cellText.toLowerCase().startsWith("implication")) {
-              if (phenotypeIdxMap.size() == 1) {
-                implIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
+            Matcher phenoMatch = PHENO_PATTERN.matcher(cellText);
+            Matcher alleleMatch = ALLELE_PATTERN.matcher(cellText);
+
+            // figuring out the index of each type of column
+            if (implMatch.matches()) {
+              if (implMatch.group(1) != null) {
+                implIdxMap.put(implMatch.group(1), j);
+              } else if (dbHarness.getGenes().size() == 1) {
+                implIdxMap.put(dbHarness.getGenes().get(0), j);
               } else {
-                throw new RuntimeException("Multi-gene recommendation sheet needs one 'Implications' column per gene");
+                throw new RuntimeException("Unexpected implication column setup");
               }
-            } else if (phenotypeIdxMap.size() > 1 && asMatch.matches()) {
-              asIdxMap.put(asMatch.group(1), j);
-            } else if (cellText.toLowerCase().contains("activity score")) {
-              asIdxMap.put(phenotypeIdxMap.keySet().iterator().next(), j);
+            } else if (asMatch.matches()) {
+              if (asMatch.group(1) != null) {
+                asIdxMap.put(asMatch.group(1), j);
+              } else if (dbHarness.getGenes().size() == 1) {
+                asIdxMap.put(dbHarness.getGenes().get(0), j);
+              } else {
+                throw new RuntimeException("Unexpected activity score setup for " + drugName);
+              }
+            } else if (phenoMatch.matches()) {
+              phenotypeIdxMap.put(phenoMatch.group(1), j);
+            } else if (alleleMatch.matches()) {
+              alleleIdxMap.put(alleleMatch.group(1), j);
             } else if (cellText.equalsIgnoreCase("Therapeutic Recommendation")) {
               idxRecommendation = j;
             } else if (cellText.toLowerCase().contains("classification of recommendation")) {
               idxClassification = j;
             } else if (cellText.toLowerCase().contains("comments")) {
               idxComments = j;
+            } else {
+              throw new RuntimeException("Unrecognized column: " + cellText);
             }
           }
 
-          if (asIdxMap.size() != implIdxMap.size() || implIdxMap.size() != phenotypeIdxMap.size()) {
-            sf_logger.warn("phenotype/score/implication maps do not match");
-          } else {
-            asIdxMap.size();
-            phenotypeIdxMap.size();
+          for (String gene : dbHarness.getGenes()) {
+            switch (dbHarness.geneLookupCache.get(gene)) {
+              case ACTIVITY_SCORE:
+                if (asIdxMap.get(gene) == null) {
+                  throw new RuntimeException("Activity score column missing for " + gene);
+                }
+                if (phenotypeIdxMap.get(gene) == null) {
+                  throw new RuntimeException("Phenotype column missing for " + gene);
+                }
+                break;
+              case PHENOTYPE:
+                if (phenotypeIdxMap.get(gene) == null) {
+                  throw new RuntimeException("Phenotype column missing for " + gene);
+                }
+                break;
+              case ALLELE_STATUS:
+                if (alleleIdxMap.get(gene) == null) {
+                  throw new RuntimeException("Allele status column missing for " + gene);
+                }
+                break;
+              default:
+                throw new RuntimeException("Unsupported lookup method for " + gene);
+            }
           }
 
           for (int k = 1; k <= workbook.currentSheet.getLastRowNum(); k++) {
@@ -166,9 +201,11 @@ public class RecommendationImporter extends BaseDirectoryImporter {
               Map<String,String> phenotype = new HashMap<>();
               Map<String,String> implication = new HashMap<>();
               Map<String,String> activityScore = new HashMap<>();
+              Map<String,String> alleleStatus = new HashMap<>();
+              Map<String,String> lookupKey = new HashMap<>();
 
               for (String gene : phenotypeIdxMap.keySet()) {
-                String normalizedPheno = WordUtils.capitalize(StringUtils.strip(dataRow.getText(phenotypeIdxMap.get(gene)).replaceAll("\\s*" + gene + "\\s*", " ")));
+                String normalizedPheno = normalizeGeneText(gene, dataRow.getText(phenotypeIdxMap.get(gene)));
                 if (!normalizedPheno.equals(NO_RESULT) && !dbHarness.findPhenotype(gene, normalizedPheno)) {
                   sf_logger.warn("Phenotype not found in allele table for {} {}", gene, normalizedPheno);
                 }
@@ -184,11 +221,30 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 sf_logger.warn("Single-gene recommendations should not use 'No Result'");
               }
 
+              for (String gene : dbHarness.getGenes()) {
+                switch (dbHarness.geneLookupCache.get(gene)) {
+                  case ACTIVITY_SCORE:
+                    lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(asIdxMap.get(gene))));
+                    break;
+                  case ALLELE_STATUS:
+                    lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(alleleIdxMap.get(gene))));
+                    break;
+                  case PHENOTYPE:
+                    lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(phenotypeIdxMap.get(gene))));
+                    break;
+                  default:
+                    throw new RuntimeException("Unsupported lookup method for " + gene);
+                }
+              }
+
               for (String gene : implIdxMap.keySet()) {
                 implication.put(gene, dataRow.getText(implIdxMap.get(gene)));
               }
               for (String gene : asIdxMap.keySet()) {
                 activityScore.put(gene, dataRow.getText(asIdxMap.get(gene)));
+              }
+              for (String gene : alleleIdxMap.keySet()) {
+                alleleStatus.put(gene, dataRow.getText(alleleIdxMap.get(gene)));
               }
               dbHarness.insert(
                   phenotype,
@@ -197,7 +253,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                   normalizeClassification(dataRow.getText(idxClassification)),
                   dataRow.getNullableText(idxComments),
                   activityScore,
-                  populationName
+                  populationName,
+                  lookupKey,
+                  alleleStatus
               );
             } catch (RuntimeException ex) {
               throw new RuntimeException("Error reading row " + (k + 1), ex);
@@ -217,29 +275,20 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     }
   }
 
-  private Map<String, Integer> getPhenotypeIndexMap(RowWrapper headerRow) {
-    Map<String, Integer> phenotypeIdxMap = new HashMap<>();
-    for (int j = 0; j < headerRow.getLastCellNum(); j++) {
-      String cellText = headerRow.getNullableText(j);
-      if (cellText == null) continue;
-
-      Matcher phenoMatch = PHENO_PATTERN.matcher(cellText);
-      if (phenoMatch.matches()) {
-        phenotypeIdxMap.put(phenoMatch.group(1), j);
-      }
+  private String normalizeGeneText(@Nonnull String gene, String text) {
+    if (text == null) {
+      return null;
+    } else if (text.equalsIgnoreCase(NA)) {
+      return NA;
+    } else {
+      return WordUtils.capitalize(StringUtils.strip(text.replaceAll(gene + "\\s*", "")));
     }
-
-    if (phenotypeIdxMap.size() == 0) {
-      throw new RuntimeException("Phenotype column not in expected format");
-    }
-    return phenotypeIdxMap;
   }
 
   private static class DbHarness implements AutoCloseable {
     private final PreparedStatement insertStmt;
     private final PreparedStatement insertChangeStmt;
     private final PreparedStatement findPhenotype;
-    private final PreparedStatement findLookup;
     private final List<AutoCloseable> closables = new ArrayList<>();
     private final String drugId;
     private final Long guidelineId;
@@ -249,10 +298,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     
     DbHarness(String drugName) throws Exception {
       Connection conn = ConnectionFactory.newConnection();
-      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score, population) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?)");
+      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score, population, lookup_key, allele_status) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
       this.insertChangeStmt = conn.prepareStatement("insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
       this.findPhenotype = conn.prepareStatement("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
-      this.findLookup = conn.prepareStatement("select lookupmethod from gene where symbol=?");
 
       PreparedStatement drugLookupStmt = conn.prepareStatement(
           "select drugid from drug where name=?",
@@ -281,13 +329,25 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         throw new NotFoundException("Couldn't find guideline");
       }
 
+      try (PreparedStatement stmt = conn.prepareStatement("select genesymbol, g.lookupmethod from pair p join drug d on p.drugid = d.drugid join gene g on p.genesymbol = g.symbol where d.name=? and p.usedForRecommendation = true")) {
+        stmt.setString(1, drugName);
+        try (ResultSet stmtRs = stmt.executeQuery()) {
+          while (stmtRs.next()) {
+            geneLookupCache.put(stmtRs.getString(1), LookupMethod.valueOf(stmtRs.getString(2)));
+          }
+        }
+      }
+
       sf_logger.debug("Drug: {}; Drug ID: {}; Guideline ID: {}", drugName, drugId, guidelineId);
 
-      closables.add(this.findLookup);
       closables.add(this.findPhenotype);
       closables.add(this.insertChangeStmt);
       closables.add(this.insertStmt);
       closables.add(conn);
+    }
+
+    List<String> getGenes() {
+      return new ArrayList<>(geneLookupCache.keySet());
     }
 
     boolean findPhenotype(String gene, String phenotype) throws SQLException {
@@ -307,30 +367,13 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       }
     }
 
-    LookupMethod findLookup(String gene) throws SQLException {
-      if (geneLookupCache.containsKey(gene)) {
-        return geneLookupCache.get(gene);
-      } else {
-        this.findLookup.setString(1, gene);
-        try (ResultSet rs = this.findLookup.executeQuery()) {
-          if (rs.next()) {
-            LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
-            geneLookupCache.put(gene, lookupMethod);
-            return lookupMethod;
-          } else {
-            throw new RuntimeException("No gene data for " + gene);
-          }
-        }
-      }
-    }
-    
-    void insert(Map<String,String> phenotype, Map<String,String> implication, String recommendation, String classification, String comments, Map<String,String> activityScore, String population) {
+    void insert(Map<String,String> phenotype, Map<String,String> implication, String recommendation, String classification, String comments, Map<String,String> activityScore, String population, Map<String,String> lookupKey, Map<String,String> alleleStatus) {
       try {
         this.insertStmt.clearParameters();
 
         // Validate that activity score genes have activity score values filled in
         for (String gene : activityScore.keySet()) {
-          LookupMethod lookupMethod = findLookup(gene);
+          LookupMethod lookupMethod = geneLookupCache.get(gene);
           if (lookupMethod == LookupMethod.ACTIVITY_SCORE && activityScore.get(gene).equals(NA)) {
             String genePhenotype = phenotype.get(gene);
             if (!genePhenotype.equals("Indeterminate") && !genePhenotype.equals(NO_RESULT)) {
@@ -361,6 +404,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         }
         this.insertStmt.setString(8, gson.toJson(activityScore));
         this.insertStmt.setString(9, population);
+        this.insertStmt.setString(10, gson.toJson(lookupKey));
+        this.insertStmt.setString(11, gson.toJson(alleleStatus));
         
         this.insertStmt.executeUpdate();
         

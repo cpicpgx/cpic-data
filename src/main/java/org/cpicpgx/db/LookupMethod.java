@@ -6,9 +6,11 @@ package org.cpicpgx.db;
  * This applies to things like recommendations and CDS language.
  *
  * {@link LookupMethod#ACTIVITY_SCORE} Use the activity scores assigned to the diplotype when looking up information
- * {@link LookupMethod#FUNCTION} Use the functions assigned to the diplotype when looking up information
+ * {@link LookupMethod#PHENOTYPE} Use the phenotype of the diplotype when looking up information
+ * {@link LookupMethod#ALLELE_STATUS} Use the status of whether an allele is present or not to look up information
  */
 public enum LookupMethod {
   ACTIVITY_SCORE,
-  FUNCTION
+  PHENOTYPE,
+  ALLELE_STATUS
 }

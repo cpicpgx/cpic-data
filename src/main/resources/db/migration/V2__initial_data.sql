@@ -833,3 +833,4 @@ HLA-B	*58:01	9003
 
 -- these genes need to use activity score for lookup
 update gene set lookupMethod='ACTIVITY_SCORE' where symbol in ('CYP2C9', 'CYP2D6', 'DPYD');
+update gene set lookupMethod='ALLELE_STATUS' where symbol in ('HLA-A', 'HLA-B');

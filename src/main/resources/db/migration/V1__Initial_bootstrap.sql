@@ -20,7 +20,8 @@ CREATE TABLE guideline
   version INTEGER DEFAULT 1,
   name TEXT UNIQUE NOT NULL,
   url TEXT UNIQUE,
-  pharmgkbId TEXT[]
+  pharmgkbId TEXT[],
+  genes TEXT[]
 );
 
 CREATE TRIGGER version_guideline
@@ -33,6 +34,7 @@ COMMENT ON COLUMN guideline.version IS 'The version number, iterates on modifica
 COMMENT ON COLUMN guideline.name IS 'The name (title) of this guideline, required';
 COMMENT ON COLUMN guideline.url IS 'The URL of this guideline on the cpicpgx.org domain, optional';
 COMMENT ON COLUMN guideline.pharmgkbId IS 'The IDs from PharmGKB for their annotations of this guideline, optional';
+COMMENT ON COLUMN guideline.genes IS 'The subject genes of this guideline';
 
 
 CREATE TABLE publication
@@ -79,7 +81,7 @@ CREATE TABLE gene
   ensemblId         TEXT CHECK (ensemblId ~ '^(ENSG\d+){0,1}$'),
   pharmgkbId        TEXT CHECK (pharmgkbId ~ '^(PA\d+){0,1}$'),
   frequencyMethods  TEXT,
-  lookupMethod      TEXT DEFAULT 'FUNCTION',
+  lookupMethod      TEXT DEFAULT 'PHENOTYPE',
   version           INTEGER DEFAULT 1
 );
 
@@ -98,7 +100,7 @@ COMMENT ON COLUMN gene.pharmgkbId IS 'The ID for this gene in PharmGKB.';
 COMMENT ON COLUMN gene.hgncId IS 'The HGNC numerical ID number for this gene prefixed by "HGNC:"';
 COMMENT ON COLUMN gene.ncbiId IS 'The NCBI Gene (Entrez) ID number for this gene';
 COMMENT ON COLUMN gene.frequencyMethods IS 'Text documentation of the methods and caveats for allele frequency data';
-COMMENT ON COLUMN gene.lookupMethod IS 'The way to lookup information about diplotypes of this gene, should use function or score';
+COMMENT ON COLUMN gene.lookupMethod IS 'The way to lookup information about diplotypes of this gene, should use ACTIVITY_SCORE, PHENOTYPE, or ALLELE_STATUS';
 COMMENT ON COLUMN gene.ensemblId IS 'The Ensembl ID for this gene';
 
 
@@ -385,6 +387,7 @@ CREATE TABLE pair
   geneSymbol VARCHAR(20) REFERENCES gene(symbol),
   drugId VARCHAR(20) REFERENCES drug(drugId),
   guidelineId INTEGER REFERENCES guideline(id),
+  usedForRecommendation BOOLEAN DEFAULT FALSE,
   version INTEGER DEFAULT 1,
   level VARCHAR(5) NOT NULL,
   pgkbCALevel VARCHAR(5),
@@ -403,6 +406,7 @@ COMMENT ON COLUMN pair.pairid IS 'A synthetic numerical id, automatically assign
 COMMENT ON COLUMN pair.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
 COMMENT ON COLUMN pair.drugId IS 'The ID of the drug in this pair, required';
 COMMENT ON COLUMN pair.guidelineId IS 'The ID of a guideline this pair is described in, optional';
+COMMENT ON COLUMN pair.usedForRecommendation IS 'Whether the gene is used for recommendation lookup for the drug if this pair is part of a guideline, default false';
 COMMENT ON COLUMN pair.version IS 'The version number, iterates on modification';
 COMMENT ON COLUMN pair.level IS 'The CPIC level of this pair, required';
 COMMENT ON COLUMN pair.pgkbCALevel IS 'The top level of PharmGKB Clinical Annotation for this pair, optional';
@@ -513,9 +517,13 @@ CREATE TABLE recommendation
   classification VARCHAR(20),
   phenotypes JSONB,
   activity_score JSONB,
+  allele_status JSONB,
+  lookup_key JSONB,
   population TEXT,
   comments TEXT,
-  version INTEGER DEFAULT 1
+  version INTEGER DEFAULT 1,
+
+  UNIQUE (guidelineId, drugId, population, lookup_key)
 );
 
 CREATE TRIGGER version_recommendation
@@ -533,6 +541,8 @@ COMMENT ON COLUMN recommendation.population IS 'The population this recommendati
 COMMENT ON COLUMN recommendation.comments IS 'Optional comments about the recommendation';
 COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendation applies to, this is a JSON mapping of gene to phenotype';
 COMMENT ON COLUMN recommendation.activity_score IS 'Activity score that this recommendation applies to, this is a JSON mapping of gene to score value';
+COMMENT ON COLUMN recommendation.allele_status IS 'Whether or not an allele is present, used mainly for HLA genes, and used for recommendation lookups. This is a JSON mappin gof gene to allele status (positive/negative)';
+COMMENT ON COLUMN recommendation.lookup_key IS '';
 
 
 CREATE TABLE test_alert
