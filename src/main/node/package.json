@@ -11,9 +11,9 @@
   "author": "Ryan Whaley",
   "license": "CC0-1.0",
   "dependencies": {
-    "axios": "^0.18.1",
-    "csv-generate": "^3.2.0",
-    "dayjs": "^1.7.7",
-    "lodash": "^4.17.15"
+    "axios": "^0.19.2",
+    "csv-generate": "^3.2.4",
+    "dayjs": "^1.8.30",
+    "lodash": "^4.17.19"
   }
 }
