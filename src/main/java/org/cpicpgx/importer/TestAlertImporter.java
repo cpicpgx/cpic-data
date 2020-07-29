@@ -2,7 +2,6 @@ package org.cpicpgx.importer;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
@@ -18,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,9 +34,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       "delete from drug_note where type='" + NoteType.TEST_ALERT.name() + "'",
       "delete from test_alert"
   };
-  private static final Pattern sf_activityScorePattern = Pattern.compile("^(.+)?[Aa]ctivity [Ss]core$");
-  private static final Pattern sf_phenotypePattern = Pattern.compile("^(.+)?[Pp]henotype$");
-
   private static final String FILE_EXTENSION = "_Pre_and_Post_Test_Alerts.xlsx";
   private static final String DEFAULT_DIRECTORY = "test_alerts";
 
@@ -94,42 +90,46 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private static final int COL_TRIGGER_START = 1;
   private static final String COL_NAME_CONTEXT = "CDS Context, Relative to Genetic Testing";
   private static final String COL_NAME_ALERT = "CDS Alert Text";
+  private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
+  private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)?\\s*[Aa]ctivity [Ss]core.*");
+  private static final Pattern ALLELE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Aa]llele.*");
 
   private void processTestAlertSheet(WorkbookWrapper workbook, DbHarness dbHarness, String population) throws Exception {
     RowWrapper headerRow = workbook.getRow(0);
 
-    Map<String, Integer> activityCols = new TreeMap<>();
-    Map<String, Integer> phenotypeCols = new TreeMap<>();
-
     int idxContext = -1;
     int idxAlert = -1;
+    Map<String, Integer> idxPhenotypeByGene = new HashMap<>();
+    Map<String, Integer> idxActivityByGene = new HashMap<>();
+    Map<String, Integer> idxAlleleByGene = new HashMap<>();
+
     for (int h=COL_TRIGGER_START; h<= headerRow.row.getLastCellNum(); h++) {
-      String triggerName = StringUtils.strip(headerRow.getNullableText(h));
-      if (StringUtils.isBlank(triggerName)) {
+      String columnHeaderText = StringUtils.strip(headerRow.getNullableText(h));
+      if (columnHeaderText == null) {
         continue;
-      } else if (triggerName.equals(COL_NAME_CONTEXT)) {
+      }
+
+      Matcher phenoMatch = PHENO_PATTERN.matcher(columnHeaderText);
+      Matcher activityMatch = AS_PATTERN.matcher(columnHeaderText);
+      Matcher alleleMatch = ALLELE_PATTERN.matcher(columnHeaderText);
+
+      if (columnHeaderText.equals(COL_NAME_CONTEXT)) {
         idxContext = h;
-      } else if (triggerName.equals(COL_NAME_ALERT)) {
+      } else if (columnHeaderText.equals(COL_NAME_ALERT)) {
         idxAlert = h;
+      } else if (phenoMatch.matches() && phenoMatch.group(1) != null) {
+        idxPhenotypeByGene.put(phenoMatch.group(1), h);
+      } else if (activityMatch.matches() && activityMatch.group(1) != null) {
+        idxActivityByGene.put(activityMatch.group(1), h);
+      } else if (alleleMatch.matches() && alleleMatch.group(1) != null) {
+        idxAlleleByGene.put(alleleMatch.group(1), h);
       } else {
-        Matcher activityMatch = sf_activityScorePattern.matcher(triggerName);
-        Matcher phenotypeMatch = sf_phenotypePattern.matcher(triggerName);
-        if (activityMatch.matches()) {
-          String activityGene = StringUtils.stripToNull(activityMatch.group(1));
-          if (activityGene == null) {
-            throw new RuntimeException("No gene specified in the activity column " + (h + 1));
-          }
-          activityCols.put(StringUtils.strip(activityMatch.group(1)), h);
-        } else if (phenotypeMatch.matches()) {
-          phenotypeCols.put(StringUtils.strip(phenotypeMatch.group(1)), h);
-        } else {
-          throw new RuntimeException("Trigger column not in expected format: " + triggerName);
-        }
+        throw new RuntimeException("Column type not recognized: " + columnHeaderText);
       }
     }
 
-    if (activityCols.size() != phenotypeCols.size()) {
-      sf_logger.warn("activity and phenotype columns do not match");
+    if (idxPhenotypeByGene.size() == 0 && idxActivityByGene.size() == 0 && idxAlleleByGene.size() == 0) {
+      throw new RuntimeException("No lookup columns found");
     }
     if (idxContext == -1) {
       sf_logger.warn("no context column found");
@@ -138,7 +138,9 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       sf_logger.warn("no alert text column found");
     }
 
-    dbHarness.addGenes(activityCols.keySet());
+    dbHarness.addGenes(idxPhenotypeByGene.keySet());
+    dbHarness.addGenes(idxActivityByGene.keySet());
+    dbHarness.addGenes(idxAlleleByGene.keySet());
 
     boolean noteMode = false;
     for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
@@ -163,19 +165,38 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
 
       Map<String, String> activityJson = new HashMap<>();
-      for (String gene : activityCols.keySet()) {
-        activityJson.put(gene, row.getText(activityCols.get(gene)));
+      for (String gene : idxActivityByGene.keySet()) {
+        String pheno = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
+        if (pheno != null && pheno.toLowerCase().startsWith("no result")) {
+          activityJson.put(gene, pheno);
+        } else {
+          activityJson.put(gene, normalizeGeneText(gene, row.getText(idxActivityByGene.get(gene))));
+        }
+      }
+      Map<String,String> phenotypeJson = new HashMap<>();
+      for (String gene : idxPhenotypeByGene.keySet()) {
+        phenotypeJson.put(gene, normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene))));
       }
 
-      Map<String,String> phenotypeJson = new HashMap<>();
-      for (String gene : phenotypeCols.keySet()) {
-        String phenotype = WordUtils.capitalize(row.getText(phenotypeCols.get(gene)).replaceAll(gene + " ", ""));
-        phenotypeJson.put(gene, phenotype);
+      Map<String,String> alleleJson = new HashMap<>();
+      Collection<String> genesToCheck = idxAlleleByGene.size() == 0 ? idxPhenotypeByGene.keySet() : idxAlleleByGene.keySet();
+      for (String gene : genesToCheck) {
+        String pheno = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
+        if (idxAlleleByGene.get(gene) == null) {
+          alleleJson.put(gene, pheno);
+        } else {
+          String allele = normalizeGeneText(gene, row.getText(idxAlleleByGene.get(gene)));
+          alleleJson.put(gene, allele);
+        }
       }
 
       String context = StringUtils.replace(row.getText(idxContext), "Test", "test");
 
-      dbHarness.writeAlert(context, activityCols.keySet(), row.getText(COL_DRUG), row.getText(idxAlert), population, activityJson, phenotypeJson);
+      try {
+        dbHarness.writeAlert(context, row.getText(COL_DRUG), row.getText(idxAlert), population, activityJson, phenotypeJson, alleleJson);
+      } catch (Exception ex) {
+        throw new RuntimeException("Error processing row " + (i + 1), ex);
+      }
     }
   }
 
@@ -198,28 +219,25 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     private final PreparedStatement insertNote;
     private final PreparedStatement insertChangeStmt;
     private final PreparedStatement findLookup;
-    private final PreparedStatement findPhenotypes;
     private final Map<String, String> nameToIdMap = new HashMap<>();
-    private final Set<String> activityGenes = new HashSet<>();
+    private final Map<String,LookupMethod> geneMap = new HashMap<>();
     private final List<AutoCloseable> closables = new ArrayList<>();
     private final Gson gson = new Gson();
 
     private DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
       this.insert = conn.prepareStatement(
-          "insert into test_alert(cds_context, genes, drugid, alert_text, population, activity_score, phenotype) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb)");
+          "insert into test_alert(cds_context, genes, drugid, alert_text, population, activity_score, phenotype, allele_status, lookup_key) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)");
       this.insertNote = conn.prepareStatement(
           "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
       this.insertChangeStmt = conn.prepareStatement(
           "insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
       this.findLookup = conn.prepareStatement("select lookupmethod from gene where symbol=?");
-      this.findPhenotypes = conn.prepareStatement("select phenotype from gene_phenotype where genesymbol=?");
 
       closables.add(this.insert);
       closables.add(this.insertNote);
       closables.add(this.insertChangeStmt);
       closables.add(this.findLookup);
-      closables.add(this.findPhenotypes);
       closables.add(conn);
     }
 
@@ -236,11 +254,14 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       noteOrdinal += 1;
     }
 
+    private Set<String> getGenes() {
+      return this.geneMap.keySet();
+    }
+
     private void addGenes(Collection<String> genes) throws SQLException {
       for (String gene : genes) {
-        if (findLookup(gene) == LookupMethod.ACTIVITY_SCORE) {
-          activityGenes.add(gene);
-        }
+        LookupMethod lookup = findLookup(gene);
+        geneMap.put(gene, lookup);
       }
     }
 
@@ -260,13 +281,34 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
 
-    private void writeAlert(String context, Set<String> genes, String drugName, String alertText, String population, Map<String,String> activityMap, Map<String,String> phenotypeMap) throws SQLException {
-      Array geneArray = conn.createArrayOf("VARCHAR", genes.toArray());
+    private void writeAlert(String context, String drugName, String alertText, String population, Map<String,String> activityMap, Map<String,String> phenotypeMap, Map<String,String> alleleMap) throws SQLException {
+      Array geneArray = conn.createArrayOf("VARCHAR", getGenes().toArray());
       Array alertSqlArray = conn.createArrayOf("VARCHAR", new String[]{alertText});
 
-      for (String gene : activityGenes) {
-        if (activityMap.get(gene).equals(NA) && !phenotypeMap.get(gene).equals("Indeterminate") && !phenotypeMap.get(gene).startsWith("No Result")) {
-          sf_logger.warn("activity gene has no activity score assigned for {}", gson.toJson(phenotypeMap));
+      Map<String,String> lookupKey = new HashMap<>();
+      for (String gene : getGenes()) {
+        if (this.geneMap.get(gene) == LookupMethod.PHENOTYPE) {
+          if (phenotypeMap.get(gene) != null) {
+            lookupKey.put(gene, phenotypeMap.get(gene));
+            alleleMap.clear();
+          } else {
+            throw new RuntimeException("No phenotype value for gene " + gene);
+          }
+        }
+        else if (this.geneMap.get(gene) == LookupMethod.ACTIVITY_SCORE) {
+          if (activityMap.get(gene) != null) {
+            lookupKey.put(gene, activityMap.get(gene));
+            alleleMap.clear();
+          } else {
+            throw new RuntimeException("No activity score value for gene " + gene);
+          }
+        }
+        else if (this.geneMap.get(gene) == LookupMethod.ALLELE_STATUS) {
+          if (alleleMap.get(gene) != null) {
+            lookupKey.put(gene, alleleMap.get(gene));
+          } else {
+            throw new RuntimeException("No allele status value for gene " + gene);
+          }
         }
       }
 
@@ -278,6 +320,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       insert.setString(5, population);
       insert.setString(6, gson.toJson(activityMap));
       insert.setString(7, gson.toJson(phenotypeMap));
+      insert.setString(8, gson.toJson(alleleMap));
+      insert.setString(9, gson.toJson(lookupKey));
       insert.executeUpdate();
     }
 

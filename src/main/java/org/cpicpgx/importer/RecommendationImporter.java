@@ -275,16 +275,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     }
   }
 
-  private String normalizeGeneText(@Nonnull String gene, String text) {
-    if (text == null) {
-      return null;
-    } else if (text.equalsIgnoreCase(NA)) {
-      return NA;
-    } else {
-      return WordUtils.capitalize(StringUtils.strip(text.replaceAll(gene + "\\s*", "")));
-    }
-  }
-
   private static class DbHarness implements AutoCloseable {
     private final PreparedStatement insertStmt;
     private final PreparedStatement insertChangeStmt;

@@ -541,8 +541,8 @@ COMMENT ON COLUMN recommendation.population IS 'The population this recommendati
 COMMENT ON COLUMN recommendation.comments IS 'Optional comments about the recommendation';
 COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendation applies to, this is a JSON mapping of gene to phenotype';
 COMMENT ON COLUMN recommendation.activity_score IS 'Activity score that this recommendation applies to, this is a JSON mapping of gene to score value';
-COMMENT ON COLUMN recommendation.allele_status IS 'Whether or not an allele is present, used mainly for HLA genes, and used for recommendation lookups. This is a JSON mappin gof gene to allele status (positive/negative)';
-COMMENT ON COLUMN recommendation.lookup_key IS '';
+COMMENT ON COLUMN recommendation.allele_status IS 'Whether or not an allele is present, used mainly for HLA genes, and used for recommendation lookups. This is a JSON mapping of gene to allele status (positive/negative)';
+COMMENT ON COLUMN recommendation.lookup_key IS 'A key to use for finding a specific recommendation. Made of a JSON object of gene symbol to key value. The key value can be one of phenotype, activity score, or allele status depending on the gene.';
 
 
 CREATE TABLE test_alert
@@ -553,9 +553,13 @@ CREATE TABLE test_alert
   genes TEXT[],
   phenotype JSONB,
   activity_score JSONB,
+  allele_status JSONB,
+  lookup_key JSONB,
   drugId VARCHAR(20) REFERENCES drug(drugId),
   alert_text TEXT[] NOT NULL,
-  version INTEGER DEFAULT 1
+  version INTEGER DEFAULT 1,
+
+  UNIQUE (drugId, population, lookup_key)
 );
 
 CREATE TRIGGER version_test_alert
@@ -569,5 +573,7 @@ COMMENT ON COLUMN test_alert.cds_context IS 'This should be either "Pre-test", "
 COMMENT ON COLUMN test_alert.genes IS 'One or more genes this test alert uses for trigger conditions';
 COMMENT ON COLUMN test_alert.phenotype IS 'A JSON object of gene symbol keys to phenotype description';
 COMMENT ON COLUMN test_alert.activity_score IS 'A JSON object of gene symbol keys to gene activity score';
+COMMENT ON COLUMN test_alert.allele_status IS 'Whether or not an allele is present, used mainly for HLA genes. This is a JSON mapping of gene to allele status (positive/negative)';
+COMMENT ON COLUMN test_alert.lookup_key IS 'A key to use for finding a specific test alert. Made of a JSON object of gene symbol to key value. The key value can be one of phenotype, activity score, or allele status depending on the gene.';
 COMMENT ON COLUMN test_alert.drugId IS 'The ID of a drug this alert text is for';
 COMMENT ON COLUMN test_alert.alert_text IS 'An array of one or more pieces of alert text';

@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import com.google.gson.JsonObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
@@ -11,6 +12,7 @@ import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
@@ -273,6 +275,24 @@ public abstract class BaseDirectoryImporter {
       } else {
         throw new RuntimeException("Activity score not in expected format: " + score);
       }
+    }
+  }
+
+  /**
+   * Normalize text by taking out the gene name, init capping all the words, and stripping extraneous whitespace.
+   * @param gene the gene text to be removed
+   * @param text the text to normalize
+   * @return normalized version of input "text", possibly null
+   */
+  @Nullable
+  static String normalizeGeneText(@Nonnull String gene, @Nullable String text) {
+    String strippedText = StringUtils.stripToNull(text);
+    if (strippedText == null) {
+      return null;
+    } else if (strippedText.equalsIgnoreCase(NA)) {
+      return NA;
+    } else {
+      return WordUtils.capitalize(strippedText.replaceAll(gene + "\\s*", ""));
     }
   }
 }
