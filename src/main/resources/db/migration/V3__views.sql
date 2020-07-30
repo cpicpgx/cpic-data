@@ -1,30 +1,38 @@
 -- noinspection SqlDialectInspectionForFile
 SET ROLE cpic;
 
-CREATE OR REPLACE VIEW diplotype_view AS
+CREATE OR REPLACE VIEW diplotype AS
 select
-    p.genesymbol,
+    gp.genesymbol,
     d.diplotype,
-    p.phenotype,
-    p.ehrpriority,
-    p.consultationtext,
-    f.totalActivityScore as activityscore,
-    f.function1,
-    f.function2
+    pf.function1,
+    pf.function2,
+    pf.activityvalue1,
+    pf.activityvalue2,
+    pf.totalactivityscore,
+    pf.description,
+    d.diplotypekey,
+    gp.phenotype,
+    gp.ehrPriority,
+    gp.consultationText,
+    json_build_object(gp.genesymbol, gp.phenotype) as lookup_key
 from
-    gene_phenotype p
-    join phenotype_function f on p.id = f.phenotypeId
-    join phenotype_diplotype d on f.id = d.functionPhenotypeId;
+    phenotype_diplotype d
+        join phenotype_function pf on d.functionphenotypeid = pf.id
+        join gene_phenotype gp on pf.phenotypeid = gp.id;
 
-COMMENT ON VIEW diplotype_view IS 'A combination of gene_phenotype and phenotype_diplotype that allows you to easily query by diplotype and see the phenotype-related data for it';
-COMMENT ON COLUMN diplotype_view.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
-COMMENT ON COLUMN diplotype_view.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
-COMMENT ON COLUMN diplotype_view.phenotype IS 'Coded Genotype/Phenotype Summary, required';
-COMMENT ON COLUMN diplotype_view.ehrPriority IS 'EHR Priority Result, optional';
-COMMENT ON COLUMN diplotype_view.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result, optional';
-COMMENT ON COLUMN diplotype_view.activityScore IS 'The Activity Score number, optional';
-COMMENT ON COLUMN diplotype_view.function1 IS 'A functional assignment of one of the alleles, optional';
-COMMENT ON COLUMN diplotype_view.function2 IS 'A functional assignment of one of the alleles, optional';
+COMMENT ON VIEW diplotype IS 'A combination of gene_phenotype and phenotype_diplotype that allows you to easily query by diplotype and see the phenotype-related data for it';
+COMMENT ON COLUMN diplotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
+COMMENT ON COLUMN diplotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
+COMMENT ON COLUMN diplotype.function1 IS 'A functional assignment of one of the alleles, optional';
+COMMENT ON COLUMN diplotype.function2 IS 'A functional assignment of one of the alleles, optional';
+COMMENT ON COLUMN diplotype.activityvalue1 IS 'An activity value assignment of one of the alleles, optional';
+COMMENT ON COLUMN diplotype.activityvalue2 IS 'An activity value assignment of one of the alleles, optional';
+COMMENT ON COLUMN diplotype.totalactivityscore IS 'The total Activity Score number, optional';
+COMMENT ON COLUMN diplotype.description IS 'The long-form description of the diplotype';
+COMMENT ON COLUMN diplotype.diplotypekey IS 'A normalized version of the diplotype that can be used for DB lookups';
+COMMENT ON COLUMN diplotype.phenotype IS 'Coded Genotype/Phenotype Summary, required';
+COMMENT ON COLUMN diplotype.lookup_key IS 'A normalized version of the gene phenotype that can be used for recommendation or test alert lookup';
 
 
 CREATE OR REPLACE VIEW allele_guideline_view AS

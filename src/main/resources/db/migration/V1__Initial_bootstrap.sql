@@ -469,11 +469,11 @@ CREATE TABLE phenotype_function
 (
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
     phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
-    functionKey JSONB NOT NULL,
+    lookupKey JSONB NOT NULL,
     function1 TEXT NOT NULL,
     function2 TEXT NOT NULL,
-    activityScore1 TEXT,
-    activityScore2 TEXT,
+    activityValue1 TEXT,
+    activityValue2 TEXT,
     totalActivityScore TEXT,
     description TEXT
 );
@@ -481,11 +481,11 @@ CREATE TABLE phenotype_function
 COMMENT ON TABLE phenotype_function IS 'Gene function combinations that apply to the phenotype referenced. This table is a child of gene_phenotype.';
 COMMENT ON COLUMN phenotype_function.id IS 'A synthetic numerical ID, auto-assigned, primary key';
 COMMENT ON COLUMN phenotype_function.phenotypeId IS 'An ID referencing the gene_phenotype this is associated with, required';
-COMMENT ON COLUMN phenotype_function.functionKey IS 'A normailized JSON versino fo the function combination for use in lookups. Should be an object with functions as properties and counts as the values. Required.';
+COMMENT ON COLUMN phenotype_function.lookupKey IS 'A normalized JSON format of the data used to lookup a diplotype. The keys of this field are either the functions, activity scores, or allele statuses depending on what the gene requires. Required.';
 COMMENT ON COLUMN phenotype_function.function1 IS 'The first allele function, required';
 COMMENT ON COLUMN phenotype_function.function2 IS 'The second allele function, required';
-COMMENT ON COLUMN phenotype_function.activityScore1 IS 'The activity score for the first allele function';
-COMMENT ON COLUMN phenotype_function.activityScore2 IS 'The activity score for the second allele function';
+COMMENT ON COLUMN phenotype_function.activityValue1 IS 'The activity score for the first allele function';
+COMMENT ON COLUMN phenotype_function.activityValue2 IS 'The activity score for the second allele function';
 COMMENT ON COLUMN phenotype_function.totalActivityScore IS 'The sum activity score for the functions';
 COMMENT ON COLUMN phenotype_function.description IS 'A description of the diplotypes associated with this phenotype';
 

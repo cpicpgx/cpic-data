@@ -11,7 +11,7 @@ from function_reference r
 group by genesymbol
 union all
 select 'Gene' as object_class, 'Diplotype to Phenotype Data' as data_type, genesymbol as object_name, count(*) as n
-from diplotype_view
+from diplotype
 group by genesymbol
 union all
 select 'Gene' as object_class, 'Frequency Data' as data_type, genesymbol as object_name, count(*) as n

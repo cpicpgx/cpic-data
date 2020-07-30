@@ -70,7 +70,7 @@ public class ProgressReport {
           "select genesymbol, count(*) from function_reference r join allele a on r.alleleid = a.id group by genesymbol order by genesymbol",
           "Allele Functionality Table");
       queryData(conn, 
-          "select genesymbol, count(*) from diplotype_view group by genesymbol order by genesymbol",
+          "select genesymbol, count(*) from diplotype group by genesymbol order by genesymbol",
           "Diplotype to Phenotype Table");
       queryData(conn, 
           "select genesymbol, count(*) from allele_frequency f join allele a on f.alleleid = a.id group by genesymbol order by genesymbol",

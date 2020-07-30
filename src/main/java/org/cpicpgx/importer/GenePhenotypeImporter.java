@@ -109,7 +109,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       this.geneSymbol = geneSymbol;
       this.conn = ConnectionFactory.newConnection();
       this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
-      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, functionkey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
+      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
       this.lookupDiplotypes = conn.prepareStatement("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.clinicalfunctionalstatus=pf.function1 " +
@@ -152,9 +152,9 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
 
       this.insertFunction.setInt(1, phenoId);
       if (this.useScoreLookup) {
-        this.insertFunction.setString(2, makeFunctionKey(null, null, a1Value, a2Value));
+        this.insertFunction.setString(2, makeLookupKey(null, null, a1Value, a2Value));
       } else {
-        this.insertFunction.setString(2, makeFunctionKey(a1Fn, a2Fn, null, null));
+        this.insertFunction.setString(2, makeLookupKey(a1Fn, a2Fn, null, null));
       }
       this.insertFunction.setString(3, a1Fn);
       this.insertFunction.setString(4, a2Fn);

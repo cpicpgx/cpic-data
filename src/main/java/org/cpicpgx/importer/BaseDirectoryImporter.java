@@ -195,7 +195,7 @@ public abstract class BaseDirectoryImporter {
     }
   }
 
-  static String makeFunctionKey(String f1, String f2, String as1, String as2) {
+  static String makeLookupKey(String f1, String f2, String as1, String as2) {
     JsonObject key = new JsonObject();
     if (f1 != null) {
       if (f1.equals(f2)) {
