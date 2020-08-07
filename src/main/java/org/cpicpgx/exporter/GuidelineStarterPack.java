@@ -49,7 +49,9 @@ public class GuidelineStarterPack {
     f_genes.addAll(Arrays.asList(genes));
 
     String[] drugs = cli.getOptionValues("d");
-    f_drugs.addAll(Arrays.asList(drugs));
+    if (drugs != null) {
+      f_drugs.addAll(Arrays.asList(drugs));
+    }
   }
 
   private void execute() throws Exception {
