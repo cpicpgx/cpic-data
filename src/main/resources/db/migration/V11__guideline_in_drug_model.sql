@@ -1,4 +1,5 @@
-alter table drug add guidelineId INTEGER REFERENCES guideline(id);
+alter table drug add guidelineId INTEGER;
+alter table drug add constraint guideline_for_drug foreign key (guidelineId) references guideline(id);
 
 COMMENT ON COLUMN drug.guidelineId IS 'The guideline this drug is part of a guideline, null means not a part of any guideline';
 
