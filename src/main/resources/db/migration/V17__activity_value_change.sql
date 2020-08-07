@@ -1,1 +1,1 @@
-alter table allele rename column activityscore to activityValue;
+-- nothing to do

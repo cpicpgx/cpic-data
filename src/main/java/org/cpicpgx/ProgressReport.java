@@ -67,7 +67,7 @@ public class ProgressReport {
           "select genesymbol,count(*) from allele group by genesymbol order by genesymbol",
           "Allele Definition Table");
       queryData(conn, 
-          "select genesymbol, count(*) from function_reference r join allele a on r.alleleid = a.id group by genesymbol order by genesymbol",
+          "select genesymbol, count(*) from allele a where clinicalfunctionalstatus is not null group by genesymbol order by genesymbol",
           "Allele Functionality Table");
       queryData(conn, 
           "select genesymbol, count(*) from diplotype group by genesymbol order by genesymbol",

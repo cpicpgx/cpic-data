@@ -6,8 +6,7 @@ from allele_definition
 group by genesymbol
 union all
 select 'Gene' as object_class, 'Allele Functionality Data' as data_type, genesymbol as object_name, count(*) as n
-from function_reference r
-         join allele a on r.alleleid = a.id
+from allele a where clinicalFunctionalStatus is not null
 group by genesymbol
 union all
 select 'Gene' as object_class, 'Diplotype to Phenotype Data' as data_type, genesymbol as object_name, count(*) as n

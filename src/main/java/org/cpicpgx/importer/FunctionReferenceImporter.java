@@ -45,7 +45,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final int COL_IDX_COMMENTS = 8;
 
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from function_reference",
       "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from gene_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
   };
@@ -227,7 +226,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private final Connection conn;
     private final Map<String, Long> alleleNameMap = new HashMap<>();
     private final PreparedStatement insertAlleleStmt;
-    private final PreparedStatement insertStmt;
     private final PreparedStatement insertNoteStmt;
     private final PreparedStatement insertChangeStmt;
     private final String gene;
@@ -263,8 +261,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
 
-      insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate) values (?, ?, ?, initcap(?), ?, initcap(?), ?) returning id");
-      insertStmt = this.conn.prepareStatement("insert into function_reference(alleleid, citations, strength, findings, comments) values (?, ?, ?, ?::jsonb, ?)");
+      insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) values (?, ?, ?, initcap(?), ?, initcap(?), ?, ?, ?, ?::jsonb, ?)");
       insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
       insertChangeStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
     }
@@ -302,24 +299,14 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       setNullableText(this.insertAlleleStmt, 5, activityValue);
       setNullableText(this.insertAlleleStmt, 6, clinicalFunction);
       setNullableText(this.insertAlleleStmt, 7, substrate);
-      Long alleleId = null;
-      try (ResultSet rs = this.insertAlleleStmt.executeQuery()) {
-        while (rs.next()) {
-          alleleId = rs.getLong(1);
-        }
-      }
-      if (alleleId == null) {
+      this.insertAlleleStmt.setArray(8, conn.createArrayOf("TEXT", pmids));
+      setNullableText(this.insertAlleleStmt, 9, strength);
+      setNullableText(this.insertAlleleStmt, 10, findings != null ? findings.toString() : null);
+      setNullableText(this.insertAlleleStmt, 11, comments);
+      int inserted = this.insertAlleleStmt.executeUpdate();
+      if (inserted == 0) {
         throw new RuntimeException("No allele inserted");
       }
-
-
-      this.insertStmt.clearParameters();
-      this.insertStmt.setLong(1, alleleId);
-      this.insertStmt.setArray(2, conn.createArrayOf("TEXT", pmids));
-      setNullableText(this.insertStmt, 3, strength);
-      setNullableText(this.insertStmt, 4, findings != null ? findings.toString() : null);
-      setNullableText(this.insertStmt, 5, comments);
-      this.insertStmt.executeUpdate();
     }
 
     void insertNote(String note) throws SQLException {
@@ -371,8 +358,14 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
     @Override
     public void close() throws SQLException {
-      if (this.insertStmt != null) {
-        this.insertStmt.close();
+      if (this.insertAlleleStmt != null) {
+        this.insertAlleleStmt.close();
+      }
+      if (this.insertNoteStmt != null) {
+        this.insertNoteStmt.close();
+      }
+      if (this.insertChangeStmt != null) {
+        this.insertChangeStmt.close();
       }
       if (this.conn != null) {
         this.conn.close();

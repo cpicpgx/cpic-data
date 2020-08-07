@@ -179,8 +179,12 @@ CREATE TABLE allele
     functionalStatus TEXT,
     clinicalFunctionalStatus TEXT,
     clinicalFunctionalSubstrate TEXT,
-    activityScore VARCHAR(50),
+    activityValue VARCHAR(50),
     definitionId INTEGER NOT NULL REFERENCES allele_definition(id),
+    citations TEXT[],
+    strength TEXT,
+    findings JSONB,
+    functionComments TEXT,
 
     constraint allele_unique UNIQUE (geneSymbol, name)
 );
@@ -197,8 +201,12 @@ COMMENT ON COLUMN allele.name IS 'The name of this allele, required';
 COMMENT ON COLUMN allele.functionalStatus IS 'The functional phenotype of this allele';
 COMMENT ON COLUMN allele.clinicalFunctionalStatus IS 'The functional phenotype of this allele used for clinical systems';
 COMMENT ON COLUMN allele.clinicalFunctionalSubstrate IS 'Allele clinical function substrate specificity, optional';
-COMMENT ON COLUMN allele.activityScore IS 'Descriptor of activity score, optional';
+COMMENT ON COLUMN allele.activityValue IS 'Descriptor of activity score, optional';
 COMMENT ON COLUMN allele.definitionId IS 'The reference to the definition for this allele';
+COMMENT ON COLUMN allele.citations IS 'An array of PubMed IDs use as citations for this functional assignment';
+COMMENT ON COLUMN allele.strength IS 'The strength of evidence';
+COMMENT ON COLUMN allele.findings IS 'Findings listed by PubMed ID';
+COMMENT ON COLUMN allele.functionComments IS 'Comments this functional assignment of this allele';
 
 
 CREATE TABLE gene_note
@@ -270,31 +278,6 @@ COMMENT ON COLUMN allele_frequency.population IS 'The ID of the population for t
 COMMENT ON COLUMN allele_frequency.frequency IS 'The numeric representation of this frequency';
 COMMENT ON COLUMN allele_frequency.label IS 'The textual label for this frequency, "-" means no observation made';
 COMMENT ON COLUMN allele_frequency.version IS 'The version number, iterates on modification';
-
-
-CREATE TABLE function_reference
-(
-  id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-  alleleid INTEGER NOT NULL REFERENCES allele(id),
-  citations TEXT[],
-  strength TEXT,
-  findings JSONB,
-  comments TEXT,
-  version INTEGER DEFAULT 1
-);
-
-CREATE TRIGGER version_function_reference
-  BEFORE UPDATE ON function_reference
-  FOR EACH ROW EXECUTE PROCEDURE increment_version();
-
-COMMENT ON TABLE function_reference IS 'A reference about this allele''s function with supporting info';
-COMMENT ON COLUMN function_reference.id IS 'The synthetic primary key for this reference';
-COMMENT ON COLUMN function_reference.alleleId IS 'The ID of the allele in the allele table this function is for';
-COMMENT ON COLUMN function_reference.citations IS 'An array of PubMed IDs use as citations for this functional assignment';
-COMMENT ON COLUMN function_reference.strength IS 'The strength of evidence';
-COMMENT ON COLUMN function_reference.findings IS 'Findings listed by PubMed ID';
-COMMENT ON COLUMN function_reference.comments IS 'General comments for this functional assignment';
-COMMENT ON COLUMN function_reference.version IS 'The version number, iterates on modification';
 
 
 CREATE TABLE drug

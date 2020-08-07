@@ -41,10 +41,10 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
   
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement geneStmt = conn.prepareStatement("select distinct a.genesymbol from function_reference f join allele a on f.alleleid = a.id order by 1");
+         PreparedStatement geneStmt = conn.prepareStatement("select distinct a.genesymbol from allele a where clinicalfunctionalstatus is not null order by 1");
          PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.activityvalue, a.functionalstatus, a.clinicalfunctionalstatus, a.clinicalfunctionalsubstrate, " +
-             "f.citations, f.strength, f.findings, f.comments " +
-             "from function_reference f join allele a on f.alleleid = a.id where a.genesymbol=? order by a.id");
+             "a.citations, a.strength, a.findings, a.functioncomments " +
+             "from allele a where a.genesymbol=? order by a.id");
          PreparedStatement changeStmt = conn.prepareStatement("select n.date, note from gene_note n where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? and n.date is not null order by ordinal");
          ResultSet grs = geneStmt.executeQuery()
     ) {
