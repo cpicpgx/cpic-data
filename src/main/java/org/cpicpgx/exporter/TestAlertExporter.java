@@ -49,7 +49,7 @@ public class TestAlertExporter extends BaseExporter {
     Type stringMapType = new TypeToken<TreeMap<String, String>>(){}.getType();
 
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement alertStmt = conn.prepareStatement("select t.cds_context, t.alert_text, t.activity_score, t.phenotype from test_alert t where t.drugid=? and t.population=?");
+         PreparedStatement alertStmt = conn.prepareStatement("select t.cdsContext, t.alertText, t.activityScore, t.phenotype from test_alert t where t.drugid=? and t.population=?");
          PreparedStatement popStmt = conn.prepareStatement("select distinct population, genes from test_alert where drugid=? order by 1");
          PreparedStatement geneStmt = conn.prepareStatement("select distinct d.name, t.drugid from test_alert t join drug d on t.drugid = d.drugid");
          ResultSet grs = geneStmt.executeQuery()

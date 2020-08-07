@@ -288,7 +288,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     
     DbHarness(String drugName) throws Exception {
       Connection conn = ConnectionFactory.newConnection();
-      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drug_recommendation, classification, phenotypes, comments, activity_score, population, lookup_key, allele_status) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
+      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
       this.insertChangeStmt = conn.prepareStatement("insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
       this.findPhenotype = conn.prepareStatement("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
 

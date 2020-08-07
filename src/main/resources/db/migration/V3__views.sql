@@ -15,7 +15,7 @@ select
     gp.phenotype,
     gp.ehrPriority,
     gp.consultationText,
-    json_build_object(gp.genesymbol, gp.phenotype) as lookup_key
+    json_build_object(gp.genesymbol, gp.phenotype) as lookupkey
 from
     phenotype_diplotype d
         join phenotype_function pf on d.functionphenotypeid = pf.id
@@ -32,7 +32,7 @@ COMMENT ON COLUMN diplotype.totalactivityscore IS 'The total Activity Score numb
 COMMENT ON COLUMN diplotype.description IS 'The long-form description of the diplotype';
 COMMENT ON COLUMN diplotype.diplotypekey IS 'A normalized version of the diplotype that can be used for DB lookups';
 COMMENT ON COLUMN diplotype.phenotype IS 'Coded Genotype/Phenotype Summary, required';
-COMMENT ON COLUMN diplotype.lookup_key IS 'A normalized version of the gene phenotype that can be used for recommendation or test alert lookup';
+COMMENT ON COLUMN diplotype.lookupkey IS 'A normalized version of the gene phenotype that can be used for recommendation or test alert lookup';
 
 
 CREATE OR REPLACE VIEW allele_guideline_view AS

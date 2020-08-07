@@ -227,7 +227,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     private DbHarness() throws SQLException {
       this.conn = ConnectionFactory.newConnection();
       this.insert = conn.prepareStatement(
-          "insert into test_alert(cds_context, genes, drugid, alert_text, population, activity_score, phenotype, allele_status, lookup_key) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)");
+          "insert into test_alert(cdsContext, genes, drugid, alertText, population, activityScore, phenotype, alleleStatus, lookupKey) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)");
       this.insertNote = conn.prepareStatement(
           "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
       this.insertChangeStmt = conn.prepareStatement(
