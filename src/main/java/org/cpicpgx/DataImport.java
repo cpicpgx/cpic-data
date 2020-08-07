@@ -22,7 +22,7 @@ import java.util.List;
 public class DataImport {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private Path m_directory;
+  private final Path m_directory;
 
   public static void main(String[] args) {
     try {
