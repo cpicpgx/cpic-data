@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern sf_geneLabelPattern = Pattern.compile("GENE:\\s(\\w+)");
+  private static final Pattern sf_geneLabelPattern = Pattern.compile("GENE:\\s([\\w-]+)");
   private static final Pattern sf_alleleNamePattern = Pattern.compile("^(.+?)([x≥](\\d+|N))?$");
   private static final Pattern sf_pmidPattern = Pattern.compile("^\\d+$");
   private static final int COL_IDX_ALLELE = 0;
@@ -209,6 +209,10 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
             this.alleleNameMap.put(rs.getString(1), rs.getLong(2));
           }
         }
+      }
+
+      if (this.alleleNameMap.size() == 0) {
+        throw new RuntimeException("No alleles found for gene: " + gene);
       }
 
       try (PreparedStatement pstmt = this.conn.prepareStatement("select lookupmethod from gene where symbol=?")) {
