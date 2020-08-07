@@ -17,11 +17,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
-import java.sql.Date;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Class to parse references for functional assignments from a directory of excel files.
@@ -100,6 +101,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     rowIdx += 2; // move down 2 rows and start reading;
     try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
+        int readableRow = rowIdx + 1;
         row = workbook.getRow(rowIdx);
         if (row.hasNoText(COL_IDX_ALLELE) || row.getNullableText(COL_IDX_ALLELE).toLowerCase().startsWith("note")) break;
         
@@ -110,7 +112,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String substrate = row.getNullableText(COL_IDX_CLINICAL_SUBSTRATE);
         String citationClump = row.getNullableText(COL_IDX_PMID, true);
         String strength = row.getNullableText(COL_IDX_STRENGTH);
-        String findings = row.getNullableText(COL_IDX_FINDINGS);
+        String findingsString = row.getNullableText(COL_IDX_FINDINGS);
         String comments = row.getNullableText(COL_IDX_COMMENTS);
 
         if (clinicalFunction == null) {
@@ -122,9 +124,19 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
           for (String citation : citationClump.split("[;,\\.]")) {
             String pmid = StringUtils.strip(citation);
             if (!sf_pmidPattern.matcher(pmid).matches()) {
-              throw new RuntimeException("PMID not valid: [" + pmid + "] in row " + (rowIdx + 1));
+              throw new RuntimeException("PMID not valid: [" + pmid + "] in row " + readableRow);
             }
             citationList.add(StringUtils.strip(citation));
+          }
+        }
+
+        JsonObject findings = parseFindingsObject(findingsString);
+        if (findings != null) {
+          for (String pmid : findings.keySet()) {
+            if (!citationList.contains(pmid)) {
+//              throw new RuntimeException("PMID ("+pmid+") used in Findings not in PMID field, row " + readableRow);
+              sf_logger.warn("PMID ("+pmid+") used in Findings not in PMID field, row " + readableRow);
+            }
           }
         }
 
@@ -142,7 +154,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
           );
         }
         catch (RuntimeException ex) {
-          throw new RuntimeException("Error on row " + (rowIdx + 1), ex);
+          throw new RuntimeException("Error on row " + readableRow, ex);
         }
       }
       
@@ -183,6 +195,30 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       throw new RuntimeException("Allele name not in expected format");
     }
   }
+
+  private static final String pmidRegex = "(^\\d{7,8}|(?<=\\s)\\d{7,8})";
+  private static final Pattern pmidPattern = Pattern.compile(pmidRegex);
+  static JsonObject parseFindingsObject(String findings) {
+    if (StringUtils.isBlank(findings)) return null;
+
+    JsonObject findingsObject = new JsonObject();
+
+    String[] descriptions = findings.split(pmidRegex);
+    Matcher matcher = pmidPattern.matcher(findings);
+
+    int n = 0;
+    while (matcher.find()) {
+      n += 1;
+      String pmid = StringUtils.substring(findings, matcher.start(), matcher.end());
+      String description = "";
+      if (descriptions.length > n) {
+        description = StringUtils.strip(descriptions[n], ":; \n");
+      }
+      findingsObject.addProperty(pmid, description);
+    }
+    return findingsObject;
+  }
+
 
   /**
    * Private class for handling DB interactions
@@ -249,7 +285,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String substrate,
         String[] pmids,
         String strength,
-        String findings,
+        JsonObject findings,
         String comments
     ) throws SQLException {
       Long alleleDefinitionId = lookupAlleleDefinitionId(allele);
@@ -281,40 +317,11 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       this.insertStmt.setLong(1, alleleId);
       this.insertStmt.setArray(2, conn.createArrayOf("TEXT", pmids));
       setNullableText(this.insertStmt, 3, strength);
-      setNullableText(this.insertStmt, 4, reformatFindings(findings));
+      setNullableText(this.insertStmt, 4, findings != null ? findings.toString() : null);
       setNullableText(this.insertStmt, 5, comments);
       this.insertStmt.executeUpdate();
     }
 
-    static String reformatFindings(String findings) {
-      if (StringUtils.isBlank(findings)) {
-        return null;
-      } else {
-        return parseFindingsObject(findings).toString();
-      }
-    }
-
-    private static final String pmidRegex = "\\d{7,8}";
-    private static final Pattern pmidPattern = Pattern.compile(pmidRegex);
-    static JsonObject parseFindingsObject(String findings) {
-      JsonObject findingsObject = new JsonObject();
-
-      String[] descriptions = findings.split(pmidRegex);
-      Matcher matcher = pmidPattern.matcher(findings);
-
-      int n = 0;
-      while (matcher.find()) {
-        n += 1;
-        String pmid = StringUtils.substring(findings, matcher.start(), matcher.end());
-        String description = "";
-        if (descriptions.length > n) {
-          description = StringUtils.strip(descriptions[n], ":; \n");
-        }
-        findingsObject.addProperty(pmid, description);
-      }
-      return findingsObject;
-    }
-    
     void insertNote(String note) throws SQLException {
       this.insertNoteStmt.clearParameters();
       this.insertNoteStmt.setString(1, gene);
