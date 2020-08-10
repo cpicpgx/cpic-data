@@ -224,7 +224,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
               for (String gene : dbHarness.getGenes()) {
                 switch (dbHarness.geneLookupCache.get(gene)) {
                   case ACTIVITY_SCORE:
-                    lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(asIdxMap.get(gene))));
+                    lookupKey.put(gene, normalizeScore(normalizeGeneText(gene, dataRow.getText(asIdxMap.get(gene)))));
                     break;
                   case ALLELE_STATUS:
                     lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(alleleIdxMap.get(gene))));

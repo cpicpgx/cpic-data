@@ -43,6 +43,7 @@ public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+\\.?\\d*$");
   static final String NA = "n/a";
+  static final String NO_RESULT = "No Result";
   static final String EXCEL_EXTENSION = ".xlsx";
 
   private Path directory;
@@ -269,6 +270,9 @@ public abstract class BaseDirectoryImporter {
     } else {
       if (score.toLowerCase().equals(NA)) {
         return NA;
+      }
+      else if (score.equals(NO_RESULT)) {
+        return NO_RESULT;
       }
       else if (sf_activityScorePattern.matcher(score).matches()) {
         return score.replaceAll("\\.0$", "");
