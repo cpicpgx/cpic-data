@@ -91,6 +91,7 @@ select
     r.lookupKey,
     d.name drugname,
     g.name guidelinename,
+    g.url guidelineurl,
     r.implications,
     r.drugrecommendation,
     r.classification,
@@ -103,3 +104,17 @@ from recommendation r
          join guideline g on r.guidelineid = g.id;
 
 comment on view recommendation_view is 'A view to help find recommendation data when querying by the lookupKey';
+
+
+create or replace view test_alert_view as
+select
+    t.id testalertid,
+    t.lookupKey,
+    d.name drugname,
+    t.population,
+    t.alertText,
+    t.cdsContext
+from test_alert t
+         join drug d on t.drugId = d.drugId;
+
+comment on view test_alert_view is 'A view to help find test alert data when querying by the lookupKey';

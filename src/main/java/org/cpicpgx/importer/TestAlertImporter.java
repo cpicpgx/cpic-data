@@ -170,7 +170,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         if (pheno != null && pheno.toLowerCase().startsWith("no result")) {
           activityJson.put(gene, pheno);
         } else {
-          activityJson.put(gene, normalizeGeneText(gene, row.getText(idxActivityByGene.get(gene))));
+          activityJson.put(gene, normalizeScore(normalizeGeneText(gene, row.getText(idxActivityByGene.get(gene)))));
         }
       }
       Map<String,String> phenotypeJson = new HashMap<>();
