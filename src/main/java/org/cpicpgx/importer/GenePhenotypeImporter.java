@@ -214,9 +214,12 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
             diplotypeKey.addProperty(a2, 1);
           }
 
+          JsonObject geneKey = new JsonObject();
+          geneKey.add(geneSymbol, diplotypeKey);
+
           this.insertDiplotype.setInt(1, functionId);
           this.insertDiplotype.setString(2, diplotypeText);
-          this.insertDiplotype.setString(3, diplotypeKey.toString());
+          this.insertDiplotype.setString(3, geneKey.toString());
           this.insertDiplotype.executeUpdate();
           this.loadedDiplotypes.add(diplotypeText);
         }

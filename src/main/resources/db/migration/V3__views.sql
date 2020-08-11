@@ -15,11 +15,12 @@ select
     gp.phenotype,
     gp.ehrPriority,
     gp.consultationText,
-    json_build_object(gp.genesymbol, gp.phenotype) as lookupkey
+    json_build_object(gp.genesymbol, case when g.lookupMethod = 'ACTIVITY_SCORE' then pf.totalActivityScore else gp.phenotype end) as lookupkey
 from
     phenotype_diplotype d
         join phenotype_function pf on d.functionphenotypeid = pf.id
-        join gene_phenotype gp on pf.phenotypeid = gp.id;
+        join gene_phenotype gp on pf.phenotypeid = gp.id
+        join gene g on gp.geneSymbol = g.symbol;
 
 COMMENT ON VIEW diplotype IS 'A combination of gene_phenotype and phenotype_diplotype that allows you to easily query by diplotype and see the phenotype-related data for it';
 COMMENT ON COLUMN diplotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
@@ -73,7 +74,7 @@ where
 group by
     a.genesymbol, a.name, p.ethnicity;
 
-COMMENT ON VIEW population_frequency_view IS 'An summary of frequency data by allele and major population group';
+COMMENT ON VIEW population_frequency_view IS 'A summary of frequency data by allele and major population group';
 COMMENT ON COLUMN population_frequency_view.geneSymbol IS 'The HGNC symbol of the gene';
 COMMENT ON COLUMN population_frequency_view.name IS 'The allele name';
 COMMENT ON COLUMN population_frequency_view.population_group IS 'The major grouping of population';
@@ -82,3 +83,23 @@ COMMENT ON COLUMN population_frequency_view.freq_weighted_avg IS 'The average fr
 COMMENT ON COLUMN population_frequency_view.freq_avg IS 'The unweighted average frequency (use with caution)';
 COMMENT ON COLUMN population_frequency_view.freq_max IS 'The maximum frequency observed';
 COMMENT ON COLUMN population_frequency_view.freq_min IS 'The minimum frequency observed';
+
+
+create or replace view recommendation_view as
+select
+    r.id recommendationid,
+    r.lookupKey,
+    d.name drugname,
+    g.name guidelinename,
+    r.implications,
+    r.drugrecommendation,
+    r.classification,
+    r.phenotypes,
+    r.activityscore,
+    r.population,
+    r.comments
+from recommendation r
+         join drug d on r.drugid = d.drugid
+         join guideline g on r.guidelineid = g.id;
+
+comment on view recommendation_view is 'A view to help find recommendation data when querying by the lookupKey';
