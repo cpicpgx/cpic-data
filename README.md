@@ -1,31 +1,39 @@
 # CPIC Data
 
-This repo contains all the DDL and code for defining the [CPIC](https://cpicpgx.org) data model and populating it with data.
+This repo contains all the code used to create and maintain the [CPIC](https://cpicpgx.org) data model. This powers the API and the database.
 
-## :exclamation:  :exclamation:  :exclamation: WARNING: ALPHA TESTING ONLY :exclamation:  :exclamation:  :exclamation:
+If you're looking to use the REST API or get a copy of the database, go [read the docs](https://github.com/cpicpgx/cpic-data/wiki).
 
-__:warning: This repo is under active development and, thus, only useful for testing purposes. When this message disappears and a __production__ release is on the Releases tab then it will be ready for use. Until then, this is for evaluation only. :warning:__
+## THIS IS PRE-RELEASE :exclamation:
+:exclamation:  :exclamation:  :exclamation:  
+WARNING: BETA TESTING ONLY  
+:exclamation:  :exclamation:  :exclamation:
+
+__This repo is under active development and, thus, only useful for testing purposes. When this message disappears and a __production__ release is on the [Releases page](https://github.com/cpicpgx/cpic-data/releases) then it will be ready for use. Until then, this is for evaluation only.__
 
 
-## Important Links
-
-### Get Data/Code
-
-If you want to get a copy of the data or code, [check the releases](https://github.com/cpicpgx/cpic-data/releases).
+## Important Links for Everyone
 
 ### Read the Docs
 
-If you want more information about how CPIC data works, [read the wiki](https://github.com/cpicpgx/cpic-data/wiki).
+If you want more information about using the API or database, [read the docs](https://github.com/cpicpgx/cpic-data/wiki).
 
 ### Bugs/Discussion
 
-If you found a bug or need to discuss something, [check the issues](https://github.com/cpicpgx/cpic-data/issues).
+If you found a bug or need to discuss something, [submit an issue](https://github.com/cpicpgx/cpic-data/issues). (Requires [GitHub account](https://github.com/join))
 
-## Setup
+### Get Data/Code
+
+If you want to get a copy of the raw data or code, [check the releases](https://github.com/cpicpgx/cpic-data/releases).
+
+
+## Database Setup
+
+You probably don't need to read the rest of this.
 
 This section (and the next) are only applicable if you want to build the database from scratch. If you're importing a 
 pre-built database export or using the API you don't need to do any of this. However, if you're interested in seeing an 
-example of how to work with the datbase in Java code, follow along.
+example of how to work with the database in Java code, follow along.
 
 This project assumes you're running a Postgres 11+ database for loading/querying data.
 
