@@ -43,5 +43,6 @@ exports.getAlleles = (path) => {
         if (e) console.log(e);
         console.log('Done writing ' + csvFile);
       });
-    });
+    })
+    .catch((err) => console.log('Error:', err));
 };

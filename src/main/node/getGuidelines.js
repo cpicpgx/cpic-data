@@ -10,12 +10,13 @@ exports.getGuidelines = (path) => {
 
   axios.get(
     uri,
-    {params: {select: 'name,url,gene(symbol),drug(name)', order: 'name'}},
+    {params: {select: 'name,url,gene(symbol),guideline_for_drug(name)', order: 'name'}},
   )
     .then((r) => {
       fs.writeFile(jsonFile, JSON.stringify(r.data, null, 2), (e) => {
         if (e) console.log(e);
         console.log(`Done writing ${jsonFile}`);
       });
-    });
+    })
+    .catch((err) => console.log('Error:', err));
 }
