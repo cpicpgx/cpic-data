@@ -25,7 +25,8 @@ import java.util.StringJoiner;
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from gene_note where type='" + NoteType.ALLELE_FREQUENCY.name() + "'",
+      "delete from change_log where type='" + NoteType.ALLELE_FREQUENCY.name() + "'",
+      "delete from file_note where type='" + NoteType.ALLELE_FREQUENCY.name() + "'",
       "delete from allele_frequency",
       "delete from population"
   };
@@ -80,7 +81,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
         }
       }
 
-      writeNotes(EntityType.GENE, gene, workbook.getNotes());
+      writeNotes(gene, workbook.getNotes());
 
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {

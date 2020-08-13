@@ -67,7 +67,7 @@ public class FrequencyExporter extends BaseExporter {
           PreparedStatement refFreqStmt = conn.prepareStatement(
               "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
           PreparedStatement changeStmt = conn.prepareStatement(
-              "select n.date, note from gene_note n where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? and n.date is not null order by ordinal"
+              "select n.date, note from change_log n where type='"+ NoteType.FUNCTION_REFERENCE +"' and entityId=? order by date"
           );
           PreparedStatement geneStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"

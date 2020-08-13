@@ -54,7 +54,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
          PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele_definition a join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleledefinitionid\n" +
              "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid\n" +
              "order by 1");
-         PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from gene_note n where genesymbol=? and type=? and n.date is not null order by ordinal");
+         PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from change_log n where entityId=? and type=? order by date");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {

@@ -151,7 +151,7 @@ public abstract class BaseExporter {
     List<String> notes = new ArrayList<>();
     try (
         PreparedStatement noteStmt = conn.prepareStatement(
-            "select n.note from gene_note n where genesymbol=? and type=? and n.date is null order by ordinal"
+            "select n.note from file_note n where entityId=? and type=? order by ordinal"
         )
     ) {
       noteStmt.setString(1, symbol);
@@ -177,7 +177,7 @@ public abstract class BaseExporter {
     List<String> notes = new ArrayList<>();
     try (
         PreparedStatement noteStmt = conn.prepareStatement(
-            "select n.note from drug_note n where drugid=? and type=? and n.date is null order by ordinal"
+            "select n.note from file_note n where entityId=? and type=? order by ordinal"
         )
     ) {
       noteStmt.setString(1, drugId);

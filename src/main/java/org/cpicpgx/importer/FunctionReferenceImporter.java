@@ -46,7 +46,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
   private static final String[] sf_deleteStatements = new String[]{
       "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
-      "delete from gene_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
+      "delete from change_log where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
+      "delete from file_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "allele_functionality_reference";
 
@@ -262,8 +263,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       }
 
       insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) values (?, ?, ?, initcap(?), ?, initcap(?), ?, ?, ?, ?::jsonb, ?)");
-      insertNoteStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
-      insertChangeStmt = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+      insertNoteStmt = this.conn.prepareStatement("insert into file_note(entityId, note, type, ordinal) values (?, ?, ?, ?)");
+      insertChangeStmt = this.conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
     }
 
     private Long lookupAlleleDefinitionId(String alleleName) {
@@ -319,8 +320,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       this.noteIdx += 1;
     }
     
-    int nHistory = 0;
-
     /**
      * Insert a change event into the history table.
      * @param date the date of the change, required
@@ -328,7 +327,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
      * @throws SQLException can occur from bad database transaction
      */
     void insertChange(java.util.Date date, String note) throws SQLException {
-      Preconditions.checkNotNull(date, "History line %s has a blank date", this.nHistory + 1);
+      Preconditions.checkNotNull(date, "History line has a blank date");
 
       this.insertChangeStmt.clearParameters();
       this.insertChangeStmt.setString(1, gene);
@@ -338,10 +337,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         this.insertChangeStmt.setString(2, "n/a");
       }
       this.insertChangeStmt.setString(3, NoteType.FUNCTION_REFERENCE.name());
-      this.insertChangeStmt.setInt(4, this.nHistory);
-      this.insertChangeStmt.setDate(5, new Date(date.getTime()));
+      this.insertChangeStmt.setDate(4, new Date(date.getTime()));
       this.insertChangeStmt.executeUpdate();
-      this.nHistory += 1;
     }
     
     private void setNullableText(PreparedStatement stmt, int idx, String value) throws SQLException {

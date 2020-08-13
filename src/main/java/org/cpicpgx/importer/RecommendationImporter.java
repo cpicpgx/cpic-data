@@ -49,7 +49,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   private static final String NO_RESULT = "No Result";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from recommendation",
-      "delete from drug_note where type='" + NoteType.RECOMMENDATIONS.name() + "'"
+      "delete from file_note where type='" + NoteType.RECOMMENDATIONS.name() + "'",
+      "delete from change_log where type='" + NoteType.RECOMMENDATIONS.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
   private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
@@ -289,7 +290,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     DbHarness(String drugName) throws Exception {
       Connection conn = ConnectionFactory.newConnection();
       this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
-      this.insertChangeStmt = conn.prepareStatement("insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+      this.insertChangeStmt = conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
       this.findPhenotype = conn.prepareStatement("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
 
       PreparedStatement drugLookupStmt = conn.prepareStatement(
@@ -404,7 +405,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       }
     }
     
-    int nHistory = 0;
     /**
      * Insert a change event into the history table.
      * @param date the date of the change, required
@@ -412,7 +412,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
      * @throws SQLException can occur from bad database transaction
      */
     void insertChange(java.util.Date date, String note) throws SQLException {
-      Preconditions.checkNotNull(date, "History line %s has a blank date", this.nHistory + 1);
+      Preconditions.checkNotNull(date, "History line has a blank date");
 
       this.insertChangeStmt.clearParameters();
       this.insertChangeStmt.setString(1, drugId);
@@ -422,10 +422,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         this.insertChangeStmt.setString(2, "n/a");
       }
       this.insertChangeStmt.setString(3, NoteType.RECOMMENDATIONS.name());
-      this.insertChangeStmt.setInt(4, this.nHistory);
-      this.insertChangeStmt.setDate(5, new Date(date.getTime()));
+      this.insertChangeStmt.setDate(4, new Date(date.getTime()));
       this.insertChangeStmt.executeUpdate();
-      this.nHistory += 1;
     }
 
     @Override

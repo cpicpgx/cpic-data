@@ -225,7 +225,7 @@ public class AlleleDefinitionImporter {
     List<String> notes = workbook.getNotes();
 
     try (Connection conn = ConnectionFactory.newConnection()) {
-      PreparedStatement noteInsert = conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
+      PreparedStatement noteInsert = conn.prepareStatement("insert into file_note(entityId, note, type, ordinal) values (?, ?, ?, ?)");
       int n = 0;
       for (String note : notes) {
         noteInsert.setString(1, m_gene);
@@ -243,7 +243,7 @@ public class AlleleDefinitionImporter {
     workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
 
     try (Connection conn = ConnectionFactory.newConnection()) {
-      PreparedStatement insertStmt = conn.prepareStatement("insert into gene_note (geneSymbol, type, date, note, ordinal) values (?, ?, ?, ?, ?)");
+      PreparedStatement insertStmt = conn.prepareStatement("insert into change_log (entityId, type, date, note) values (?, ?, ?, ?)");
       insertStmt.setString(1, m_gene);
       insertStmt.setString(2, NoteType.ALLELE_DEFINITION.name());
       
@@ -263,8 +263,7 @@ public class AlleleDefinitionImporter {
         } else {
           insertStmt.setString(4, "n/a");
         }
-        insertStmt.setLong(5, i);
-        
+
         insertStmt.executeUpdate();
       }
     }

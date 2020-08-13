@@ -218,30 +218,16 @@ public abstract class BaseDirectoryImporter {
   }
 
   /**
-   * Writes the supplied list of notes to the DB for the given type/id pair
-   * @param entityType the type of object to note, either gene or drug
+   * Writes the supplied list of notes to the DB for the given id
    * @param entityId the ID of the object to note
    * @param notes a List of String notes
    * @throws SQLException can occur from DB inserts
    */
-  void writeNotes(EntityType entityType, String entityId, List<String> notes) throws SQLException {
+  void writeNotes(String entityId, List<String> notes) throws SQLException {
     if (notes == null || notes.size() == 0) return;
 
-    String insertSqlTemplate = "insert into %s(%s, note, type, ordinal) values (?, ?, ?, ?)";
-    String insertSql;
-    switch (entityType) {
-      case GENE:
-        insertSql = String.format(insertSqlTemplate, "gene_note", "genesymbol");
-        break;
-      case DRUG:
-        insertSql = String.format(insertSqlTemplate, "drug_note", "drugid");
-        break;
-      default:
-        throw new RuntimeException(String.format("Type not supported: %s", entityType.name()));
-    }
-
     try (Connection conn = ConnectionFactory.newConnection()) {
-      PreparedStatement noteInsert = conn.prepareStatement(insertSql);
+      PreparedStatement noteInsert = conn.prepareStatement("insert into file_note(entityId, note, type, ordinal) values (?, ?, ?, ?)");
       int n = 0;
       for (String note : notes) {
         noteInsert.setString(1, entityId);

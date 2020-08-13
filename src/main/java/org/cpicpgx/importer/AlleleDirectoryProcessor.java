@@ -15,7 +15,8 @@ import java.sql.SQLException;
  */
 public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from gene_note where type='" + NoteType.ALLELE_DEFINITION.name() + "'",
+      "delete from change_log where type='" + NoteType.ALLELE_DEFINITION.name() + "'",
+      "delete from file_note where type='" + NoteType.ALLELE_DEFINITION.name() + "'",
       "delete from allele_location_value",
       "delete from allele_definition where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from sequence_location"
@@ -53,7 +54,7 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
     try {
       AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
       importer.writeToDB();
-      writeNotes(EntityType.GENE, importer.getGene(), workbook.getNotes());
+      writeNotes(importer.getGene(), workbook.getNotes());
       importer.writeHistory(workbook);
     } catch (SQLException e) {
       throw new RuntimeException("Error processing " + workbook, e);

@@ -45,7 +45,7 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
          PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.activityvalue, a.functionalstatus, a.clinicalfunctionalstatus, a.clinicalfunctionalsubstrate, " +
              "a.citations, a.strength, a.findings, a.functioncomments " +
              "from allele a where a.genesymbol=? order by a.id");
-         PreparedStatement changeStmt = conn.prepareStatement("select n.date, note from gene_note n where type='"+ NoteType.FUNCTION_REFERENCE +"' and genesymbol=? and n.date is not null order by ordinal");
+         PreparedStatement changeStmt = conn.prepareStatement("select n.date, note from change_log n where type='"+ NoteType.FUNCTION_REFERENCE +"' and entityId=? order by date");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {

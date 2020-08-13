@@ -25,7 +25,8 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern GENE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from gene_note where type='" + NoteType.CDS.name() + "'"
+      "delete from file_note where type='" + NoteType.CDS.name() + "'",
+      "delete from change_log where type='" + NoteType.CDS.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "gene_cds";
   private static final int COL_PHENOTYPE = 0;
@@ -121,7 +122,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       insertStmt = this.conn.prepareStatement(
           "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityScore) values (?, ?, ?, ?, ?) ON CONFLICT (genesymbol, phenotype, activityScore) DO UPDATE set ehrpriority=excluded.ehrpriority, consultationtext=excluded.consultationtext"
       );
-      insertNote = this.conn.prepareStatement("insert into gene_note(geneSymbol, note, type, ordinal) values (?, ?, ?, ?)");
+      insertNote = this.conn.prepareStatement("insert into file_note(entityId, note, type, ordinal) values (?, ?, ?, ?)");
     }
 
     void insert(String phenotype, String activity, String ehr, String consultation) throws SQLException {

@@ -209,27 +209,6 @@ COMMENT ON COLUMN allele.findings IS 'Findings listed by PubMed ID';
 COMMENT ON COLUMN allele.functionComments IS 'Comments this functional assignment of this allele';
 
 
-CREATE TABLE gene_note
-(
-    geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
-    date DATE,
-    type VARCHAR(50) NOT NULL,
-    ordinal INTEGER NOT NULL,
-    note TEXT NOT NULL,
-    version INTEGER DEFAULT 1
-);
-CREATE TRIGGER version_gene_note
-  BEFORE UPDATE ON gene_note
-  FOR EACH ROW EXECUTE PROCEDURE increment_version();
-COMMENT ON TABLE gene_note IS 'A note about a gene';
-COMMENT ON COLUMN gene_note.geneSymbol IS 'The HGNC gene symbol for the gene this note is about, required';
-COMMENT ON COLUMN gene_note.date IS 'The optional date this note was entered';
-COMMENT ON COLUMN gene_note.type IS 'The type of information this note is about, required';
-COMMENT ON COLUMN gene_note.ordinal IS 'A number for sort order of this note compared to other notes for this gene-type';
-COMMENT ON COLUMN gene_note.note IS 'The text of the note about allele translation, required';
-COMMENT ON COLUMN gene_note.version IS 'The version number, iterates on modification';
-
-
 CREATE TABLE population
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
@@ -306,27 +285,6 @@ COMMENT ON COLUMN drug.drugbankId IS 'The DrugBank ID for this drug, optional';
 COMMENT ON COLUMN drug.umlsCui IS 'The UMLS Concept Unique ID for this drug, optional';
 COMMENT ON COLUMN drug.atcId IS 'One or more ATC IDs for this drug in an array, optional';
 COMMENT ON COLUMN drug.flowChart IS 'URL for the flow chart image of this drug';
-
-CREATE TABLE drug_note
-(
-    drugId  VARCHAR(20) REFERENCES drug(drugId) NOT NULL,
-    date    DATE,
-    type    VARCHAR(50) NOT NULL,
-    ordinal INTEGER NOT NULL,
-    note    TEXT NOT NULL,
-    version INTEGER DEFAULT 1
-);
-CREATE TRIGGER version_drug_note
-    BEFORE UPDATE ON drug_note
-    FOR EACH ROW EXECUTE PROCEDURE increment_version();
-COMMENT ON TABLE drug_note IS 'A note about a gene';
-COMMENT ON COLUMN drug_note.drugId IS 'The ID for the drug this note is about, required';
-COMMENT ON COLUMN drug_note.date IS 'The optional date this note was entered';
-COMMENT ON COLUMN drug_note.type IS 'The type of information this note is about, required';
-COMMENT ON COLUMN drug_note.ordinal IS 'A number for sort order of this note compared to other notes for this drug-type';
-COMMENT ON COLUMN drug_note.note IS 'The text of the note, required';
-COMMENT ON COLUMN drug_note.version IS 'The version number, iterates on modification';
-
 
 CREATE TABLE file_artifact
 (
@@ -560,3 +518,39 @@ COMMENT ON COLUMN test_alert.alleleStatus IS 'Whether or not an allele is presen
 COMMENT ON COLUMN test_alert.lookupKey IS 'A key to use for finding a specific test alert. Made of a JSON object of gene symbol to key value. The key value can be one of phenotype, activity score, or allele status depending on the gene.';
 COMMENT ON COLUMN test_alert.drugId IS 'The ID of a drug this alert text is for';
 COMMENT ON COLUMN test_alert.alertText IS 'An array of one or more pieces of alert text';
+
+CREATE TABLE change_log
+(
+    date DATE NOT NULL,
+    type TEXT NOT NULL,
+    entityId TEXT,
+    note TEXT NOT NULL,
+    version INTEGER DEFAULT 1
+);
+CREATE TRIGGER version_change_log
+    BEFORE UPDATE ON change_log
+    FOR EACH ROW EXECUTE PROCEDURE increment_version();
+COMMENT ON TABLE change_log IS 'A dated freeform text description of a change made to a type of information and optionally for a specific entity';
+COMMENT ON COLUMN change_log.date IS 'The date the log note is applicable';
+COMMENT ON COLUMN change_log.type IS 'The type of data this log message is about';
+COMMENT ON COLUMN change_log.entityId IS 'Optional, the specific entity this note is about. For example, could be a gene symbol or drug ID';
+COMMENT ON COLUMN change_log.note IS 'The freeform text note about what the change was';
+COMMENT ON COLUMN change_log.version IS 'The version number, iterates on modification';
+
+CREATE TABLE file_note
+(
+    type TEXT NOT NULL,
+    entityId TEXT,
+    note TEXT NOT NULL,
+    ordinal INTEGER NOT NULL,
+    version INTEGER DEFAULT 1
+);
+CREATE TRIGGER version_file_note
+    BEFORE UPDATE ON file_note
+    FOR EACH ROW EXECUTE PROCEDURE increment_version();
+COMMENT ON TABLE file_note IS 'An ordered note that should appear with the type of information specified';
+COMMENT ON COLUMN file_note.type IS 'The type of information this note is about';
+COMMENT ON COLUMN file_note.entityId IS 'Optional, the specific entity this note is about. For example, could be a gene symbol or drug ID';
+COMMENT ON COLUMN file_note.note IS 'The freeform text note about the type/entity';
+COMMENT ON COLUMN file_note.ordinal IS 'The index number for ordering notes of a given type/entity';
+COMMENT ON COLUMN file_note.version IS 'The version number, iterates on modification';

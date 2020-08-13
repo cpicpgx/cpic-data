@@ -31,7 +31,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from drug_note where type='" + NoteType.TEST_ALERT.name() + "'",
+      "delete from change_log where type='" + NoteType.TEST_ALERT.name() + "'",
+      "delete from file_note where type='" + NoteType.TEST_ALERT.name() + "'",
       "delete from test_alert"
   };
   private static final String FILE_EXTENSION = "_Pre_and_Post_Test_Alerts.xlsx";
@@ -209,7 +210,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
       java.util.Date date = row.getDate(0);
       String note = row.getText(1);
-      dbHarness.writeHistory(date, note, i - 1);
+      dbHarness.writeHistory(date, note);
     }
   }
 
@@ -229,9 +230,9 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       this.insert = conn.prepareStatement(
           "insert into test_alert(cdsContext, genes, drugid, alertText, population, activityScore, phenotype, alleleStatus, lookupKey) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)");
       this.insertNote = conn.prepareStatement(
-          "insert into drug_note(drugId, type, ordinal, note) values (?, ?, ?, ?)");
+          "insert into file_note(entityId, type, ordinal, note) values (?, ?, ?, ?)");
       this.insertChangeStmt = conn.prepareStatement(
-          "insert into drug_note(drugid, note, type, ordinal, date) values (?, ?, ?, ?, ?)");
+          "insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
       this.findLookup = conn.prepareStatement("select lookupmethod from gene where symbol=?");
 
       closables.add(this.insert);
@@ -265,7 +266,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
 
-    private void writeHistory(Date date, String note, int ordinal) throws SQLException {
+    private void writeHistory(Date date, String note) throws SQLException {
       for (String drugId : nameToIdMap.values()) {
         this.insertChangeStmt.clearParameters();
         this.insertChangeStmt.setString(1, drugId);
@@ -275,8 +276,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
           this.insertChangeStmt.setString(2, "n/a");
         }
         this.insertChangeStmt.setString(3, getNoteType().name());
-        this.insertChangeStmt.setInt(4, ordinal);
-        this.insertChangeStmt.setDate(5, new java.sql.Date(date.getTime()));
+        this.insertChangeStmt.setDate(4, new java.sql.Date(date.getTime()));
         this.insertChangeStmt.executeUpdate();
       }
     }

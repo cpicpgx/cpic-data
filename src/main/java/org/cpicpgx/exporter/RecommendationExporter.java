@@ -55,7 +55,7 @@ public class RecommendationExporter extends BaseExporter {
         PreparedStatement geneStmt = conn.prepareStatement("select distinct jsonb_object_keys(phenotypes) from recommendation where drugid=?");
         PreparedStatement popStmt = conn.prepareStatement("select distinct population from recommendation where drugid=?");
         PreparedStatement recStmt = conn.prepareStatement("select r.phenotypes, r.drugRecommendation, r.implications, r.classification, r.activityScore, r.comments from recommendation r where r.drugid=? and r.population=?");
-        PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from drug_note n where drugid=? and type=? and n.date is not null order by ordinal");
+        PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from change_log n where entityId=? and type=? order by date");
         ResultSet drs = drugStmt.executeQuery()
     ) {
       while (drs.next()) {
