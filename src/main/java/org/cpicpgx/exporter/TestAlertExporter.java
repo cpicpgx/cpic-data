@@ -3,7 +3,6 @@ package org.cpicpgx.exporter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -89,7 +88,7 @@ public class TestAlertExporter extends BaseExporter {
             }
           }
         }
-        workbook.writeNotes(queryDrugNotes(conn, drugId, NoteType.TEST_ALERT));
+        workbook.writeNotes(queryDrugNotes(conn, drugId, FileType.TEST_ALERTS));
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{drugId});

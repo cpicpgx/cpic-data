@@ -6,8 +6,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -230,7 +230,7 @@ public class AlleleDefinitionImporter {
       for (String note : notes) {
         noteInsert.setString(1, m_gene);
         noteInsert.setString(2, note);
-        noteInsert.setString(3, NoteType.ALLELE_DEFINITION.name());
+        noteInsert.setString(3, FileType.ALLELE_DEFINITION.name());
         noteInsert.setInt(4, n);
         noteInsert.executeUpdate();
         n += 1;
@@ -245,7 +245,7 @@ public class AlleleDefinitionImporter {
     try (Connection conn = ConnectionFactory.newConnection()) {
       PreparedStatement insertStmt = conn.prepareStatement("insert into change_log (entityId, type, date, note) values (?, ?, ?, ?)");
       insertStmt.setString(1, m_gene);
-      insertStmt.setString(2, NoteType.ALLELE_DEFINITION.name());
+      insertStmt.setString(2, FileType.ALLELE_DEFINITION.name());
       
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);

@@ -3,7 +3,6 @@ package org.cpicpgx.exporter;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.FileHistoryWriter;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.FileStoreClient;
@@ -33,7 +32,7 @@ public abstract class BaseExporter {
 
   protected Path directory;
   private boolean upload = false;
-  private List<Path> generatedFiles = new ArrayList<>();
+  private final List<Path> generatedFiles = new ArrayList<>();
 
   /**
    * The type of file this exports
@@ -147,7 +146,7 @@ public abstract class BaseExporter {
    * @return an ordered list of notes
    * @throws SQLException can occur from database query
    */
-  List<String> queryGeneNotes(Connection conn, String symbol, NoteType type) throws SQLException {
+  List<String> queryGeneNotes(Connection conn, String symbol, FileType type) throws SQLException {
     List<String> notes = new ArrayList<>();
     try (
         PreparedStatement noteStmt = conn.prepareStatement(
@@ -173,7 +172,7 @@ public abstract class BaseExporter {
    * @return an ordered list of notes
    * @throws SQLException can occur from database query
    */
-  List<String> queryDrugNotes(Connection conn, String drugId, NoteType type) throws SQLException {
+  List<String> queryDrugNotes(Connection conn, String drugId, FileType type) throws SQLException {
     List<String> notes = new ArrayList<>();
     try (
         PreparedStatement noteStmt = conn.prepareStatement(

@@ -6,7 +6,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.DbLookup;
 import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
@@ -31,14 +30,14 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from change_log where type='" + NoteType.TEST_ALERT.name() + "'",
-      "delete from file_note where type='" + NoteType.TEST_ALERT.name() + "'",
+      "delete from change_log where type='" + FileType.TEST_ALERTS.name() + "'",
+      "delete from file_note where type='" + FileType.TEST_ALERTS.name() + "'",
       "delete from test_alert"
   };
   private static final String FILE_EXTENSION = "_Pre_and_Post_Test_Alerts.xlsx";
   private static final String DEFAULT_DIRECTORY = "test_alerts";
 
-  private final Set<String> f_notes = new LinkedHashSet<>();
+  private final List<String> f_notes = new ArrayList<>();
 
   public static void main(String[] args) {
     rebuild(new TestAlertImporter(), args);
@@ -80,8 +79,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
           processTestAlertSheet(workbook, dbHarness, population);
         }
       }
-      for (String note : f_notes) {
-        dbHarness.writeNote(note);
+      for (String drugId : dbHarness.getDrugIds()) {
+        writeNotes(drugId, f_notes);
       }
       f_notes.clear();
     }
@@ -217,7 +216,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private class DbHarness implements AutoCloseable {
     private final Connection conn;
     private final PreparedStatement insert;
-    private final PreparedStatement insertNote;
     private final PreparedStatement insertChangeStmt;
     private final PreparedStatement findLookup;
     private final Map<String, String> nameToIdMap = new HashMap<>();
@@ -229,30 +227,14 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       this.conn = ConnectionFactory.newConnection();
       this.insert = conn.prepareStatement(
           "insert into test_alert(cdsContext, genes, drugid, alertText, population, activityScore, phenotype, alleleStatus, lookupKey) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)");
-      this.insertNote = conn.prepareStatement(
-          "insert into file_note(entityId, type, ordinal, note) values (?, ?, ?, ?)");
       this.insertChangeStmt = conn.prepareStatement(
           "insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
       this.findLookup = conn.prepareStatement("select lookupmethod from gene where symbol=?");
 
       closables.add(this.insert);
-      closables.add(this.insertNote);
       closables.add(this.insertChangeStmt);
       closables.add(this.findLookup);
       closables.add(conn);
-    }
-
-    int noteOrdinal = 0;
-    private void writeNote(String note) throws SQLException {
-      for (String drugId : nameToIdMap.values()) {
-        insertNote.clearParameters();
-        insertNote.setString(1, drugId);
-        insertNote.setString(2, getNoteType().name());
-        insertNote.setInt(3, noteOrdinal);
-        insertNote.setString(4, note);
-        insertNote.executeUpdate();
-      }
-      noteOrdinal += 1;
     }
 
     private Set<String> getGenes() {
@@ -275,7 +257,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         } else {
           this.insertChangeStmt.setString(2, "n/a");
         }
-        this.insertChangeStmt.setString(3, getNoteType().name());
+        this.insertChangeStmt.setString(3, getFileType().name());
         this.insertChangeStmt.setDate(4, new java.sql.Date(date.getTime()));
         this.insertChangeStmt.executeUpdate();
       }
@@ -337,6 +319,10 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         nameToIdMap.put(name, id);
       }
       return id;
+    }
+
+    private Collection<String> getDrugIds() {
+      return nameToIdMap.values();
     }
 
     @Nullable

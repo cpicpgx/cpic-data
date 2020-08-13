@@ -7,7 +7,6 @@ import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -49,8 +48,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   private static final String NO_RESULT = "No Result";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from recommendation",
-      "delete from file_note where type='" + NoteType.RECOMMENDATIONS.name() + "'",
-      "delete from change_log where type='" + NoteType.RECOMMENDATIONS.name() + "'"
+      "delete from file_note where type='" + FileType.RECOMMENDATIONS.name() + "'",
+      "delete from change_log where type='" + FileType.RECOMMENDATIONS.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
   private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
@@ -421,7 +420,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       } else {
         this.insertChangeStmt.setString(2, "n/a");
       }
-      this.insertChangeStmt.setString(3, NoteType.RECOMMENDATIONS.name());
+      this.insertChangeStmt.setString(3, FileType.RECOMMENDATIONS.name());
       this.insertChangeStmt.setDate(4, new Date(date.getTime()));
       this.insertChangeStmt.executeUpdate();
     }

@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
          PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.activityvalue, a.functionalstatus, a.clinicalfunctionalstatus, a.clinicalfunctionalsubstrate, " +
              "a.citations, a.strength, a.findings, a.functioncomments " +
              "from allele a where a.genesymbol=? order by a.id");
-         PreparedStatement changeStmt = conn.prepareStatement("select n.date, note from change_log n where type='"+ NoteType.FUNCTION_REFERENCE +"' and entityId=? order by date");
+         PreparedStatement changeStmt = conn.prepareStatement("select n.date, note from change_log n where type='"+ FileType.ALLELE_FUNCTION_REFERENCE +"' and entityId=? order by date");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -72,7 +71,7 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
           }
         }
         
-        workbook.writeNotes(queryGeneNotes(conn, symbol, NoteType.FUNCTION_REFERENCE));
+        workbook.writeNotes(queryGeneNotes(conn, symbol, FileType.ALLELE_FUNCTION_REFERENCE));
         
         changeStmt.setString(1, symbol);
         try (ResultSet rs = changeStmt.executeQuery()) {

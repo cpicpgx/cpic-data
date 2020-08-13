@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
@@ -13,7 +12,10 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -67,7 +69,7 @@ public class FrequencyExporter extends BaseExporter {
           PreparedStatement refFreqStmt = conn.prepareStatement(
               "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
           PreparedStatement changeStmt = conn.prepareStatement(
-              "select n.date, note from change_log n where type='"+ NoteType.FUNCTION_REFERENCE +"' and entityId=? order by date"
+              "select n.date, note from change_log n where type='"+ FileType.ALLELE_FUNCTION_REFERENCE +"' and entityId=? order by date"
           );
           PreparedStatement geneStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"

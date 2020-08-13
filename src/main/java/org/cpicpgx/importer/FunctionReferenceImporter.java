@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -46,8 +45,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
   private static final String[] sf_deleteStatements = new String[]{
       "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
-      "delete from change_log where type='" + NoteType.FUNCTION_REFERENCE.name() + "'",
-      "delete from file_note where type='" + NoteType.FUNCTION_REFERENCE.name() + "'"
+      "delete from change_log where type='" + FileType.ALLELE_FUNCTION_REFERENCE.name() + "'",
+      "delete from file_note where type='" + FileType.ALLELE_FUNCTION_REFERENCE.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "allele_functionality_reference";
 
@@ -157,13 +156,15 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Error on row " + readableRow, ex);
         }
       }
-      
+
+      List<String> notes = new ArrayList<>();
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
         row = workbook.getRow(rowIdx);
         if (!row.hasNoText(0) && !row.getNullableText(0).toLowerCase().startsWith("note")) {
-          dbHarness.insertNote(row.getNullableText(0));
+          notes.add(row.getText(0));
         }
       }
+      writeNotes(geneSymbol, notes);
       
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
@@ -227,11 +228,9 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private final Connection conn;
     private final Map<String, Long> alleleNameMap = new HashMap<>();
     private final PreparedStatement insertAlleleStmt;
-    private final PreparedStatement insertNoteStmt;
     private final PreparedStatement insertChangeStmt;
     private final String gene;
     private final LookupMethod geneLookupMethod;
-    private int noteIdx = 0;
 
     DbHarness(String gene) throws SQLException {
       this.gene = gene;
@@ -263,7 +262,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       }
 
       insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) values (?, ?, ?, initcap(?), ?, initcap(?), ?, ?, ?, ?::jsonb, ?)");
-      insertNoteStmt = this.conn.prepareStatement("insert into file_note(entityId, note, type, ordinal) values (?, ?, ?, ?)");
       insertChangeStmt = this.conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
     }
 
@@ -310,16 +308,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       }
     }
 
-    void insertNote(String note) throws SQLException {
-      this.insertNoteStmt.clearParameters();
-      this.insertNoteStmt.setString(1, gene);
-      this.insertNoteStmt.setString(2, note);
-      this.insertNoteStmt.setString(3, NoteType.FUNCTION_REFERENCE.name());
-      this.insertNoteStmt.setInt(4, this.noteIdx);
-      this.insertNoteStmt.executeUpdate();
-      this.noteIdx += 1;
-    }
-    
     /**
      * Insert a change event into the history table.
      * @param date the date of the change, required
@@ -336,7 +324,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       } else {
         this.insertChangeStmt.setString(2, "n/a");
       }
-      this.insertChangeStmt.setString(3, NoteType.FUNCTION_REFERENCE.name());
+      this.insertChangeStmt.setString(3, FileType.ALLELE_FUNCTION_REFERENCE.name());
       this.insertChangeStmt.setDate(4, new Date(date.getTime()));
       this.insertChangeStmt.executeUpdate();
     }
@@ -357,9 +345,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     public void close() throws SQLException {
       if (this.insertAlleleStmt != null) {
         this.insertAlleleStmt.close();
-      }
-      if (this.insertNoteStmt != null) {
-        this.insertNoteStmt.close();
       }
       if (this.insertChangeStmt != null) {
         this.insertChangeStmt.close();

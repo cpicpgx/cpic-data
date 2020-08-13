@@ -3,7 +3,6 @@ package org.cpicpgx.exporter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -105,7 +104,7 @@ public class RecommendationExporter extends BaseExporter {
         }
 
         changeStmt.setString(1, drugId);
-        changeStmt.setString(2, NoteType.RECOMMENDATIONS.name());
+        changeStmt.setString(2, FileType.RECOMMENDATIONS.name());
         try (ResultSet rs = changeStmt.executeQuery()) {
           while (rs.next()) {
             workbook.writeHistory(rs.getDate(1), rs.getString(2));

@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
@@ -109,10 +108,10 @@ public class AlleleDefinitionExporter extends BaseExporter {
           }
         }
 
-        workbook.writeNotes(queryGeneNotes(conn, symbol, NoteType.ALLELE_DEFINITION));
+        workbook.writeNotes(queryGeneNotes(conn, symbol, FileType.ALLELE_DEFINITION));
         
         changeStmt.setString(1, symbol);
-        changeStmt.setString(2, NoteType.ALLELE_DEFINITION.name());
+        changeStmt.setString(2, FileType.ALLELE_DEFINITION.name());
         try (ResultSet rs = changeStmt.executeQuery()) {
           while (rs.next()) {
             workbook.writeHistory(rs.getDate(1), rs.getString(2));

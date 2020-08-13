@@ -1,7 +1,6 @@
 package org.cpicpgx.importer;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
@@ -13,6 +12,8 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,8 +26,8 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern GENE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from file_note where type='" + NoteType.CDS.name() + "'",
-      "delete from change_log where type='" + NoteType.CDS.name() + "'"
+      "delete from file_note where type='" + FileType.GENE_CDS.name() + "'",
+      "delete from change_log where type='" + FileType.GENE_CDS.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "gene_cds";
   private static final int COL_PHENOTYPE = 0;
@@ -98,13 +99,15 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
 
         dbHarness.insert(pheno, activity, priority, consultation);
       }
-      
+
+      List<String> notes = new ArrayList<>();
       // pick up any note rows after "Notes:" header
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
         RowWrapper row = workbook.getRow(rowIdx);
         if (row.hasNoText(0)) continue;
-        dbHarness.insertNote(row.getNullableText(0));
+        notes.add(row.getText(0));
       }
+      writeNotes(geneSymbol, notes);
     }
   }
 
@@ -112,8 +115,6 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
     private final Connection conn;
     private final String gene;
     private final PreparedStatement insertStmt;
-    private final PreparedStatement insertNote;
-    private int noteOrdinal = 0;
 
     DbHarness(String gene) throws SQLException {
       this.gene = gene;
@@ -122,7 +123,6 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       insertStmt = this.conn.prepareStatement(
           "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityScore) values (?, ?, ?, ?, ?) ON CONFLICT (genesymbol, phenotype, activityScore) DO UPDATE set ehrpriority=excluded.ehrpriority, consultationtext=excluded.consultationtext"
       );
-      insertNote = this.conn.prepareStatement("insert into file_note(entityId, note, type, ordinal) values (?, ?, ?, ?)");
     }
 
     void insert(String phenotype, String activity, String ehr, String consultation) throws SQLException {
@@ -137,23 +137,10 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       insertStmt.executeUpdate();
     }
     
-    void insertNote(String note) throws SQLException {
-      insertNote.clearParameters();
-      insertNote.setString(1, gene);
-      insertNote.setString(2, note);
-      insertNote.setString(3, NoteType.CDS.name());
-      insertNote.setInt(4, noteOrdinal);
-      insertNote.executeUpdate();
-      noteOrdinal += 1;
-    }
-    
     @Override
     public void close() throws Exception {
       if (this.insertStmt != null) {
         this.insertStmt.close();
-      }
-      if (this.insertNote != null) {
-        this.insertNote.close();
       }
       if (this.conn != null) {
         this.conn.close();

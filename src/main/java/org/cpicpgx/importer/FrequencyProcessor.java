@@ -2,8 +2,8 @@ package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class FrequencyProcessor implements AutoCloseable {
     this.insertHistory =
         this.conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
     this.insertHistory.setString(1, gene);
-    this.insertHistory.setString(3, NoteType.ALLELE_FREQUENCY.name());
+    this.insertHistory.setString(3, FileType.FREQUENCIES.name());
     this.updateMethods =
         this.conn.prepareStatement("update gene set frequencyMethods=? where symbol=?");
     this.updateMethods.setString(2, gene);

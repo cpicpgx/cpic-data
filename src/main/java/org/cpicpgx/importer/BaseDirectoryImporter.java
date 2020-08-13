@@ -5,8 +5,6 @@ import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -60,30 +58,6 @@ public abstract class BaseDirectoryImporter {
    */
   abstract FileType getFileType();
 
-  /**
-   * Gets the type of Note for this importer based on {@link BaseDirectoryImporter#getFileType()}
-   * @return a {@link NoteType} enum value
-   * @throws RuntimeException when notes are not supported
-   */
-  NoteType getNoteType() {
-    switch (getFileType()) {
-      case ALLELE_DEFINITION:
-        return NoteType.ALLELE_DEFINITION;
-      case FREQUENCIES:
-        return NoteType.ALLELE_FREQUENCY;
-      case GENE_CDS:
-        return NoteType.CDS;
-      case ALLELE_FUNCTION_REFERENCE:
-        return NoteType.FUNCTION_REFERENCE;
-      case TEST_ALERTS:
-        return NoteType.TEST_ALERT;
-      case RECOMMENDATIONS:
-        return NoteType.RECOMMENDATIONS;
-      default:
-        throw new RuntimeException("Notes are not supported");
-    }
-  }
-  
   abstract String[] getDeleteStatements();
   
   abstract String getDefaultDirectoryName();
@@ -232,7 +206,7 @@ public abstract class BaseDirectoryImporter {
       for (String note : notes) {
         noteInsert.setString(1, entityId);
         noteInsert.setString(2, note);
-        noteInsert.setString(3, getNoteType().name());
+        noteInsert.setString(3, getFileType().name());
         noteInsert.setInt(4, n);
         noteInsert.executeUpdate();
         n += 1;

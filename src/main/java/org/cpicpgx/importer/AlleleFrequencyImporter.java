@@ -1,9 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.exporter.AbstractWorkbook;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
@@ -25,8 +23,8 @@ import java.util.StringJoiner;
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from change_log where type='" + NoteType.ALLELE_FREQUENCY.name() + "'",
-      "delete from file_note where type='" + NoteType.ALLELE_FREQUENCY.name() + "'",
+      "delete from change_log where type='" + FileType.FREQUENCIES.name() + "'",
+      "delete from file_note where type='" + FileType.FREQUENCIES.name() + "'",
       "delete from allele_frequency",
       "delete from population"
   };

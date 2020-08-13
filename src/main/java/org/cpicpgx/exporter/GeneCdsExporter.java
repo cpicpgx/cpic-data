@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.NoteType;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -62,7 +61,7 @@ public class GeneCdsExporter extends BaseExporter {
           }
         }
         
-        workbook.writeNotes(queryGeneNotes(conn, geneSymbol, NoteType.CDS));
+        workbook.writeNotes(queryGeneNotes(conn, geneSymbol, FileType.GENE_CDS));
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{geneSymbol});
