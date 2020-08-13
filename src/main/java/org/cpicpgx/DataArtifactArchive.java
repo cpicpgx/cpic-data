@@ -79,6 +79,7 @@ public class DataArtifactArchive {
     exporters.add(new DrugResourceExporter());
     exporters.add(new RecommendationExporter());
     exporters.add(new TestAlertExporter());
+    exporters.add(new PairsExporter());
 
     exporters.forEach(e -> {
       Path dirPath = getDirectoryPath(sf_dirNamePattern + "/" + e.getFileType().name().toLowerCase());

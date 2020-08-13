@@ -15,3 +15,5 @@ grant select on population_frequency_view to web_anon;
 grant select on file_status to web_anon;
 grant select on recommendation_view to web_anon;
 grant select on test_alert_view to web_anon;
+grant select on pair_view to web_anon;
+grant select on change_log_view to web_anon;

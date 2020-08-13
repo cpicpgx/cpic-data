@@ -293,6 +293,13 @@ public abstract class AbstractWorkbook {
     sheet.sheet.setColumnWidth(0, 100 * 256);
   }
 
+  void writeHistoryHeader() {
+    SheetWrapper historySheet = this.findSheet(HISTORY_SHEET_NAME);
+    Row headerRow = historySheet.nextRow();
+    writeHeaderCell(headerRow, 0, "Date");
+    writeHeaderCell(headerRow, 1, "Note");
+  }
+
   void writeHistory(Date date, String note) {
     boolean sheetExists = this.getSheets().stream().anyMatch((s) -> s.getName().equals(HISTORY_SHEET_NAME));
     SheetWrapper historySheet = this.findSheet(HISTORY_SHEET_NAME);
