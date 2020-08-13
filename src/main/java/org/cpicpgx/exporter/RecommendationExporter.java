@@ -36,7 +36,7 @@ public class RecommendationExporter extends BaseExporter {
   }
 
   public FileType getFileType() {
-    return FileType.RECOMMENDATIONS;
+    return FileType.RECOMMENDATION;
   }
 
   EntityType getEntityCategory() {
@@ -104,7 +104,7 @@ public class RecommendationExporter extends BaseExporter {
         }
 
         changeStmt.setString(1, drugId);
-        changeStmt.setString(2, FileType.RECOMMENDATIONS.name());
+        changeStmt.setString(2, FileType.RECOMMENDATION.name());
         try (ResultSet rs = changeStmt.executeQuery()) {
           while (rs.next()) {
             workbook.writeHistory(rs.getDate(1), rs.getString(2));

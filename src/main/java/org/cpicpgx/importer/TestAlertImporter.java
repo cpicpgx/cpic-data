@@ -30,8 +30,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from change_log where type='" + FileType.TEST_ALERTS.name() + "'",
-      "delete from file_note where type='" + FileType.TEST_ALERTS.name() + "'",
+      "delete from change_log where type='" + FileType.TEST_ALERT.name() + "'",
+      "delete from file_note where type='" + FileType.TEST_ALERT.name() + "'",
       "delete from test_alert"
   };
   private static final String FILE_EXTENSION = "_Pre_and_Post_Test_Alerts.xlsx";
@@ -51,7 +51,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
   @Override
   public FileType getFileType() {
-    return FileType.TEST_ALERTS;
+    return FileType.TEST_ALERT;
   }
 
   @Override

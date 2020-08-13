@@ -35,7 +35,7 @@ public class TestAlertExporter extends BaseExporter {
   }
 
   public FileType getFileType() {
-    return FileType.TEST_ALERTS;
+    return FileType.TEST_ALERT;
   }
 
   EntityType getEntityCategory() {
@@ -88,7 +88,7 @@ public class TestAlertExporter extends BaseExporter {
             }
           }
         }
-        workbook.writeNotes(queryDrugNotes(conn, drugId, FileType.TEST_ALERTS));
+        workbook.writeNotes(queryDrugNotes(conn, drugId, FileType.TEST_ALERT));
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{drugId});

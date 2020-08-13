@@ -30,7 +30,7 @@ public class TermsExporter extends BaseExporter {
   }
 
   public FileType getFileType() {
-    return FileType.TERMS;
+    return FileType.TERM;
   }
 
   EntityType getEntityCategory() {

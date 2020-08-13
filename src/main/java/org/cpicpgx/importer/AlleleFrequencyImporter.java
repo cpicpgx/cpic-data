@@ -23,8 +23,8 @@ import java.util.StringJoiner;
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from change_log where type='" + FileType.FREQUENCIES.name() + "'",
-      "delete from file_note where type='" + FileType.FREQUENCIES.name() + "'",
+      "delete from change_log where type='" + FileType.FREQUENCY.name() + "'",
+      "delete from file_note where type='" + FileType.FREQUENCY.name() + "'",
       "delete from allele_frequency",
       "delete from population"
   };
@@ -42,7 +42,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
 
   @Override
   public FileType getFileType() {
-    return FileType.FREQUENCIES;
+    return FileType.FREQUENCY;
   }
 
   @Override

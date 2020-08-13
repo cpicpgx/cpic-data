@@ -71,7 +71,7 @@ public class FrequencyProcessor implements AutoCloseable {
     this.insertHistory =
         this.conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
     this.insertHistory.setString(1, gene);
-    this.insertHistory.setString(3, FileType.FREQUENCIES.name());
+    this.insertHistory.setString(3, FileType.FREQUENCY.name());
     this.updateMethods =
         this.conn.prepareStatement("update gene set frequencyMethods=? where symbol=?");
     this.updateMethods.setString(2, gene);

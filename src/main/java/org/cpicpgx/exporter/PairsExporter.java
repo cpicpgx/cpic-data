@@ -50,7 +50,7 @@ public class PairsExporter extends BaseExporter {
   }
 
   public FileType getFileType() {
-    return FileType.PAIRS;
+    return FileType.PAIR;
   }
 
   EntityType getEntityCategory() {

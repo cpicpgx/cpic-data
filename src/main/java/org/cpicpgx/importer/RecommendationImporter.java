@@ -48,8 +48,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   private static final String NO_RESULT = "No Result";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from recommendation",
-      "delete from file_note where type='" + FileType.RECOMMENDATIONS.name() + "'",
-      "delete from change_log where type='" + FileType.RECOMMENDATIONS.name() + "'"
+      "delete from file_note where type='" + FileType.RECOMMENDATION.name() + "'",
+      "delete from change_log where type='" + FileType.RECOMMENDATION.name() + "'"
   };
   private static final String DEFAULT_DIRECTORY = "recommendation_tables";
   private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
@@ -69,7 +69,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
   @Override
   public FileType getFileType() {
-    return FileType.RECOMMENDATIONS;
+    return FileType.RECOMMENDATION;
   }
 
   @Override
@@ -423,7 +423,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       } else {
         this.insertChangeStmt.setString(2, "n/a");
       }
-      this.insertChangeStmt.setString(3, FileType.RECOMMENDATIONS.name());
+      this.insertChangeStmt.setString(3, FileType.RECOMMENDATION.name());
       this.insertChangeStmt.setDate(4, new Date(date.getTime()));
       this.insertChangeStmt.executeUpdate();
     }
