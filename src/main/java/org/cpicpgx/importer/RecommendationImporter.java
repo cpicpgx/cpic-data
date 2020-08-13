@@ -206,6 +206,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
               for (String gene : phenotypeIdxMap.keySet()) {
                 String normalizedPheno = normalizeGeneText(gene, dataRow.getText(phenotypeIdxMap.get(gene)));
+                if (normalizedPheno == null) {
+                  throw new RuntimeException("No phenotype found");
+                }
                 if (!normalizedPheno.equals(NO_RESULT) && !dbHarness.findPhenotype(gene, normalizedPheno)) {
                   sf_logger.warn("Phenotype not found in allele table for {} {}", gene, normalizedPheno);
                 }
