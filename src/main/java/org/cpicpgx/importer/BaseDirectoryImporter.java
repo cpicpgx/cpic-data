@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,6 +258,19 @@ public abstract class BaseDirectoryImporter {
       return NA;
     } else {
       return WordUtils.capitalize(strippedText.replaceAll(gene + "\\s*", ""));
+    }
+  }
+
+  void processChangeLog(DbHarness db, WorkbookWrapper workbook, @Nullable String entityId) throws SQLException {
+    for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+      RowWrapper row = workbook.getRow(i);
+      if (row.hasNoText(0) ^ row.hasNoText(1)) {
+        throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
+      } else if (row.hasNoText(0)) continue;
+
+      java.util.Date date = row.getDate(0);
+      String note = row.getText(1);
+      db.writeChangeLog(entityId, date, note);
     }
   }
 }

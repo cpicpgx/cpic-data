@@ -24,11 +24,11 @@ public class PairsExporter extends BaseExporter {
   private static final String sf_pairQuery = "select " +
       "       genesymbol as \"Gene\", " +
       "       drugname as \"Drug\", " +
-      "       guidelineurl as \"Guideline URL\", " +
       "       cpiclevel as \"CPIC Level\", " +
       "       pgkbcalevel as \"PharmGKB Level of Evidence\", " +
       "       pgxtesting as \"PGx Level of Evidence\", " +
-      "       array_to_string(pmids, ';') as \"CPIC Publications (PMID)\" " +
+      "       array_to_string(pmids, ';') as \"CPIC Publications (PMID)\", " +
+      "       guidelineurl as \"Guideline URL\" " +
       "from pair_view order by cpiclevel, drugname, genesymbol";
   //language=PostgreSQL
   private static final String sf_changeLogQuery = "select date, note from change_log where type=?";

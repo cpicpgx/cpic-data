@@ -335,7 +335,9 @@ CREATE TABLE pair
   pgxTesting TEXT,
   citations TEXT[],
 
-  UNIQUE (geneSymbol, drugId)
+  UNIQUE (geneSymbol, drugId),
+  CONSTRAINT valid_level_check CHECK (level in ('A', 'A/B', 'B', 'B/C', 'C', 'C/D', 'D')),
+  CONSTRAINT valid_pgkblevel_check CHECK ( pgkbCALevel in ('1A', '1B', '2A', '2B', '3', '4') )
 );
 
 CREATE TRIGGER version_pair
