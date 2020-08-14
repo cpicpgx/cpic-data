@@ -8,7 +8,11 @@ select
     p.level as cpiclevel,
     p.pgkbcalevel,
     p.pgxtesting,
-    p.citations as pmids
+    p.citations as pmids,
+    case
+        when (p.usedforrecommendation and p.guidelineid is not null) then 'Yes'
+        when (not p.usedforrecommendation and p.guidelineid is not null) then 'No'
+        else 'n/a' end usedForRecommendation
 from pair p
          join drug d on p.drugid = d.drugid
          left join guideline g on d.guidelineid = g.id;

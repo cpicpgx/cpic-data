@@ -42,7 +42,8 @@ public class PairImporter extends BaseDirectoryImporter {
             row.getText(2),
             row.getNullableText(3),
             row.getNullableText(4),
-            citations
+            citations,
+            row.getNullableText(7)
         );
       }
 
@@ -78,13 +79,13 @@ public class PairImporter extends BaseDirectoryImporter {
     PairDbHarness() throws SQLException {
       super(FileType.PAIR);
       //language=PostgreSQL
-      String upsertSql = "insert into pair(genesymbol, drugid, guidelineid, level, pgkbcalevel, pgxtesting, citations) " +
-          "values (?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, drugid) do " +
-          "update set guidelineid=excluded.guidelineid, level=excluded.level, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations";
+      String upsertSql = "insert into pair(genesymbol, drugid, guidelineid, level, pgkbcalevel, pgxtesting, citations, usedforrecommendation) " +
+          "values (?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, drugid) do " +
+          "update set guidelineid=excluded.guidelineid, level=excluded.level, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation";
       upsertPair = prepare(upsertSql);
     }
 
-    void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations) throws SQLException {
+    void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations, String used) throws SQLException {
       upsertPair.clearParameters();
       setNullableString(upsertPair, 1, StringUtils.stripToNull(gene));
       setNullableString(upsertPair, 2, lookupCachedDrug(drugName));
@@ -93,6 +94,7 @@ public class PairImporter extends BaseDirectoryImporter {
       setNullableString(upsertPair, 5, StringUtils.stripToNull(pgkbLevel));
       setNullableString(upsertPair, 6, StringUtils.stripToNull(pgxTesting));
       setNullableArray(upsertPair, 7, citations);
+      upsertPair.setBoolean(8, StringUtils.strip(used).equalsIgnoreCase("yes"));
       upsertPair.executeUpdate();
     }
   }

@@ -66,6 +66,7 @@ public class DataImport {
     List<BaseDirectoryImporter> importers = new ArrayList<>();
     importers.add(new GeneReferenceImporter().setDirectory(m_directory, null));
     importers.add(new DrugImporter().setDirectory(m_directory, null));
+    importers.add(new PairImporter().setDirectory(m_directory, null));
     importers.add(new AlleleDirectoryProcessor().setDirectory(m_directory, null));
     importers.add(new PharmVarImporter().setDirectory(m_directory, null));
     importers.add(new FunctionReferenceImporter().setDirectory(m_directory, null));
