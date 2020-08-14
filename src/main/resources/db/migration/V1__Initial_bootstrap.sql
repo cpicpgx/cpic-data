@@ -330,13 +330,13 @@ CREATE TABLE pair
   guidelineId INTEGER REFERENCES guideline(id),
   usedForRecommendation BOOLEAN DEFAULT FALSE,
   version INTEGER DEFAULT 1,
-  level VARCHAR(5) NOT NULL,
+  cpiclevel VARCHAR(5) NOT NULL,
   pgkbCALevel VARCHAR(5),
   pgxTesting TEXT,
   citations TEXT[],
 
   UNIQUE (geneSymbol, drugId),
-  CONSTRAINT valid_level_check CHECK (level in ('A', 'A/B', 'B', 'B/C', 'C', 'C/D', 'D')),
+  CONSTRAINT valid_cpiclevel_check CHECK (cpiclevel in ('A', 'A/B', 'B', 'B/C', 'C', 'C/D', 'D')),
   CONSTRAINT valid_pgkblevel_check CHECK ( pgkbCALevel in ('1A', '1B', '2A', '2B', '3', '4') ),
   CONSTRAINT valid_used_check CHECK ( not usedForRecommendation or guidelineId is not null )
 );
@@ -352,7 +352,7 @@ COMMENT ON COLUMN pair.drugId IS 'The ID of the drug in this pair, required';
 COMMENT ON COLUMN pair.guidelineId IS 'The ID of a guideline this pair is described in, optional';
 COMMENT ON COLUMN pair.usedForRecommendation IS 'Whether the gene is used for recommendation lookup for the drug if this pair is part of a guideline, default false';
 COMMENT ON COLUMN pair.version IS 'The version number, iterates on modification';
-COMMENT ON COLUMN pair.level IS 'The CPIC level of this pair, required';
+COMMENT ON COLUMN pair.cpiclevel IS 'The CPIC level of this pair, required';
 COMMENT ON COLUMN pair.pgkbCALevel IS 'The top level of PharmGKB Clinical Annotation for this pair, optional';
 COMMENT ON COLUMN pair.pgxTesting IS 'The top level of PGx testing recommendation from PharmGKB label annotations, optional';
 COMMENT ON COLUMN pair.citations IS 'The PMID citations in an array for this pair, optional';

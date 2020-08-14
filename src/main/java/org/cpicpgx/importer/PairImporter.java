@@ -79,9 +79,9 @@ public class PairImporter extends BaseDirectoryImporter {
     PairDbHarness() throws SQLException {
       super(FileType.PAIR);
       //language=PostgreSQL
-      String upsertSql = "insert into pair(genesymbol, drugid, guidelineid, level, pgkbcalevel, pgxtesting, citations, usedforrecommendation) " +
+      String upsertSql = "insert into pair(genesymbol, drugid, guidelineid, cpiclevel, pgkbcalevel, pgxtesting, citations, usedforrecommendation) " +
           "values (?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, drugid) do " +
-          "update set guidelineid=excluded.guidelineid, level=excluded.level, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation";
+          "update set guidelineid=excluded.guidelineid, cpiclevel=excluded.cpiclevel, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation";
       upsertPair = prepare(upsertSql);
     }
 

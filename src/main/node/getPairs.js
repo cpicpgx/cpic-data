@@ -8,8 +8,8 @@ const defaultFilename = 'cpicPairs';
 
 exports.getPairs = (path) => {
   axios.get(
-    cpicapi.apiUrl('/gene_drug_pair'),
-    {params: {order: 'level,drugname'}})
+    cpicapi.apiUrl('/pair_view'),
+    {params: {order: 'cpiclevel,drugname'}})
     .then((r) => {
       const pairs = r.data;
       const countDrugs = _.uniq(pairs.map(p => _.get(p, 'drugname'))).length;
@@ -32,7 +32,7 @@ exports.getPairs = (path) => {
       const csvFile = `${path}/${defaultFilename}.csv`;
       const csv = _.concat(
         [`"Date last updated: ${lastUpdated}"`, 'Gene,Drug,Guideline,CPIC Level,PharmGKB Level of Evidence,PGx on FDA Label,CPIC Publications (PMID)'],
-        pairs.map((p) => [p.gene, p.drugname, p.guidelineurl, p.level, p.pgkbcalevel, p.pgxtesting, _.join(p.citations, ';')].join(',')),
+        pairs.map((p) => [p.gene, p.drugname, p.guidelineurl, p.cpiclevel, p.pgkbcalevel, p.pgxtesting, _.join(p.pmids, ';')].join(',')),
       );
       fs.writeFile(csvFile, csv.join('\n'), (e) => {
         if (e) console.log(e);
