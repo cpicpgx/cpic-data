@@ -1,12 +1,12 @@
 ARCHIVE_NAME = cpic_db_dump
-DATED_NAME = $(ARCHIVE_NAME)-$(shell date +'%Y%m%d').sql
+TAG_NAME = $(ARCHIVE_NAME)-$(shell git describe --tags).sql
 
 dump:
 	mkdir -p out
-	pg_dump cpic -f out/${DATED_NAME} --no-privileges --schema=cpic --no-owner
+	pg_dump cpic -f out/${TAG_NAME} --no-privileges --schema=cpic --no-owner
 
 upload:
-	gzip out/${DATED_NAME}
-	aws s3 cp out/${DATED_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
+	gzip out/${TAG_NAME}
+	aws s3 cp out/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 
 archive: dump upload
