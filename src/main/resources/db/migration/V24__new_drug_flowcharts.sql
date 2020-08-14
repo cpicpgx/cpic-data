@@ -1,0 +1,9 @@
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Dexlansoprazole_CDS_Flow_Chart.jpg' where name='dexlansoprazole';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Ibuprofen_CDS_Flow_Chart.jpg' where name='ibuprofen';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Lansoprazole_CDS_Flow_Chart.jpg' where name='lansoprazole';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Lornoxicam_CDS_Flow_Chart.jpg' where name='lornoxicam';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Meloxicam_CDS_Flow_Chart.jpg' where name='meloxicam';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Omeprazole_CDS_Flow_Chart.jpg' where name='omeprazole';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Pantoprazole_CDS_Flow_Chart.jpg' where name='pantoprazole';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Piroxicam_CDS_Flow_Chart.jpg' where name='piroxicam';
+update drug set flowchart='http://files.cpicpgx.org/images/flow_chart/Tenoxicam_CDS_Flow_Chart.jpg' where name='tenoxicam';
