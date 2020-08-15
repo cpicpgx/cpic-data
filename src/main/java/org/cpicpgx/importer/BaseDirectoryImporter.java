@@ -171,6 +171,14 @@ public abstract class BaseDirectoryImporter {
     }
   }
 
+  /**
+   * Creates the lookup key used for linking recommendations and test alerts to gene phenotypes
+   * @param f1 the first allele function
+   * @param f2 the second allele function, possibly n/a
+   * @param as1 the first activity value
+   * @param as2 the second activity value, possibly n/a
+   * @return a string to match the lookup key between recommendation and phenotype
+   */
   static String makeLookupKey(String f1, String f2, String as1, String as2) {
     JsonObject key = new JsonObject();
     if (f1 != null) {
@@ -178,7 +186,9 @@ public abstract class BaseDirectoryImporter {
         key.addProperty(f1, 2);
       } else {
         key.addProperty(f1, 1);
-        key.addProperty(f2, 1);
+        if (!f2.equalsIgnoreCase(NA)) {
+          key.addProperty(f2, 1);
+        }
       }
     }
     if (as1 != null) {
@@ -186,7 +196,9 @@ public abstract class BaseDirectoryImporter {
         key.addProperty(as1, 2);
       } else {
         key.addProperty(as1, 1);
-        key.addProperty(as2, 1);
+        if (!as2.equalsIgnoreCase(NA)) {
+          key.addProperty(as2, 1);
+        }
       }
     }
     return key.toString();

@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
@@ -94,15 +95,18 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
   }
 
   static class DbHarness implements AutoCloseable {
+    private final static List<String> sf_singleAlleleGeneList = ImmutableList.of("chrX", "chrY", "chrM");
     private final Connection conn;
     private final PreparedStatement insertPhenotype;
     private final PreparedStatement insertFunction;
     private final PreparedStatement lookupDiplotypes;
     private final PreparedStatement lookupDiplotypesByScore;
     private final PreparedStatement insertDiplotype;
+    private final PreparedStatement lookupAllelesByFn;
     private final String geneSymbol;
     private final Map<String, Integer> phenotypeCache = new HashMap<>();
     private boolean useScoreLookup = false;
+    private boolean allowSingleAlleles = false;
     private final Set<String> loadedDiplotypes = new HashSet<>();
 
     DbHarness(String geneSymbol) throws SQLException {
@@ -120,15 +124,21 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityvalue=pf.activityvalue1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityvalue=pf.activityvalue2 " +
           "where pf.id=? order by a1.name, a2.name");
+      this.lookupAllelesByFn = conn.prepareStatement("select a.name from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
+          "join allele a on g.genesymbol=a.genesymbol and a.clinicalFunctionalStatus=pf.function1 " +
+          "where pf.id=?");
       this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
 
-      try (PreparedStatement lookupGene = conn.prepareStatement("select lookupMethod from gene where symbol=?")) {
+      try (PreparedStatement lookupGene = conn.prepareStatement("select lookupMethod, chr from gene where symbol=?")) {
         lookupGene.setString(1, geneSymbol);
         try (ResultSet rs = lookupGene.executeQuery()) {
           while (rs.next()) {
             LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
             if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
               this.useScoreLookup = true;
+            }
+            if (sf_singleAlleleGeneList.contains(rs.getString(2))) {
+              this.allowSingleAlleles = true;
             }
           }
         }
@@ -170,7 +180,11 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       try (ResultSet rs = this.insertFunction.executeQuery()) {
         if (rs.next()) {
           int fnId = rs.getInt(1);
-          insertDiplotypes(fnId);
+          if (allowSingleAlleles && !a1Fn.equalsIgnoreCase(NA) && a2Fn.equalsIgnoreCase(NA)) {
+            insertSingleAllele(fnId);
+          } else {
+            insertDiplotypes(fnId);
+          }
         } else {
           throw new RuntimeException("Couldn't insert function");
         }
@@ -223,6 +237,25 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           this.insertDiplotype.executeUpdate();
           this.loadedDiplotypes.add(diplotypeText);
         }
+      }
+    }
+
+    void insertSingleAllele(int functionId) throws SQLException {
+      lookupAllelesByFn.setInt(1, functionId);
+      ResultSet rs = lookupAllelesByFn.executeQuery();
+
+      while (rs.next()) {
+        String rawAllele = rs.getString(1);
+
+        JsonObject diplotypeKey = new JsonObject();
+        diplotypeKey.addProperty(rawAllele, 1);
+        JsonObject geneKey = new JsonObject();
+        geneKey.add(geneSymbol, diplotypeKey);
+
+        this.insertDiplotype.setInt(1, functionId);
+        this.insertDiplotype.setString(2, rawAllele);
+        this.insertDiplotype.setString(3, geneKey.toString());
+        this.insertDiplotype.executeUpdate();
       }
     }
 
