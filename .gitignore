@@ -12,6 +12,5 @@
 /cpic-data.wiki
 /logs
 /out
-/server/pgdata
 /src/main/node/node_modules
 /src/main/resources/cpicData.properties

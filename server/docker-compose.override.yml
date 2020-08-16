@@ -1,8 +1,0 @@
-version: '2'
-services:
-  server:
-    environment:
-      PGRST_DB_URI: postgres://cpic_api:cpicapi@host.docker.internal:5432/cpic
-  swagger:
-    environment:
-      API_URL: http://localhost:3000/
