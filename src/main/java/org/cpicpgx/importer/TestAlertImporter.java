@@ -179,15 +179,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
 
       Map<String,String> alleleJson = new HashMap<>();
-      Collection<String> genesToCheck = idxAlleleByGene.size() == 0 ? idxPhenotypeByGene.keySet() : idxAlleleByGene.keySet();
-      for (String gene : genesToCheck) {
-        String pheno = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
-        if (idxAlleleByGene.get(gene) == null) {
-          alleleJson.put(gene, pheno);
-        } else {
-          String allele = normalizeGeneText(gene, row.getText(idxAlleleByGene.get(gene)));
-          alleleJson.put(gene, allele);
-        }
+      for (String gene : idxAlleleByGene.keySet()) {
+        alleleJson.put(gene, normalizeGeneText(gene, row.getText(idxAlleleByGene.get(gene))));
       }
 
       String context = StringUtils.replace(row.getText(idxContext), "Test", "test");
@@ -272,7 +265,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         if (this.geneMap.get(gene) == LookupMethod.PHENOTYPE) {
           if (phenotypeMap.get(gene) != null) {
             lookupKey.put(gene, phenotypeMap.get(gene));
-            alleleMap.clear();
+            alleleMap.remove(gene);
           } else {
             throw new RuntimeException("No phenotype value for gene " + gene);
           }
@@ -280,7 +273,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         else if (this.geneMap.get(gene) == LookupMethod.ACTIVITY_SCORE) {
           if (activityMap.get(gene) != null) {
             lookupKey.put(gene, activityMap.get(gene));
-            alleleMap.clear();
+            alleleMap.remove(gene);
           } else {
             throw new RuntimeException("No activity score value for gene " + gene);
           }
