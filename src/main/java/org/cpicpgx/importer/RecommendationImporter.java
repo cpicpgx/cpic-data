@@ -295,31 +295,18 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       this.insertChangeStmt = conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
       this.findPhenotype = conn.prepareStatement("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
 
-      PreparedStatement drugLookupStmt = conn.prepareStatement(
-          "select drugid from drug where name=?",
-          ResultSet.TYPE_SCROLL_INSENSITIVE,
-          ResultSet.CONCUR_READ_ONLY);
-      drugLookupStmt.setString(1, drugName);
-      ResultSet rs = drugLookupStmt.executeQuery();
-      if (rs.first()) {
-        drugId = rs.getString(1);
-      } else {
-        throw new NotFoundException("Couldn't find drug " + drugName);
-      }
-
-      PreparedStatement guidelineLookupStmt = conn.prepareStatement(
-          "select distinct p.guidelineid from pair p join drug d on p.drugid = d.drugid where d.name=? and p.guidelineid is not null",
-          ResultSet.TYPE_SCROLL_INSENSITIVE,
-          ResultSet.CONCUR_READ_ONLY);
-      guidelineLookupStmt.setString(1, drugName);
-      ResultSet grs = guidelineLookupStmt.executeQuery();
-      if (grs.first()) {
-        if (!grs.isLast()) {
-          throw new NotFoundException("Couldn't find just 1 guideline for " + drugName);
+      try (PreparedStatement drugLookupStmt = conn.prepareStatement("select drugid, guidelineid from drug where name=? and guidelineid is not null")) {
+        drugLookupStmt.setString(1, drugName);
+        ResultSet rs = drugLookupStmt.executeQuery();
+        if (rs.next()) {
+          drugId = rs.getString(1);
+          guidelineId = rs.getLong(2);
+        } else {
+          throw new NotFoundException("Couldn't find drug with guideline for: " + drugName);
         }
-        guidelineId = grs.getLong(1);
-      } else {
-        throw new NotFoundException("Couldn't find guideline");
+        if (rs.next()) {
+          throw new RuntimeException("More than one guideline found for: " + drugName);
+        }
       }
 
       try (PreparedStatement stmt = conn.prepareStatement("select genesymbol, g.lookupmethod from pair p join drug d on p.drugid = d.drugid join gene g on p.genesymbol = g.symbol where d.name=? and p.usedForRecommendation = true")) {
@@ -329,6 +316,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             geneLookupCache.put(stmtRs.getString(1), LookupMethod.valueOf(stmtRs.getString(2)));
           }
         }
+      }
+      if (geneLookupCache.size() == 0) {
+        throw new NotFoundException("No gene found in a pair used for lookup for " + drugName);
       }
 
       sf_logger.debug("Drug: {}; Drug ID: {}; Guideline ID: {}", drugName, drugId, guidelineId);
