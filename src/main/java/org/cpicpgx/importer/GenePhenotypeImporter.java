@@ -260,7 +260,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     }
 
     int lookupPhenotype(String phenotype, String score) throws SQLException {
-      String normalizedPhenotype = phenotype.replaceAll(this.geneSymbol + "\\s", "");
+      String normalizedPhenotype = normalizeGeneText(this.geneSymbol, phenotype);
       String normalizedScore = normalizeScore(score);
       String lookupKey;
       if (useScoreLookup) {
