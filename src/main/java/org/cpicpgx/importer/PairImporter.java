@@ -75,27 +75,37 @@ public class PairImporter extends BaseDirectoryImporter {
   private static class PairDbHarness extends DbHarness {
 
     final PreparedStatement upsertPair;
+    final PreparedStatement updateDrug;
 
     PairDbHarness() throws SQLException {
       super(FileType.PAIR);
       //language=PostgreSQL
-      String upsertSql = "insert into pair(genesymbol, drugid, guidelineid, cpiclevel, pgkbcalevel, pgxtesting, citations, usedforrecommendation) " +
+      upsertPair = prepare("insert into pair(genesymbol, drugid, guidelineid, cpiclevel, pgkbcalevel, pgxtesting, citations, usedforrecommendation) " +
           "values (?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, drugid) do " +
-          "update set guidelineid=excluded.guidelineid, cpiclevel=excluded.cpiclevel, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation";
-      upsertPair = prepare(upsertSql);
+          "update set guidelineid=excluded.guidelineid, cpiclevel=excluded.cpiclevel, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation");
+
+      //language=PostgreSQL
+      updateDrug = prepare("update drug set guidelineid=? where drugid=?");
     }
 
     void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations, String used) throws SQLException {
+      String drugId = lookupCachedDrug(drugName);
+      Integer guidelineId = lookupCachedGuideline(guidelineUrl);
+
       upsertPair.clearParameters();
       setNullableString(upsertPair, 1, StringUtils.stripToNull(gene));
-      setNullableString(upsertPair, 2, lookupCachedDrug(drugName));
-      setNullableInteger(upsertPair, 3, lookupCachedGuideline(guidelineUrl));
+      setNullableString(upsertPair, 2, drugId);
+      setNullableInteger(upsertPair, 3, guidelineId);
       setNullableString(upsertPair, 4, StringUtils.stripToNull(level));
       setNullableString(upsertPair, 5, StringUtils.stripToNull(pgkbLevel));
       setNullableString(upsertPair, 6, StringUtils.stripToNull(pgxTesting));
       setNullableArray(upsertPair, 7, citations);
       upsertPair.setBoolean(8, StringUtils.strip(used).equalsIgnoreCase("yes"));
       upsertPair.executeUpdate();
+
+      setNullableInteger(updateDrug, 1, guidelineId);
+      updateDrug.setString(2, drugId);
+      updateDrug.executeUpdate();
     }
   }
 }
