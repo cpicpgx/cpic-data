@@ -71,7 +71,7 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
           }
         }
         
-        workbook.writeNotes(queryGeneNotes(conn, symbol, FileType.ALLELE_FUNCTION_REFERENCE));
+        workbook.writeNotes(queryNotes(conn, symbol, FileType.ALLELE_FUNCTION_REFERENCE));
         
         changeStmt.setString(1, symbol);
         try (ResultSet rs = changeStmt.executeQuery()) {

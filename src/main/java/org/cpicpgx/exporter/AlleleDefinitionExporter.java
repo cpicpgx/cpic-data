@@ -108,7 +108,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
           }
         }
 
-        workbook.writeNotes(queryGeneNotes(conn, symbol, FileType.ALLELE_DEFINITION));
+        workbook.writeNotes(queryNotes(conn, symbol, FileType.ALLELE_DEFINITION));
         
         changeStmt.setString(1, symbol);
         changeStmt.setString(2, FileType.ALLELE_DEFINITION.name());

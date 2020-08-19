@@ -139,47 +139,21 @@ public abstract class BaseExporter {
   }
 
   /**
-   * Get the notes for a given gene and note type
+   * Get the notes for a given entity and note type
    * @param conn an open Database connection
-   * @param symbol a gene symbol
+   * @param entityId a gene symbol, drug ID, or other entity identifier
    * @param type the note type to query for
    * @return an ordered list of notes
    * @throws SQLException can occur from database query
    */
-  List<String> queryGeneNotes(Connection conn, String symbol, FileType type) throws SQLException {
+  List<String> queryNotes(Connection conn, String entityId, FileType type) throws SQLException {
     List<String> notes = new ArrayList<>();
     try (
         PreparedStatement noteStmt = conn.prepareStatement(
             "select n.note from file_note n where entityId=? and type=? order by ordinal"
         )
     ) {
-      noteStmt.setString(1, symbol);
-      noteStmt.setString(2, type.name());
-      try (ResultSet rs = noteStmt.executeQuery()) {
-        while (rs.next()) {
-          notes.add(rs.getString(1));
-        }
-      }
-    }
-    return notes;
-  }
-
-  /**
-   * Get the notes for a given drug and note type
-   * @param conn an open Database connection
-   * @param drugId the ID of the drug to query for
-   * @param type the note type to query for
-   * @return an ordered list of notes
-   * @throws SQLException can occur from database query
-   */
-  List<String> queryDrugNotes(Connection conn, String drugId, FileType type) throws SQLException {
-    List<String> notes = new ArrayList<>();
-    try (
-        PreparedStatement noteStmt = conn.prepareStatement(
-            "select n.note from file_note n where entityId=? and type=? order by ordinal"
-        )
-    ) {
-      noteStmt.setString(1, drugId);
+      noteStmt.setString(1, entityId);
       noteStmt.setString(2, type.name());
       try (ResultSet rs = noteStmt.executeQuery()) {
         while (rs.next()) {
