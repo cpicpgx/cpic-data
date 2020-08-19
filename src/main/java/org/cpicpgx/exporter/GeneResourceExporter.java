@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +33,6 @@ public class GeneResourceExporter extends BaseExporter {
     return FileType.GENE_RESOURCE;
   }
 
-  EntityType getEntityCategory() {
-    return EntityType.GENE;
-  }
-  
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct g.symbol, g.hgncid, g.ncbiid, " +

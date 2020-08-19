@@ -2,7 +2,6 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.ActivityScoreComparator;
 import org.slf4j.Logger;
@@ -37,10 +36,6 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
     return FileType.DIPLOTYPE_PHENOTYPE;
   }
 
-  EntityType getEntityCategory() {
-    return EntityType.GENE;
-  }
-  
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct d.geneSymbol, g.lookupmethod from diplotype d join gene g on (d.genesymbol=g.symbol)");

@@ -3,6 +3,7 @@ package org.cpicpgx.util;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.cpicpgx.db.FileHistoryWriter;
+import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +25,10 @@ public class FileStoreClient implements AutoCloseable {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
   private static final String S3_PUBLIC_BUCKET      = "files.cpicpgx.org";
-  private static final String S3_GENERIC_KEY_PREFIX = "data/";
-  private static final String S3_GENE_KEY_PREFIX    = "data/gene/";
-  private static final String S3_DRUG_KEY_PREFIX    = "data/drug/";
+  private static final String S3_GENERIC_KEY_PREFIX = "data/report/";
   private static final String S3_URL_FORMAT         = "http://" + S3_PUBLIC_BUCKET + "/%s%s";
   
-  private AmazonS3 s3;
+  private final AmazonS3 s3;
   private FileHistoryWriter fileHistoryWriter;
   
   public FileStoreClient() {
@@ -41,36 +40,17 @@ public class FileStoreClient implements AutoCloseable {
     }
   }
   
-  public void putGeneArtifact(Path geneFilePath) {
+  public void putArtifact(Path geneFilePath, FileType type) {
     String fileName = geneFilePath.getFileName().toString();
-    putFile(S3_GENE_KEY_PREFIX, fileName, geneFilePath.toFile());
+    String directoryPrefix = S3_GENERIC_KEY_PREFIX + type.name().toLowerCase() + "/";
+    putFile(directoryPrefix, fileName, geneFilePath.toFile());
     try {
-      fileHistoryWriter.writeUpload(fileName, String.format(S3_URL_FORMAT, S3_GENE_KEY_PREFIX, fileName));
+      fileHistoryWriter.writeUpload(fileName, String.format(S3_URL_FORMAT, directoryPrefix, fileName));
     } catch (SQLException e) {
       sf_logger.error("Error updating file record in DB " + fileName, e);
     }
   }
-  
-  public void putDrugArtifact(Path drugFilePath) {
-    String fileName = drugFilePath.getFileName().toString();
-    putFile(S3_DRUG_KEY_PREFIX, fileName, drugFilePath.toFile());
-    try {
-      fileHistoryWriter.writeUpload(fileName, String.format(S3_URL_FORMAT, S3_DRUG_KEY_PREFIX, fileName));
-    } catch (SQLException e) {
-      sf_logger.error("Error updating file record in DB " + fileName, e);
-    }
-  }
-  
-  public void putArtifact(Path filePath) {
-    String fileName = filePath.getFileName().toString();
-    putFile(S3_GENERIC_KEY_PREFIX, fileName, filePath.toFile());
-    try {
-      fileHistoryWriter.writeUpload(fileName, String.format(S3_URL_FORMAT, S3_GENERIC_KEY_PREFIX, fileName));
-    } catch (SQLException e) {
-      sf_logger.error("Error updating file record in DB " + fileName, e);
-    }
-  }
-  
+
   private void putFile(String prefix, String fileName, File geneFile) {
     s3.putObject(S3_PUBLIC_BUCKET, prefix + fileName, geneFile);
     sf_logger.info("Uploaded {}", String.format("s3:///%s/%s%s", S3_PUBLIC_BUCKET, prefix, fileName));

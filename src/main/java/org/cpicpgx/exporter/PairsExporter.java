@@ -2,7 +2,6 @@ package org.cpicpgx.exporter;
 
 import org.apache.commons.cli.ParseException;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +49,6 @@ public class PairsExporter extends BaseExporter {
     return FileType.PAIR;
   }
 
-  EntityType getEntityCategory() {
-    return EntityType.PAIR;
-  }
-
   public void export() {
     try (
         Connection conn = ConnectionFactory.newConnection();
@@ -82,6 +77,7 @@ public class PairsExporter extends BaseExporter {
       addFileExportHistory(pairWorkbook.getFilename(), new String[]{});
 
       writeWorkbook(pairWorkbook);
+      handleFileUpload();
     } catch (IOException e) {
       sf_logger.error("Couldn't write to filesystem", e);
     } catch (SQLException e) {

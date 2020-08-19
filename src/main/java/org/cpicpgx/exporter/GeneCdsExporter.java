@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +32,6 @@ public class GeneCdsExporter extends BaseExporter {
     return FileType.GENE_CDS;
   }
 
-  EntityType getEntityCategory() {
-    return EntityType.GENE;
-  }
-  
   @Override
   public void export() throws Exception {
     try (

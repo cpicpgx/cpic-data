@@ -3,7 +3,6 @@ package org.cpicpgx.exporter;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.FileHistoryWriter;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.FileStoreClient;
 import org.slf4j.Logger;
@@ -92,13 +91,6 @@ public abstract class BaseExporter {
   }
 
   /**
-   * Gets the type of entity this exporter is related to. For example, if this export mainly deals with information 
-   * related to genes then you would choose {@link EntityType#GENE}
-   * @return the entity type this export relates to
-   */
-  abstract EntityType getEntityCategory();
-  
-  /**
    * The method that will export files
    * @throws Exception can occur from querying the DB
    */
@@ -124,17 +116,7 @@ public abstract class BaseExporter {
       return;
     }
     try (FileStoreClient fileStore = new FileStoreClient()) {
-      switch (getEntityCategory()) {
-        case GENE:
-          generatedFiles.forEach(fileStore::putGeneArtifact);
-          break;
-        case DRUG:
-          generatedFiles.forEach(fileStore::putDrugArtifact);
-          break;
-        default:
-          generatedFiles.forEach(fileStore::putArtifact);
-      }
-      
+      generatedFiles.forEach(f -> fileStore.putArtifact(f, getFileType()));
     }
   }
 

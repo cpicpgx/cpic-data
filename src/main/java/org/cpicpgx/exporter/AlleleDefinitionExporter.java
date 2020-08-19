@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
@@ -38,10 +37,6 @@ public class AlleleDefinitionExporter extends BaseExporter {
 
   public FileType getFileType() {
     return FileType.ALLELE_DEFINITION;
-  }
-
-  EntityType getEntityCategory() {
-    return EntityType.GENE;
   }
 
   /**

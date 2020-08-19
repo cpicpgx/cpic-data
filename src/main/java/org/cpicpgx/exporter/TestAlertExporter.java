@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +37,6 @@ public class TestAlertExporter extends BaseExporter {
 
   public FileType getFileType() {
     return FileType.TEST_ALERT;
-  }
-
-  EntityType getEntityCategory() {
-    return EntityType.DRUG;
   }
 
   public void export() throws Exception {

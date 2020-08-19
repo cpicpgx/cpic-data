@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +30,6 @@ public class TermsExporter extends BaseExporter {
 
   public FileType getFileType() {
     return FileType.TERM;
-  }
-
-  EntityType getEntityCategory() {
-    return EntityType.TERM;
   }
 
   public void export() throws Exception {

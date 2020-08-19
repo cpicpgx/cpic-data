@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,6 @@ public class DrugResourceExporter extends BaseExporter {
   @Override
   public FileType getFileType() {
     return FileType.DRUG_RESOURCE;
-  }
-
-  @Override
-  EntityType getEntityCategory() {
-    return EntityType.DRUG;
   }
 
   @Override

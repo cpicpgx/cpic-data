@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
@@ -12,7 +11,10 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -38,10 +40,6 @@ public class FrequencyExporter extends BaseExporter {
     return FileType.FREQUENCY;
   }
 
-  EntityType getEntityCategory() {
-    return EntityType.GENE;
-  }
-  
   @Override
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection()) {
