@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +29,6 @@ import java.util.List;
  */
 public abstract class BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  public static final SimpleDateFormat sf_dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
   protected Path directory;
   private boolean upload = false;

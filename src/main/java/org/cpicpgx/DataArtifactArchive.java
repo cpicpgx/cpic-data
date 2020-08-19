@@ -6,16 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.geom.IllegalPathStateException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,11 +24,8 @@ import java.util.List;
 public class DataArtifactArchive {
   
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final SimpleDateFormat sf_dateFormat = new SimpleDateFormat("yyyy-MM-dd");
   private static final String sf_dirNamePattern = "cpic_information";
-  private static final String sf_readmeFilename = "README.txt";
-  private static final String sf_timeFile = "The contents these files were queried on %s. For more information visit https://cpicpgx.org";
-  
+
   private Path m_baseDirectory;
   private boolean upload = false;
 
@@ -75,7 +66,6 @@ public class DataArtifactArchive {
     exporters.add(new GeneCdsExporter());
     exporters.add(new GeneResourceExporter());
     exporters.add(new PhenotypesExporter());
-    exporters.add(new DrugReviewExporter());
     exporters.add(new DrugResourceExporter());
     exporters.add(new RecommendationExporter());
     exporters.add(new TestAlertExporter());
@@ -91,12 +81,6 @@ public class DataArtifactArchive {
         throw new RuntimeException("Error exporting " + e.getClass().getSimpleName(), ex);
       }
     });
-
-    try {
-      writeTimestamp(m_baseDirectory.resolve(sf_dirNamePattern));
-    } catch (IOException e) {
-      sf_logger.error("Error writing timestamp file", e);
-    }
   }
   
   private Path getDirectoryPath(String filePath) {
@@ -107,16 +91,5 @@ public class DataArtifactArchive {
       sf_logger.info("Using existing directory {}", dir);
     }
     return dir;
-  }
-
-  private void writeTimestamp(Path dirPath) throws IOException {
-    String displayDate = sf_dateFormat.format(new Date());
-    Path filePath = dirPath.resolve(sf_readmeFilename);
-    try (
-        OutputStream out = Files.newOutputStream(filePath);
-        PrintWriter print = new PrintWriter(out)
-    ) {
-      print.print(String.format(sf_timeFile, displayDate));
-    }
   }
 }
