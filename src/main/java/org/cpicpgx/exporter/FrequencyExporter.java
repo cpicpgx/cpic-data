@@ -12,10 +12,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -68,9 +65,6 @@ public class FrequencyExporter extends BaseExporter {
           );
           PreparedStatement refFreqStmt = conn.prepareStatement(
               "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
-          PreparedStatement changeStmt = conn.prepareStatement(
-              "select n.date, note from change_log n where type='"+ FileType.ALLELE_FUNCTION_REFERENCE +"' and entityId=? order by date"
-          );
           PreparedStatement geneStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"
           );
@@ -197,13 +191,8 @@ public class FrequencyExporter extends BaseExporter {
             workbook.writeEthnicitySummary(allele, frequencies);
           }
 
-          // writing the notes
-          changeStmt.setString(1, geneSymbol);
-          try (ResultSet notes = changeStmt.executeQuery()) {
-            while (notes.next()) {
-              workbook.writeHistory(notes.getDate(1), notes.getString(2));
-            }
-          }
+          // writing the change log
+          workbook.writeChangeLog(queryChangeLog(conn, geneSymbol, getFileType()));
 
           // writing the methods for this gene
           geneStmt.setString(1, geneSymbol);

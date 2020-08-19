@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to handle exporting a CPIC report out to filesystem.
@@ -66,13 +68,16 @@ public class PairsExporter extends BaseExporter {
         }
       }
 
-      pairWorkbook.writeHistoryHeader();
+
+      // NOTE: this is a non-standard query so don't use the "queryChangeLog" method
       changeStmt.setString(1, FileType.PAIR.name());
+      List<Object[]> changeLogEvents = new ArrayList<>();
       try (ResultSet rs = changeStmt.executeQuery()) {
         while (rs.next()) {
-          pairWorkbook.writeHistory(rs.getDate(1), rs.getString(2));
+          changeLogEvents.add(new Object[]{rs.getDate(1), rs.getString(2)});
         }
       }
+      pairWorkbook.writeChangeLog(changeLogEvents);
 
       addFileExportHistory(pairWorkbook.getFilename(), new String[]{});
 

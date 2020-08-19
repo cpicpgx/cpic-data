@@ -63,6 +63,8 @@ public class GeneCdsExporter extends BaseExporter {
         
         workbook.writeNotes(queryNotes(conn, geneSymbol, FileType.GENE_CDS));
 
+        workbook.writeChangeLog(queryChangeLog(conn, geneSymbol, getFileType()));
+
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{geneSymbol});
       }

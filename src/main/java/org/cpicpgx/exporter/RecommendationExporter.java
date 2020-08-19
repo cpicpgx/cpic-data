@@ -54,7 +54,6 @@ public class RecommendationExporter extends BaseExporter {
         PreparedStatement geneStmt = conn.prepareStatement("select distinct jsonb_object_keys(phenotypes) from recommendation where drugid=?");
         PreparedStatement popStmt = conn.prepareStatement("select distinct population from recommendation where drugid=?");
         PreparedStatement recStmt = conn.prepareStatement("select r.phenotypes, r.drugRecommendation, r.implications, r.classification, r.activityScore, r.comments from recommendation r where r.drugid=? and r.population=?");
-        PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from change_log n where entityId=? and type=? order by date");
         ResultSet drs = drugStmt.executeQuery()
     ) {
       while (drs.next()) {
@@ -103,13 +102,7 @@ public class RecommendationExporter extends BaseExporter {
           }
         }
 
-        changeStmt.setString(1, drugId);
-        changeStmt.setString(2, FileType.RECOMMENDATION.name());
-        try (ResultSet rs = changeStmt.executeQuery()) {
-          while (rs.next()) {
-            workbook.writeHistory(rs.getDate(1), rs.getString(2));
-          }
-        }
+        workbook.writeChangeLog(queryChangeLog(conn, drugId, getFileType()));
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{drugId});

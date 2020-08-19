@@ -99,7 +99,9 @@ public class TestAlertExporter extends BaseExporter {
             }
           }
         }
-        workbook.writeNotes(queryNotes(conn, drugId, FileType.TEST_ALERT));
+        workbook.writeNotes(queryNotes(conn, drugId, getFileType()));
+
+        workbook.writeChangeLog(queryChangeLog(conn, drugId, getFileType()));
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{drugId});

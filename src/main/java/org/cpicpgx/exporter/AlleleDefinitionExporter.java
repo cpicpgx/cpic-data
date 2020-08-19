@@ -53,7 +53,6 @@ public class AlleleDefinitionExporter extends BaseExporter {
          PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele_definition a join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleledefinitionid\n" +
              "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid\n" +
              "order by 1");
-         PreparedStatement changeStmt = conn.prepareStatement("select n.date, n.note from change_log n where entityId=? and type=? order by date");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -109,15 +108,9 @@ public class AlleleDefinitionExporter extends BaseExporter {
         }
 
         workbook.writeNotes(queryNotes(conn, symbol, FileType.ALLELE_DEFINITION));
-        
-        changeStmt.setString(1, symbol);
-        changeStmt.setString(2, FileType.ALLELE_DEFINITION.name());
-        try (ResultSet rs = changeStmt.executeQuery()) {
-          while (rs.next()) {
-            workbook.writeHistory(rs.getDate(1), rs.getString(2));
-          }
-        }
-        
+
+        workbook.writeChangeLog(queryChangeLog(conn, symbol, getFileType()));
+
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{symbol});
       }

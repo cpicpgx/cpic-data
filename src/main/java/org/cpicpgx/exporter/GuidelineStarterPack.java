@@ -1,5 +1,6 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.cli.*;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
@@ -135,7 +136,7 @@ public class GuidelineStarterPack {
       }
 
       for (AbstractWorkbook w : workbooksToWrite) {
-        w.writeHistory(new Date(), "File created");
+        w.writeChangeLog(ImmutableList.of(new Object[]{new Date(), "File created"}));
         w.getSheets().forEach(SheetWrapper::autosizeColumns);
         Path filePath = m_path.resolve(w.getFilename());
         try (OutputStream out = Files.newOutputStream(filePath)) {

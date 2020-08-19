@@ -44,7 +44,6 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
          PreparedStatement alleleStmt = conn.prepareStatement("select a.name, a.activityvalue, a.functionalstatus, a.clinicalfunctionalstatus, a.clinicalfunctionalsubstrate, " +
              "a.citations, a.strength, a.findings, a.functioncomments " +
              "from allele a where a.genesymbol=? order by a.id");
-         PreparedStatement changeStmt = conn.prepareStatement("select n.date, note from change_log n where type='"+ FileType.ALLELE_FUNCTION_REFERENCE +"' and entityId=? order by date");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -72,13 +71,8 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
         }
         
         workbook.writeNotes(queryNotes(conn, symbol, FileType.ALLELE_FUNCTION_REFERENCE));
-        
-        changeStmt.setString(1, symbol);
-        try (ResultSet rs = changeStmt.executeQuery()) {
-          while (rs.next()) {
-            workbook.writeHistory(rs.getDate(1), rs.getString(2));
-          }
-        }
+
+        workbook.writeChangeLog(queryChangeLog(conn, symbol, getFileType()));
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{symbol});

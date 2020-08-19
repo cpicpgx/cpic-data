@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import java.util.List;
  */
 public abstract class BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  public static final SimpleDateFormat sf_dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
   protected Path directory;
   private boolean upload = false;
@@ -162,6 +164,31 @@ public abstract class BaseExporter {
       }
     }
     return notes;
+  }
+
+  /**
+   * Gets a List of change log events as an Object array. The first element of the array is a {@link java.util.Date} of
+   * the log event and the second element is the {@link String} note.
+   * @param conn an open database connection
+   * @param entityId a gene symbol or drug ID
+   * @param type the type of change log event
+   * @return a List of 2-element Object arrays
+   * @throws SQLException can occur from DB interactions
+   */
+  List<Object[]> queryChangeLog(Connection conn, String entityId, FileType type) throws SQLException {
+    List<Object[]> changeLog = new ArrayList<>();
+    try (
+        PreparedStatement logStmt = conn.prepareStatement("select date, note from change_log where entityid=? and type=? order by date desc")
+        ) {
+      logStmt.setString(1, entityId);
+      logStmt.setString(2, type.name());
+      try (ResultSet rs = logStmt.executeQuery()) {
+        while (rs.next()) {
+          changeLog.add(new Object[]{rs.getDate(1), rs.getString(2)});
+        }
+      }
+    }
+    return changeLog;
   }
 
   void addFileExportHistory(String fileName, String[] entityIds) throws Exception {

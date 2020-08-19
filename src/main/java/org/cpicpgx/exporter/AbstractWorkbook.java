@@ -293,14 +293,7 @@ public abstract class AbstractWorkbook {
     sheet.sheet.setColumnWidth(0, 100 * 256);
   }
 
-  void writeHistoryHeader() {
-    SheetWrapper historySheet = this.findSheet(HISTORY_SHEET_NAME);
-    Row headerRow = historySheet.nextRow();
-    writeHeaderCell(headerRow, 0, "Date");
-    writeHeaderCell(headerRow, 1, "Note");
-  }
-
-  void writeHistory(Date date, String note) {
+  void writeChangeLog(List<Object[]> changeLogEvents) {
     boolean sheetExists = this.getSheets().stream().anyMatch((s) -> s.getName().equals(HISTORY_SHEET_NAME));
     SheetWrapper historySheet = this.findSheet(HISTORY_SHEET_NAME);
     historySheet.setWidths(new Integer[]{20*256, 100*256});
@@ -310,8 +303,10 @@ public abstract class AbstractWorkbook {
       writeHeaderCell(headerRow, 0, "Date");
       writeHeaderCell(headerRow, 1, "Note");
     }
-    Row row = historySheet.nextRow();
-    writeDateCell(row, 0, date);
-    writeStringCell(row, 1, note,false);
+    for (Object[] changeLogEvent : changeLogEvents) {
+      Row row = historySheet.nextRow();
+      writeDateCell(row, 0, (Date)changeLogEvent[0]);
+      writeStringCell(row, 1, (String)changeLogEvent[1], false);
+    }
   }
 }
