@@ -119,9 +119,9 @@ public class GuidelineStarterPack {
           w.writeMapping("", "", new String[]{}, "");
           workbooksToWrite.add(w);
 
-          RecommendationWorkbook recommendationWorkbook = new RecommendationWorkbook(drug, f_genes);
+          RecommendationWorkbook recommendationWorkbook = new RecommendationWorkbook(drug, geneLookupMap);
           recommendationWorkbook.setupSheet("population general");
-          writePhenotypeCombos(conn, recommendationWorkbook, f_genes);
+          writePhenotypeCombos(conn, recommendationWorkbook, geneLookupMap);
           workbooksToWrite.add(recommendationWorkbook);
 
           TestAlertWorkbook testAlertWorkbook = new TestAlertWorkbook(drug);
@@ -147,10 +147,10 @@ public class GuidelineStarterPack {
     }
   }
 
-  private static void writePhenotypeCombos(Connection conn, RecommendationWorkbook workbook, Set<String> genes) throws SQLException {
+  private static void writePhenotypeCombos(Connection conn, RecommendationWorkbook workbook, Map<String, LookupMethod> geneMap) throws SQLException {
     Map<String,String> aliases = new TreeMap<>();
     int i=1;
-    for (String gene : genes) {
+    for (String gene : geneMap.keySet()) {
       aliases.put("g" + i, gene);
       i += 1;
     }
@@ -162,18 +162,30 @@ public class GuidelineStarterPack {
 
     Map<String, String> phenoMap = new TreeMap<>();
     Map<String, String> scoreMap = new TreeMap<>();
+    Map<String, String> alleleMap = new TreeMap<>();
     Map<String, String> implMap = new TreeMap<>();
     try (ResultSet rs = conn.prepareStatement(query).executeQuery()) {
       while (rs.next()) {
         int colIdx = 1;
         for (String alias : aliases.keySet()) {
-          phenoMap.put(aliases.get(alias), rs.getString(colIdx));
+          String geneSymbol = aliases.get(alias);
+          LookupMethod lookupMethod = geneMap.get(geneSymbol);
+          switch(lookupMethod) {
+            case PHENOTYPE:
+              phenoMap.put(geneSymbol, rs.getString(colIdx));
+              break;
+            case ALLELE_STATUS:
+              alleleMap.put(geneSymbol, rs.getString(colIdx));
+              break;
+            case ACTIVITY_SCORE:
+              scoreMap.put(geneSymbol, rs.getString(colIdx));
+              break;
+            default:
+              throw new RuntimeException("Lookup method not implemented");
+          }
           colIdx += 1;
-          scoreMap.put(aliases.get(alias), rs.getString(colIdx));
-          colIdx += 1;
-          implMap.put(aliases.get(alias), "");
         }
-        workbook.writeRec(phenoMap, scoreMap, implMap, "", "", "");
+        workbook.writeRec(phenoMap, scoreMap, implMap, alleleMap, "", "", "");
       }
     }
   }

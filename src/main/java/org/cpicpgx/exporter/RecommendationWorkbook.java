@@ -1,9 +1,9 @@
 package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
+import org.cpicpgx.db.LookupMethod;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A representation of a Recommendation workbook
@@ -16,12 +16,12 @@ class RecommendationWorkbook extends AbstractWorkbook {
 
   private SheetWrapper sheet;
   private final String drug;
-  private final Set<String> genes;
+  private final Map<String, LookupMethod> genes;
   
-  RecommendationWorkbook(String drug, Set<String> genes) {
+  RecommendationWorkbook(String drug, Map<String, LookupMethod> geneMap) {
     super();
     this.drug = drug;
-    this.genes = genes;
+    this.genes = geneMap;
   }
 
   void setupSheet(String population) {
@@ -29,11 +29,22 @@ class RecommendationWorkbook extends AbstractWorkbook {
 
     int colIdx = 0;
     Row headerRow = this.sheet.nextRow();
-    for (String gene : genes) {
-      writeHeaderCell(headerRow, colIdx++, gene + " Phenotype");
-      writeHeaderCell(headerRow, colIdx++, gene + " Activity Score");
+    for (String gene : genes.keySet()) {
+      switch (genes.get(gene)) {
+        case PHENOTYPE:
+          writeHeaderCell(headerRow, colIdx++, gene + " Phenotype");
+          break;
+        case ACTIVITY_SCORE:
+          writeHeaderCell(headerRow, colIdx++, gene + " Activity Score");
+          break;
+        case ALLELE_STATUS:
+          writeHeaderCell(headerRow, colIdx++, gene + " Allele");
+          break;
+        default:
+          throw new RuntimeException("Lookup method not implemented");
+      }
     }
-    for (String gene : genes) {
+    for (String gene : genes.keySet()) {
       writeHeaderCell(headerRow, colIdx++, gene + " Implications for Phenotypic Measures");
     }
     writeHeaderCell(headerRow, colIdx++, "Therapeutic Recommendation");
@@ -46,17 +57,29 @@ class RecommendationWorkbook extends AbstractWorkbook {
       Map<String,String> phenotypeMap,
       Map<String,String> activityMap,
       Map<String,String> implicationMap,
+      Map<String,String> alleleStatusMap,
       String rec,
       String classification,
       String comments
   ) {
     Row row = this.sheet.nextRow();
     int colIdx = 0;
-    for (String gene : this.genes) {
-      writeStringCell(row, colIdx++, phenotypeMap.get(gene), false);
-      writeStringCell(row, colIdx++, activityMap.get(gene), this.wrapStyle);
+    for (String gene : this.genes.keySet()) {
+      switch(this.genes.get(gene)) {
+        case PHENOTYPE:
+          writeStringCell(row, colIdx++, phenotypeMap.get(gene), this.wrapStyle);
+          break;
+        case ACTIVITY_SCORE:
+          writeStringCell(row, colIdx++, activityMap.get(gene), this.wrapStyle);
+          break;
+        case ALLELE_STATUS:
+          writeStringCell(row, colIdx++, alleleStatusMap.get(gene), this.wrapStyle);
+          break;
+        default:
+          throw new RuntimeException("Lookup method not implemented");
+      }
     }
-    for (String gene : this.genes) {
+    for (String gene : this.genes.keySet()) {
       writeStringCell(row, colIdx++, implicationMap.get(gene), false);
     }
     writeStringCell(row, colIdx++, rec, false);

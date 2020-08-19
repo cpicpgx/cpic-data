@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -13,9 +14,8 @@ import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Export recommendation excel workbooks
@@ -51,25 +51,39 @@ public class RecommendationExporter extends BaseExporter {
     try (
         Connection conn = ConnectionFactory.newConnection();
         PreparedStatement drugStmt = conn.prepareStatement("select distinct r.drugid, d.name from recommendation r join drug d on r.drugid = d.drugid");
-        PreparedStatement geneStmt = conn.prepareStatement("select distinct jsonb_object_keys(phenotypes) from recommendation where drugid=?");
+        PreparedStatement geneStmt = conn.prepareStatement("with r as ( " +
+            "    select jsonb_object_keys(phenotypes) as genesymbol " +
+            "    from recommendation " +
+            "    where drugid = ? " +
+            "    union " +
+            "    select jsonb_object_keys(activityscore) as genesymbol " +
+            "    from recommendation " +
+            "    where drugid = ? " +
+            "    union " +
+            "    select jsonb_object_keys(allelestatus) as genesymbol " +
+            "    from recommendation " +
+            "    where drugid = ? " +
+            ") select r.genesymbol, g.lookupmethod from r join gene g on (r.genesymbol=g.symbol)");
         PreparedStatement popStmt = conn.prepareStatement("select distinct population from recommendation where drugid=?");
-        PreparedStatement recStmt = conn.prepareStatement("select r.phenotypes, r.drugRecommendation, r.implications, r.classification, r.activityScore, r.comments from recommendation r where r.drugid=? and r.population=?");
+        PreparedStatement recStmt = conn.prepareStatement("select r.phenotypes, r.drugRecommendation, r.implications, r.classification, r.activityScore, r.comments, r.allelestatus from recommendation r where r.drugid=? and r.population=?");
         ResultSet drs = drugStmt.executeQuery()
     ) {
       while (drs.next()) {
         String drugId = drs.getString(1);
         String drugName = drs.getString(2);
 
-        Set<String> geneSymbols = new TreeSet<>();
+        Map<String, LookupMethod> geneLookupMap = new TreeMap<>();
         geneStmt.setString(1, drugId);
+        geneStmt.setString(2, drugId);
+        geneStmt.setString(3, drugId);
         try (ResultSet grs = geneStmt.executeQuery()) {
           while (grs.next()) {
-            geneSymbols.add(grs.getString(1));
+            geneLookupMap.put(grs.getString(1), LookupMethod.valueOf(grs.getString(2)));
           }
         }
         
         sf_logger.info("Processing {} {}", drugId, drugName);
-        RecommendationWorkbook workbook = new RecommendationWorkbook(drugName, geneSymbols);
+        RecommendationWorkbook workbook = new RecommendationWorkbook(drugName, geneLookupMap);
 
         popStmt.setString(1, drugId);
         try (ResultSet prs = popStmt.executeQuery()) {
@@ -88,11 +102,13 @@ public class RecommendationExporter extends BaseExporter {
                 String classification = rrs.getString(4);
                 String activityScore = rrs.getString(5);
                 String comments = rrs.getString(6);
+                String alleleStatus = rrs.getString(7);
 
                 workbook.writeRec(
                     gson.fromJson(phenotypes, stringMapType),
                     gson.fromJson(activityScore, stringMapType),
                     gson.fromJson(implication, stringMapType),
+                    gson.fromJson(alleleStatus, stringMapType),
                     recommendation,
                     classification,
                     comments
