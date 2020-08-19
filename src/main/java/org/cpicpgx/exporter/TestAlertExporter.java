@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.EntityType;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -10,10 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -48,17 +50,27 @@ public class TestAlertExporter extends BaseExporter {
     Type stringMapType = new TypeToken<TreeMap<String, String>>(){}.getType();
 
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement alertStmt = conn.prepareStatement("select t.cdsContext, t.alertText, t.activityScore, t.phenotype from test_alert t where t.drugid=? and t.population=?");
+         PreparedStatement alertStmt = conn.prepareStatement("select t.cdsContext, t.alertText, t.activityScore, t.phenotype, t.allelestatus from test_alert t where t.drugid=? and t.population=?");
          PreparedStatement popStmt = conn.prepareStatement("select distinct population, genes from test_alert where drugid=? order by 1");
-         PreparedStatement geneStmt = conn.prepareStatement("select distinct d.name, t.drugid from test_alert t join drug d on t.drugid = d.drugid");
-         ResultSet grs = geneStmt.executeQuery()
+         PreparedStatement geneStmt = conn.prepareStatement("with g as (select distinct unnest(genes) as gene from test_alert where drugid=?) select g.gene, h.lookupmethod from g join gene h on (g.gene=h.symbol) order by 1");
+         PreparedStatement allDrugsStmt = conn.prepareStatement("select distinct d.name, t.drugid from test_alert t join drug d on t.drugid = d.drugid");
+         ResultSet adrs = allDrugsStmt.executeQuery()
     ) {
-      while (grs.next()) {
-        String drugName = grs.getString(1);
-        String drugId = grs.getString(2);
+      while (adrs.next()) {
+        String drugName = adrs.getString(1);
+        String drugId = adrs.getString(2);
         sf_logger.info("Writing {}", drugName);
 
         popStmt.setString(1, drugId);
+        geneStmt.setString(1, drugId);
+
+        Map<String, LookupMethod> geneLookupMap = new LinkedHashMap<>();
+
+        try (ResultSet rs = geneStmt.executeQuery()) {
+          while (rs.next()) {
+            geneLookupMap.put(rs.getString(1), LookupMethod.valueOf(rs.getString(2)));
+          }
+        }
 
         // initialize the workbook
         TestAlertWorkbook workbook = new TestAlertWorkbook(drugName);
@@ -66,23 +78,22 @@ public class TestAlertExporter extends BaseExporter {
         try (ResultSet prs = popStmt.executeQuery()) {
           while (prs.next()) {
             String population = prs.getString(1);
-            Array geneSqlArray = prs.getArray(2);
-            String[] geneArray = (String[])geneSqlArray.getArray();
 
             // add a sheet to the work book and write headers
-            workbook.writeSheet(population, geneArray);
+            workbook.writeSheet(population, geneLookupMap);
 
             alertStmt.setString(1, drugId);
             alertStmt.setString(2, population);
             try (ResultSet ars = alertStmt.executeQuery()) {
               while (ars.next()) {
                 workbook.writeAlert(
-                    geneArray,
+                    geneLookupMap,
                     ars.getString(1),
                     (String[])ars.getArray(2).getArray(),
                     drugName,
                     gson.fromJson(ars.getString(3), stringMapType),
-                    gson.fromJson(ars.getString(4), stringMapType)
+                    gson.fromJson(ars.getString(4), stringMapType),
+                    gson.fromJson(ars.getString(5), stringMapType)
                 );
               }
             }

@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.apache.commons.cli.*;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ public class GuidelineStarterPack {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private final Set<String> f_genes = new TreeSet<>();
   private final Set<String> f_drugs = new TreeSet<>();
+  private Path m_path;
 
   public static void main(String[] args) {
     try {
@@ -40,10 +42,20 @@ public class GuidelineStarterPack {
 
   private void parseArgs(String[] args) throws ParseException {
     Options options = new Options()
+        .addOption("o", true, "output directory")
         .addOption("g", true, "gene symbol")
         .addOption("d", true,"drug name");
     CommandLine cli = new DefaultParser()
         .parse(options, args);
+
+    if (!cli.hasOption("o")) {
+      throw new ParseException("Must specify an output path");
+    } else {
+      m_path = Paths.get(cli.getOptionValue("o"));
+      if (!m_path.toFile().exists() || !m_path.toFile().isDirectory()) {
+        throw new ParseException("Output directory must be an existing directory");
+      }
+    }
 
     String[] genes = cli.getOptionValues("g");
     f_genes.addAll(Arrays.asList(genes));
@@ -59,10 +71,11 @@ public class GuidelineStarterPack {
 
     try (
         Connection conn = ConnectionFactory.newConnection();
-        PreparedStatement geneStmt = conn.prepareStatement("select g.symbol from gene g where g.symbol=?");
+        PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.lookupmethod from gene g where g.symbol=?");
         PreparedStatement drugStmt = conn.prepareStatement("select d.drugid from drug d where d.name=?")
     ) {
       List<AbstractWorkbook> workbooksToWrite = new ArrayList<>();
+      Map<String, LookupMethod> geneLookupMap = new LinkedHashMap<>();
 
       for (String gene : f_genes) {
         geneStmt.setString(1, gene);
@@ -70,6 +83,8 @@ public class GuidelineStarterPack {
           if (rs.next()) {
             sf_logger.warn("{} already exists, starter files will not include possibly extant data", gene);
           }
+          geneLookupMap.put(rs.getString(1), LookupMethod.valueOf(rs.getString(2)));
+
           AlleleDefinitionWorkbook alleleDefinitionWorkbook = new AlleleDefinitionWorkbook(gene, "NC_#######", "NP_#######", "NG_#######", "NM_#######", 0L);
           alleleDefinitionWorkbook.writeAllele("ALLELE NAME HERE");
           alleleDefinitionWorkbook.writeVariant("VARIANT HERE", "X###X", "g.#####", "g.#####", "rs#####", 1L);
@@ -109,8 +124,8 @@ public class GuidelineStarterPack {
           workbooksToWrite.add(recommendationWorkbook);
 
           TestAlertWorkbook testAlertWorkbook = new TestAlertWorkbook(drug);
-          testAlertWorkbook.writeSheet("population general", f_genes.toArray(new String[0]));
-          writeAlertCombos(conn, testAlertWorkbook, f_genes, drug);
+          testAlertWorkbook.writeSheet("population general", geneLookupMap);
+          writeAlertCombos(conn, testAlertWorkbook, geneLookupMap, drug);
           workbooksToWrite.add(testAlertWorkbook);
         }
       }
@@ -122,11 +137,11 @@ public class GuidelineStarterPack {
       for (AbstractWorkbook w : workbooksToWrite) {
         w.writeHistory(new Date(), "File created");
         w.getSheets().forEach(SheetWrapper::autosizeColumns);
-        Path filePath = Paths.get(w.getFilename());
+        Path filePath = m_path.resolve(w.getFilename());
         try (OutputStream out = Files.newOutputStream(filePath)) {
           w.write(out);
         }
-        sf_logger.info("Created starter file {}", filePath);
+        sf_logger.info("Created starter file {}", filePath.toAbsolutePath());
       }
     }
   }
@@ -162,10 +177,10 @@ public class GuidelineStarterPack {
     }
   }
 
-  private static void writeAlertCombos(Connection conn, TestAlertWorkbook workbook, Set<String> genes, String drug) throws SQLException {
+  private static void writeAlertCombos(Connection conn, TestAlertWorkbook workbook, Map<String, LookupMethod> geneMap, String drug) throws SQLException {
     Map<String,String> aliases = new TreeMap<>();
     int i=1;
-    for (String gene : genes) {
+    for (String gene : geneMap.keySet()) {
       aliases.put("g" + i, gene);
       i += 1;
     }
@@ -177,16 +192,29 @@ public class GuidelineStarterPack {
 
     Map<String, String> phenoMap = new TreeMap<>();
     Map<String, String> scoreMap = new TreeMap<>();
+    Map<String, String> alleleMap = new TreeMap<>();
     try (ResultSet rs = conn.prepareStatement(query).executeQuery()) {
       while (rs.next()) {
         int colIdx = 1;
         for (String alias : aliases.keySet()) {
-          phenoMap.put(aliases.get(alias), rs.getString(colIdx));
-          colIdx += 1;
-          scoreMap.put(aliases.get(alias), rs.getString(colIdx));
+          String geneSymbol = aliases.get(alias);
+          LookupMethod lookupMethod = geneMap.get(geneSymbol);
+          switch(lookupMethod) {
+            case PHENOTYPE:
+              phenoMap.put(geneSymbol, rs.getString(colIdx));
+              break;
+            case ALLELE_STATUS:
+              alleleMap.put(geneSymbol, rs.getString(colIdx));
+              break;
+            case ACTIVITY_SCORE:
+              scoreMap.put(geneSymbol, rs.getString(colIdx));
+              break;
+            default:
+              throw new RuntimeException("Lookup method not implemented");
+          }
           colIdx += 1;
         }
-        workbook.writeAlert(genes.toArray(new String[0]), "", new String[0], drug, scoreMap, phenoMap);
+        workbook.writeAlert(geneMap, "", new String[0], drug, scoreMap, phenoMap, alleleMap);
       }
     }
   }
