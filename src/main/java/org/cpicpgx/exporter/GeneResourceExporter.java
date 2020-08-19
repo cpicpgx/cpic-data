@@ -10,6 +10,7 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collections;
 
 /**
  * Exports individual excel sheets for each gene to show their links to external resources
@@ -53,6 +54,8 @@ public class GeneResourceExporter extends BaseExporter {
         
         GeneResourceWorkbook workbook = new GeneResourceWorkbook(symbol);
         workbook.writeIds(hgnc, ncbi, ensembl, pgkb);
+
+        workbook.writeChangeLog(Collections.emptyList());
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{symbol});

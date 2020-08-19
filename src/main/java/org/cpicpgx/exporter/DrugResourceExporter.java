@@ -10,6 +10,7 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collections;
 
 /**
  * A class to export files, by drug, of the external IDs used to identify that drug
@@ -60,6 +61,8 @@ public class DrugResourceExporter extends BaseExporter {
             atcCodes,
             rs.getString(3)
         );
+
+        workbook.writeChangeLog(Collections.emptyList());
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{rs.getString(1)});

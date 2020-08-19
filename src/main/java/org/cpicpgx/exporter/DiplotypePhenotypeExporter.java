@@ -13,10 +13,7 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Exports files, by gene, of the diplotype to phenotype assignments.
@@ -93,7 +90,9 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
         for (String[] key : phenoMap.values()) {
           workbook.writeInterpretation(key[0], key[1], key[2], key[3]);
         }
-        
+
+        workbook.writeChangeLog(Collections.emptyList());
+
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{gene});
       }

@@ -82,7 +82,7 @@ public class RecommendationExporter extends BaseExporter {
           }
         }
         
-        sf_logger.info("Processing {} {}", drugId, drugName);
+        sf_logger.debug("Processing {} {}", drugId, drugName);
         RecommendationWorkbook workbook = new RecommendationWorkbook(drugName, geneLookupMap);
 
         popStmt.setString(1, drugId);

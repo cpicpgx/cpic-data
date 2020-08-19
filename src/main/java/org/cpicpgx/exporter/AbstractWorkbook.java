@@ -3,15 +3,11 @@ package org.cpicpgx.exporter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Shared workbook code that all exported workbooks can use.
@@ -22,11 +18,11 @@ public abstract class AbstractWorkbook {
 
   public static final String HISTORY_SHEET_NAME = "Change log";
   public static final String NOTES_SHEET_NAME = "Notes";
+  public static final String LOG_FILE_CREATED = "File generated and data queried";
   private final Workbook workbook;
   private final CreationHelper createHelper;
   private final List<SheetWrapper> sheets = new ArrayList<>();
   private final CellStyle dateStyle;
-  private final CellStyle boldDateStyle;
   private final CellStyle centerTextStyle;
   CellStyle leftTextStyle;
   CellStyle rightNumberStyle;
@@ -52,7 +48,7 @@ public abstract class AbstractWorkbook {
     this.dateStyle.setDataFormat(
         createHelper.createDataFormat().getFormat("m/d/yy")
     );
-    this.dateStyle.setAlignment(HorizontalAlignment.CENTER);
+    this.dateStyle.setAlignment(HorizontalAlignment.LEFT);
     this.dateStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.dateStyle.setFont(newFont);
 
@@ -99,14 +95,6 @@ public abstract class AbstractWorkbook {
     this.headerStyle.setAlignment(HorizontalAlignment.CENTER);
     this.headerStyle.setFont(boldFont);
 
-    this.boldDateStyle = this.workbook.createCellStyle();
-    this.boldDateStyle.setDataFormat(
-        createHelper.createDataFormat().getFormat("m/d/yy")
-    );
-    this.boldDateStyle.setAlignment(HorizontalAlignment.CENTER);
-    this.boldDateStyle.setVerticalAlignment(VerticalAlignment.TOP);
-    this.boldDateStyle.setFont(boldFont);
-    
     this.topBorderStyle = this.workbook.createCellStyle();
     this.topBorderStyle.setBorderTop(BorderStyle.THIN);
     
@@ -166,23 +154,10 @@ public abstract class AbstractWorkbook {
     }
   }
 
-  void writeBoldDateCell(Row row, Date value) {
-    writeDateCell(row, value, this.boldDateStyle);
-  }
-  
   void writeDateCell(Row row, int idx, Date value) {
     Cell nameCell = row.createCell(idx);
     nameCell.setCellStyle(this.dateStyle);
     nameCell.setCellValue(value);
-  }
-
-  private void writeDateCell(Row row, Date value, CellStyle style) {
-    Cell nameCell = row.createCell(1);
-    nameCell.setCellStyle(this.dateStyle);
-    nameCell.setCellValue(value);
-    if (style != null) {
-      nameCell.setCellStyle(style);
-    }
   }
 
   void writeStringCell(Row row, int colIdx, String value) {
@@ -211,13 +186,6 @@ public abstract class AbstractWorkbook {
     nameCell.setCellStyle(style);
   }
 
-  void writeMergedNoteCell(Row row, String value, int lastCol) {
-    Cell noteCell = row.createCell(0);
-    noteCell.setCellValue(StringUtils.strip(value));
-    noteCell.setCellStyle(noteStyle);
-    row.getSheet().addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, lastCol));
-  }
-  
   void writeNoteCell(Row row, String value) {
     Cell noteCell = row.createCell(0);
     noteCell.setCellValue(StringUtils.strip(value));
@@ -302,6 +270,10 @@ public abstract class AbstractWorkbook {
       Row headerRow = historySheet.nextRow();
       writeHeaderCell(headerRow, 0, "Date");
       writeHeaderCell(headerRow, 1, "Note");
+
+      Row generatedRow = historySheet.nextRow();
+      writeDateCell(generatedRow, 0, new Date());
+      writeStringCell(generatedRow, 1, LOG_FILE_CREATED, false);
     }
     for (Object[] changeLogEvent : changeLogEvents) {
       Row row = historySheet.nextRow();

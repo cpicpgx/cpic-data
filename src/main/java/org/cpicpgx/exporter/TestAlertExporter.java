@@ -59,7 +59,7 @@ public class TestAlertExporter extends BaseExporter {
       while (adrs.next()) {
         String drugName = adrs.getString(1);
         String drugId = adrs.getString(2);
-        sf_logger.info("Writing {}", drugName);
+        sf_logger.debug("Writing {}", drugName);
 
         popStmt.setString(1, drugId);
         geneStmt.setString(1, drugId);
