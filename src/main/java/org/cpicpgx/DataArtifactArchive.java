@@ -24,7 +24,6 @@ import java.util.List;
 public class DataArtifactArchive {
   
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String sf_dirNamePattern = "cpic_information";
 
   private Path m_baseDirectory;
   private boolean upload = false;
@@ -72,7 +71,7 @@ public class DataArtifactArchive {
     exporters.add(new PairsExporter());
 
     exporters.forEach(e -> {
-      Path dirPath = getDirectoryPath(sf_dirNamePattern + "/" + e.getFileType().name().toLowerCase());
+      Path dirPath = getDirectoryPath(e.getFileType().name().toLowerCase());
       e.setDirectory(dirPath);
       try {
         e.setUpload(upload);
