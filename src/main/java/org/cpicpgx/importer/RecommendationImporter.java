@@ -1,11 +1,9 @@
 package org.cpicpgx.importer;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
@@ -17,8 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
-import java.sql.Date;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,7 +89,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     String[] drugNames = drugText.split("_");
 
     for (String drugName : drugNames) {
-      try (DbHarness dbHarness = new DbHarness(drugName)) {
+      try (RecDbHarness dbHarness = new RecDbHarness(drugName)) {
         for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext(); ) {
           Sheet sheet = sheetIterator.next();
           workbook.currentSheetIs(sheet.getSheetName());
@@ -278,43 +278,38 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     }
   }
 
-  private static class DbHarness implements AutoCloseable {
+  private static class RecDbHarness extends DbHarness {
     private final PreparedStatement insertStmt;
-    private final PreparedStatement insertChangeStmt;
     private final PreparedStatement findPhenotype;
-    private final List<AutoCloseable> closables = new ArrayList<>();
     private final String drugId;
     private final Long guidelineId;
     private final Map<String,Integer> phenotypeCache = new HashMap<>();
     private final Map<String, LookupMethod> geneLookupCache = new HashMap<>();
     private final Gson gson = new Gson();
-    
-    DbHarness(String drugName) throws Exception {
-      Connection conn = ConnectionFactory.newConnection();
-      this.insertStmt = conn.prepareStatement("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
-      this.insertChangeStmt = conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
-      this.findPhenotype = conn.prepareStatement("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
 
-      try (PreparedStatement drugLookupStmt = conn.prepareStatement("select drugid, guidelineid from drug where name=? and guidelineid is not null")) {
-        drugLookupStmt.setString(1, drugName);
-        ResultSet rs = drugLookupStmt.executeQuery();
-        if (rs.next()) {
-          drugId = rs.getString(1);
-          guidelineId = rs.getLong(2);
-        } else {
-          throw new NotFoundException("Couldn't find drug with guideline for: " + drugName);
-        }
-        if (rs.next()) {
-          throw new RuntimeException("More than one guideline found for: " + drugName);
-        }
+    RecDbHarness(String drugName) throws Exception {
+      super(FileType.RECOMMENDATION);
+      this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
+      this.findPhenotype = prepare("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
+
+      PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where name=? and guidelineid is not null");
+      drugLookupStmt.setString(1, drugName);
+      ResultSet rs = drugLookupStmt.executeQuery();
+      if (rs.next()) {
+        drugId = rs.getString(1);
+        guidelineId = rs.getLong(2);
+      } else {
+        throw new NotFoundException("Couldn't find drug with guideline for: " + drugName);
+      }
+      if (rs.next()) {
+        throw new RuntimeException("More than one guideline found for: " + drugName);
       }
 
-      try (PreparedStatement stmt = conn.prepareStatement("select genesymbol, g.lookupmethod from pair p join drug d on p.drugid = d.drugid join gene g on p.genesymbol = g.symbol where d.name=? and p.usedForRecommendation = true")) {
-        stmt.setString(1, drugName);
-        try (ResultSet stmtRs = stmt.executeQuery()) {
-          while (stmtRs.next()) {
-            geneLookupCache.put(stmtRs.getString(1), LookupMethod.valueOf(stmtRs.getString(2)));
-          }
+      PreparedStatement stmt = prepare("select genesymbol, g.lookupmethod from pair p join drug d on p.drugid = d.drugid join gene g on p.genesymbol = g.symbol where d.name=? and p.usedForRecommendation = true");
+      stmt.setString(1, drugName);
+      try (ResultSet stmtRs = stmt.executeQuery()) {
+        while (stmtRs.next()) {
+          geneLookupCache.put(stmtRs.getString(1), LookupMethod.valueOf(stmtRs.getString(2)));
         }
       }
       if (geneLookupCache.size() == 0) {
@@ -322,11 +317,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       }
 
       sf_logger.debug("Drug: {}; Drug ID: {}; Guideline ID: {}", drugName, drugId, guidelineId);
-
-      closables.add(this.findPhenotype);
-      closables.add(this.insertChangeStmt);
-      closables.add(this.insertStmt);
-      closables.add(conn);
     }
 
     List<String> getGenes() {
@@ -396,7 +386,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         throw new RuntimeException("Error inserting record", e);
       }
     }
-    
+
     /**
      * Insert a change event into the history table.
      * @param date the date of the change, required
@@ -404,29 +394,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
      * @throws SQLException can occur from bad database transaction
      */
     void insertChange(java.util.Date date, String note) throws SQLException {
-      Preconditions.checkNotNull(date, "History line has a blank date");
-
-      this.insertChangeStmt.clearParameters();
-      this.insertChangeStmt.setString(1, drugId);
-      if (StringUtils.isNotBlank(note)) {
-        this.insertChangeStmt.setString(2, note);
-      } else {
-        this.insertChangeStmt.setString(2, "n/a");
-      }
-      this.insertChangeStmt.setString(3, FileType.RECOMMENDATION.name());
-      this.insertChangeStmt.setDate(4, new Date(date.getTime()));
-      this.insertChangeStmt.executeUpdate();
-    }
-
-    @Override
-    public void close() {
-      closables.forEach(c -> {
-        try {
-          c.close();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      });
+      writeChangeLog(drugId, date, note);
     }
   }
 }

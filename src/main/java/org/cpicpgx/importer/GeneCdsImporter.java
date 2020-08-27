@@ -1,7 +1,7 @@
 package org.cpicpgx.importer;
 
-import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.Connection;
+import java.security.InvalidParameterException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
     String geneSymbol = m.group(1);
     sf_logger.debug("loading gene {}", geneSymbol);
 
-    try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
+    try (GeneDbHarness dbHarness = new GeneDbHarness(geneSymbol)) {
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
         RowWrapper dataRow = workbook.getRow(rowIdx);
         if (dataRow.hasNoText(COL_PHENOTYPE)) continue;
@@ -108,19 +108,25 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         notes.add(row.getText(0));
       }
       writeNotes(geneSymbol, notes);
+
+      try {
+        workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+        processChangeLog(dbHarness, workbook, geneSymbol);
+      } catch (InvalidParameterException ex) {
+        sf_logger.debug("No change log sheet, skipping");
+      }
     }
   }
 
-  static class DbHarness implements AutoCloseable {
-    private final Connection conn;
+  static class GeneDbHarness extends DbHarness {
     private final String gene;
     private final PreparedStatement insertStmt;
 
-    DbHarness(String gene) throws SQLException {
+    GeneDbHarness(String gene) throws SQLException {
+      super(FileType.GENE_CDS);
       this.gene = gene;
-      this.conn = ConnectionFactory.newConnection();
 
-      insertStmt = this.conn.prepareStatement(
+      insertStmt = prepare(
           "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityScore) values (?, ?, ?, ?, ?) ON CONFLICT (genesymbol, phenotype, activityScore) DO UPDATE set ehrpriority=excluded.ehrpriority, consultationtext=excluded.consultationtext"
       );
     }
@@ -135,16 +141,6 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       insertStmt.setString(4, consultation);
       insertStmt.setString(5, activity);
       insertStmt.executeUpdate();
-    }
-    
-    @Override
-    public void close() throws Exception {
-      if (this.insertStmt != null) {
-        this.insertStmt.close();
-      }
-      if (this.conn != null) {
-        this.conn.close();
-      }
     }
   }
 }

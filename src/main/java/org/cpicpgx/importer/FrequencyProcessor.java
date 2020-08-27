@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.slf4j.Logger;
@@ -190,6 +191,8 @@ public class FrequencyProcessor implements AutoCloseable {
   }
 
   void insertHistory(java.util.Date date, String note) throws SQLException {
+    if (note.equalsIgnoreCase(AbstractWorkbook.LOG_FILE_CREATED)) return;
+
     if (StringUtils.isNotBlank(note)) {
       insertHistory.setString(2, note);
     } else {

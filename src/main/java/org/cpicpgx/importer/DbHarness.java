@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 
 import javax.annotation.Nonnull;
@@ -92,7 +93,11 @@ public abstract class DbHarness implements AutoCloseable {
     if (value == null) {
       stmt.setNull(parameterIndex, Types.VARCHAR);
     } else {
-      stmt.setString(parameterIndex, value);
+      if (value.equalsIgnoreCase(BaseDirectoryImporter.NA)) {
+        stmt.setString(parameterIndex, BaseDirectoryImporter.NA);
+      } else {
+        stmt.setString(parameterIndex, value);
+      }
     }
   }
 
@@ -113,6 +118,8 @@ public abstract class DbHarness implements AutoCloseable {
   }
 
   public void writeChangeLog(@Nullable String entityId, @Nonnull java.util.Date date, @Nonnull String note) throws SQLException {
+    if (note.equalsIgnoreCase(AbstractWorkbook.LOG_FILE_CREATED)) return;
+
     this.insertChangeLog.clearParameters();
     if (StringUtils.isBlank(entityId)) {
       this.insertChangeLog.setNull(1, Types.VARCHAR);
@@ -123,6 +130,10 @@ public abstract class DbHarness implements AutoCloseable {
     this.insertChangeLog.setString(3, f_fileType.name());
     this.insertChangeLog.setDate(4, new java.sql.Date(date.getTime()));
     this.insertChangeLog.executeUpdate();
+  }
+
+  Array createArrayOf(String[] values) throws SQLException {
+    return f_conn.createArrayOf("TEXT", values);
   }
 
   @Override

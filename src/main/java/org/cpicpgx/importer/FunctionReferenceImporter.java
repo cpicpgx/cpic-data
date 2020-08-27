@@ -1,9 +1,7 @@
 package org.cpicpgx.importer;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
@@ -15,7 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,7 +98,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
     List<String> noFunctionAlleles = new ArrayList<>();
     rowIdx += 2; // move down 2 rows and start reading;
-    try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
+    try (FunctionDbHarness dbHarness = new FunctionDbHarness(geneSymbol)) {
       for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
         int readableRow = rowIdx + 1;
         row = workbook.getRow(rowIdx);
@@ -120,7 +120,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
         List<String> citationList = new ArrayList<>();
         if (StringUtils.isNotBlank(citationClump)) {
-          for (String citation : citationClump.split("[;,\\.]")) {
+          for (String citation : citationClump.split("[;,.]")) {
             String pmid = StringUtils.strip(citation);
             if (!sf_pmidPattern.matcher(pmid).matches()) {
               throw new RuntimeException("PMID not valid: [" + pmid + "] in row " + readableRow);
@@ -133,7 +133,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         if (findings != null) {
           for (String pmid : findings.keySet()) {
             if (!citationList.contains(pmid)) {
-//              throw new RuntimeException("PMID ("+pmid+") used in Findings not in PMID field, row " + readableRow);
               sf_logger.warn("PMID ("+pmid+") used in Findings not in PMID field, row " + readableRow);
             }
           }
@@ -165,18 +164,9 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
       writeNotes(geneSymbol, notes);
-      
-      workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
-      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
-        row = workbook.getRow(i);
-        if (row.hasNoText(0) ^ row.hasNoText(1)) {
-          throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
-        } else if (row.hasNoText(0) ) continue;
 
-        java.util.Date date = row.getDate(0);
-        String note = row.getText(1);
-        dbHarness.insertChange(date, note);
-      }
+      workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+      processChangeLog(dbHarness, workbook, geneSymbol);
     }
 
     if (noFunctionAlleles.size() > 0) {
@@ -224,24 +214,21 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   /**
    * Private class for handling DB interactions
    */
-  static class DbHarness implements AutoCloseable {
-    private final Connection conn;
+  static class FunctionDbHarness extends DbHarness {
     private final Map<String, Long> alleleNameMap = new HashMap<>();
     private final PreparedStatement insertAlleleStmt;
-    private final PreparedStatement insertChangeStmt;
     private final String gene;
     private final LookupMethod geneLookupMethod;
 
-    DbHarness(String gene) throws SQLException {
+    FunctionDbHarness(String gene) throws SQLException {
+      super(FileType.ALLELE_FUNCTION_REFERENCE);
       this.gene = gene;
-      this.conn = ConnectionFactory.newConnection();
 
-      try (PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele_definition where geneSymbol=?")) {
-        pstmt.setString(1, gene);
-        try (ResultSet rs = pstmt.executeQuery()) {
-          while (rs.next()) {
-            this.alleleNameMap.put(rs.getString(1), rs.getLong(2));
-          }
+      PreparedStatement pstmt = prepare("select name, id from allele_definition where geneSymbol=?");
+      pstmt.setString(1, gene);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          this.alleleNameMap.put(rs.getString(1), rs.getLong(2));
         }
       }
 
@@ -249,20 +236,18 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         throw new RuntimeException("No alleles found for gene: " + gene);
       }
 
-      try (PreparedStatement pstmt = this.conn.prepareStatement("select lookupmethod from gene where symbol=?")) {
-        pstmt.setString(1, gene);
-        try (ResultSet rs = pstmt.executeQuery()) {
-          if (rs.next()) {
-            this.geneLookupMethod = LookupMethod.valueOf(rs.getString(1));
-          } else {
-            sf_logger.warn("Gene lookup method not found for " + gene);
-            this.geneLookupMethod = null;
-          }
+      PreparedStatement lstmt = prepare("select lookupmethod from gene where symbol=?");
+      lstmt.setString(1, gene);
+      try (ResultSet rs = lstmt.executeQuery()) {
+        if (rs.next()) {
+          this.geneLookupMethod = LookupMethod.valueOf(rs.getString(1));
+        } else {
+          sf_logger.warn("Gene lookup method not found for " + gene);
+          this.geneLookupMethod = null;
         }
       }
 
-      insertAlleleStmt = this.conn.prepareStatement("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) values (?, ?, ?, initcap(?), ?, initcap(?), ?, ?, ?, ?::jsonb, ?)");
-      insertChangeStmt = this.conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
+      insertAlleleStmt = prepare("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) values (?, ?, ?, initcap(?), ?, initcap(?), ?, ?, ?, ?::jsonb, ?)");
     }
 
     private Long lookupAlleleDefinitionId(String alleleName) {
@@ -295,65 +280,19 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       this.insertAlleleStmt.setString(2, allele);
       this.insertAlleleStmt.setLong(3, alleleDefinitionId);
       this.insertAlleleStmt.setString(4, normalizeFunction(alleleFunction));
-      setNullableText(this.insertAlleleStmt, 5, activityValue);
-      setNullableText(this.insertAlleleStmt, 6, clinicalFunction);
-      setNullableText(this.insertAlleleStmt, 7, substrate);
-      this.insertAlleleStmt.setArray(8, conn.createArrayOf("TEXT", pmids));
-      setNullableText(this.insertAlleleStmt, 9, strength);
-      setNullableText(this.insertAlleleStmt, 10, findings != null ? findings.toString() : null);
-      setNullableText(this.insertAlleleStmt, 11, comments);
+      setNullableString(this.insertAlleleStmt, 5, activityValue);
+      setNullableString(this.insertAlleleStmt, 6, clinicalFunction);
+      setNullableString(this.insertAlleleStmt, 7, substrate);
+      this.insertAlleleStmt.setArray(8, createArrayOf(pmids));
+      setNullableString(this.insertAlleleStmt, 9, strength);
+      setNullableString(this.insertAlleleStmt, 10, findings != null ? findings.toString() : null);
+      setNullableString(this.insertAlleleStmt, 11, comments);
       int inserted = this.insertAlleleStmt.executeUpdate();
       if (inserted == 0) {
         throw new RuntimeException("No allele inserted");
       }
     }
 
-    /**
-     * Insert a change event into the history table.
-     * @param date the date of the change, required
-     * @param note the text note to explain the change
-     * @throws SQLException can occur from bad database transaction
-     */
-    void insertChange(java.util.Date date, String note) throws SQLException {
-      Preconditions.checkNotNull(date, "History line has a blank date");
-
-      this.insertChangeStmt.clearParameters();
-      this.insertChangeStmt.setString(1, gene);
-      if (StringUtils.isNotBlank(note)) {
-        this.insertChangeStmt.setString(2, note);
-      } else {
-        this.insertChangeStmt.setString(2, "n/a");
-      }
-      this.insertChangeStmt.setString(3, FileType.ALLELE_FUNCTION_REFERENCE.name());
-      this.insertChangeStmt.setDate(4, new Date(date.getTime()));
-      this.insertChangeStmt.executeUpdate();
-    }
-    
-    private void setNullableText(PreparedStatement stmt, int idx, String value) throws SQLException {
-      if (StringUtils.isNotBlank(value)) {
-        if (value.equals("N/A")) {
-          stmt.setString(idx, "n/a");
-        } else {
-          stmt.setString(idx, value);
-        }
-      } else {
-        stmt.setNull(idx, Types.VARCHAR);
-      }
-    }
-
-    @Override
-    public void close() throws SQLException {
-      if (this.insertAlleleStmt != null) {
-        this.insertAlleleStmt.close();
-      }
-      if (this.insertChangeStmt != null) {
-        this.insertChangeStmt.close();
-      }
-      if (this.conn != null) {
-        this.conn.close();
-      }
-    }
-    
     private String normalizeFunction(String fn) {
       if (fn == null) {
         return null;

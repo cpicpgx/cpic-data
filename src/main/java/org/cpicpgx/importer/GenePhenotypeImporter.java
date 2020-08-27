@@ -2,7 +2,6 @@ package org.cpicpgx.importer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
-import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
@@ -12,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,7 +81,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     }
     String geneSymbol = m.group(1);
 
-    try (DbHarness dbHarness = new DbHarness(geneSymbol)) {
+    try (PhenoDbHarness dbHarness = new PhenoDbHarness(geneSymbol)) {
       for (int i = 2; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper dataRow = workbook.getRow(i);
         if (dataRow.hasNoText(0)) {
@@ -91,12 +93,13 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Error processing row " + (i+1), e);
         }
       }
+
+
     }
   }
 
-  static class DbHarness implements AutoCloseable {
+  static class PhenoDbHarness extends DbHarness {
     private final static List<String> sf_singleAlleleGeneList = ImmutableList.of("chrX", "chrY", "chrM");
-    private final Connection conn;
     private final PreparedStatement insertPhenotype;
     private final PreparedStatement insertFunction;
     private final PreparedStatement lookupDiplotypes;
@@ -109,37 +112,36 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private boolean allowSingleAlleles = false;
     private final Set<String> loadedDiplotypes = new HashSet<>();
 
-    DbHarness(String geneSymbol) throws SQLException {
+    PhenoDbHarness(String geneSymbol) throws SQLException {
+      super(FileType.GENE_PHENOTYPE);
       this.geneSymbol = geneSymbol;
-      this.conn = ConnectionFactory.newConnection();
-      this.insertPhenotype = conn.prepareStatement("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
-      this.insertFunction = conn.prepareStatement("insert into phenotype_function(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
-      this.lookupDiplotypes = conn.prepareStatement("select a1.name, a2.name " +
+      this.insertPhenotype = prepare("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
+      this.insertFunction = prepare("insert into phenotype_function(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
+      this.lookupDiplotypes = prepare("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.clinicalfunctionalstatus=pf.function1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.clinicalfunctionalstatus=pf.function2 " +
           "where pf.id=? order by a1.name, a2.name");
-      this.lookupDiplotypesByScore = conn.prepareStatement("select a1.name, a2.name " +
+      this.lookupDiplotypesByScore = prepare("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityvalue=pf.activityvalue1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityvalue=pf.activityvalue2 " +
           "where pf.id=? order by a1.name, a2.name");
-      this.lookupAllelesByFn = conn.prepareStatement("select a.name from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
+      this.lookupAllelesByFn = prepare("select a.name from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
           "join allele a on g.genesymbol=a.genesymbol and a.clinicalFunctionalStatus=pf.function1 " +
           "where pf.id=?");
-      this.insertDiplotype = conn.prepareStatement("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
+      this.insertDiplotype = prepare("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
 
-      try (PreparedStatement lookupGene = conn.prepareStatement("select lookupMethod, chr from gene where symbol=?")) {
-        lookupGene.setString(1, geneSymbol);
-        try (ResultSet rs = lookupGene.executeQuery()) {
-          while (rs.next()) {
-            LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
-            if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
-              this.useScoreLookup = true;
-            }
-            if (sf_singleAlleleGeneList.contains(rs.getString(2))) {
-              this.allowSingleAlleles = true;
-            }
+      PreparedStatement lookupGene = prepare("select lookupMethod, chr from gene where symbol=?");
+      lookupGene.setString(1, geneSymbol);
+      try (ResultSet rs = lookupGene.executeQuery()) {
+        while (rs.next()) {
+          LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
+          if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
+            this.useScoreLookup = true;
+          }
+          if (sf_singleAlleleGeneList.contains(rs.getString(2))) {
+            this.allowSingleAlleles = true;
           }
         }
       }
@@ -328,13 +330,6 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private static double convertScore(String score) {
       String strippedScore = score.replaceAll("≥", "");
       return Double.parseDouble(strippedScore);
-    }
-
-    @Override
-    public void close() throws Exception {
-      if (this.conn != null) {
-        this.conn.close();
-      }
     }
   }
 }

@@ -94,7 +94,7 @@ public class AlleleDefinitionImporter {
     Optional<String> geneOpt = getCellValue(row, 0);
     m_gene = geneOpt
         .orElseThrow(IllegalStateException::new)
-        .replaceAll("GENE:\\s*", "");
+        .replaceAll("(GENE|Gene):\\s*", "");
   }
   
   private void readLegacyRow(Sheet sheet) {
@@ -256,6 +256,8 @@ public class AlleleDefinitionImporter {
         
         Date date = row.getDate(0);
         String note = row.getNullableText(1);
+
+        if (note.equalsIgnoreCase(AbstractWorkbook.LOG_FILE_CREATED)) continue;
         
         insertStmt.setDate(3, new java.sql.Date(date.getTime()));
         if (StringUtils.isNotBlank(note)) {

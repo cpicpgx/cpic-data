@@ -3,8 +3,6 @@ package org.cpicpgx.importer;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.db.DbLookup;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -15,8 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
-import java.util.Date;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,7 +66,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
   @Override
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
-    try (DbHarness dbHarness = new DbHarness()) {
+    try (TestDbHarness dbHarness = new TestDbHarness()) {
       for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext(); ) {
         Sheet sheet = sheetIterator.next();
 
@@ -94,7 +94,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)?\\s*[Aa]ctivity [Ss]core.*");
   private static final Pattern ALLELE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Aa]llele.*");
 
-  private void processTestAlertSheet(WorkbookWrapper workbook, DbHarness dbHarness, String population) throws Exception {
+  private void processTestAlertSheet(WorkbookWrapper workbook, TestDbHarness dbHarness, String population) throws Exception {
     RowWrapper headerRow = workbook.getRow(0);
 
     int idxContext = -1;
@@ -193,7 +193,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     }
   }
 
-  void processHistory(WorkbookWrapper workbook, DbHarness dbHarness) throws SQLException {
+  void processHistory(WorkbookWrapper workbook, TestDbHarness dbHarness) throws SQLException {
     for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
       RowWrapper row = workbook.getRow(i);
       if (row.hasNoText(0) ^ row.hasNoText(1)) {
@@ -206,28 +206,18 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     }
   }
 
-  private class DbHarness implements AutoCloseable {
-    private final Connection conn;
+  private static class TestDbHarness extends DbHarness {
     private final PreparedStatement insert;
-    private final PreparedStatement insertChangeStmt;
     private final PreparedStatement findLookup;
     private final Map<String, String> nameToIdMap = new HashMap<>();
     private final Map<String,LookupMethod> geneMap = new HashMap<>();
-    private final List<AutoCloseable> closables = new ArrayList<>();
     private final Gson gson = new Gson();
 
-    private DbHarness() throws SQLException {
-      this.conn = ConnectionFactory.newConnection();
-      this.insert = conn.prepareStatement(
+    private TestDbHarness() throws SQLException {
+      super(FileType.TEST_ALERT);
+      this.insert = prepare(
           "insert into test_alert(cdsContext, genes, drugid, alertText, population, activityScore, phenotype, alleleStatus, lookupKey) values (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)");
-      this.insertChangeStmt = conn.prepareStatement(
-          "insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
-      this.findLookup = conn.prepareStatement("select lookupmethod from gene where symbol=?");
-
-      closables.add(this.insert);
-      closables.add(this.insertChangeStmt);
-      closables.add(this.findLookup);
-      closables.add(conn);
+      this.findLookup = prepare("select lookupmethod from gene where symbol=?");
     }
 
     private Set<String> getGenes() {
@@ -243,22 +233,13 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
     private void writeHistory(Date date, String note) throws SQLException {
       for (String drugId : nameToIdMap.values()) {
-        this.insertChangeStmt.clearParameters();
-        this.insertChangeStmt.setString(1, drugId);
-        if (StringUtils.isNotBlank(note)) {
-          this.insertChangeStmt.setString(2, note);
-        } else {
-          this.insertChangeStmt.setString(2, "n/a");
-        }
-        this.insertChangeStmt.setString(3, getFileType().name());
-        this.insertChangeStmt.setDate(4, new java.sql.Date(date.getTime()));
-        this.insertChangeStmt.executeUpdate();
+        writeChangeLog(drugId, date, note);
       }
     }
 
     private void writeAlert(String context, String drugName, String alertText, String population, Map<String,String> activityMap, Map<String,String> phenotypeMap, Map<String,String> alleleMap) throws SQLException {
-      Array geneArray = conn.createArrayOf("VARCHAR", getGenes().toArray());
-      Array alertSqlArray = conn.createArrayOf("VARCHAR", new String[]{alertText});
+      Array geneArray = createArrayOf(getGenes().toArray(new String[]{}));
+      Array alertSqlArray = createArrayOf(new String[]{alertText});
 
       Map<String,String> lookupKey = new HashMap<>();
       for (String gene : getGenes()) {
@@ -290,7 +271,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       insert.clearParameters();
       insert.setString(1, context);
       insert.setArray(2, geneArray);
-      insert.setString(3, lookup(drugName));
+      insert.setString(3, lookupCachedDrug(drugName));
       insert.setArray(4, alertSqlArray);
       insert.setString(5, population);
       insert.setString(6, gson.toJson(activityMap));
@@ -298,20 +279,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       insert.setString(8, gson.toJson(alleleMap));
       insert.setString(9, gson.toJson(lookupKey));
       insert.executeUpdate();
-    }
-
-    private String lookup(String name) throws SQLException {
-      if (StringUtils.isBlank(name)) {
-        return null;
-      }
-
-      String id = nameToIdMap.get(name);
-      if (id == null) {
-        id = DbLookup.getDrugByName(conn, name)
-                .orElseThrow(() -> new RuntimeException("No drug for " + name));
-        nameToIdMap.put(name, id);
-      }
-      return id;
     }
 
     private Collection<String> getDrugIds() {
@@ -328,13 +295,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
           sf_logger.warn("no gene data for {}", gene);
           return null;
         }
-      }
-    }
-
-    @Override
-    public void close() throws Exception {
-      for (AutoCloseable closable : closables) {
-        closable.close();
       }
     }
   }
