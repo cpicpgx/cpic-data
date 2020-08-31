@@ -31,7 +31,6 @@ import java.util.function.Consumer;
 public class PharmVarImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String PROCESS_FILE_EXTENSION = ".tsv";
-  private static final String DEFAULT_DIRECTORY = "pharmvar";
 
   public static void main(String[] args) {
     rebuild(new PharmVarImporter(), args);
@@ -52,11 +51,6 @@ public class PharmVarImporter extends BaseDirectoryImporter {
     return new String[0];
   }
 
-  @Override
-  String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
-  
   @Override
   Consumer<File> getFileProcessor() {
     return f -> {

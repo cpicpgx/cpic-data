@@ -23,7 +23,6 @@ import java.util.List;
 public class DrugImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String FILE_SUFFIX = "-Drug_Resource_Mappings.xlsx";
-  private static final String DEFAULT_DIRECTORY = "drug_resource_mappings";
 
   // purposely DO NOT delete anything, this import only upserts records
   private static final String[] sf_deleteStatements = new String[0];
@@ -52,11 +51,6 @@ public class DrugImporter extends BaseDirectoryImporter {
   @Override
   String[] getDeleteStatements() {
     return sf_deleteStatements;
-  }
-
-  @Override
-  String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
   }
 
   @Override

@@ -15,7 +15,6 @@ import java.sql.PreparedStatement;
  */
 public class GeneReferenceImporter extends BaseDirectoryImporter {
   private static final String[] sf_deleteStatements = new String[]{};
-  private static final String DEFAULT_DIRECTORY = "gene_resource_mappings";
 
   public static void main(String[] args) {
     rebuild(new GeneReferenceImporter(), args);
@@ -27,10 +26,6 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
     return sf_deleteStatements;
   }
 
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
-  
   @Override
   public FileType getFileType() {
     return FileType.GENE_RESOURCE;

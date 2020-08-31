@@ -33,7 +33,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   private static final int COL_IDX_DIP = 0;
   private static final String DIPLOTYPE_SEPARATOR = "/";
   private static final String[] sf_deleteStatements = new String[]{};
-  private static final String DEFAULT_DIRECTORY = "diplotype_phenotype_tables";
 
   public static void main(String[] args) {
     rebuild(new DiplotypePhenotypeImporter(), args);
@@ -41,10 +40,6 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   
   public DiplotypePhenotypeImporter() { }
   
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
-
   @Override
   public FileType getFileType() {
     return FileType.DIPLOTYPE_PHENOTYPE;

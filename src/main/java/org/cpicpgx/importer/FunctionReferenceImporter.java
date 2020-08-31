@@ -48,7 +48,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       "delete from change_log where type='" + FileType.ALLELE_FUNCTION_REFERENCE.name() + "'",
       "delete from file_note where type='" + FileType.ALLELE_FUNCTION_REFERENCE.name() + "'"
   };
-  private static final String DEFAULT_DIRECTORY = "allele_functionality_reference";
 
   public static void main(String[] args) {
     rebuild(new FunctionReferenceImporter(), args);
@@ -58,10 +57,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   
   String getFileExtensionToProcess() {
     return EXCEL_EXTENSION;
-  }
-
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
   }
 
   @Override

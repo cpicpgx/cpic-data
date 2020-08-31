@@ -32,7 +32,6 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       "delete from phenotype_function",
       "delete from gene_phenotype"
   };
-  private static final String DEFAULT_DIRECTORY = "gene_phenotypes";
   private static final Pattern GENE_PATTERN = Pattern.compile("Gene:\\s+(\\w+)");
 
   private static final int COL_A1_FN = 0;
@@ -60,11 +59,6 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
   @Override
   String[] getDeleteStatements() {
     return sf_deleteStatements;
-  }
-
-  @Override
-  String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
   }
 
   @Override

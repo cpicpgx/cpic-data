@@ -13,7 +13,6 @@ import java.sql.SQLException;
  * Importer for gene-drug pairs that pairs with the export of {@link org.cpicpgx.exporter.PairsExporter}
  */
 public class PairImporter extends BaseDirectoryImporter {
-  private static final String DEFAULT_DIRECTORY = "gene_drug_pairs";
   private static final String FILE_SUFFIX = "cpicPairs.xlsx";
   //language=PostgreSQL
   private static final String[] DELETE_STATEMENTS = new String[]{"delete from change_log where type='" + FileType.PAIR.name() + "'"};
@@ -65,11 +64,6 @@ public class PairImporter extends BaseDirectoryImporter {
   @Override
   String[] getDeleteStatements() {
     return DELETE_STATEMENTS;
-  }
-
-  @Override
-  String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
   }
 
   private static class PairDbHarness extends DbHarness {

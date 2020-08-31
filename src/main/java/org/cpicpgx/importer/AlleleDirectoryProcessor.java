@@ -19,18 +19,12 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
       "delete from allele_definition where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from sequence_location"
   };
-  private static final String DEFAULT_DIRECTORY = "allele_definition_tables";
 
   public static void main(String[] args) {
     rebuild(new AlleleDirectoryProcessor(), args);
   }
 
   public AlleleDirectoryProcessor() { }
-
-  @Override
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
 
   @Override
   public FileType getFileType() {

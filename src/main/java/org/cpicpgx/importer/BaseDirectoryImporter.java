@@ -60,8 +60,14 @@ public abstract class BaseDirectoryImporter {
   abstract FileType getFileType();
 
   abstract String[] getDeleteStatements();
-  
-  abstract String getDefaultDirectoryName();
+
+  /**
+   * Gets the default directory name for the data type. Should rely on {@link FileType}
+   * @return a default directory name, all lowercase
+   */
+  String getDefaultDirectoryName() {
+    return getFileType().name().toLowerCase();
+  }
 
   /**
    * Calling this method 

@@ -35,7 +35,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       "delete from test_alert"
   };
   private static final String FILE_EXTENSION = "_Pre_and_Post_Test_Alerts.xlsx";
-  private static final String DEFAULT_DIRECTORY = "test_alerts";
 
   private final List<String> f_notes = new ArrayList<>();
 
@@ -44,10 +43,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   }
   
   public TestAlertImporter() {}
-
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
 
   @Override
   public FileType getFileType() {

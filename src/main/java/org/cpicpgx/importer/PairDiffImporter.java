@@ -26,7 +26,6 @@ import java.util.function.Consumer;
 public class PairDiffImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String PROCESS_FILE_EXTENSION = ".json";
-  private static final String DEFAULT_DIRECTORY = "pairsDiffs";
 
   public static void main(String[] args) {
     rebuild(new PairDiffImporter(), args);
@@ -47,11 +46,6 @@ public class PairDiffImporter extends BaseDirectoryImporter {
     return new String[0];
   }
 
-  @Override
-  String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
-  
   @Override
   Consumer<File> getFileProcessor() {
     return f -> {

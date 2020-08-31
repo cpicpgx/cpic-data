@@ -51,7 +51,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       "delete from file_note where type='" + FileType.RECOMMENDATION.name() + "'",
       "delete from change_log where type='" + FileType.RECOMMENDATION.name() + "'"
   };
-  private static final String DEFAULT_DIRECTORY = "recommendation_tables";
   private static final Pattern PHENO_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
   private static final Pattern IMPL_PATTERN = Pattern.compile("([\\w-]+)?\\s*[Ii]mplication.*");
   private static final Pattern AS_PATTERN = Pattern.compile("([\\w-]+)?\\s*[Aa]ctivity [Ss]core.*");
@@ -62,10 +61,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
   }
   
   public RecommendationImporter() {}
-
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
 
   @Override
   public FileType getFileType() {

@@ -29,7 +29,6 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       "delete from file_note where type='" + FileType.GENE_CDS.name() + "'",
       "delete from change_log where type='" + FileType.GENE_CDS.name() + "'"
   };
-  private static final String DEFAULT_DIRECTORY = "gene_cds";
   private static final int COL_PHENOTYPE = 0;
   private static final int COL_ACTIVITY = 1;
   private static final int COL_EHR_PRIORITY = 2;
@@ -41,10 +40,6 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   
   public GeneCdsImporter() { }
   
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
-
   @Override
   public FileType getFileType() {
     return FileType.GENE_CDS;

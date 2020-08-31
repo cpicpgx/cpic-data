@@ -28,17 +28,12 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       "delete from allele_frequency",
       "delete from population"
   };
-  private static final String DEFAULT_DIRECTORY = "frequency_table";
-  
+
   public static void main(String[] args) {
     rebuild(new AlleleFrequencyImporter(), args);
   }
   
   public AlleleFrequencyImporter() { }
-
-  public String getDefaultDirectoryName() {
-    return DEFAULT_DIRECTORY;
-  }
 
   @Override
   public FileType getFileType() {
