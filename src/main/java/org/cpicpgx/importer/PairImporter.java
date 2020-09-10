@@ -47,6 +47,7 @@ public class PairImporter extends BaseDirectoryImporter {
       }
 
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+      db.updateGuidelineGenes();
       processChangeLog(db, workbook, null);
     }
   }
@@ -70,6 +71,7 @@ public class PairImporter extends BaseDirectoryImporter {
 
     final PreparedStatement upsertPair;
     final PreparedStatement updateDrug;
+    final PreparedStatement updateGuidelines;
 
     PairDbHarness() throws SQLException {
       super(FileType.PAIR);
@@ -80,6 +82,9 @@ public class PairImporter extends BaseDirectoryImporter {
 
       //language=PostgreSQL
       updateDrug = prepare("update drug set guidelineid=? where drugid=?");
+
+      //language=PostgreSQL
+      updateGuidelines = prepare("update guideline set genes=(select array_agg(distinct genesymbol) from pair where guidelineid=id and cpiclevel ~ 'A') where genes is null");
     }
 
     void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations, String used) throws SQLException {
@@ -100,6 +105,10 @@ public class PairImporter extends BaseDirectoryImporter {
       setNullableInteger(updateDrug, 1, guidelineId);
       updateDrug.setString(2, drugId);
       updateDrug.executeUpdate();
+    }
+
+    void updateGuidelineGenes() throws SQLException {
+      updateGuidelines.executeUpdate();
     }
   }
 }
