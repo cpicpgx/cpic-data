@@ -1,12 +1,11 @@
 package org.cpicpgx.importer;
 
-import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Parses gene mapping files for NCBI, HGNC, and Ensembl data. Those IDs are then set in the gene table
@@ -38,40 +37,57 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
 
   @Override
   void processWorkbook(WorkbookWrapper workbook) throws Exception {
-    try (Connection conn = ConnectionFactory.newConnection()) {
-      PreparedStatement hgncstmt = conn.prepareStatement("update gene set hgncid=? where symbol=?");
-      PreparedStatement ncbistmt = conn.prepareStatement("update gene set ncbiid=? where symbol=?");
-      PreparedStatement ensstmt  = conn.prepareStatement("update gene set ensemblid=? where symbol=?");
+    try (GeneDbHarness dbHarness = new GeneDbHarness()) {
+      String geneSymbol = null;
+      String hgncId = null;
+      String ncbiId = null;
+      String ensemblId = null;
 
       for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
         String idType = row.getNullableText(2);
         String idValue = row.getNullableText(3, true);
-        String symbolValue = row.getNullableText(0);
+        geneSymbol = row.getNullableText(0);
 
-        PreparedStatement updateStmt = null;
         if (idValue != null) {
           switch (idType) {
             case "HGNC ID":
-              updateStmt = hgncstmt;
+              hgncId = idValue;
               break;
             case "Gene ID":
-              updateStmt = ncbistmt;
+              ncbiId = idValue;
               break;
             case "Ensembl ID":
-              updateStmt = ensstmt;
+              ensemblId = idValue;
               break;
             default:
               // fall out
           }
         }
-        
-        if (updateStmt != null) {
-          updateStmt.setString(1, idValue);
-          updateStmt.setString(2, symbolValue);
-          updateStmt.executeUpdate();
-        }
       }
+
+      dbHarness.upsert(geneSymbol, hgncId, ncbiId, ensemblId);
+    }
+  }
+
+  private static class GeneDbHarness extends DbHarness {
+    private final PreparedStatement upsertGene;
+
+    GeneDbHarness() throws SQLException {
+      super(FileType.GENE_RESOURCE);
+      //language=PostgreSQL
+      upsertGene = prepare("insert into gene(symbol, hgncid, ncbiid, ensemblid) values (?,?,?,?) " +
+          "on conflict (symbol) do update " +
+          "set hgncId=excluded.hgncid, ncbiId=excluded.ncbiid, ensemblId=excluded.ensemblid");
+    }
+
+    private void upsert(String geneSymbol, String hgncId, String ncbiId, String ensemblId) throws SQLException {
+      this.upsertGene.clearParameters();
+      this.upsertGene.setString(1, geneSymbol);
+      setNullableString(this.upsertGene, 2, hgncId);
+      setNullableString(this.upsertGene, 3, ncbiId);
+      setNullableString(this.upsertGene, 4, ensemblId);
+      this.upsertGene.executeUpdate();
     }
   }
 }
