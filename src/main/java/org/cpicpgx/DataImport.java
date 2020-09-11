@@ -32,8 +32,7 @@ public class DataImport {
       CommandLine cli = clParser.parse(options, args);
 
       DataImport processor = new DataImport(cli.getOptionValue("d"));
-
-        processor.execute();
+      processor.execute();
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
       System.exit(1);
