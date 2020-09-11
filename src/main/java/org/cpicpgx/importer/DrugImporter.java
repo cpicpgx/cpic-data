@@ -59,7 +59,7 @@ public class DrugImporter extends BaseDirectoryImporter {
 
     RowWrapper rxnormRow = workbook.getRow(ROW_RXNORM);
     String drugName = rxnormRow.getText(COL_NAME);
-    String rxNormId = rxnormRow.getNullableText(COL_ID);
+    String rxNormId = rxnormRow.getNullableText(COL_ID, true);
 
     RowWrapper drugbankRow = workbook.getRow(ROW_DRUGBANK);
     String drugbankId = drugbankRow.getNullableText(COL_ID);
