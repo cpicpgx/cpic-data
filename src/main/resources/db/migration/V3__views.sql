@@ -98,7 +98,8 @@ select
     r.phenotypes,
     r.activityscore,
     r.population,
-    r.comments
+    r.comments,
+    r.prescribingChange
 from recommendation r
          join drug d on r.drugid = d.drugid
          join guideline g on r.guidelineid = g.id;

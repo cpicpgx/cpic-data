@@ -460,6 +460,7 @@ CREATE TABLE recommendation
   drugRecommendation TEXT,
   classification VARCHAR(20),
   phenotypes JSONB,
+  prescribingChange TEXT,
   activityScore JSONB,
   alleleStatus JSONB,
   lookupKey JSONB,
@@ -467,7 +468,8 @@ CREATE TABLE recommendation
   comments TEXT,
   version INTEGER DEFAULT 1,
 
-  UNIQUE (guidelineId, drugId, population, lookupKey)
+  UNIQUE (guidelineId, drugId, population, lookupKey),
+  CHECK ( prescribingChange in ('Yes', 'No', 'Possibly') )
 );
 
 CREATE TRIGGER version_recommendation
@@ -484,6 +486,7 @@ COMMENT ON COLUMN recommendation.classification IS 'Classification of recommenda
 COMMENT ON COLUMN recommendation.population IS 'The population this recommendation is applicable to';
 COMMENT ON COLUMN recommendation.comments IS 'Optional comments about the recommendation';
 COMMENT ON COLUMN recommendation.phenotypes IS 'Phenotypes that this recommendation applies to, this is a JSON mapping of gene to phenotype';
+COMMENT ON COLUMN recommendation.prescribingChange IS 'Does this recommendation include a prescribing change? values: Yes, No, Possibly. default: No';
 COMMENT ON COLUMN recommendation.activityScore IS 'Activity score that this recommendation applies to, this is a JSON mapping of gene to score value';
 COMMENT ON COLUMN recommendation.alleleStatus IS 'Whether or not an allele is present, used mainly for HLA genes, and used for recommendation lookups. This is a JSON mapping of gene to allele status (positive/negative)';
 COMMENT ON COLUMN recommendation.lookupKey IS 'A key to use for finding a specific recommendation. Made of a JSON object of gene symbol to key value. The key value can be one of phenotype, activity score, or allele status depending on the gene.';
