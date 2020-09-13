@@ -7,6 +7,7 @@ import org.apache.commons.text.WordUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
+import org.cpicpgx.util.DbHarness;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;

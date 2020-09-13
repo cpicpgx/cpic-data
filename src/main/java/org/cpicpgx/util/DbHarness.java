@@ -1,10 +1,9 @@
-package org.cpicpgx.importer;
+package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
-import org.cpicpgx.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Helper class for importers to interact with the database. Handles connection creation and closing any generated SQL
+ * Helper class to interact with the database. Handles connection creation and closing any generated SQL
  * statements. Also include some caching for common queries like looking up drug IDs or guideline IDs.
  *
- * Extend this class in your own importers and add your own write statements to it.
+ * Extend this class in your own class and add your own write statements to it.
  */
 public abstract class DbHarness implements AutoCloseable {
   private final List<AutoCloseable> closables = new ArrayList<>();
