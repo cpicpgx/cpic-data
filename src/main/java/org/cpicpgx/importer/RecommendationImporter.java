@@ -102,9 +102,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             }
             continue;
           }
-          else if (!sheet.getSheetName().startsWith("population")) {
-            throw new RuntimeException("Improper sheet name: " + sheet.getSheetName());
-          }
 
           String populationName = sheet.getSheetName().replaceAll("^population\\s+", "");
           if (StringUtils.isBlank(populationName)) {
