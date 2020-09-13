@@ -32,7 +32,7 @@ public abstract class DbHarness implements AutoCloseable {
 
   private final PreparedStatement insertChangeLog;
 
-  DbHarness(FileType type) throws SQLException {
+  public DbHarness(FileType type) throws SQLException {
     f_conn = ConnectionFactory.newConnection();
     closables.add(f_conn);
     f_fileType = type;
@@ -45,13 +45,13 @@ public abstract class DbHarness implements AutoCloseable {
     insertChangeLog = prepare("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
   }
 
-  PreparedStatement prepare(@Nonnull String sql) throws SQLException {
+  public PreparedStatement prepare(@Nonnull String sql) throws SQLException {
     PreparedStatement pstmt = f_conn.prepareStatement(sql);
     closables.add(pstmt);
     return pstmt;
   }
 
-  String lookupCachedDrug(String drugName) throws SQLException {
+  public String lookupCachedDrug(String drugName) throws SQLException {
     String normalizedName = StringUtils.lowerCase(StringUtils.stripToNull(drugName));
     if (normalizedName == null) return null;
 
@@ -70,7 +70,7 @@ public abstract class DbHarness implements AutoCloseable {
     }
   }
 
-  Integer lookupCachedGuideline(String url) throws SQLException {
+  public Integer lookupCachedGuideline(String url) throws SQLException {
     String normalizedUrl = StringUtils.stripToNull(url);
     if (normalizedUrl == null) return null;
 
@@ -89,7 +89,7 @@ public abstract class DbHarness implements AutoCloseable {
     }
   }
 
-  void setNullableString(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable String value) throws SQLException {
+  public void setNullableString(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable String value) throws SQLException {
     if (value == null) {
       stmt.setNull(parameterIndex, Types.VARCHAR);
     } else {
@@ -101,7 +101,7 @@ public abstract class DbHarness implements AutoCloseable {
     }
   }
 
-  void setNullableInteger(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable Integer value) throws SQLException {
+  public void setNullableInteger(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable Integer value) throws SQLException {
     if (value == null) {
       stmt.setNull(parameterIndex, Types.NUMERIC);
     } else {
@@ -109,7 +109,7 @@ public abstract class DbHarness implements AutoCloseable {
     }
   }
 
-  void setNullableArray(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable String[] values) throws SQLException {
+  public void setNullableArray(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable String[] values) throws SQLException {
     if (values == null || values.length == 0) {
       stmt.setNull(parameterIndex, Types.ARRAY);
     } else {
@@ -132,7 +132,7 @@ public abstract class DbHarness implements AutoCloseable {
     this.insertChangeLog.executeUpdate();
   }
 
-  Array createArrayOf(String[] values) throws SQLException {
+  public Array createArrayOf(String[] values) throws SQLException {
     return f_conn.createArrayOf("TEXT", values);
   }
 
