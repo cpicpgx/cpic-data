@@ -8,6 +8,7 @@ import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -45,7 +46,6 @@ import java.util.regex.Pattern;
 public class RecommendationImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String FILE_NAME_SUFFIX = " recommendation.xlsx";
-  private static final String NO_RESULT = "No Result";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from recommendation",
       "delete from file_note where type='" + FileType.RECOMMENDATION.name() + "'",
@@ -201,18 +201,18 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 if (normalizedPheno == null) {
                   throw new RuntimeException("No phenotype found");
                 }
-                if (!normalizedPheno.equals(NO_RESULT) && !dbHarness.findPhenotype(gene, normalizedPheno)) {
+                if (!normalizedPheno.equals(Constants.NO_RESULT) && !dbHarness.findPhenotype(gene, normalizedPheno)) {
                   sf_logger.warn("Phenotype not found in allele table for {} {}", gene, normalizedPheno);
                 }
                 phenotype.put(gene, normalizedPheno);
               }
 
               // Validate not all "No Result" in multi-gene rec
-              if (phenotype.size() > 1 && phenotype.values().stream().allMatch((v) -> v.equals(NO_RESULT))) {
+              if (phenotype.size() > 1 && phenotype.values().stream().allMatch((v) -> v.equals(Constants.NO_RESULT))) {
                 sf_logger.warn("Row {} contains all No Result", k + 1);
               }
               // Validate no use of "No Result in single-gene rec
-              if (phenotype.size() == 1 && phenotype.containsValue(NO_RESULT)) {
+              if (phenotype.size() == 1 && phenotype.containsValue(Constants.NO_RESULT)) {
                 sf_logger.warn("Single-gene recommendations should not use 'No Result'");
               }
 
@@ -263,8 +263,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
   @Nonnull
   private String normalizeClassification(@Nonnull String classification) {
-    if (classification.equals(NA)) {
-      return NA;
+    if (classification.equals(Constants.NA)) {
+      return Constants.NA;
     } else {
       return WordUtils.capitalize(classification);
     }
@@ -339,9 +339,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         // Validate that activity score genes have activity score values filled in
         for (String gene : activityScore.keySet()) {
           LookupMethod lookupMethod = geneLookupCache.get(gene);
-          if (lookupMethod == LookupMethod.ACTIVITY_SCORE && activityScore.get(gene).equals(NA)) {
+          if (lookupMethod == LookupMethod.ACTIVITY_SCORE && activityScore.get(gene).equals(Constants.NA)) {
             String genePhenotype = phenotype.get(gene);
-            if (!genePhenotype.equals("Indeterminate") && !genePhenotype.equals(NO_RESULT)) {
+            if (!genePhenotype.equals("Indeterminate") && !genePhenotype.equals(Constants.NO_RESULT)) {
               sf_logger.warn("{} is an activity gene but has a missing activity value for {} {}", gene, population, gson.toJson(phenotype));
             }
           }

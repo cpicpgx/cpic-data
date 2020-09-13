@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -41,9 +42,6 @@ import java.util.regex.Pattern;
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+\\.?\\d*$");
-  static final String NA = "n/a";
-  static final String NO_RESULT = "No Result";
-  static final String EXCEL_EXTENSION = ".xlsx";
 
   private Path directory;
 
@@ -192,7 +190,7 @@ public abstract class BaseDirectoryImporter {
         key.addProperty(f1, 2);
       } else {
         key.addProperty(f1, 1);
-        if (!f2.equalsIgnoreCase(NA)) {
+        if (!f2.equalsIgnoreCase(Constants.NA)) {
           key.addProperty(f2, 1);
         }
       }
@@ -202,7 +200,7 @@ public abstract class BaseDirectoryImporter {
         key.addProperty(as1, 2);
       } else {
         key.addProperty(as1, 1);
-        if (!as2.equalsIgnoreCase(NA)) {
+        if (!as2.equalsIgnoreCase(Constants.NA)) {
           key.addProperty(as2, 1);
         }
       }
@@ -247,11 +245,11 @@ public abstract class BaseDirectoryImporter {
     if (StringUtils.isBlank(score)) {
       return null;
     } else {
-      if (score.toLowerCase().equals(NA)) {
-        return NA;
+      if (score.toLowerCase().equals(Constants.NA)) {
+        return Constants.NA;
       }
-      else if (score.equals(NO_RESULT)) {
-        return NO_RESULT;
+      else if (score.equals(Constants.NO_RESULT)) {
+        return Constants.NO_RESULT;
       }
       else if (sf_activityScorePattern.matcher(score).matches()) {
         return score.replaceAll("\\.0$", "");
@@ -272,8 +270,8 @@ public abstract class BaseDirectoryImporter {
     String strippedText = StringUtils.stripToNull(text);
     if (strippedText == null) {
       return null;
-    } else if (strippedText.equalsIgnoreCase(NA)) {
-      return NA;
+    } else if (strippedText.equalsIgnoreCase(Constants.NA)) {
+      return Constants.NA;
     } else {
       return WordUtils.capitalize(strippedText.replaceAll(gene + "\\s*", ""));
     }

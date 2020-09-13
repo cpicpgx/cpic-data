@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -162,7 +163,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       Map<String, String> activityJson = new HashMap<>();
       for (String gene : idxActivityByGene.keySet()) {
         String pheno = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
-        if (pheno != null && pheno.toLowerCase().startsWith("no result")) {
+        if (pheno != null && pheno.toLowerCase().startsWith(Constants.NO_RESULT.toLowerCase())) {
           activityJson.put(gene, pheno);
         } else {
           activityJson.put(gene, normalizeScore(normalizeGeneText(gene, row.getText(idxActivityByGene.get(gene)))));

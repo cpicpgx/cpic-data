@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -144,9 +145,9 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     void insertValues(RowWrapper row) throws SQLException {
       String a1Fn = row.getText(COL_A1_FN);
       String a2Fn = row.getText(COL_A2_FN);
-      String a1Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A1_VALUE))).orElse(NA);
-      String a2Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A2_VALUE))).orElse(NA);
-      String totalScore = Optional.ofNullable(normalizeScore(row.getNullableText(COL_TOTAL_SCORE))).orElse(NA);
+      String a1Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A1_VALUE))).orElse(Constants.NA);
+      String a2Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A2_VALUE))).orElse(Constants.NA);
+      String totalScore = Optional.ofNullable(normalizeScore(row.getNullableText(COL_TOTAL_SCORE))).orElse(Constants.NA);
       String description = row.getNullableText(COL_DESC);
       int phenoId = lookupPhenotype(row.getText(COL_PHENO), totalScore);
 
@@ -176,7 +177,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       try (ResultSet rs = this.insertFunction.executeQuery()) {
         if (rs.next()) {
           int fnId = rs.getInt(1);
-          if (allowSingleAlleles && !a1Fn.equalsIgnoreCase(NA) && a2Fn.equalsIgnoreCase(NA)) {
+          if (allowSingleAlleles && !a1Fn.equalsIgnoreCase(Constants.NA) && a2Fn.equalsIgnoreCase(Constants.NA)) {
             insertSingleAllele(fnId);
           } else {
             insertDiplotypes(fnId);
@@ -300,9 +301,9 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       }
 
       // if "n/a" values are present
-      if (score1.equalsIgnoreCase(NA) || score2.equalsIgnoreCase(NA)) {
+      if (score1.equalsIgnoreCase(Constants.NA) || score2.equalsIgnoreCase(Constants.NA)) {
         // the total must be "n/a"
-        if (!total.equalsIgnoreCase(NA)){
+        if (!total.equalsIgnoreCase(Constants.NA)){
           throw new RuntimeException("n/a score is not consistent");
         } else {
           // nothing left to check for n/a values

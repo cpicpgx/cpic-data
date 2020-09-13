@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.postgresql.util.PSQLException;
@@ -52,7 +53,7 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
   
   @Override
   String getFileExtensionToProcess() {
-    return EXCEL_EXTENSION;
+    return Constants.EXCEL_EXTENSION;
   }
 
   @Override

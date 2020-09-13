@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
 
   @Override
   String getFileExtensionToProcess() {
-    return EXCEL_EXTENSION;
+    return Constants.EXCEL_EXTENSION;
   }
 
   @Override

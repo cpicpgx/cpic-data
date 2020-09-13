@@ -5,6 +5,7 @@ import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,7 +197,7 @@ public class FrequencyProcessor implements AutoCloseable {
     if (StringUtils.isNotBlank(note)) {
       insertHistory.setString(2, note);
     } else {
-      insertHistory.setString(2, "n/a");
+      insertHistory.setString(2, Constants.NA);
     }
     insertHistory.setDate(4, new Date(date.getTime()));
     insertHistory.executeUpdate();

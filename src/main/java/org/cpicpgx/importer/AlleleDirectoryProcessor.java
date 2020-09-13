@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.WorkbookWrapper;
 
 import java.sql.SQLException;
@@ -38,7 +39,7 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
 
   @Override
   String getFileExtensionToProcess() {
-    return EXCEL_EXTENSION;
+    return Constants.EXCEL_EXTENSION;
   }
 
   @Override

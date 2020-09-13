@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -93,8 +94,8 @@ public abstract class DbHarness implements AutoCloseable {
     if (value == null) {
       stmt.setNull(parameterIndex, Types.VARCHAR);
     } else {
-      if (value.equalsIgnoreCase(BaseDirectoryImporter.NA)) {
-        stmt.setString(parameterIndex, BaseDirectoryImporter.NA);
+      if (value.equalsIgnoreCase(Constants.NA)) {
+        stmt.setString(parameterIndex, Constants.NA);
       } else {
         stmt.setString(parameterIndex, value);
       }

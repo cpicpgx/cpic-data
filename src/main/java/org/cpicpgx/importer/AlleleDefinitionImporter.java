@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
@@ -263,7 +264,7 @@ public class AlleleDefinitionImporter {
         if (StringUtils.isNotBlank(note)) {
           insertStmt.setString(4, note);
         } else {
-          insertStmt.setString(4, "n/a");
+          insertStmt.setString(4, Constants.NA);
         }
 
         insertStmt.executeUpdate();
