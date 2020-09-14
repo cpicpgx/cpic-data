@@ -415,11 +415,13 @@ CREATE TABLE phenotype_lookup
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
     phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
     lookupKey JSONB NOT NULL,
-    function1 TEXT NOT NULL,
-    function2 TEXT NOT NULL,
+    function1 TEXT,
+    function2 TEXT,
     activityValue1 TEXT,
     activityValue2 TEXT,
     totalActivityScore TEXT,
+    alleleStatus1 TEXT,
+    alleleStatus2 TEXT,
     description TEXT
 );
 
@@ -427,11 +429,13 @@ COMMENT ON TABLE phenotype_lookup IS 'Gene descriptions that, when combined, lin
 COMMENT ON COLUMN phenotype_lookup.id IS 'A synthetic numerical ID, auto-assigned, primary key';
 COMMENT ON COLUMN phenotype_lookup.phenotypeId IS 'An ID referencing the gene_phenotype this is associated with, required';
 COMMENT ON COLUMN phenotype_lookup.lookupKey IS 'A normalized JSON format of the data used to lookup a diplotype. The keys of this field are either the functions, activity scores, or allele statuses depending on what the gene requires. Required.';
-COMMENT ON COLUMN phenotype_lookup.function1 IS 'The first allele function, required';
-COMMENT ON COLUMN phenotype_lookup.function2 IS 'The second allele function, required';
+COMMENT ON COLUMN phenotype_lookup.function1 IS 'The first allele function';
+COMMENT ON COLUMN phenotype_lookup.function2 IS 'The second allele function';
 COMMENT ON COLUMN phenotype_lookup.activityValue1 IS 'The activity score for the first allele function';
 COMMENT ON COLUMN phenotype_lookup.activityValue2 IS 'The activity score for the second allele function';
 COMMENT ON COLUMN phenotype_lookup.totalActivityScore IS 'The sum activity score for the functions';
+COMMENT ON COLUMN phenotype_lookup.alleleStatus1 IS 'The first allele status';
+COMMENT ON COLUMN phenotype_lookup.alleleStatus2 IS 'The second allele status';
 COMMENT ON COLUMN phenotype_lookup.description IS 'A description of the diplotypes associated with this phenotype';
 
 
