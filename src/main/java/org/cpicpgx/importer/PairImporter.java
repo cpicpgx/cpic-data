@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.DbHarness;
@@ -9,6 +10,7 @@ import org.cpicpgx.util.WorkbookWrapper;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Importer for gene-drug pairs that pairs with the export of {@link org.cpicpgx.exporter.PairsExporter}
@@ -31,25 +33,35 @@ public class PairImporter extends BaseDirectoryImporter {
         RowWrapper row = workbook.getRow(i);
 
         String[] citations = null;
-        if (row.getNullableText(5) != null) {
-          citations = row.getText(5).split(";");
+        if (row.getNullableText(6) != null) {
+          citations = row.getText(6).split(";");
         }
 
         db.write(
             row.getText(0),
             row.getText(1),
-            row.getNullableText(6),
-            row.getText(2),
+            row.getNullableText(2),
             row.getNullableText(3),
             row.getNullableText(4),
+            row.getNullableText(5),
             citations,
-            row.getNullableText(7)
+            row.getNullableText(7),
+            row.getText(8),
+            row.getNullableDate(9),
+            row.getNullableText(10)
         );
       }
 
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
       db.updateGuidelineGenes();
       processChangeLog(db, workbook, null);
+
+      if (db.unknownDrugs.size() > 0) {
+        System.err.println("Missing drugs, create resource files, import them, try again: " + String.join("; ", db.unknownDrugs));
+      }
+      if (db.unknownGenes.size() > 0) {
+        System.err.println("Missing genes, create resource files, import them, try again: " + String.join("; ", db.unknownGenes));
+      }
     }
   }
 
@@ -73,13 +85,15 @@ public class PairImporter extends BaseDirectoryImporter {
     final PreparedStatement upsertPair;
     final PreparedStatement updateDrug;
     final PreparedStatement updateGuidelines;
+    final Set<String> unknownDrugs = new TreeSet<>();
+    final Set<String> unknownGenes = new TreeSet<>();
 
     PairDbHarness() throws SQLException {
       super(FileType.PAIR);
       //language=PostgreSQL
-      upsertPair = prepare("insert into pair(genesymbol, drugid, guidelineid, cpiclevel, pgkbcalevel, pgxtesting, citations, usedforrecommendation) " +
-          "values (?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, drugid) do " +
-          "update set guidelineid=excluded.guidelineid, cpiclevel=excluded.cpiclevel, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation");
+      upsertPair = prepare("insert into pair(genesymbol, drugid, guidelineid, cpiclevel, pgkbcalevel, pgxtesting, citations, usedforrecommendation, removed, removeddate, removedreason) " +
+          "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, drugid) do " +
+          "update set guidelineid=excluded.guidelineid, cpiclevel=excluded.cpiclevel, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation, removed=excluded.removed, removeddate=excluded.removeddate, removedreason=excluded.removedreason");
 
       //language=PostgreSQL
       updateDrug = prepare("update drug set guidelineid=? where drugid=?");
@@ -88,8 +102,15 @@ public class PairImporter extends BaseDirectoryImporter {
       updateGuidelines = prepare("update guideline set genes=(select array_agg(distinct genesymbol) from pair where guidelineid=id and cpiclevel ~ 'A') where genes is null");
     }
 
-    void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations, String used) throws SQLException {
-      String drugId = lookupCachedDrug(drugName);
+    void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations, String used, String removed, Date removedDate, String removedReason) throws SQLException {
+      String drugId = findDrug(drugName);
+      boolean knownGene = lookupCachedGene(gene);
+      if (!knownGene) {
+        unknownGenes.add(gene);
+      }
+
+      if (drugId == null || !knownGene) return;
+
       Integer guidelineId = lookupCachedGuideline(guidelineUrl);
 
       upsertPair.clearParameters();
@@ -101,6 +122,9 @@ public class PairImporter extends BaseDirectoryImporter {
       setNullableString(upsertPair, 6, StringUtils.stripToNull(pgxTesting));
       setNullableArray(upsertPair, 7, citations);
       upsertPair.setBoolean(8, StringUtils.strip(used).equalsIgnoreCase("yes"));
+      upsertPair.setBoolean(9, StringUtils.strip(removed).equalsIgnoreCase("yes"));
+      setNullableDate(upsertPair, 10, removedDate);
+      setNullableString(upsertPair, 11, removedReason);
       upsertPair.executeUpdate();
 
       setNullableInteger(updateDrug, 1, guidelineId);
@@ -110,6 +134,17 @@ public class PairImporter extends BaseDirectoryImporter {
 
     void updateGuidelineGenes() throws SQLException {
       updateGuidelines.executeUpdate();
+    }
+
+    String findDrug(String drugName) {
+      try {
+        return lookupCachedDrug(drugName);
+      } catch (Exception ex) {
+        if (ex instanceof NotFoundException) {
+          unknownDrugs.add(drugName.toLowerCase());
+        }
+        return null;
+      }
     }
   }
 }

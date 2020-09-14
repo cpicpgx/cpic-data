@@ -3,20 +3,20 @@ package org.cpicpgx.importer;
 import com.google.common.net.UrlEscapers;
 import com.google.gson.Gson;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static org.cpicpgx.util.HttpUtils.apiRequest;
 
 /**
  * A class to import PharmVar data from their API. This will find all alleles in PharmVar genes that don't have PharmVar
@@ -29,14 +29,14 @@ public class PharmVarApiImporter {
   public static void main(String[] args) {
     try {
       PharmVarApiImporter.execute();
-    } catch (IOException ex) {
+    } catch (IOException|NotFoundException ex) {
       sf_logger.error("Error importing from PharmVar API", ex);
     } catch (SQLException ex) {
       sf_logger.error("Error with DB", ex);
     }
   }
 
-  private static void execute() throws IOException, SQLException {
+  private static void execute() throws IOException, SQLException, NotFoundException {
     OkHttpClient client = new OkHttpClient().newBuilder()
         .build();
     Gson gson = new Gson();
@@ -82,21 +82,6 @@ public class PharmVarApiImporter {
           }
         }
       }
-    }
-  }
-
-  @Nullable
-  private static String apiRequest(OkHttpClient client, String url) throws IOException {
-    Request request = new Request.Builder().url(url).method("GET", null).build();
-    try (Response response = client.newCall(request).execute()) {
-
-      if (!response.isSuccessful()) {
-        throw new IOException("Unexpected response " + response);
-      }
-      if (response.body() == null) {
-        return null;
-      }
-      return response.body().string();
     }
   }
 }

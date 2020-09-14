@@ -17,8 +17,9 @@ select
     case when p.guidelineid is null then true else false end provisional
 from pair p
          join drug d on p.drugid = d.drugid
-         left join guideline g on p.guidelineid = g.id;
-COMMENT ON VIEW pair_view IS 'This pairs view combines information from the pair, drug, and guideline tables to make a more readable view of pair data';
+         left join guideline g on p.guidelineid = g.id
+where p.removed is false;
+COMMENT ON VIEW pair_view IS 'This pairs view combines information from the pair, drug, and guideline tables to make a more readable view of pair data. This also limits result to pairs which have NOT been removed.';
 COMMENT ON COLUMN  pair_view.pairid IS 'The primary key ID of this pair';
 COMMENT ON COLUMN  pair_view.drugid IS 'The ID of the drug in the pair';
 COMMENT ON COLUMN  pair_view.drugname IS 'The name of the drug in the pair';

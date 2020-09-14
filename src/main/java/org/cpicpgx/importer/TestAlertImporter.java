@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.LookupMethod;
+import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
@@ -234,7 +235,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
 
-    private void writeAlert(String context, String drugName, String alertText, String population, Map<String,String> activityMap, Map<String,String> phenotypeMap, Map<String,String> alleleMap) throws SQLException {
+    private void writeAlert(String context, String drugName, String alertText, String population, Map<String,String> activityMap, Map<String,String> phenotypeMap, Map<String,String> alleleMap) throws SQLException, NotFoundException {
       Array geneArray = createArrayOf(getGenes().toArray(new String[]{}));
       Array alertSqlArray = createArrayOf(new String[]{alertText});
 

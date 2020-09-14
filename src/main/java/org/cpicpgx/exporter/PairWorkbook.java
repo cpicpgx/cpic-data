@@ -2,9 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class PairWorkbook extends AbstractWorkbook {
 
@@ -29,7 +27,16 @@ public class PairWorkbook extends AbstractWorkbook {
   void writePair(ResultSet rs) throws SQLException {
     Row dataRow = sheet.nextRow();
     for (int colIdx = 0; colIdx < rs.getMetaData().getColumnCount(); colIdx++) {
-      writeStringCell(dataRow, colIdx, rs.getString(colIdx+1), false);
+      Object colObject = rs.getObject(colIdx + 1);
+      if (colObject == null) {
+        continue;
+      } else if (colObject instanceof String) {
+        writeStringCell(dataRow, colIdx, rs.getString(colIdx + 1), false);
+      } else if (colObject instanceof java.util.Date) {
+        writeDateCell(dataRow, colIdx, rs.getDate(colIdx + 1));
+      } else {
+        throw new RuntimeException("Cell type not supported in column " + (colIdx + 1) + " " + colObject.getClass().getSimpleName());
+      }
     }
   }
 

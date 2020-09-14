@@ -335,6 +335,9 @@ CREATE TABLE pair
   pgkbCALevel VARCHAR(5),
   pgxTesting TEXT,
   citations TEXT[],
+  removed BOOLEAN DEFAULT FALSE,
+  removedDate DATE,
+  removedReason TEXT,
 
   UNIQUE (geneSymbol, drugId),
   CONSTRAINT valid_cpiclevel_check CHECK (cpiclevel in ('A', 'A/B', 'B', 'B/C', 'C', 'C/D', 'D')),
@@ -357,6 +360,9 @@ COMMENT ON COLUMN pair.cpiclevel IS 'The CPIC level of this pair, required';
 COMMENT ON COLUMN pair.pgkbCALevel IS 'The top level of PharmGKB Clinical Annotation for this pair, optional';
 COMMENT ON COLUMN pair.pgxTesting IS 'The top level of PGx testing recommendation from PharmGKB label annotations, optional';
 COMMENT ON COLUMN pair.citations IS 'The PMID citations in an array for this pair, optional';
+COMMENT ON COLUMN pair.removed IS 'Has this pair been "removed", eg is no longer a valid pair, default false';
+COMMENT ON COLUMN pair.removedDate IS 'If removed, when was this pair "removed"';
+COMMENT ON COLUMN pair.removedReason  IS 'If removed, why was this pair "removed"';
 
 
 CREATE TABLE term (

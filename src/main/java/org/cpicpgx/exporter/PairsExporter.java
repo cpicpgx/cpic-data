@@ -23,15 +23,24 @@ import java.util.List;
 public class PairsExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String sf_pairQuery = "select " +
-      "       genesymbol as \"Gene\", " +
-      "       drugname as \"Drug\", " +
-      "       cpiclevel as \"CPIC Level\", " +
-      "       pgkbcalevel as \"PharmGKB Level of Evidence\", " +
-      "       pgxtesting as \"PGx Level of Evidence\", " +
-      "       array_to_string(pmids, ';') as \"CPIC Publications (PMID)\", " +
-      "       guidelineurl as \"Guideline URL\"," +
-      "       usedForRecommendation as \"Used for Recommendation\" " +
-      "from pair_view order by cpiclevel, drugname, genesymbol";
+      "    p.genesymbol as \"Gene\", " +
+      "    d.name as \"Drug\", " +
+      "    g.url as \"Guideline URL\", " +
+      "    p.cpiclevel as \"CPIC Level\", " +
+      "    p.pgkbcalevel as \"PharmGKB Level of Evidence\", " +
+      "    p.pgxtesting as \"PGx Level of Evidence\", " +
+      "    array_to_string(p.citations, ';') as \"CPIC Publications (PMID)\", " +
+      "    case " +
+      "        when (p.usedforrecommendation and p.guidelineid is not null) then 'Yes' " +
+      "        when (not p.usedforrecommendation and p.guidelineid is not null) then 'No' " +
+      "        else 'n/a' end \"Used for Recommendation\", " +
+      "    case when p.removed is true then 'Yes' else 'No' end \"Removed\", " +
+      "    p.removeddate \"Date Removed\", " +
+      "    p.removedreason \"Reason Removed\" " +
+      "from pair p " +
+      "         join drug d on p.drugid = d.drugid " +
+      "         left join guideline g on p.guidelineid = g.id " +
+      "order by p.cpiclevel, d.name, p.genesymbol";
   //language=PostgreSQL
   private static final String sf_changeLogQuery = "select date, note from change_log where type=?";
 

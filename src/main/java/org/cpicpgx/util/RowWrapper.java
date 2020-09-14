@@ -245,6 +245,10 @@ public class RowWrapper {
     Cell cell = this.row.getCell(cellIdx);
     if (cell == null) return null;
 
+    if (cell.getCellType() == CellType.BLANK) {
+      return null;
+    }
+
     if (!DateUtil.isCellDateFormatted(cell)) {
       throw new RuntimeException("Cell is not date formatted " + cell.getAddress());
     }
