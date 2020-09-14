@@ -18,7 +18,7 @@ select
     json_build_object(gp.genesymbol, case when g.lookupMethod = 'ACTIVITY_SCORE' then pf.totalActivityScore else gp.phenotype end) as lookupkey
 from
     phenotype_diplotype d
-        join phenotype_function pf on d.functionphenotypeid = pf.id
+        join phenotype_lookup pf on d.functionphenotypeid = pf.id
         join gene_phenotype gp on pf.phenotypeid = gp.id
         join gene g on gp.geneSymbol = g.symbol;
 

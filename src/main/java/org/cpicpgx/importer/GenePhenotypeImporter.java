@@ -31,7 +31,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
   private static final String FILE_SUFFIX = "_phenotypes.xlsx";
   private static final String[] sf_deleteStatements = new String[]{
       "delete from phenotype_diplotype",
-      "delete from phenotype_function",
+      "delete from phenotype_lookup",
       "delete from gene_phenotype"
   };
   private static final Pattern GENE_PATTERN = Pattern.compile("Gene:\\s+(\\w+)");
@@ -111,23 +111,30 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     PhenoDbHarness(String geneSymbol) throws SQLException {
       super(FileType.GENE_PHENOTYPE);
       this.geneSymbol = geneSymbol;
+      //language=PostgreSQL
       this.insertPhenotype = prepare("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
-      this.insertFunction = prepare("insert into phenotype_function(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
+      //language=PostgreSQL
+      this.insertFunction = prepare("insert into phenotype_lookup(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
+      //language=PostgreSQL
       this.lookupDiplotypes = prepare("select a1.name, a2.name " +
-          "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
+          "from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.clinicalfunctionalstatus=pf.function1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.clinicalfunctionalstatus=pf.function2 " +
           "where pf.id=? order by a1.name, a2.name");
+      //language=PostgreSQL
       this.lookupDiplotypesByScore = prepare("select a1.name, a2.name " +
-          "from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
+          "from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityvalue=pf.activityvalue1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityvalue=pf.activityvalue2 " +
           "where pf.id=? order by a1.name, a2.name");
-      this.lookupAllelesByFn = prepare("select a.name from gene_phenotype g join phenotype_function pf on g.id = pf.phenotypeid " +
+      //language=PostgreSQL
+      this.lookupAllelesByFn = prepare("select a.name from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid " +
           "join allele a on g.genesymbol=a.genesymbol and a.clinicalFunctionalStatus=pf.function1 " +
           "where pf.id=?");
+      //language=PostgreSQL
       this.insertDiplotype = prepare("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
 
+      //language=PostgreSQL
       PreparedStatement lookupGene = prepare("select lookupMethod, chr from gene where symbol=?");
       lookupGene.setString(1, geneSymbol);
       try (ResultSet rs = lookupGene.executeQuery()) {

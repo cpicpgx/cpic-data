@@ -410,7 +410,7 @@ COMMENT ON COLUMN gene_phenotype.ehrPriority IS 'EHR Priority Result, optional';
 COMMENT ON COLUMN gene_phenotype.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result';
 
 
-CREATE TABLE phenotype_function
+CREATE TABLE phenotype_lookup
 (
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
     phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
@@ -423,31 +423,31 @@ CREATE TABLE phenotype_function
     description TEXT
 );
 
-COMMENT ON TABLE phenotype_function IS 'Gene function combinations that apply to the phenotype referenced. This table is a child of gene_phenotype.';
-COMMENT ON COLUMN phenotype_function.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN phenotype_function.phenotypeId IS 'An ID referencing the gene_phenotype this is associated with, required';
-COMMENT ON COLUMN phenotype_function.lookupKey IS 'A normalized JSON format of the data used to lookup a diplotype. The keys of this field are either the functions, activity scores, or allele statuses depending on what the gene requires. Required.';
-COMMENT ON COLUMN phenotype_function.function1 IS 'The first allele function, required';
-COMMENT ON COLUMN phenotype_function.function2 IS 'The second allele function, required';
-COMMENT ON COLUMN phenotype_function.activityValue1 IS 'The activity score for the first allele function';
-COMMENT ON COLUMN phenotype_function.activityValue2 IS 'The activity score for the second allele function';
-COMMENT ON COLUMN phenotype_function.totalActivityScore IS 'The sum activity score for the functions';
-COMMENT ON COLUMN phenotype_function.description IS 'A description of the diplotypes associated with this phenotype';
+COMMENT ON TABLE phenotype_lookup IS 'Gene descriptions that, when combined, link to a gene phenotype. This table is a child of gene_phenotype.';
+COMMENT ON COLUMN phenotype_lookup.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN phenotype_lookup.phenotypeId IS 'An ID referencing the gene_phenotype this is associated with, required';
+COMMENT ON COLUMN phenotype_lookup.lookupKey IS 'A normalized JSON format of the data used to lookup a diplotype. The keys of this field are either the functions, activity scores, or allele statuses depending on what the gene requires. Required.';
+COMMENT ON COLUMN phenotype_lookup.function1 IS 'The first allele function, required';
+COMMENT ON COLUMN phenotype_lookup.function2 IS 'The second allele function, required';
+COMMENT ON COLUMN phenotype_lookup.activityValue1 IS 'The activity score for the first allele function';
+COMMENT ON COLUMN phenotype_lookup.activityValue2 IS 'The activity score for the second allele function';
+COMMENT ON COLUMN phenotype_lookup.totalActivityScore IS 'The sum activity score for the functions';
+COMMENT ON COLUMN phenotype_lookup.description IS 'A description of the diplotypes associated with this phenotype';
 
 
 CREATE TABLE phenotype_diplotype
 (
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-    functionPhenotypeId INTEGER REFERENCES phenotype_function(id) NOT NULL,
+    functionPhenotypeId INTEGER REFERENCES phenotype_lookup(id) NOT NULL,
     diplotype TEXT NOT NULL,
     diplotypeKey JSONB NOT NULL,
 
     UNIQUE (functionPhenotypeId, diplotypeKey)
 );
 
-COMMENT ON TABLE phenotype_diplotype IS 'Specific diplotypes that are associated with a gene phenotype. This table is a child of phenotype_function and distantly of gene_phenotype';
+COMMENT ON TABLE phenotype_diplotype IS 'Specific diplotypes that are associated with a gene phenotype. This table is a child of phenotype_lookup and distantly of gene_phenotype';
 COMMENT ON COLUMN phenotype_diplotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN phenotype_diplotype.functionPhenotypeId IS 'An ID referencing a phenotype_function record, required';
+COMMENT ON COLUMN phenotype_diplotype.functionPhenotypeId IS 'An ID referencing a phenotype_lookup record, required';
 COMMENT ON COLUMN phenotype_diplotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
 COMMENT ON COLUMN phenotype_diplotype.diplotypeKey IS 'A normalized JSON version of the diplotype for use in lookups. Should be an object with the allele names as properties and the counts as the values. Required';
 
