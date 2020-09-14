@@ -108,11 +108,12 @@ create table allele_definition
 (
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
     version INTEGER DEFAULT 1,
-    geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
+    geneSymbol VARCHAR(50) NOT NULL,
     name TEXT NOT NULL,
     pharmvarId VARCHAR(50),
 
-    constraint allele_definition_unique UNIQUE (geneSymbol, name)
+    constraint allele_definition_unique UNIQUE (geneSymbol, name),
+    constraint allele_definitions_for_gene FOREIGN KEY (geneSymbol) REFERENCES gene(symbol)
 );
 
 CREATE TRIGGER version_allele_definition
