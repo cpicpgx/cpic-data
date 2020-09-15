@@ -20,7 +20,13 @@ exports.getPairs = (path) => {
         countGenes,
         countGuidelines: pairs.length,
         lastUpdated,
-        pairs: _.map(pairs, (p) => _.set(p, 'gene', p.genesymbol)),
+        pairs: _.map(pairs, (p) => {
+          const newP = p;
+          p.gene = p.genesymbol;
+          p.level = p.cpiclevel;
+          p.citations = p.pmids;
+          return newP;
+        }),
       };
 
       const jsonFile = `${path}/${defaultFilename}.json`;
