@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,9 +61,9 @@ public class PairDiffImporter extends BaseDirectoryImporter {
         sf_logger.info("Found {} diffs", diffs.length);
         
         for (PairDiff pairDiff : diffs) {
-          if (pairDiff.pairid != null) {
+          if (pairDiff.pairId != null) {
             Arrays.stream(pairDiff.messages).forEach(sf_logger::info);
-            int changes = dbHarness.update(pairDiff.pairid, pairDiff.pgkbcalevel, pairDiff.pgxtesting);
+            int changes = dbHarness.update(pairDiff.pairId, pairDiff.pgkbCaLevel, pairDiff.pgxTesting);
             sf_logger.info("{} changes applied to {}", changes, pairDiff.name);
           }
         }
@@ -74,35 +76,45 @@ public class PairDiffImporter extends BaseDirectoryImporter {
   private static class PairDiff {
     String[] messages;
     String name;
-    Long pairid;
-    String pgkbcalevel;
-    String pgxtesting;
+    Long pairId;
+    String pgkbCaLevel;
+    String pgxTesting;
   }
 
   private static class DbHarness implements AutoCloseable {
-    private List<AutoCloseable> closables = new ArrayList<>();
-    private PreparedStatement updateLevelStmt;
-    private PreparedStatement updateTestingStmt;
+    private final List<AutoCloseable> closeables = new ArrayList<>();
+    private final PreparedStatement updateLevelStmt;
+    private final PreparedStatement updateTestingStmt;
 
     DbHarness() throws SQLException {
       Connection conn = ConnectionFactory.newConnection();
-      closables.add(conn);
+      closeables.add(conn);
 
       updateLevelStmt = conn.prepareStatement("update pair set pgkbCALevel=? where pairid=?");
-      closables.add(updateLevelStmt);
+      closeables.add(updateLevelStmt);
       updateTestingStmt = conn.prepareStatement("update pair set pgxTesting=? where pairid=?");
-      closables.add(updateTestingStmt);
+      closeables.add(updateTestingStmt);
     }
 
     private int update(Long pairId, String level, String testing) throws SQLException {
       int changes = 0;
       if (level != null) {
-        updateLevelStmt.setString(1, level);
+        if (StringUtils.isBlank(level)) {
+          updateLevelStmt.setNull(1, Types.VARCHAR);
+        }
+        else {
+          updateLevelStmt.setString(1, level);
+        }
         updateLevelStmt.setLong(2, pairId);
         changes += updateLevelStmt.executeUpdate();
       }
       if (testing != null) {
-        updateTestingStmt.setString(1, testing);
+        if (StringUtils.isBlank(testing)) {
+          updateTestingStmt.setNull(1, Types.VARCHAR);
+        }
+        else {
+          updateTestingStmt.setString(1, testing);
+        }
         updateTestingStmt.setLong(2, pairId);
         changes += updateTestingStmt.executeUpdate();
       }
@@ -111,7 +123,7 @@ public class PairDiffImporter extends BaseDirectoryImporter {
 
     @Override
     public void close() {
-      closables.forEach(c -> {
+      closeables.forEach(c -> {
         try {
           c.close();
         } catch (Exception e) {
