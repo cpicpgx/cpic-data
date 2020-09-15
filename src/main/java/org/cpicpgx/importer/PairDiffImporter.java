@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
@@ -76,8 +77,11 @@ public class PairDiffImporter extends BaseDirectoryImporter {
   private static class PairDiff {
     String[] messages;
     String name;
+    @SerializedName("pairid")
     Long pairId;
+    @SerializedName("pgkbcalevel")
     String pgkbCaLevel;
+    @SerializedName("pgxtesting")
     String pgxTesting;
   }
 
@@ -106,7 +110,11 @@ public class PairDiffImporter extends BaseDirectoryImporter {
           updateLevelStmt.setString(1, level);
         }
         updateLevelStmt.setLong(2, pairId);
-        changes += updateLevelStmt.executeUpdate();
+        int updateCount = updateLevelStmt.executeUpdate();
+        if (updateCount == 0) {
+          throw new RuntimeException("Change not applied, missing ID? " + pairId);
+        }
+        changes += updateCount;
       }
       if (testing != null) {
         if (StringUtils.isBlank(testing)) {
@@ -116,7 +124,11 @@ public class PairDiffImporter extends BaseDirectoryImporter {
           updateTestingStmt.setString(1, testing);
         }
         updateTestingStmt.setLong(2, pairId);
-        changes += updateTestingStmt.executeUpdate();
+        int updateCount = updateTestingStmt.executeUpdate();
+        if (updateCount == 0) {
+          throw new RuntimeException("Change not applied, missing ID? " + pairId);
+        }
+        changes += updateCount;
       }
       return changes;
     }
