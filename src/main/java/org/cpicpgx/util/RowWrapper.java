@@ -132,8 +132,8 @@ public class RowWrapper {
   }
 
   /**
-   * Parses PubMed IDs out of a cell at the given index. Will split comma-separated PMID lists and automatically convert
-   * PMIDs that are stored as NUMERICs for some reason.
+   * Parses PubMed IDs out of a cell at the given index. Will split semicolon-separated PMID lists and automatically
+   * convert PMIDs that are stored as NUMERICs for some reason.
    * @param cellIdx the index of the cell to get PMIDs from
    * @return a nullable String array of PMIDs found in the given cell
    */
@@ -146,11 +146,13 @@ public class RowWrapper {
     if (cell == null) return null;
 
     switch (cell.getCellType()) {
+      case BLANK:
+        return null;
       case STRING:
         if (StringUtils.isBlank(cell.getStringCellValue())) {
           return null;
         } else {
-          return cell.getStringCellValue().split(",\\s*");
+          return cell.getStringCellValue().split(";");
         }
       case NUMERIC:
         if (DateUtil.isCellDateFormatted(cell)) {

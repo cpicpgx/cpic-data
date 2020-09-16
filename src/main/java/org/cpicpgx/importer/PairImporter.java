@@ -32,11 +32,6 @@ public class PairImporter extends BaseDirectoryImporter {
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
 
-        String[] citations = null;
-        if (row.getNullableText(6) != null) {
-          citations = row.getText(6).split(";");
-        }
-
         db.write(
             row.getText(0),
             row.getText(1),
@@ -44,7 +39,7 @@ public class PairImporter extends BaseDirectoryImporter {
             row.getNullableText(3),
             row.getNullableText(4),
             row.getNullableText(5),
-            citations,
+            row.getNullablePmids(6),
             row.getNullableText(7),
             row.getText(8),
             row.getNullableDate(9),
