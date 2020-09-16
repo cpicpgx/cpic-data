@@ -127,9 +127,11 @@ public class PairImporter extends BaseDirectoryImporter {
       setNullableString(upsertPair, 11, removedReason);
       upsertPair.executeUpdate();
 
-      setNullableInteger(updateDrug, 1, guidelineId);
-      updateDrug.setString(2, drugId);
-      updateDrug.executeUpdate();
+      if (guidelineId != null) {
+        setNullableInteger(updateDrug, 1, guidelineId);
+        updateDrug.setString(2, drugId);
+        updateDrug.executeUpdate();
+      }
     }
 
     void updateGuidelineGenes() throws SQLException {
