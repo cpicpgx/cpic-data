@@ -9,6 +9,7 @@ import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -57,6 +58,9 @@ public class PairImporter extends BaseDirectoryImporter {
       if (db.unknownGenes.size() > 0) {
         System.err.println("Missing genes, create resource files, import them, try again: " + String.join("; ", db.unknownGenes));
       }
+      if (db.existingPairs.size() > 0) {
+        System.err.println("Pairs in the DB but missing from input sheet:\n" + String.join("\n", db.existingPairs));
+      }
     }
   }
 
@@ -82,6 +86,7 @@ public class PairImporter extends BaseDirectoryImporter {
     final PreparedStatement updateGuidelines;
     final Set<String> unknownDrugs = new TreeSet<>();
     final Set<String> unknownGenes = new TreeSet<>();
+    final Set<String> existingPairs = new TreeSet<>();
 
     PairDbHarness() throws SQLException {
       super(FileType.PAIR);
@@ -95,6 +100,13 @@ public class PairImporter extends BaseDirectoryImporter {
 
       //language=PostgreSQL
       updateGuidelines = prepare("update guideline set genes=(select array_agg(distinct genesymbol) from pair where guidelineid=id and cpiclevel ~ 'A') where genes is null");
+
+      //language=PostgreSQL
+      try (ResultSet rs = prepare("select lower(d.name)||' + '||p.genesymbol from pair p join drug d on p.drugid = d.drugid").executeQuery()) {
+        while (rs.next()) {
+          existingPairs.add(rs.getString(1));
+        }
+      }
     }
 
     void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations, String used, String removed, Date removedDate, String removedReason) throws SQLException {
@@ -127,6 +139,8 @@ public class PairImporter extends BaseDirectoryImporter {
         updateDrug.setString(2, drugId);
         updateDrug.executeUpdate();
       }
+
+      existingPairs.remove(drugName.toLowerCase() + " + " + gene);
     }
 
     void updateGuidelineGenes() throws SQLException {
