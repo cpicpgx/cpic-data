@@ -37,7 +37,7 @@ class RecommendationWorkbook extends AbstractWorkbook {
           writeHeaderCell(headerRow, colIdx++, gene + " Phenotype");
           break;
         case ALLELE_STATUS:
-          writeHeaderCell(headerRow, colIdx++, gene + " Allele");
+          writeHeaderCell(headerRow, colIdx++, gene + " Allele Status");
           break;
         default:
           throw new RuntimeException("Lookup method not implemented");
