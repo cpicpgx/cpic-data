@@ -202,8 +202,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 if (normalizedPheno == null) {
                   throw new RuntimeException("No phenotype found");
                 }
-                if (!normalizedPheno.equals(Constants.NO_RESULT) && !dbHarness.findPhenotype(gene, normalizedPheno)) {
-                  sf_logger.warn("Phenotype not found in allele table for {} {}", gene, normalizedPheno);
+                if (!dbHarness.validPhenotype(gene, normalizedPheno)) {
+                  sf_logger.warn("Phenotype not found in allele table for {}: {}", gene, normalizedPheno);
                 }
                 phenotype.put(gene, normalizedPheno);
               }
@@ -282,9 +282,12 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
     RecDbHarness(String drugName) throws Exception {
       super(FileType.RECOMMENDATION);
+      //language=PostgreSQL
       this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
-      this.findPhenotype = prepare("select count(*) from gene_phenotype a where a.genesymbol=? and a.phenotype=?");
+      //language=PostgreSQL
+      this.findPhenotype = prepare("select count(*) from gene_phenotype a where a.genesymbol=? and lower(a.phenotype)=lower(?)");
 
+      //language=PostgreSQL
       PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where name=? and guidelineid is not null");
       drugLookupStmt.setString(1, drugName);
       ResultSet rs = drugLookupStmt.executeQuery();
@@ -298,6 +301,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         throw new RuntimeException("More than one guideline found for: " + drugName);
       }
 
+      //language=PostgreSQL
       PreparedStatement stmt = prepare("select genesymbol, g.lookupmethod from pair p join drug d on p.drugid = d.drugid join gene g on p.genesymbol = g.symbol where d.name=? and p.usedForRecommendation = true");
       stmt.setString(1, drugName);
       try (ResultSet stmtRs = stmt.executeQuery()) {
@@ -316,7 +320,17 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       return new ArrayList<>(geneLookupCache.keySet());
     }
 
-    boolean findPhenotype(String gene, String phenotype) throws SQLException {
+    /**
+     * This method is used as a validation step to ensure phenotypes used in the recommendations table are valid
+     * @param gene the gene to validate
+     * @param phenotype the phenotype text to validate
+     * @return true if this is a valid phenotype value, false otherwise
+     * @throws SQLException can occur when querying the DB for phenotype names
+     */
+    boolean validPhenotype(String gene, String phenotype) throws SQLException {
+      if (isNoResult(phenotype) || phenotype.equals(Constants.INDETERMINATE)) {
+        return true;
+      }
       String key = gene + phenotype;
 
       if (phenotypeCache.containsKey(key)) {

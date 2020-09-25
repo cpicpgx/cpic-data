@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+\\.?\\d*$");
+  private static final Pattern sf_noResultPattern = Pattern.compile("^No [Rr]esult$");
 
   private Path directory;
 
@@ -248,7 +249,7 @@ public abstract class BaseDirectoryImporter {
       if (score.toLowerCase().equals(Constants.NA)) {
         return Constants.NA;
       }
-      else if (score.equals(Constants.NO_RESULT)) {
+      else if (isNoResult(score)) {
         return Constants.NO_RESULT;
       }
       else if (sf_activityScorePattern.matcher(score).matches()) {
@@ -260,7 +261,7 @@ public abstract class BaseDirectoryImporter {
   }
 
   /**
-   * Normalize text by taking out the gene name, init capping all the words, and stripping extraneous whitespace.
+   * Normalize text by taking out the gene name and stripping extraneous whitespace.
    * @param gene the gene text to be removed
    * @param text the text to normalize
    * @return normalized version of input "text", possibly null
@@ -288,5 +289,9 @@ public abstract class BaseDirectoryImporter {
       String note = row.getText(1);
       db.writeChangeLog(entityId, date, note);
     }
+  }
+
+  static boolean isNoResult(String text) {
+    return sf_noResultPattern.matcher(text).matches();
   }
 }
