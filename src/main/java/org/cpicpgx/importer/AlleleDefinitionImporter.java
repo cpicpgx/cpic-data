@@ -311,10 +311,12 @@ public class AlleleDefinitionImporter {
       }
       sf_logger.debug("created {} new locations", newLocations);
 
-      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name) values (?,?) returning (id)");
+      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name, reference) values (?,?,?) returning (id)");
+      boolean isReference = true;
       for (String alleleName : m_alleles.keySet()) {
         alleleInsert.setString(1, m_gene);
         alleleInsert.setString(2, alleleName);
+        alleleInsert.setBoolean(3, isReference);
         ResultSet rs = alleleInsert.executeQuery();
         rs.next();
         int alleleId = rs.getInt(1);
@@ -326,6 +328,7 @@ public class AlleleDefinitionImporter {
           joinTableInsert.setString(3, allelePosMap.get(locIdx));
           joinTableInsert.executeUpdate();
         }
+        isReference = false;
       }
       sf_logger.debug("created {} new alleles", m_alleles.keySet().size());
     }

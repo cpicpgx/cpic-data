@@ -10,6 +10,8 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -45,8 +47,11 @@ public class AlleleDefinitionExporter extends BaseExporter {
    */
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
-         PreparedStatement geneStmt = conn.prepareStatement("select g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele_definition a join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleledefinitionid\n" +
-             "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid\n" +
+         PreparedStatement geneStmt = conn.prepareStatement(
+             "select g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, " +
+                 "sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele_definition a " +
+                 "join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleledefinitionid " +
+             "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid " +
              "order by 1");
          ResultSet grs = geneStmt.executeQuery()
     ) {
@@ -60,7 +65,9 @@ public class AlleleDefinitionExporter extends BaseExporter {
       
         AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, seqChr, seqPro, seqGen, seqMrna, pvCount);
 
-        try (PreparedStatement seqLocStmt = conn.prepareStatement("select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?")) {
+        try (PreparedStatement seqLocStmt = conn.prepareStatement(
+            "select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?"
+        )) {
           seqLocStmt.setString(1, symbol);
           try (ResultSet rs = seqLocStmt.executeQuery()) {
             while (rs.next()) {
@@ -77,19 +84,29 @@ public class AlleleDefinitionExporter extends BaseExporter {
         }
       
         try (
-            PreparedStatement alleleStmt = conn.prepareStatement("select name, id from allele_definition where geneSymbol=?");
+            PreparedStatement alleleStmt = conn.prepareStatement("select name, id, reference from allele_definition where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleledefinitionid=?")
         ) {
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
             
             // parse to an intermediary map so we can sort the allele names properly
-            SortedMap<String, Long> alleleMap = new TreeMap<>(HaplotypeNameComparator.getComparator()); 
+            SortedMap<String, Long> alleleMap = new TreeMap<>(HaplotypeNameComparator.getComparator());
+            String referenceAllele = null;
             while (rs.next()) {
+              boolean isReference = rs.getBoolean(3);
+              if (isReference) {
+                referenceAllele = rs.getString(1);
+              }
               alleleMap.put(rs.getString(1), rs.getLong(2));
             }
-            
-            for (String alleleName : alleleMap.keySet()) {
+
+            // We do this so the reference allele is always listed first and the rest are in natural order
+            List<String> nameOutputOrderList = new ArrayList<>(alleleMap.keySet());
+            nameOutputOrderList.remove(referenceAllele);
+            nameOutputOrderList.add(0, referenceAllele);
+
+            for (String alleleName : nameOutputOrderList) {
               Long alleleId = alleleMap.get(alleleName);
               workbook.writeAllele(alleleName);
               locValStmt.setLong(1, alleleId);
