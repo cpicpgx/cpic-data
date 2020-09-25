@@ -249,7 +249,7 @@ public abstract class BaseDirectoryImporter {
       if (score.toLowerCase().equals(Constants.NA)) {
         return Constants.NA;
       }
-      else if (isNoResult(score)) {
+      else if (Constants.isNoResult(score)) {
         return Constants.NO_RESULT;
       }
       else if (sf_activityScorePattern.matcher(score).matches()) {
@@ -289,9 +289,5 @@ public abstract class BaseDirectoryImporter {
       String note = row.getText(1);
       db.writeChangeLog(entityId, date, note);
     }
-  }
-
-  static boolean isNoResult(String text) {
-    return sf_noResultPattern.matcher(text).matches();
   }
 }

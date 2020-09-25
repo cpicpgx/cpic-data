@@ -328,7 +328,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
      * @throws SQLException can occur when querying the DB for phenotype names
      */
     boolean validPhenotype(String gene, String phenotype) throws SQLException {
-      if (isNoResult(phenotype) || phenotype.equals(Constants.INDETERMINATE)) {
+      if (Constants.isNoResult(phenotype) || phenotype.equals(Constants.INDETERMINATE)) {
         return true;
       }
       String key = gene + phenotype;

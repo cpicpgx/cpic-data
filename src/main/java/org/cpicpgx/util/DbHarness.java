@@ -169,10 +169,6 @@ public abstract class DbHarness implements AutoCloseable {
     return f_conn.createArrayOf("TEXT", values);
   }
 
-  public boolean isUnspecified(String value) {
-    return StringUtils.isBlank(value) || value.equals(Constants.NA);
-  }
-
   @Override
   public void close() {
     closables.forEach(c -> {

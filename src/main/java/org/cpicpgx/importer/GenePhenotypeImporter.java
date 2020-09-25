@@ -164,7 +164,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       try (ResultSet rs = this.validateFn.executeQuery()) {
         if (rs.next()) {
           int count = rs.getInt(1);
-          if (count == 0 && !(allowSingleAlleles && isUnspecified(fn))) {
+          if (count == 0 && !(allowSingleAlleles && Constants.isUnspecified(fn))) {
             throw new NotFoundException(String.format("No count found for %s allele function [%s]", this.geneSymbol, fn));
           } else {
             return fn;
@@ -327,7 +327,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     private void validateScoreData(String score1, String score2, String total) {
       // if score is not used, nothing to do
       if (this.lookupMethod != LookupMethod.ACTIVITY_SCORE) {
-        if (!isUnspecified(score1) || !isUnspecified(score2) || !isUnspecified(total)) {
+        if (!Constants.isUnspecified(score1) || !Constants.isUnspecified(score2) || !Constants.isUnspecified(total)) {
           throw new RuntimeException("Score data provided for non-score gene");
         } else {
           return;
