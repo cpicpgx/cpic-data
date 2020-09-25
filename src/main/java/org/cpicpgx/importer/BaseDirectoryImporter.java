@@ -3,7 +3,6 @@ package org.cpicpgx.importer;
 import com.google.gson.JsonObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
@@ -274,7 +273,7 @@ public abstract class BaseDirectoryImporter {
     } else if (strippedText.equalsIgnoreCase(Constants.NA)) {
       return Constants.NA;
     } else {
-      return WordUtils.capitalize(strippedText.replaceAll(gene + "\\s*", ""));
+      return strippedText.replaceAll(gene + "\\s*", "");
     }
   }
 

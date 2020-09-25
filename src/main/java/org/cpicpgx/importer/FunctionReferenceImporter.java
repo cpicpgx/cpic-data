@@ -244,7 +244,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
 
-      insertAlleleStmt = prepare("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) values (?, ?, ?, initcap(?), ?, initcap(?), ?, ?, ?, ?::jsonb, ?)");
+      insertAlleleStmt = prepare("insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)");
     }
 
     private Long lookupAlleleDefinitionId(String alleleName) {

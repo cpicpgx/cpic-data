@@ -2,7 +2,9 @@ package org.cpicpgx.importer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.LookupMethod;
+import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;
@@ -97,14 +99,15 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
   static class PhenoDbHarness extends DbHarness {
     private final static List<String> sf_singleAlleleGeneList = ImmutableList.of("chrX", "chrY", "chrM");
     private final PreparedStatement insertPhenotype;
-    private final PreparedStatement insertFunction;
+    private final PreparedStatement insertLookup;
     private final PreparedStatement lookupDiplotypes;
     private final PreparedStatement lookupDiplotypesByScore;
     private final PreparedStatement insertDiplotype;
     private final PreparedStatement lookupAllelesByFn;
+    private final PreparedStatement validateFn;
     private final String geneSymbol;
     private final Map<String, Integer> phenotypeCache = new HashMap<>();
-    private boolean useScoreLookup = false;
+    private LookupMethod lookupMethod;
     private boolean allowSingleAlleles = false;
     private final Set<String> loadedDiplotypes = new HashSet<>();
 
@@ -114,7 +117,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       //language=PostgreSQL
       this.insertPhenotype = prepare("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
       //language=PostgreSQL
-      this.insertFunction = prepare("insert into phenotype_lookup(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
+      this.insertLookup = prepare("insert into phenotype_lookup(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
       //language=PostgreSQL
       this.lookupDiplotypes = prepare("select a1.name, a2.name " +
           "from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid " +
@@ -133,16 +136,15 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           "where pf.id=?");
       //language=PostgreSQL
       this.insertDiplotype = prepare("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
+      //language=PostgreSQL
+      this.validateFn = prepare("select count(*) from allele where genesymbol=? and clinicalfunctionalstatus=?");
 
       //language=PostgreSQL
       PreparedStatement lookupGene = prepare("select lookupMethod, chr from gene where symbol=?");
       lookupGene.setString(1, geneSymbol);
       try (ResultSet rs = lookupGene.executeQuery()) {
         while (rs.next()) {
-          LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
-          if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
-            this.useScoreLookup = true;
-          }
+          this.lookupMethod = LookupMethod.valueOf(rs.getString(1));
           if (sf_singleAlleleGeneList.contains(rs.getString(2))) {
             this.allowSingleAlleles = true;
           }
@@ -150,9 +152,32 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       }
     }
 
-    void insertValues(RowWrapper row) throws SQLException {
-      String a1Fn = row.getText(COL_A1_FN);
-      String a2Fn = row.getText(COL_A2_FN);
+    String validateFunction(String rawFn) throws Exception {
+      String fn = normalizeGeneText(this.geneSymbol, rawFn);
+      if (StringUtils.isBlank(fn)) {
+        throw new NotFoundException("No function specified");
+      }
+
+      this.validateFn.clearParameters();
+      this.validateFn.setString(1, this.geneSymbol);
+      this.validateFn.setString(2, fn);
+      try (ResultSet rs = this.validateFn.executeQuery()) {
+        if (rs.next()) {
+          int count = rs.getInt(1);
+          if (count == 0 && !(allowSingleAlleles && isUnspecified(fn))) {
+            throw new NotFoundException(String.format("No count found for %s allele function [%s]", this.geneSymbol, fn));
+          } else {
+            return fn;
+          }
+        } else {
+          throw new NotFoundException("No result found for allele function, unexpected result");
+        }
+      }
+    }
+
+    void insertValues(RowWrapper row) throws Exception {
+      String a1Fn = validateFunction(row.getText(COL_A1_FN));
+      String a2Fn = validateFunction(row.getText(COL_A2_FN));
       String a1Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A1_VALUE))).orElse(Constants.NA);
       String a2Value = Optional.ofNullable(normalizeScore(row.getNullableText(COL_A2_VALUE))).orElse(Constants.NA);
       String totalScore = Optional.ofNullable(normalizeScore(row.getNullableText(COL_TOTAL_SCORE))).orElse(Constants.NA);
@@ -165,24 +190,24 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
 
       validateScoreData(a1Value, a2Value, totalScore);
 
-      this.insertFunction.setInt(1, phenoId);
-      if (this.useScoreLookup) {
-        this.insertFunction.setString(2, makeLookupKey(null, null, a1Value, a2Value));
+      this.insertLookup.setInt(1, phenoId);
+      if (this.lookupMethod == LookupMethod.ACTIVITY_SCORE) {
+        this.insertLookup.setString(2, makeLookupKey(null, null, a1Value, a2Value));
       } else {
-        this.insertFunction.setString(2, makeLookupKey(a1Fn, a2Fn, null, null));
+        this.insertLookup.setString(2, makeLookupKey(a1Fn, a2Fn, null, null));
       }
-      this.insertFunction.setString(3, a1Fn);
-      this.insertFunction.setString(4, a2Fn);
-      this.insertFunction.setString(5, a1Value);
-      this.insertFunction.setString(6, a2Value);
-      this.insertFunction.setString(7, totalScore);
+      this.insertLookup.setString(3, a1Fn);
+      this.insertLookup.setString(4, a2Fn);
+      this.insertLookup.setString(5, a1Value);
+      this.insertLookup.setString(6, a2Value);
+      this.insertLookup.setString(7, totalScore);
       if (description != null) {
-        this.insertFunction.setString(8, description);
+        this.insertLookup.setString(8, description);
       } else {
-        this.insertFunction.setNull(8, Types.VARCHAR);
+        this.insertLookup.setNull(8, Types.VARCHAR);
       }
 
-      try (ResultSet rs = this.insertFunction.executeQuery()) {
+      try (ResultSet rs = this.insertLookup.executeQuery()) {
         if (rs.next()) {
           int fnId = rs.getInt(1);
           if (allowSingleAlleles && !a1Fn.equalsIgnoreCase(Constants.NA) && a2Fn.equalsIgnoreCase(Constants.NA)) {
@@ -202,7 +227,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
      * @throws SQLException can occur when inserting into the DB
      */
     void insertDiplotypes(int functionId) throws SQLException {
-      PreparedStatement lookup = this.useScoreLookup ? this.lookupDiplotypesByScore : this.lookupDiplotypes;
+      PreparedStatement lookup = this.lookupMethod == LookupMethod.ACTIVITY_SCORE ? this.lookupDiplotypesByScore : this.lookupDiplotypes;
 
       lookup.setInt(1, functionId);
       Set<List<String>> rawDiplotypes = new HashSet<>();
@@ -268,7 +293,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       String normalizedPhenotype = normalizeGeneText(this.geneSymbol, phenotype);
       String normalizedScore = normalizeScore(score);
       String lookupKey;
-      if (useScoreLookup) {
+      if (this.lookupMethod == LookupMethod.ACTIVITY_SCORE) {
         lookupKey = normalizedScore;
       } else {
         lookupKey = normalizedPhenotype;
@@ -301,7 +326,13 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
      */
     private void validateScoreData(String score1, String score2, String total) {
       // if score is not used, nothing to do
-      if (!this.useScoreLookup) return;
+      if (this.lookupMethod != LookupMethod.ACTIVITY_SCORE) {
+        if (!isUnspecified(score1) || !isUnspecified(score2) || !isUnspecified(total)) {
+          throw new RuntimeException("Score data provided for non-score gene");
+        } else {
+          return;
+        }
+      }
 
       // if score data is missing throw an exception
       if (score1 == null || score2 == null || total == null) {
