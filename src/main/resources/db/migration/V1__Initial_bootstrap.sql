@@ -426,8 +426,6 @@ CREATE TABLE gene_result_lookup
     activityValue1 TEXT,
     activityValue2 TEXT,
     totalActivityScore TEXT,
-    alleleStatus1 TEXT,
-    alleleStatus2 TEXT,
     description TEXT
 );
 
@@ -440,8 +438,6 @@ COMMENT ON COLUMN gene_result_lookup.function2 IS 'The second allele function';
 COMMENT ON COLUMN gene_result_lookup.activityValue1 IS 'The activity score for the first allele function';
 COMMENT ON COLUMN gene_result_lookup.activityValue2 IS 'The activity score for the second allele function';
 COMMENT ON COLUMN gene_result_lookup.totalActivityScore IS 'The sum activity score for the functions';
-COMMENT ON COLUMN gene_result_lookup.alleleStatus1 IS 'The first allele status';
-COMMENT ON COLUMN gene_result_lookup.alleleStatus2 IS 'The second allele status';
 COMMENT ON COLUMN gene_result_lookup.description IS 'A description of the diplotypes associated with this phenotype';
 
 
