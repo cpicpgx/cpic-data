@@ -36,7 +36,7 @@ public class GeneCdsExporter extends BaseExporter {
   public void export() throws Exception {
     try (
         Connection conn = ConnectionFactory.newConnection();
-        PreparedStatement geneStmt = conn.prepareStatement("select distinct p.genesymbol from gene_phenotype p");
+        PreparedStatement geneStmt = conn.prepareStatement("select distinct p.genesymbol from gene_phenotype p where p.ehrPriority is not null or p.consultationText is not null");
         ResultSet geneRs = geneStmt.executeQuery();
         PreparedStatement cdsStmt = conn.prepareStatement("select phenotype, ehrpriority, consultationtext, activityScore from gene_phenotype where genesymbol=? order by activityscore desc, phenotype")
     ) {
