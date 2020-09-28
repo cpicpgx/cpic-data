@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.security.InvalidParameterException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,26 +119,59 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   static class GeneDbHarness extends DbHarness {
     private final String gene;
     private final PreparedStatement insertStmt;
+    private final PreparedStatement updateStmt;
+    private final boolean phenotypesExist;
 
     GeneDbHarness(String gene) throws SQLException {
       super(FileType.GENE_CDS);
       this.gene = gene;
 
+      //language=PostgreSQL
       insertStmt = prepare(
-          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityScore) values (?, ?, ?, ?, ?) ON CONFLICT (genesymbol, phenotype, activityScore) DO UPDATE set ehrpriority=excluded.ehrpriority, consultationtext=excluded.consultationtext"
+          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityScore) " +
+              "values (?, ?, ?, ?, ?)"
       );
+
+      //language=PostgreSQL
+      updateStmt = prepare("update gene_phenotype set ehrPriority=?, consultationText=? where geneSymbol=? and phenotype=? and activityScore=?");
+
+      //language=PostgreSQL
+      PreparedStatement existingStmt = prepare("select count(*) from gene_phenotype where genesymbol=?");
+      existingStmt.setString(1, gene);
+      try (ResultSet rs = existingStmt.executeQuery()) {
+        if (rs.next()) {
+          int count = rs.getInt(1);
+          phenotypesExist = count > 0;
+        } else {
+          phenotypesExist = false;
+        }
+      }
     }
 
-    void insert(String phenotype, String activity, String ehr, String consultation) throws SQLException {
+    void insert(String phenotype, String activity, String ehr, String consultation) throws Exception {
       String normalizedPhenotype = phenotype.replaceAll(this.gene + "\\s+", "");
 
-      insertStmt.clearParameters();
-      insertStmt.setString(1, gene);
-      insertStmt.setString(2, normalizedPhenotype);
-      insertStmt.setString(3, ehr);
-      insertStmt.setString(4, consultation);
-      insertStmt.setString(5, activity);
-      insertStmt.executeUpdate();
+      if (!phenotypesExist) {
+        insertStmt.clearParameters();
+        insertStmt.setString(1, gene);
+        insertStmt.setString(2, normalizedPhenotype);
+        insertStmt.setString(3, ehr);
+        insertStmt.setString(4, consultation);
+        insertStmt.setString(5, activity);
+        insertStmt.executeUpdate();
+      } else {
+        updateStmt.clearParameters();
+        setNullableString(updateStmt, 1, ehr);
+        setNullableString(updateStmt, 2, consultation);
+        updateStmt.setString(3, gene);
+        updateStmt.setString(4, normalizedPhenotype);
+        updateStmt.setString(5, activity);
+
+        int result = updateStmt.executeUpdate();
+        if (result == 0) {
+          throw new NotFoundException(String.format("No phenotype row exists for %s %s [activity:%s]", gene, normalizedPhenotype, activity));
+        }
+      }
     }
   }
 }
