@@ -84,7 +84,8 @@ public class GuidelineStarterPack {
           if (rs.next()) {
             sf_logger.warn("{} already exists, starter files will not include possibly extant data", gene);
           }
-          geneLookupMap.put(rs.getString(1), LookupMethod.valueOf(rs.getString(2)));
+          LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(2));
+          geneLookupMap.put(gene, lookupMethod);
 
           AlleleDefinitionWorkbook alleleDefinitionWorkbook = new AlleleDefinitionWorkbook(gene, "NC_#######", "NP_#######", "NG_#######", "NM_#######", 0L);
           alleleDefinitionWorkbook.writeAllele("ALLELE NAME HERE");
@@ -98,7 +99,7 @@ public class GuidelineStarterPack {
           frequencyWorkbook.writeEthnicityHeader("Example Group", 0);
           workbooksToWrite.add(frequencyWorkbook);
 
-          GeneCdsWorkbook geneCdsWorkbook = new GeneCdsWorkbook(gene);
+          GeneCdsWorkbook geneCdsWorkbook = new GeneCdsWorkbook(gene, lookupMethod);
           workbooksToWrite.add(geneCdsWorkbook);
 
           PhenotypesWorkbook phenotypesWorkbook = new PhenotypesWorkbook(gene);

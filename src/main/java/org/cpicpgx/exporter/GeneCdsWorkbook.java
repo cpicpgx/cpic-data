@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.apache.poi.ss.usermodel.Row;
+import org.cpicpgx.db.LookupMethod;
 
 /**
  * A workbook for example CDS language for a given Gene
@@ -13,7 +14,7 @@ class GeneCdsWorkbook extends AbstractWorkbook {
   private final String geneSymbol;
   private final SheetWrapper sheetWrapper;
 
-  GeneCdsWorkbook(String geneSymbol) {
+  GeneCdsWorkbook(String geneSymbol, LookupMethod lookupMethod) {
     super();
     this.geneSymbol = geneSymbol;
     this.sheetWrapper = findSheet(SHEET_NAME);
@@ -21,7 +22,11 @@ class GeneCdsWorkbook extends AbstractWorkbook {
     Row geneRow = sheetWrapper.nextRow();
     writeHeaderCell(geneRow, 0, "Gene: " + geneSymbol);
     Row headerRow = sheetWrapper.nextRow();
-    writeHeaderCell(headerRow, 0, this.geneSymbol + " Phenotype");
+    if (lookupMethod == LookupMethod.ALLELE_STATUS) {
+      writeHeaderCell(headerRow, 0, this.geneSymbol + " Allele Status");
+    } else {
+      writeHeaderCell(headerRow, 0, this.geneSymbol + " Phenotype");
+    }
     writeHeaderCell(headerRow, 1, "Activity Score");
     writeHeaderCell(headerRow, 2, "EHR Priority Result Notation");
     writeHeaderCell(headerRow, 3, "Consultation (Interpretation) Text Provided with Test Result");

@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +37,14 @@ public class GeneCdsExporter extends BaseExporter {
   public void export() throws Exception {
     try (
         Connection conn = ConnectionFactory.newConnection();
-        PreparedStatement geneStmt = conn.prepareStatement("select distinct p.genesymbol from gene_phenotype p where p.ehrPriority is not null or p.consultationText is not null");
+        PreparedStatement geneStmt = conn.prepareStatement("select distinct p.genesymbol, g.lookupmethod from gene_phenotype p join gene g on p.genesymbol = g.symbol where p.ehrPriority is not null or p.consultationText is not null");
         ResultSet geneRs = geneStmt.executeQuery();
         PreparedStatement cdsStmt = conn.prepareStatement("select phenotype, ehrpriority, consultationtext, activityScore from gene_phenotype where genesymbol=? order by activityscore desc, phenotype")
     ) {
       while (geneRs.next()) {
         String geneSymbol = geneRs.getString(1);
-        GeneCdsWorkbook workbook = new GeneCdsWorkbook(geneSymbol);
+        LookupMethod lookupMethod = LookupMethod.valueOf(geneRs.getString(2));
+        GeneCdsWorkbook workbook = new GeneCdsWorkbook(geneSymbol, lookupMethod);
         
         cdsStmt.setString(1, geneSymbol);
         try (ResultSet cdsRs = cdsStmt.executeQuery()) {
