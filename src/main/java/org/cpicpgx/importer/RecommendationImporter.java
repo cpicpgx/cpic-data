@@ -285,7 +285,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       //language=PostgreSQL
       this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
       //language=PostgreSQL
-      this.findPhenotype = prepare("select count(*) from gene_phenotype a where a.genesymbol=? and lower(a.phenotype)=lower(?)");
+      this.findPhenotype = prepare("select count(*) from gene_result a where a.genesymbol=? and lower(a.result)=lower(?)");
 
       //language=PostgreSQL
       PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where name=? and guidelineid is not null");

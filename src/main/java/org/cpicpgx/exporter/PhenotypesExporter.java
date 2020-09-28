@@ -35,10 +35,10 @@ public class PhenotypesExporter extends BaseExporter {
   public void export() throws Exception {
     try (
         Connection conn = ConnectionFactory.newConnection();
-        PreparedStatement stmt = conn.prepareStatement("select distinct p.genesymbol from gene_phenotype p join phenotype_lookup pf on p.id = pf.phenotypeid order by 1");
+        PreparedStatement stmt = conn.prepareStatement("select distinct p.genesymbol from gene_result p join gene_result_lookup pf on p.id = pf.phenotypeid order by 1");
         ResultSet rs = stmt.executeQuery();
-        PreparedStatement pstmt = conn.prepareStatement("select function1, function2, activityvalue1, activityvalue2, totalactivityscore, phenotype, description\n" +
-            "from gene_phenotype p join phenotype_lookup pf on p.id = pf.phenotypeid\n" +
+        PreparedStatement pstmt = conn.prepareStatement("select function1, function2, activityvalue1, activityvalue2, totalactivityscore, result, description\n" +
+            "from gene_result p join gene_result_lookup pf on p.id = pf.phenotypeid\n" +
             "where p.genesymbol=?")
     ) {
       while (rs.next()) {

@@ -39,8 +39,8 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct d.geneSymbol, g.lookupmethod from diplotype d join gene g on (d.genesymbol=g.symbol) where d.ehrpriority is not null order by 1");
-         PreparedStatement dipStmt = conn.prepareStatement("select d.diplotype, d.phenotype, d.ehrpriority, d.totalactivityscore from diplotype d where d.genesymbol=? order by d.diplotype");
-         PreparedStatement phenoStmt = conn.prepareStatement("select g.phenotype, g.ehrpriority, g.consultationtext, g.activityscore from gene_phenotype g where genesymbol=? and (g.ehrpriority is not null or g.consultationtext is not null)");
+         PreparedStatement dipStmt = conn.prepareStatement("select d.diplotype, d.generesult, d.ehrpriority, d.totalactivityscore from diplotype d where d.genesymbol=? order by d.diplotype");
+         PreparedStatement phenoStmt = conn.prepareStatement("select g.result, g.ehrpriority, g.consultationtext, g.activityscore from gene_result g where genesymbol=? and (g.ehrpriority is not null or g.consultationtext is not null)");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {

@@ -32,9 +32,9 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String FILE_SUFFIX = "_phenotypes.xlsx";
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from phenotype_diplotype",
-      "delete from phenotype_lookup",
-      "delete from gene_phenotype"
+      "delete from gene_result_diplotype",
+      "delete from gene_result_lookup",
+      "delete from gene_result"
   };
   private static final Pattern GENE_PATTERN = Pattern.compile("Gene:\\s+(\\w+)");
 
@@ -115,27 +115,27 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       super(FileType.GENE_PHENOTYPE);
       this.geneSymbol = geneSymbol;
       //language=PostgreSQL
-      this.insertPhenotype = prepare("insert into gene_phenotype(genesymbol, phenotype, activityScore) values (?, ?, ?) returning id");
+      this.insertPhenotype = prepare("insert into gene_result(genesymbol, result, activityScore) values (?, ?, ?) returning id");
       //language=PostgreSQL
-      this.insertLookup = prepare("insert into phenotype_lookup(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
+      this.insertLookup = prepare("insert into gene_result_lookup(phenotypeid, lookupKey, function1, function2, activityvalue1, activityvalue2, totalactivityscore, description) values (?, ?::jsonb, ?, ?, ?, ?, ?, ?) returning id");
       //language=PostgreSQL
       this.lookupDiplotypes = prepare("select a1.name, a2.name " +
-          "from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid " +
+          "from gene_result g join gene_result_lookup pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.clinicalfunctionalstatus=pf.function1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.clinicalfunctionalstatus=pf.function2 " +
           "where pf.id=? order by a1.name, a2.name");
       //language=PostgreSQL
       this.lookupDiplotypesByScore = prepare("select a1.name, a2.name " +
-          "from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid " +
+          "from gene_result g join gene_result_lookup pf on g.id = pf.phenotypeid " +
           "                      join allele a1 on g.genesymbol = a1.genesymbol and a1.activityvalue=pf.activityvalue1 " +
           "                      join allele a2 on g.genesymbol = a2.genesymbol and a2.activityvalue=pf.activityvalue2 " +
           "where pf.id=? order by a1.name, a2.name");
       //language=PostgreSQL
-      this.lookupAllelesByFn = prepare("select a.name from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid " +
+      this.lookupAllelesByFn = prepare("select a.name from gene_result g join gene_result_lookup pf on g.id = pf.phenotypeid " +
           "join allele a on g.genesymbol=a.genesymbol and a.clinicalFunctionalStatus=pf.function1 " +
           "where pf.id=?");
       //language=PostgreSQL
-      this.insertDiplotype = prepare("insert into phenotype_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
+      this.insertDiplotype = prepare("insert into gene_result_diplotype(functionphenotypeid, diplotype, diplotypekey) values (?, ?, ?::jsonb)");
       //language=PostgreSQL
       this.validateFn = prepare("select count(*) from allele where genesymbol=? and clinicalfunctionalstatus=?");
 
@@ -222,7 +222,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     }
 
     /**
-     * Generates phenotype_diplotype records based off of data about phenotypes in the
+     * Generates gene_result_diplotype records based off of data about results in the gene_result_lookup table
      * @param functionId the primary key ID for a phenotype
      * @throws SQLException can occur when inserting into the DB
      */

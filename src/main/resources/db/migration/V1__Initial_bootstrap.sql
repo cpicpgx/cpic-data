@@ -390,36 +390,36 @@ COMMENT ON COLUMN term.geneticdef IS 'The genetic definition of the term';
 COMMENT ON COLUMN term.loinc IS 'The LOINC identifier for the term';
 
 
-CREATE TABLE gene_phenotype
+CREATE TABLE gene_result
 (
   id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
   geneSymbol VARCHAR(50) REFERENCES gene(symbol) NOT NULL,
-  phenotype TEXT,
+  result TEXT NOT NULL,
   activityScore TEXT,
   ehrPriority TEXT,
   consultationText TEXT,
   version INTEGER DEFAULT 1,
 
-  UNIQUE (geneSymbol, phenotype, activityScore)
+  UNIQUE (geneSymbol, result, activityScore)
 );
 
-CREATE TRIGGER version_gene_phenotype
-  BEFORE UPDATE ON gene_phenotype
+CREATE TRIGGER version_gene_result
+  BEFORE UPDATE ON gene_result
   FOR EACH ROW EXECUTE PROCEDURE increment_version();
 
-COMMENT ON TABLE gene_phenotype IS 'Possible phenotype values for a gene. The gene + phenotype + activity score should be unique.';
-COMMENT ON COLUMN gene_phenotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN gene_phenotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
-COMMENT ON COLUMN gene_phenotype.phenotype IS 'Coded Genotype/Phenotype Summary, optional';
-COMMENT ON COLUMN gene_phenotype.activityScore IS 'Activity score, optional';
-COMMENT ON COLUMN gene_phenotype.ehrPriority IS 'EHR Priority Result, optional';
-COMMENT ON COLUMN gene_phenotype.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result';
+COMMENT ON TABLE gene_result IS 'Possible phenotype values for a gene. The gene + phenotype + activity score should be unique.';
+COMMENT ON COLUMN gene_result.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN gene_result.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
+COMMENT ON COLUMN gene_result.result IS 'The result for a gene, can either be a phenotype or "allele status" depending on the lookup method for the gene (see lookupMethod in gene table), required';
+COMMENT ON COLUMN gene_result.activityScore IS 'Activity score, optional';
+COMMENT ON COLUMN gene_result.ehrPriority IS 'EHR Priority Result, optional';
+COMMENT ON COLUMN gene_result.consultationText IS 'Consultation (Interpretation) Text Provided with Test Result';
 
 
-CREATE TABLE phenotype_lookup
+CREATE TABLE gene_result_lookup
 (
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-    phenotypeId INTEGER REFERENCES gene_phenotype(id) NOT NULL,
+    phenotypeId INTEGER REFERENCES gene_result(id) NOT NULL,
     lookupKey JSONB NOT NULL,
     function1 TEXT,
     function2 TEXT,
@@ -431,35 +431,35 @@ CREATE TABLE phenotype_lookup
     description TEXT
 );
 
-COMMENT ON TABLE phenotype_lookup IS 'Gene descriptions that, when combined, link to a gene phenotype. This table is a child of gene_phenotype.';
-COMMENT ON COLUMN phenotype_lookup.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN phenotype_lookup.phenotypeId IS 'An ID referencing the gene_phenotype this is associated with, required';
-COMMENT ON COLUMN phenotype_lookup.lookupKey IS 'A normalized JSON format of the data used to lookup a diplotype. The keys of this field are either the functions, activity scores, or allele statuses depending on what the gene requires. Required.';
-COMMENT ON COLUMN phenotype_lookup.function1 IS 'The first allele function';
-COMMENT ON COLUMN phenotype_lookup.function2 IS 'The second allele function';
-COMMENT ON COLUMN phenotype_lookup.activityValue1 IS 'The activity score for the first allele function';
-COMMENT ON COLUMN phenotype_lookup.activityValue2 IS 'The activity score for the second allele function';
-COMMENT ON COLUMN phenotype_lookup.totalActivityScore IS 'The sum activity score for the functions';
-COMMENT ON COLUMN phenotype_lookup.alleleStatus1 IS 'The first allele status';
-COMMENT ON COLUMN phenotype_lookup.alleleStatus2 IS 'The second allele status';
-COMMENT ON COLUMN phenotype_lookup.description IS 'A description of the diplotypes associated with this phenotype';
+COMMENT ON TABLE gene_result_lookup IS 'Gene descriptions that, when combined, link to a gene result. This table is a child of gene_result.';
+COMMENT ON COLUMN gene_result_lookup.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN gene_result_lookup.phenotypeId IS 'An ID referencing the gene_result this is associated with, required';
+COMMENT ON COLUMN gene_result_lookup.lookupKey IS 'A normalized JSON format of the data used to lookup a diplotype. The keys of this field are either the functions, activity scores, or allele statuses depending on what the gene requires. Required.';
+COMMENT ON COLUMN gene_result_lookup.function1 IS 'The first allele function';
+COMMENT ON COLUMN gene_result_lookup.function2 IS 'The second allele function';
+COMMENT ON COLUMN gene_result_lookup.activityValue1 IS 'The activity score for the first allele function';
+COMMENT ON COLUMN gene_result_lookup.activityValue2 IS 'The activity score for the second allele function';
+COMMENT ON COLUMN gene_result_lookup.totalActivityScore IS 'The sum activity score for the functions';
+COMMENT ON COLUMN gene_result_lookup.alleleStatus1 IS 'The first allele status';
+COMMENT ON COLUMN gene_result_lookup.alleleStatus2 IS 'The second allele status';
+COMMENT ON COLUMN gene_result_lookup.description IS 'A description of the diplotypes associated with this phenotype';
 
 
-CREATE TABLE phenotype_diplotype
+CREATE TABLE gene_result_diplotype
 (
     id INTEGER PRIMARY KEY DEFAULT nextval('cpic_id'),
-    functionPhenotypeId INTEGER REFERENCES phenotype_lookup(id) NOT NULL,
+    functionPhenotypeId INTEGER REFERENCES gene_result_lookup(id) NOT NULL,
     diplotype TEXT NOT NULL,
     diplotypeKey JSONB NOT NULL,
 
     UNIQUE (functionPhenotypeId, diplotypeKey)
 );
 
-COMMENT ON TABLE phenotype_diplotype IS 'Specific diplotypes that are associated with a gene phenotype. This table is a child of phenotype_lookup and distantly of gene_phenotype';
-COMMENT ON COLUMN phenotype_diplotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
-COMMENT ON COLUMN phenotype_diplotype.functionPhenotypeId IS 'An ID referencing a phenotype_lookup record, required';
-COMMENT ON COLUMN phenotype_diplotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
-COMMENT ON COLUMN phenotype_diplotype.diplotypeKey IS 'A normalized JSON version of the diplotype for use in lookups. Should be an object with the allele names as properties and the counts as the values. Required';
+COMMENT ON TABLE gene_result_diplotype IS 'Specific diplotypes that are associated with a gene result. This table is a child of gene_result_lookup and distantly of gene_result';
+COMMENT ON COLUMN gene_result_diplotype.id IS 'A synthetic numerical ID, auto-assigned, primary key';
+COMMENT ON COLUMN gene_result_diplotype.functionPhenotypeId IS 'An ID referencing a gene_result_lookup record, required';
+COMMENT ON COLUMN gene_result_diplotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
+COMMENT ON COLUMN gene_result_diplotype.diplotypeKey IS 'A normalized JSON version of the diplotype for use in lookups. Should be an object with the allele names as properties and the counts as the values. Required';
 
 
 CREATE TABLE recommendation
@@ -487,7 +487,7 @@ CREATE TRIGGER version_recommendation
   BEFORE UPDATE ON recommendation
   FOR EACH ROW EXECUTE PROCEDURE increment_version();
 
-COMMENT ON TABLE recommendation IS 'Recommendations for a gene phenotype pulled from a guideline';
+COMMENT ON TABLE recommendation IS 'Recommendations for a gene result pulled from a guideline';
 COMMENT ON COLUMN recommendation.id IS 'A synthetic numerical ID, auto-assigned, primary key';
 COMMENT ON COLUMN recommendation.guidelineId IS 'The guideline this recommendation appears in';
 COMMENT ON COLUMN recommendation.drugId IS 'The drug this recommendation is for';

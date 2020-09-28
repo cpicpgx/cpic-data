@@ -128,15 +128,15 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
 
       //language=PostgreSQL
       insertStmt = prepare(
-          "insert into gene_phenotype(geneSymbol, phenotype, ehrPriority, consultationText, activityScore) " +
+          "insert into gene_result(geneSymbol, result, ehrPriority, consultationText, activityScore) " +
               "values (?, ?, ?, ?, ?)"
       );
 
       //language=PostgreSQL
-      updateStmt = prepare("update gene_phenotype set ehrPriority=?, consultationText=? where geneSymbol=? and phenotype=? and activityScore=?");
+      updateStmt = prepare("update gene_result set ehrPriority=?, consultationText=? where geneSymbol=? and result=? and activityScore=?");
 
       //language=PostgreSQL
-      PreparedStatement existingStmt = prepare("select count(*) from gene_phenotype where genesymbol=?");
+      PreparedStatement existingStmt = prepare("select count(*) from gene_result where genesymbol=?");
       existingStmt.setString(1, gene);
       try (ResultSet rs = existingStmt.executeQuery()) {
         if (rs.next()) {

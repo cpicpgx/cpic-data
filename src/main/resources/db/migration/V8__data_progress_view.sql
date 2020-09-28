@@ -19,13 +19,13 @@ from allele_frequency f
 group by genesymbol
 union all
 select 'Gene' as object_class, 'Gene CDS Data' as data_type, genesymbol as object_name, count(*) as n
-from gene_phenotype
+from gene_result
 where consultationtext is not null
 group by genesymbol
 union all
 select 'Gene' as object_class, 'Gene Phenotype Data' as data_type, g.genesymbol as object_name, count(*) as n
-from gene_phenotype g
-         join phenotype_lookup pf on g.id = pf.phenotypeid
+from gene_result g
+         join gene_result_lookup pf on g.id = pf.phenotypeid
 group by genesymbol
 union all
 select 'Gene' as object_class, 'PharmVar Allele IDs' as data_type, a.genesymbol as object_name, count(*) as n

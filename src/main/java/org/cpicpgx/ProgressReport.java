@@ -64,24 +64,31 @@ public class ProgressReport {
   private void gatherStats() throws SQLException {
     try (Connection conn = ConnectionFactory.newConnection()) {
       queryData(conn,
+          //language=PostgreSQL
           "select genesymbol,count(*) from allele group by genesymbol order by genesymbol",
           "Allele Definition Table");
-      queryData(conn, 
+      queryData(conn,
+          //language=PostgreSQL
           "select genesymbol, count(*) from allele a where clinicalfunctionalstatus is not null group by genesymbol order by genesymbol",
           "Allele Functionality Table");
-      queryData(conn, 
+      queryData(conn,
+          //language=PostgreSQL
           "select genesymbol, count(*) from diplotype group by genesymbol order by genesymbol",
           "Diplotype to Phenotype Table");
-      queryData(conn, 
+      queryData(conn,
+          //language=PostgreSQL
           "select genesymbol, count(*) from allele_frequency f join allele a on f.alleleid = a.id group by genesymbol order by genesymbol",
           "Frequency Table");
-      queryData(conn, 
-          "select genesymbol, count(*) from gene_phenotype where consultationtext is not null group by genesymbol",
+      queryData(conn,
+          //language=PostgreSQL
+          "select genesymbol, count(*) from gene_result where consultationtext is not null group by genesymbol",
           "Gene CDS Text");
       queryData(conn,
-          "select g.genesymbol, count(*) from gene_phenotype g join phenotype_lookup pf on g.id = pf.phenotypeid group by genesymbol",
+          //language=PostgreSQL
+          "select g.genesymbol, count(*) from gene_result g join gene_result_lookup pf on g.id = pf.phenotypeid group by genesymbol",
           "Gene Phenotypes");
       queryData(conn,
+          //language=PostgreSQL
           "select a.genesymbol, count(*) from allele_definition a where a.pharmvarid is not null group by a.genesymbol",
           "PharmVar Allele IDs Loaded");
     }

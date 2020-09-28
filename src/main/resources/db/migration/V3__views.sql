@@ -12,17 +12,17 @@ select
     pf.totalactivityscore,
     pf.description,
     d.diplotypekey,
-    gp.phenotype,
+    gp.result as generesult,
     gp.ehrPriority,
     gp.consultationText,
-    json_build_object(gp.genesymbol, case when g.lookupMethod = 'ACTIVITY_SCORE' then pf.totalActivityScore else gp.phenotype end) as lookupkey
+    json_build_object(gp.genesymbol, case when g.lookupMethod = 'ACTIVITY_SCORE' then pf.totalActivityScore else gp.result end) as lookupkey
 from
-    phenotype_diplotype d
-        join phenotype_lookup pf on d.functionphenotypeid = pf.id
-        join gene_phenotype gp on pf.phenotypeid = gp.id
+    gene_result_diplotype d
+        join gene_result_lookup pf on d.functionphenotypeid = pf.id
+        join gene_result gp on pf.phenotypeid = gp.id
         join gene g on gp.geneSymbol = g.symbol;
 
-COMMENT ON VIEW diplotype IS 'A combination of gene_phenotype and phenotype_diplotype that allows you to easily query by diplotype and see the phenotype-related data for it';
+COMMENT ON VIEW diplotype IS 'A combination of gene_result and gene_result_diplotype that allows you to easily query by diplotype and see the phenotype-related data for it';
 COMMENT ON COLUMN diplotype.geneSymbol IS 'The HGNC symbol of the gene in this pair, required';
 COMMENT ON COLUMN diplotype.diplotype IS 'A diplotype for the gene in the form Allele1/Allele2, required';
 COMMENT ON COLUMN diplotype.function1 IS 'A functional assignment of one of the alleles, optional';
@@ -32,7 +32,7 @@ COMMENT ON COLUMN diplotype.activityvalue2 IS 'An activity value assignment of o
 COMMENT ON COLUMN diplotype.totalactivityscore IS 'The total Activity Score number, optional';
 COMMENT ON COLUMN diplotype.description IS 'The long-form description of the diplotype';
 COMMENT ON COLUMN diplotype.diplotypekey IS 'A normalized version of the diplotype that can be used for DB lookups';
-COMMENT ON COLUMN diplotype.phenotype IS 'Coded Genotype/Phenotype Summary, required';
+COMMENT ON COLUMN diplotype.generesult IS 'The result for a gene, can either be a phenotype or "allele status" depending on the lookup method for the gene (see lookupMethod in gene table), required';
 COMMENT ON COLUMN diplotype.lookupkey IS 'A normalized version of the gene phenotype that can be used for recommendation or test alert lookup';
 
 

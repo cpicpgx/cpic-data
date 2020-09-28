@@ -155,8 +155,8 @@ public class GuidelineStarterPack {
       aliases.put("g" + i, gene);
       i += 1;
     }
-    String selectClause = aliases.keySet().stream().map(a -> a + ".phenotype, " + a + ".activityscore").collect(Collectors.joining(", "));
-    String fromClause = aliases.keySet().stream().map(a -> "gene_phenotype " + a).collect(Collectors.joining(" cross join "));
+    String selectClause = aliases.keySet().stream().map(a -> a + ".result, " + a + ".activityscore").collect(Collectors.joining(", "));
+    String fromClause = aliases.keySet().stream().map(a -> "gene_result " + a).collect(Collectors.joining(" cross join "));
     String whereClause = aliases.keySet().stream().map(a -> a + ".genesymbol='"+aliases.get(a)+"' ").collect(Collectors.joining(" and "));
 
     String query = String.format("select distinct %s from %s where %s", selectClause, fromClause, whereClause);
@@ -198,8 +198,8 @@ public class GuidelineStarterPack {
       aliases.put("g" + i, gene);
       i += 1;
     }
-    String selectClause = aliases.keySet().stream().map(a -> a + ".phenotype, " + a + ".activityscore").collect(Collectors.joining(", "));
-    String fromClause = aliases.keySet().stream().map(a -> "gene_phenotype " + a).collect(Collectors.joining(" cross join "));
+    String selectClause = aliases.keySet().stream().map(a -> a + ".result, " + a + ".activityscore").collect(Collectors.joining(", "));
+    String fromClause = aliases.keySet().stream().map(a -> "gene_result " + a).collect(Collectors.joining(" cross join "));
     String whereClause = aliases.keySet().stream().map(a -> a + ".genesymbol='"+aliases.get(a)+"' ").collect(Collectors.joining(" and "));
 
     String query = String.format("select distinct %s from %s where %s", selectClause, fromClause, whereClause);

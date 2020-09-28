@@ -158,9 +158,9 @@ public class DiplotypePhenotypeImporter extends BaseDirectoryImporter {
       this.conn = ConnectionFactory.newConnection();
 
       this.findDiplotype = this.conn.prepareStatement(
-          "select p.phenotype, f.totalactivityscore, d.id, p.ehrpriority from gene_phenotype p " +
-              "    join phenotype_lookup f on p.id = f.phenotypeId " +
-              "    join phenotype_diplotype d on f.id = d.functionPhenotypeId where p.genesymbol=? and d.diplotype=?"
+          "select p.result, f.totalactivityscore, d.id, p.ehrpriority from gene_result p " +
+              "    join gene_result_lookup f on p.id = f.phenotypeId " +
+              "    join gene_result_diplotype d on f.id = d.functionPhenotypeId where p.genesymbol=? and d.diplotype=?"
       );
     }
 
