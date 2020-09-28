@@ -36,8 +36,7 @@ public class GeneResourceExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct g.symbol, g.hgncid, g.ncbiid, " +
-             "g.ensemblid, g.pharmgkbid from gene g join pair p on g.symbol = p.genesymbol " +
-             "where g.ncbiid is not null and p.guidelineid is not null order by 1");
+             "g.ensemblid, g.pharmgkbid from gene g order by 1");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
