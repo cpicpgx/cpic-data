@@ -311,16 +311,23 @@ public class AlleleDefinitionImporter {
       }
       sf_logger.debug("created {} new locations", newLocations);
 
-      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name, reference) values (?,?,?) returning (id)");
+      PreparedStatement alleleDefInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name, reference) values (?,?,?) returning (id)");
+      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(genesymbol, name, definitionId) values (?,?,?)");
       boolean isReference = true;
       for (String alleleName : m_alleles.keySet()) {
-        alleleInsert.setString(1, m_gene);
-        alleleInsert.setString(2, alleleName);
-        alleleInsert.setBoolean(3, isReference);
-        ResultSet rs = alleleInsert.executeQuery();
+        alleleDefInsert.setString(1, m_gene);
+        alleleDefInsert.setString(2, alleleName);
+        alleleDefInsert.setBoolean(3, isReference);
+        ResultSet rs = alleleDefInsert.executeQuery();
         rs.next();
         int alleleId = rs.getInt(1);
-        
+
+        alleleInsert.clearParameters();
+        alleleInsert.setString(1, m_gene);
+        alleleInsert.setString(2, alleleName);
+        alleleInsert.setInt(3, alleleId);
+        alleleInsert.executeUpdate();
+
         Map<Integer,String> allelePosMap = m_alleles.get(alleleName);
         for (Integer locIdx : allelePosMap.keySet()) {
           joinTableInsert.setInt(1, alleleId);
