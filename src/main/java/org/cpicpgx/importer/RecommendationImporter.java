@@ -202,10 +202,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 if (normalizedPheno == null) {
                   throw new RuntimeException("No phenotype found");
                 }
-                if (!dbHarness.validPhenotype(gene, normalizedPheno)) {
-                  sf_logger.warn("Phenotype not found in allele table for {}: {}", gene, normalizedPheno);
-                }
-                phenotype.put(gene, normalizedPheno);
+                String validPhenotype = dbHarness.validPhenotype(gene, normalizedPheno);
+                phenotype.put(gene, validPhenotype);
               }
 
               // Validate not all "No Result" in multi-gene rec
@@ -226,7 +224,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                     lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(alleleIdxMap.get(gene))));
                     break;
                   case PHENOTYPE:
-                    lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(phenotypeIdxMap.get(gene))));
+                    lookupKey.put(gene, phenotype.get(gene));
                     break;
                   default:
                     throw new RuntimeException("Unsupported lookup method for " + gene);
@@ -276,7 +274,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     private final PreparedStatement findPhenotype;
     private final String drugId;
     private final Long guidelineId;
-    private final Map<String,Integer> phenotypeCache = new HashMap<>();
+    private final Map<String,String> phenotypeCache = new HashMap<>();
     private final Map<String, LookupMethod> geneLookupCache = new HashMap<>();
     private final Gson gson = new Gson();
 
@@ -285,7 +283,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       //language=PostgreSQL
       this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
       //language=PostgreSQL
-      this.findPhenotype = prepare("select count(*) from gene_result a where a.genesymbol=? and lower(a.result)=lower(?)");
+      this.findPhenotype = prepare("select a.result from gene_result a where a.genesymbol=? and lower(a.result)=lower(?)");
 
       //language=PostgreSQL
       PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where name=? and guidelineid is not null");
@@ -327,22 +325,25 @@ public class RecommendationImporter extends BaseDirectoryImporter {
      * @return true if this is a valid phenotype value, false otherwise
      * @throws SQLException can occur when querying the DB for phenotype names
      */
-    boolean validPhenotype(String gene, String phenotype) throws SQLException {
-      if (Constants.isNoResult(phenotype) || phenotype.equals(Constants.INDETERMINATE)) {
-        return true;
-      }
+    String validPhenotype(String gene, String phenotype) throws SQLException, NotFoundException {
+      if (Constants.isNoResult(phenotype)) return Constants.NO_RESULT;
+      if (Constants.isIndeterminate(phenotype)) return Constants.INDETERMINATE;
+
       String key = gene + phenotype;
 
       if (phenotypeCache.containsKey(key)) {
-        return true;
+        return phenotypeCache.get(key);
       } else {
         findPhenotype.setString(1, gene);
         findPhenotype.setString(2, phenotype);
         try (ResultSet rs = findPhenotype.executeQuery()) {
-          rs.next();
-          int count = rs.getInt(1);
-          phenotypeCache.put(key, count);
-          return count > 0;
+          if (rs.next()) {
+            String validPhenotype = rs.getString(1);
+            phenotypeCache.put(key, validPhenotype);
+            return validPhenotype;
+          } else {
+            throw new NotFoundException("Phenotype not found in allele table for " + gene + ": " + phenotype);
+          }
         }
       }
     }

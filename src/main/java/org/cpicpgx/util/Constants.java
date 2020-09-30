@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 public class Constants {
   public static final String INDETERMINATE = "Indeterminate";
+  public static final Pattern INDETERMINATE_PATTERN = Pattern.compile("[Ii]determinate]");
   public static final String NA = "n/a";
   public static final String NO_RESULT = "No Result";
   public static final Pattern NO_RESULT_PATTERN = Pattern.compile("[Nn]o [Rr]esult");
@@ -18,6 +19,15 @@ public class Constants {
    */
   public static boolean isNoResult(String text) {
     return NO_RESULT_PATTERN.matcher(text).matches();
+  }
+
+  /**
+   * Detect fi the text is "Indeterminate"
+   * @param text text to test
+   * @return true if this text is equivalent to "Indeterminate"
+   */
+  public static boolean isIndeterminate(String text) {
+    return INDETERMINATE_PATTERN.matcher(StringUtils.stripToEmpty(text)).matches();
   }
 
   /**
