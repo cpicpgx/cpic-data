@@ -58,8 +58,8 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
             String strength = rs.getString(7);
             String findings = rs.getString(8);
             String comments = rs.getString(9);
-            
-            String[] citationArray = (String[])ctiations.getArray();
+
+            String[] citationArray = ctiations == null ? new String[]{} : (String[])ctiations.getArray();
 
             workbook.writeAlleleRow(alleleName, activity, function, clinFunction, clinSubstrate, citationArray, strength, findings, comments);
           }
