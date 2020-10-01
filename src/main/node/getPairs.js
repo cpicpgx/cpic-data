@@ -38,7 +38,7 @@ exports.getPairs = (path) => {
       const csvFile = `${path}/${defaultFilename}.csv`;
       const csv = _.concat(
         [`"Date last updated: ${lastUpdated}"`, 'Gene,Drug,Guideline,CPIC Level,PharmGKB Level of Evidence,PGx on FDA Label,CPIC Publications (PMID)'],
-        pairs.map((p) => [p.genesymbol, p.drugname, p.guidelineurl, p.cpiclevel, p.pgkbcalevel, p.pgxtesting, _.join(p.pmids, ';')].join(',')),
+        pairs.map((p) => [p.genesymbol, `"${p.drugname}"`, p.guidelineurl, p.cpiclevel, p.pgkbcalevel, p.pgxtesting, _.join(p.pmids, ';')].join(',')),
       );
       fs.writeFile(csvFile, csv.join('\n'), (e) => {
         if (e) console.log(e);
