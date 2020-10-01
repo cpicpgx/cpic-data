@@ -271,10 +271,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
   private static class RecDbHarness extends DbHarness {
     private final PreparedStatement insertStmt;
-    private final PreparedStatement findPhenotype;
     private final String drugId;
     private final Long guidelineId;
-    private final Map<String,String> phenotypeCache = new HashMap<>();
     private final Map<String, LookupMethod> geneLookupCache = new HashMap<>();
     private final Gson gson = new Gson();
 
@@ -282,8 +280,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       super(FileType.RECOMMENDATION);
       //language=PostgreSQL
       this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
-      //language=PostgreSQL
-      this.findPhenotype = prepare("select a.result from gene_result a where a.genesymbol=? and lower(a.result)=lower(?)");
 
       //language=PostgreSQL
       PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where name=? and guidelineid is not null");
@@ -316,36 +312,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
     List<String> getGenes() {
       return new ArrayList<>(geneLookupCache.keySet());
-    }
-
-    /**
-     * This method is used as a validation step to ensure phenotypes used in the recommendations table are valid
-     * @param gene the gene to validate
-     * @param phenotype the phenotype text to validate
-     * @return true if this is a valid phenotype value, false otherwise
-     * @throws SQLException can occur when querying the DB for phenotype names
-     */
-    String validPhenotype(String gene, String phenotype) throws SQLException, NotFoundException {
-      if (Constants.isNoResult(phenotype)) return Constants.NO_RESULT;
-      if (Constants.isIndeterminate(phenotype)) return Constants.INDETERMINATE;
-
-      String key = gene + phenotype;
-
-      if (phenotypeCache.containsKey(key)) {
-        return phenotypeCache.get(key);
-      } else {
-        findPhenotype.setString(1, gene);
-        findPhenotype.setString(2, phenotype);
-        try (ResultSet rs = findPhenotype.executeQuery()) {
-          if (rs.next()) {
-            String validPhenotype = rs.getString(1);
-            phenotypeCache.put(key, validPhenotype);
-            return validPhenotype;
-          } else {
-            throw new NotFoundException("Phenotype not found in allele table for " + gene + ": " + phenotype);
-          }
-        }
-      }
     }
 
     void insert(Map<String,String> phenotype, Map<String,String> implication, String recommendation, String classification, String comments, Map<String,String> activityScore, String population, Map<String,String> lookupKey, Map<String,String> alleleStatus) {

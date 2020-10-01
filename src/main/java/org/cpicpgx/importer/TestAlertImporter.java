@@ -165,7 +165,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       Map<String, String> activityJson = new HashMap<>();
       for (String gene : idxActivityByGene.keySet()) {
         String pheno = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
-        if (pheno != null && pheno.toLowerCase().startsWith(Constants.NO_RESULT.toLowerCase())) {
+        if (pheno != null && Constants.isNoResult(pheno)) {
           activityJson.put(gene, pheno);
         } else {
           activityJson.put(gene, normalizeScore(normalizeGeneText(gene, row.getText(idxActivityByGene.get(gene)))));
@@ -173,7 +173,8 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
       Map<String,String> phenotypeJson = new HashMap<>();
       for (String gene : idxPhenotypeByGene.keySet()) {
-        phenotypeJson.put(gene, normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene))));
+        String normalizedPhenotype = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
+        phenotypeJson.put(gene, dbHarness.validPhenotype(gene, normalizedPhenotype));
       }
 
       Map<String,String> alleleJson = new HashMap<>();

@@ -32,6 +32,9 @@ public abstract class DbHarness implements AutoCloseable {
   private final PreparedStatement guidelineLookup;
   private final Map<String, Integer> guidelineLookupCache = new HashMap<>();
 
+  private final PreparedStatement phenotypeLookup;
+  private final Map<String,String> phenotypeLookupCache = new HashMap<>();
+
   private final PreparedStatement insertChangeLog;
 
   public DbHarness(FileType type) throws SQLException {
@@ -47,6 +50,8 @@ public abstract class DbHarness implements AutoCloseable {
     guidelineLookup = prepare("select id from guideline where url=?");
     //language=PostgreSQL
     insertChangeLog = prepare("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
+    //language=PostgreSQL
+    phenotypeLookup = prepare("select a.result from gene_result a where a.genesymbol=? and lower(a.result)=lower(?)");
   }
 
   public PreparedStatement prepare(@Nonnull String sql) throws SQLException {
@@ -113,6 +118,37 @@ public abstract class DbHarness implements AutoCloseable {
       }
     }
   }
+
+  /**
+   * This method is used as a validation step to ensure phenotypes used in the recommendations table are valid
+   * @param gene the gene to validate
+   * @param phenotype the phenotype text to validate
+   * @return true if this is a valid phenotype value, false otherwise
+   * @throws SQLException can occur when querying the DB for phenotype names
+   */
+  public String validPhenotype(String gene, String phenotype) throws SQLException, NotFoundException {
+    if (Constants.isNoResult(phenotype)) return Constants.NO_RESULT;
+    if (Constants.isIndeterminate(phenotype)) return Constants.INDETERMINATE;
+
+    String key = gene + phenotype;
+
+    if (phenotypeLookupCache.containsKey(key)) {
+      return phenotypeLookupCache.get(key);
+    } else {
+      phenotypeLookup.setString(1, gene);
+      phenotypeLookup.setString(2, phenotype);
+      try (ResultSet rs = phenotypeLookup.executeQuery()) {
+        if (rs.next()) {
+          String validPhenotype = rs.getString(1);
+          phenotypeLookupCache.put(key, validPhenotype);
+          return validPhenotype;
+        } else {
+          throw new NotFoundException("Phenotype not found in allele table for " + gene + ": [" + phenotype + "]");
+        }
+      }
+    }
+  }
+
 
   public void setNullableString(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable String value) throws SQLException {
     if (value == null) {

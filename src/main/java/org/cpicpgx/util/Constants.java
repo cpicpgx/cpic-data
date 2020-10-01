@@ -9,7 +9,7 @@ public class Constants {
   public static final Pattern INDETERMINATE_PATTERN = Pattern.compile("[Ii]determinate]");
   public static final String NA = "n/a";
   public static final String NO_RESULT = "No Result";
-  public static final Pattern NO_RESULT_PATTERN = Pattern.compile("[Nn]o [Rr]esult");
+  public static final Pattern NO_RESULT_PATTERN = Pattern.compile("[Nn]o ([Rr]esult|[Tt]est)( on [Ff]ile)?");
   public static final String EXCEL_EXTENSION = ".xlsx";
 
   /**
