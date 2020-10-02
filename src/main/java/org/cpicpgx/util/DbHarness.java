@@ -209,6 +209,42 @@ public abstract class DbHarness implements AutoCloseable {
     return f_conn;
   }
 
+  /**
+   * This will turn off auto-commit mode for the Connection and begin accumulating all interaction in one transaction
+   * @throws SQLException can occur from DB interaction
+   */
+  public void startTransaction() throws SQLException {
+    if (!getConnection().getAutoCommit()) {
+      throw new RuntimeException("Already in a transaction");
+    }
+    getConnection().setAutoCommit(false);
+  }
+
+  /**
+   * This will roll back the current transaction and turn on auto-commit mode for the Connection
+   * @throws SQLException can occur from DB interaction
+   */
+  public void rollbackTransaction() throws SQLException {
+    if (getConnection().getAutoCommit()) {
+      throw new RuntimeException("Not in a transaction");
+    }
+    getConnection().rollback();
+    getConnection().setAutoCommit(true);
+  }
+
+  /**
+   * This will commit the current transaction and turn on auto-commit mode for the Connection. Need to call
+   * {@link DbHarness#startTransaction()} again to start another transaction
+   * @throws SQLException can occur from DB interaction
+   */
+  public void endTransaction() throws SQLException {
+    if (getConnection().getAutoCommit()) {
+      throw new RuntimeException("Not in a transaction");
+    }
+    getConnection().commit();
+    getConnection().setAutoCommit(true);
+  }
+
   @Override
   public void close() {
     closables.forEach(c -> {

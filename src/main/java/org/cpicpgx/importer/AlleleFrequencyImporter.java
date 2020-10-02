@@ -160,6 +160,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
 
       // START handling diplotype frequencies
       try {
+        frequencyProcessor.startTransaction();
         workbook.findSheet(SHEET_DIPLO_NAME);
 
         int rowIdx =0;
@@ -190,12 +191,15 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
 
           frequencyProcessor.updateDiplotypeFrequency(diplotypeJson, frequencyMap);
         }
-      } catch (NotFoundException ex) {
+        frequencyProcessor.endTransaction();
+      } catch (RuntimeException|NotFoundException ex) {
         sf_logger.info(ex.getMessage());
+        frequencyProcessor.rollbackTransaction();
       }
 
       // START handling phenotype frequencies
       try {
+        frequencyProcessor.startTransaction();
         workbook.findSheet(SHEET_PHENO_NAME);
 
         int rowIdx =0;
@@ -225,8 +229,10 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
 
           frequencyProcessor.updatePhenotypeFrequency(phenotypeName, frequencyMap);
         }
-      } catch (NotFoundException ex) {
+        frequencyProcessor.endTransaction();
+      } catch (RuntimeException|NotFoundException ex) {
         sf_logger.info(ex.getMessage());
+        frequencyProcessor.rollbackTransaction();
       }
 
       sf_logger.debug("Successfully parsed " + gene + " frequencies");

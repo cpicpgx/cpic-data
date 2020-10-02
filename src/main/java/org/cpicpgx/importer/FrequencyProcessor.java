@@ -264,7 +264,7 @@ public class FrequencyProcessor extends DbHarness {
     if (result == 0) {
       throw new NotFoundException("Phenotype not found [" + phenotype + "]");
     } else if (result > 1) {
-      sf_logger.warn("More than 1 phenotype found [" + phenotype + "]");
+      throw new RuntimeException("More than 1 phenotype found [" + phenotype + "]");
     }
   }
 
