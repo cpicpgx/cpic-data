@@ -2,6 +2,7 @@ package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.cpicpgx.exception.NotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Wrapper class for an Excel workbook. Helps read and setup supporting objects.
@@ -21,8 +23,8 @@ import java.util.List;
 public class WorkbookWrapper {
   public static final String NOTES_SHEET_NAME = "Notes";
 
-  private Workbook workbook;
-  private FormulaEvaluator formulaEvaluator;
+  private final Workbook workbook;
+  private final FormulaEvaluator formulaEvaluator;
   private String fileName = null;
   public Sheet currentSheet;
 
@@ -56,6 +58,31 @@ public class WorkbookWrapper {
     }
     
     this.currentSheet = nextSheet;
+  }
+
+  /**
+   * Set the current sheet by finding a match to the supplied Regex pattern. If more than one matchis found then a
+   * {@link RuntimeException} is thrown. If no matchis found then a {@link NotFoundException} is thrown
+   * @param sheetNamePattern a Regex pattern to match the sheet name
+   * @throws NotFoundException if no match is found for the given pattern
+   */
+  public void findSheet(Pattern sheetNamePattern) throws NotFoundException {
+    Sheet foundSheet = null;
+    for (Iterator<Sheet> sheetIterator = this.workbook.sheetIterator(); sheetIterator.hasNext();) {
+      Sheet sheet = sheetIterator.next();
+      if (sheetNamePattern.matcher(sheet.getSheetName()).matches()) {
+        if (foundSheet == null) {
+          foundSheet = sheet;
+        } else {
+          throw new RuntimeException("Multiple sheets found for " + sheetNamePattern.toString());
+        }
+      }
+    }
+    if (foundSheet == null) {
+      throw new NotFoundException("Could not find sheet matching pattern " + sheetNamePattern.toString());
+    } else {
+      this.currentSheet = foundSheet;
+    }
   }
 
   /**

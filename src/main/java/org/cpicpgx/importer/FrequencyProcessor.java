@@ -1,11 +1,12 @@
 package org.cpicpgx.importer;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
+import org.cpicpgx.util.DbHarness;
 import org.cpicpgx.util.RowWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +24,19 @@ import java.util.Map;
  *
  * @author Ryan Whaley
  */
-public class FrequencyProcessor implements AutoCloseable {
+public class FrequencyProcessor extends DbHarness {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
-  private final Connection conn;
   private final Map<Integer, Long> colIdxAlleleIdMap = new HashMap<>();
   private final PreparedStatement insertStatement;
   private final PreparedStatement insertPopulation;
   private final PreparedStatement insertHistory;
   private final PreparedStatement updateMethods;
+  private final PreparedStatement updateDiplotypeFrequency;
+  private final PreparedStatement updateAlleleFrequency;
+  private final PreparedStatement updatePhenotypeFrequency;
   private final PublicationCatalog publicationCatalog;
+  private final Map<String, Long> alleleNameMap;
 
   private int colStartOffset = 0;
 
@@ -43,11 +47,12 @@ public class FrequencyProcessor implements AutoCloseable {
    * @throws SQLException can occur when reading the header row
    */
   FrequencyProcessor(String gene, RowWrapper headerRow) throws SQLException, NotFoundException {
-    this.conn = ConnectionFactory.newConnection();
-    publicationCatalog = new PublicationCatalog(this.conn);
+    super(FileType.FREQUENCY);
+    publicationCatalog = new PublicationCatalog(getConnection());
 
-    Map<String, Long> alleleNameMap = new HashMap<>();
-    PreparedStatement pstmt = this.conn.prepareStatement("select name, id from allele where allele.geneSymbol=?");
+    alleleNameMap = new HashMap<>();
+    //language=PostgreSQL
+    PreparedStatement pstmt = prepare("select name, id from allele where allele.geneSymbol=?");
     if (gene.equals("HLA")) {
       String[] hlaGenes = new String[]{"HLA-A", "HLA-B"};
       for (String hlaGene : hlaGenes) {
@@ -66,17 +71,36 @@ public class FrequencyProcessor implements AutoCloseable {
       }
     }
 
-    this.insertStatement = 
-        this.conn.prepareStatement("insert into allele_frequency(alleleid, population, frequency, label) values (?, ?, ?, ?)");
-    this.insertPopulation = 
-        this.conn.prepareStatement("insert into population(ethnicity, population, populationinfo, subjecttype, subjectcount, publicationId) values (?, ?, ?, ?, ?, ?) returning (id)");
+    //language=PostgreSQL
+    this.insertStatement =
+        prepare("insert into allele_frequency(alleleid, population, frequency, label) values (?, ?, ?, ?)");
+
+    //language=PostgreSQL
+    this.insertPopulation =
+        prepare("insert into population(ethnicity, population, populationinfo, subjecttype, subjectcount, publicationId) values (?, ?, ?, ?, ?, ?) returning (id)");
+
+    //language=PostgreSQL
     this.insertHistory =
-        this.conn.prepareStatement("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
+        prepare("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
     this.insertHistory.setString(1, gene);
     this.insertHistory.setString(3, FileType.FREQUENCY.name());
+
+    //language=PostgreSQL
     this.updateMethods =
-        this.conn.prepareStatement("update gene set frequencyMethods=? where symbol=?");
+        prepare("update gene set frequencyMethods=? where symbol=?");
     this.updateMethods.setString(2, gene);
+
+    //language=PostgreSQL
+    this.updateDiplotypeFrequency = prepare("update gene_result_diplotype d set frequency=?::jsonb where diplotypekey=?::jsonb and functionphenotypeid in (select l.id from gene_result_lookup l join gene_result r on (l.phenotypeId=r.id) where r.genesymbol=?)");
+    this.updateDiplotypeFrequency.setString(3, gene);
+
+    //language=PostgreSQL
+    this.updateAlleleFrequency = prepare("update allele d set frequency=?::jsonb where name=? and genesymbol=?");
+    this.updateAlleleFrequency.setString(3, gene);
+
+    //language=PostgreSQL
+    this.updatePhenotypeFrequency = prepare("update gene_result d set frequency=?::jsonb where result=? and genesymbol=?");
+    this.updatePhenotypeFrequency.setString(3, gene);
 
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
@@ -95,15 +119,11 @@ public class FrequencyProcessor implements AutoCloseable {
     if (colIdxAlleleIdMap.size() == 0) {
       throw new NotFoundException("No allele columns could be found for alleles " + String.join("; ", alleleNameMap.keySet()));
     }
-    
-    clearUnusedPopulations();
-  }
 
-  private void clearUnusedPopulations() throws SQLException {
+    // clear unused population
     int delCount = 0;
-    try (PreparedStatement stmt = this.conn.prepareStatement("delete from population where id not in (select population from allele_frequency)")) {
-      delCount += stmt.executeUpdate();
-    }
+    //language=PostgreSQL
+    delCount += prepare("delete from population where id not in (select population from allele_frequency)").executeUpdate();
     sf_logger.debug("cleared {} unused population records", delCount);
   }
 
@@ -210,13 +230,48 @@ public class FrequencyProcessor implements AutoCloseable {
     }
   }
 
-  @Override
-  public void close() throws Exception {
-    if (conn != null && !conn.isClosed()) {
-      conn.close();
+  void updateDiplotypeFrequency(JsonObject diplotype, JsonObject frequency) throws Exception {
+
+
+    this.updateDiplotypeFrequency.setString(1, frequency.toString());
+    this.updateDiplotypeFrequency.setString(2, diplotype.toString());
+    int result = this.updateDiplotypeFrequency.executeUpdate();
+
+    if (result == 0) {
+      sf_logger.warn("Diplotype not found [{}]", diplotype.toString());
+    } else if (result > 1) {
+      throw new RuntimeException("More than 1 diplotype found [" + diplotype + "]");
     }
   }
-  
+
+  void updateAlleleFrequency(String alleleName, JsonObject frequency) throws Exception {
+    this.updateAlleleFrequency.setString(1, frequency.toString());
+    this.updateAlleleFrequency.setString(2, alleleName);
+    int result = this.updateAlleleFrequency.executeUpdate();
+
+    if (result == 0) {
+      sf_logger.warn("Allele not found [{}]", alleleName);
+    } else if (result > 1) {
+      throw new RuntimeException("More than 1 allele found [" + alleleName + "]");
+    }
+  }
+
+  void updatePhenotypeFrequency(String phenotype, JsonObject frequency) throws Exception {
+    this.updatePhenotypeFrequency.setString(1, frequency.toString());
+    this.updatePhenotypeFrequency.setString(2, phenotype);
+    int result = this.updatePhenotypeFrequency.executeUpdate();
+
+    if (result == 0) {
+      throw new NotFoundException("Phenotype not found [" + phenotype + "]");
+    } else if (result > 1) {
+      sf_logger.warn("More than 1 phenotype found [" + phenotype + "]");
+    }
+  }
+
+  boolean isValidAllele(String alleleName) {
+    return alleleNameMap.containsKey(alleleName);
+  }
+
   private int getAuthorIdx() {
     return this.colStartOffset;
   }

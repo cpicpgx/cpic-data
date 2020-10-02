@@ -205,6 +205,10 @@ public abstract class DbHarness implements AutoCloseable {
     return f_conn.createArrayOf("TEXT", values);
   }
 
+  public Connection getConnection() {
+    return f_conn;
+  }
+
   @Override
   public void close() {
     closables.forEach(c -> {
