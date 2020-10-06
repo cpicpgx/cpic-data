@@ -71,7 +71,9 @@ public abstract class BaseExporter {
     this.directory = Paths.get(directory);
 
     if (!this.directory.toFile().exists()) {
-      throw new IllegalArgumentException("Directory doesn't exist " + this.directory);
+      if (!this.directory.toFile().mkdirs()) {
+        throw new IllegalArgumentException("Directory doesn't exist " + this.directory);
+      }
     }
     if (!this.directory.toFile().isDirectory()) {
       throw new IllegalArgumentException("Path is not a directory " + this.directory);
