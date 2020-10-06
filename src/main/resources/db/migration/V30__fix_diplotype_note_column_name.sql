@@ -1,0 +1,1 @@
+alter table gene rename column notes_on_diplotype to notesondiplotype;
