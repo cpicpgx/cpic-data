@@ -15,19 +15,21 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_PATTERN = "%s-Frequency.xlsx";
 
   private static final String SHEET_NAME_METHODS = "Methods and Caveats";
-  private static final String SHEET_NAME_ALLELE = "Allele frequency by race";
   private static final String SHEET_NAME_REFERENCES = "References";
+  private static final String SHEET_NAME_ALLELE = "Allele frequency";
+  private static final String SHEET_DIPLOTYPE = "Diplotype frequency";
+  private static final String SHEET_PHENOTYPE = "Phenotype frequency";
 
   private static final String[] REFERENCE_COLUMNS = new String[]{
       "Authors", "Year", "PMID", "Major ethnicity", "Population", "Add'l population info", "Subject type", "N subjects genotyped"
   };
 
   private final String geneSymbol;
-  private final SheetWrapper sheetMethods;
-  private final SheetWrapper sheetAllele;
-  private final SheetWrapper sheetReferences;
-  private final Set<String> ethnicities = new TreeSet<>();
-  
+  private SheetWrapper sheetReferences;
+  private SheetWrapper sheetAllele;
+  private SheetWrapper sheetDiplotype;
+  private SheetWrapper sheetPhenotype;
+
   FrequencyWorkbook(String geneSymbol) {
     super();
 
@@ -35,13 +37,10 @@ class FrequencyWorkbook extends AbstractWorkbook {
       throw new IllegalArgumentException("Must supply a gene");
     }
     this.geneSymbol = geneSymbol;
-    
-    sheetAllele = findSheet(SHEET_NAME_ALLELE);
-    sheetReferences = findSheet(SHEET_NAME_REFERENCES);
-    sheetMethods = findSheet(SHEET_NAME_METHODS);
   }
   
   void writeMethods(String methods) {
+    SheetWrapper sheetMethods = findSheet(SHEET_NAME_METHODS);
     sheetMethods.setColCount(1);
     sheetMethods.setWidths(new Integer[]{100*256});
 
@@ -52,6 +51,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   }
   
   void writeReferenceHeader(Set<String> alleles) {
+    sheetReferences = findSheet(SHEET_NAME_REFERENCES);
     Row header = sheetReferences.nextRow();
     int headerIdx = 0;
     for (String col : REFERENCE_COLUMNS) {
@@ -68,8 +68,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private static final int REFERENCE_POP_HEADER_COL_COUNT = 8;
   void writePopulation(String[] authors, Integer year, String pmid, String ethnicity, String population, String popInfo,
                        String subjectType, Integer subjectCount, String[] frequencies) {
-    ethnicities.add(ethnicity);
-    
+
     Row row = sheetReferences.nextRow();
     writeStringCell(row, 0, Optional.ofNullable(authors).map(a -> a[0]).orElse(""));
     if (year != null && year > 0) {
@@ -132,24 +131,92 @@ class FrequencyWorkbook extends AbstractWorkbook {
   
   private static final String TITLE_TEMPLATE = "Frequencies of %s alleles in major race/ethnic groups";
   private static final String GENE_CELL_TEMPLATE = "%s allele";
-  void writeEthnicity() {
+
+  /**
+   * Start the allele frequency file
+   */
+  void writeAlleleFrequencyHeader(List<String> bioGeoGroups) {
+    sheetAllele = findSheet(SHEET_NAME_ALLELE);
     Row header = sheetAllele.nextRow();
     writeHeaderCell(header, 0, String.format(TITLE_TEMPLATE, geneSymbol));
-    sheetAllele.sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, ethnicities.size()));
+    sheetAllele.sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, bioGeoGroups.size()));
 
     header = sheetAllele.nextRow();
     writeHeaderCell(header, 0, String.format(GENE_CELL_TEMPLATE, geneSymbol));
     int col = 1;
-    for (String ethnicity : ethnicities) {
-      writeHeaderCell(header, col, ethnicity);
+    for (String group : bioGeoGroups) {
+      writeHeaderCell(header, col, group);
       col += 1;
     }
     sheetAllele.setColCount(col);
   }
-  
-  void writeEthnicitySummary(String allele, Double[] frequencies) {
+
+  /**
+   * Write specific allele frequency data
+   * @param allele the gene allele
+   * @param frequencies an array of frequency data
+   */
+  void writeAlleleFrequency(String allele, Double[] frequencies) {
     Row row = sheetAllele.nextRow();
-    writeHeaderCell(row, 0, allele);
+    writeStringCell(row, 0, allele, false);
+
+    for (int i = 0; i < frequencies.length; i++) {
+      writeDoubleCell(row, 1+i, frequencies[i]);
+    }
+  }
+
+  private static final String TITLE_DIPLO_TEMPLATE = "Frequencies of %s diplotypes in major race/ethnic groups";
+  /**
+   * Write header for the diplotype sheet
+   */
+  void writeDiplotypeFrequencyHeader(List<String> bioGeoGroups) {
+    sheetDiplotype = findSheet(SHEET_DIPLOTYPE);
+    Row header = sheetDiplotype.nextRow();
+    writeHeaderCell(header, 0, String.format(TITLE_DIPLO_TEMPLATE, geneSymbol));
+    sheetDiplotype.sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, bioGeoGroups.size()));
+
+    header = sheetDiplotype.nextRow();
+    writeHeaderCell(header, 0, String.format(GENE_CELL_TEMPLATE, geneSymbol));
+    int col = 1;
+    for (String group : bioGeoGroups) {
+      writeHeaderCell(header, col, group);
+      col += 1;
+    }
+    sheetDiplotype.setColCount(col);
+  }
+
+  void writeDiplotypeFrequency(String diplotype, Double[] frequencies) {
+    Row row = sheetDiplotype.nextRow();
+    writeStringCell(row, 0, diplotype, false);
+
+    for (int i = 0; i < frequencies.length; i++) {
+      writeDoubleCell(row, 1+i, frequencies[i]);
+    }
+  }
+
+  private static final String TITLE_PHENO_TEMPLATE = "Frequencies of %s phenotypes in major race/ethnic groups";
+  /**
+   * Write header for the phenotype sheet
+   */
+  void writePhenotypeFrequencyHeader(List<String> bioGeoGroups) {
+    sheetPhenotype = findSheet(SHEET_PHENOTYPE);
+    Row header = sheetPhenotype.nextRow();
+    writeHeaderCell(header, 0, String.format(TITLE_PHENO_TEMPLATE, geneSymbol));
+    sheetPhenotype.sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, bioGeoGroups.size()));
+
+    header = sheetPhenotype.nextRow();
+    writeHeaderCell(header, 0, String.format(GENE_CELL_TEMPLATE, geneSymbol));
+    int col = 1;
+    for (String group : bioGeoGroups) {
+      writeHeaderCell(header, col, group);
+      col += 1;
+    }
+    sheetPhenotype.setColCount(col);
+  }
+
+  void writePhenotypeFrequency(String diplotype, Double[] frequencies) {
+    Row row = sheetPhenotype.nextRow();
+    writeStringCell(row, 0, diplotype, false);
 
     for (int i = 0; i < frequencies.length; i++) {
       writeDoubleCell(row, 1+i, frequencies[i]);

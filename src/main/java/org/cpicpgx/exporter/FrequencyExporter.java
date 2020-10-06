@@ -1,21 +1,19 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.DbHarness;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
+import java.lang.reflect.Type;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Exports a frequency excel sheet for every gene in the database that has frequency data
@@ -24,7 +22,6 @@ import java.util.regex.Pattern;
  */
 public class FrequencyExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern REF_ALLELE_PATTERN = Pattern.compile("^(\\*1|.*[Rr]eference.*)$");
 
   public static void main(String[] args) {
     FrequencyExporter exporter = new FrequencyExporter();
@@ -44,8 +41,7 @@ public class FrequencyExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection()) {
       try (
-          PreparedStatement pstmt = conn.prepareStatement(
-              "select distinct geneSymbol from population_frequency_view order by 1");
+          FrequencyDbHarness dbHarness = new FrequencyDbHarness();
           PreparedStatement stmt = conn.prepareStatement(
               "select distinct a.name, a.id from allele_frequency f join allele a on f.alleleid = a.id where a.genesymbol=? order by 1");
           PreparedStatement popsStmt = conn.prepareStatement(
@@ -61,17 +57,82 @@ public class FrequencyExporter extends BaseExporter {
           PreparedStatement ethAlleleStmt = conn.prepareStatement(
               "select freq_weighted_avg, freq_max, freq_min from population_frequency_view v where v.name=? and v.population_group=? and v.genesymbol=?"
           );
-          PreparedStatement refFreqStmt = conn.prepareStatement(
-              "select 1 - sum(freq_weighted_avg) reference_freq from population_frequency_view where name!=? and population_group=? and genesymbol=?");
-          PreparedStatement geneStmt = conn.prepareStatement(
+          PreparedStatement methodsStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"
           );
-          ResultSet rs = pstmt.executeQuery()
+          PreparedStatement geneStmt = conn.prepareStatement(
+              "select distinct geneSymbol from population_frequency_view order by 1");
+          ResultSet geneResults = geneStmt.executeQuery()
       ) {
         // gene loop
-        while (rs.next()) {
-          String geneSymbol = rs.getString(1);
+        while (geneResults.next()) {
+          String geneSymbol = geneResults.getString(1);
           FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol);
+
+
+          // start the Allele Frequency sheet
+          List<String> allelePops = dbHarness.getAllelePopulations(geneSymbol);
+          if (allelePops.size() > 0) {
+            workbook.writeAlleleFrequencyHeader(allelePops);
+            Map<String, HashMap<String,Double>> alleleMap = dbHarness.getAlleleData(geneSymbol);
+
+            for (String allele : alleleMap.keySet()) {
+              Double[] frequencies = new Double[allelePops.size()];
+              Map<String,Double> popMap = alleleMap.get(allele);
+              for (String pop : allelePops) {
+                frequencies[allelePops.indexOf(pop)] = popMap.get(pop);
+              }
+              workbook.writeAlleleFrequency(allele, frequencies);
+            }
+          }
+          // end the Allele Frequency sheet
+
+
+          // start the Diplotype Frequency sheet
+          List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
+          if (dipPops.size() > 0) {
+            workbook.writeDiplotypeFrequencyHeader(dipPops);
+            Map<String, HashMap<String,Double>> diplotypeMap = dbHarness.getDiplotypeData(geneSymbol);
+
+            for (String diplotype : diplotypeMap.keySet()) {
+              Double[] frequencies = new Double[dipPops.size()];
+              Map<String,Double> popMap = diplotypeMap.get(diplotype);
+              if (popMap != null) {
+                for (String pop : dipPops) {
+                  int idx = dipPops.indexOf(pop);
+                  if (idx > -1) {
+                    frequencies[idx] = popMap.get(pop);
+                  }
+                }
+              }
+              workbook.writeDiplotypeFrequency(diplotype, frequencies);
+            }
+          }
+          // end the Diplotype Frequency sheet
+
+
+          // start the Phenotype Frequency sheet
+          List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
+          if (phenoPops.size() > 0) {
+            workbook.writePhenotypeFrequencyHeader(phenoPops);
+            Map<String, HashMap<String,Double>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol);
+
+            for (String phenotype : phenotypeMap.keySet()) {
+              Double[] frequencies = new Double[phenoPops.size()];
+              Map<String,Double> popMap = phenotypeMap.get(phenotype);
+              if (popMap != null) {
+                for (String pop : phenoPops) {
+                  int idx = phenoPops.indexOf(pop);
+                  if (idx > -1) {
+                    frequencies[idx] = popMap.get(pop);
+                  }
+                }
+              }
+              workbook.writePhenotypeFrequency(phenotype, frequencies);
+            }
+          }
+          // end the Phenotype Frequency sheet
+
 
           // get the ethnicities applicable to this gene
           ethStmt.setString(1, geneSymbol);
@@ -162,40 +223,13 @@ public class FrequencyExporter extends BaseExporter {
             }
           }
 
-          workbook.writeEthnicity();
-          for (String allele : alleles.keySet()) {
-            PreparedStatement specificStmt;
-            if (REF_ALLELE_PATTERN.matcher(allele).matches()) {
-              specificStmt = refFreqStmt;
-            } else {
-              specificStmt = ethAlleleStmt;
-            }
-
-            Double[] frequencies = new Double[ethnicities.size()];
-            int i = 0;
-            for (String ethnicity : ethnicities) {
-              specificStmt.clearParameters();
-              specificStmt.setString(1, allele);
-              specificStmt.setString(2, ethnicity);
-              specificStmt.setString(3, geneSymbol);
-              try (ResultSet ethAllele = specificStmt.executeQuery()) {
-                while (ethAllele.next()) {
-                  double freq = ethAllele.getDouble(1);
-                  frequencies[i] = freq;
-                }
-              }
-              i += 1;
-            }
-            workbook.writeEthnicitySummary(allele, frequencies);
-          }
-
           // writing the change log
           workbook.writeChangeLog(queryChangeLog(conn, geneSymbol, getFileType()));
 
           // writing the methods for this gene
-          geneStmt.setString(1, geneSymbol);
+          methodsStmt.setString(1, geneSymbol);
           String methods;
-          try (ResultSet grs = geneStmt.executeQuery()) {
+          try (ResultSet grs = methodsStmt.executeQuery()) {
             if (grs.next()) {
               methods = grs.getString(1);
             } else {
@@ -209,6 +243,105 @@ public class FrequencyExporter extends BaseExporter {
         }
       }
       handleFileUpload();
+    }
+  }
+
+  private static class FrequencyDbHarness extends DbHarness {
+    final Gson gson = new Gson();
+    @SuppressWarnings("UnstableApiUsage")
+    final Type doubleMapType = new TypeToken<HashMap<String, Double>>(){}.getType();
+    PreparedStatement allelePopStmt;
+    PreparedStatement alleleDataStmt;
+    PreparedStatement diplotypePopStmt;
+    PreparedStatement diplotypeDataStmt;
+    PreparedStatement phenotypePopStmt;
+    PreparedStatement phenotypeDataStmt;
+
+    FrequencyDbHarness() throws SQLException {
+      super(FileType.FREQUENCY);
+
+      //language=PostgreSQL
+      allelePopStmt = prepare("select distinct jsonb_object_keys(frequency) from allele where genesymbol=? and frequency is not null order by 1");
+      //language=PostgreSQL
+      alleleDataStmt = prepare("select name,frequency from allele where genesymbol=? and frequency is not null");
+      //language=PostgreSQL
+      diplotypePopStmt = prepare("select distinct jsonb_object_keys(grd.frequency) from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionphenotypeid where r.genesymbol=? and grd.frequency is not null order by 1");
+      //language=PostgreSQL
+      diplotypeDataStmt = prepare("select grd.diplotype, grd.frequency from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionphenotypeid where r.genesymbol=?");
+      //language=PostgreSQL
+      phenotypePopStmt = prepare("select distinct jsonb_object_keys(frequency) from gene_result where genesymbol=? and frequency is not null order by 1");
+      //language=PostgreSQL
+      phenotypeDataStmt = prepare("select result,frequency from gene_result where genesymbol=? and frequency is not null order by result desc");
+    }
+
+    List<String> getAllelePopulations(String gene) throws SQLException {
+      List<String> result = new ArrayList<>();
+      if (StringUtils.isNotBlank(gene)) {
+        this.allelePopStmt.clearParameters();
+        this.allelePopStmt.setString(1, gene);
+        try (ResultSet rs = this.allelePopStmt.executeQuery()) {
+          while (rs.next()) {
+            result.add(rs.getString(1));
+          }
+        }
+      }
+      return result;
+    }
+
+    List<String> getDiplotypePopulations(String gene) throws SQLException {
+      List<String> result = new ArrayList<>();
+      if (StringUtils.isNotBlank(gene)) {
+        this.diplotypePopStmt.clearParameters();
+        this.diplotypePopStmt.setString(1, gene);
+        try (ResultSet rs = this.diplotypePopStmt.executeQuery()) {
+          while (rs.next()) {
+            result.add(rs.getString(1));
+          }
+        }
+      }
+      return result;
+    }
+
+    Map<String, HashMap<String,Double>> getAlleleData(String gene) throws SQLException {
+      Map<String, HashMap<String,Double>> result = new TreeMap<>(HaplotypeNameComparator.getComparator());
+      if (StringUtils.isNotBlank(gene)) {
+        this.alleleDataStmt.clearParameters();
+        this.alleleDataStmt.setString(1, gene);
+        try (ResultSet rs = this.alleleDataStmt.executeQuery()) {
+          while (rs.next()) {
+            result.put(rs.getString(1), gson.fromJson(rs.getString(2), doubleMapType));
+          }
+        }
+      }
+      return result;
+    }
+
+    Map<String, HashMap<String,Double>> getDiplotypeData(String gene) throws SQLException {
+      Map<String, HashMap<String,Double>> result = new TreeMap<>(HaplotypeNameComparator.getComparator());
+      if (StringUtils.isNotBlank(gene)) {
+        this.diplotypeDataStmt.clearParameters();
+        this.diplotypeDataStmt.setString(1, gene);
+        try (ResultSet rs = this.diplotypeDataStmt.executeQuery()) {
+          while (rs.next()) {
+            result.put(rs.getString(1), gson.fromJson(rs.getString(2), doubleMapType));
+          }
+        }
+      }
+      return result;
+    }
+
+    Map<String, HashMap<String,Double>> getPhenotypeData(String gene) throws SQLException {
+      Map<String, HashMap<String,Double>> result = new TreeMap<>(Comparator.naturalOrder());
+      if (StringUtils.isNotBlank(gene)) {
+        this.phenotypeDataStmt.clearParameters();
+        this.phenotypeDataStmt.setString(1, gene);
+        try (ResultSet rs = this.phenotypeDataStmt.executeQuery()) {
+          while (rs.next()) {
+            result.put(rs.getString(1), gson.fromJson(rs.getString(2), doubleMapType));
+          }
+        }
+      }
+      return result;
     }
   }
 }
