@@ -11,6 +11,7 @@ public class Constants {
   public static final String NO_RESULT = "No Result";
   public static final Pattern NO_RESULT_PATTERN = Pattern.compile("[Nn]o ([Rr]esult|[Tt]est)( on [Ff]ile)?");
   public static final String EXCEL_EXTENSION = ".xlsx";
+  public static final String STRUCTURAL_VARIATION = "Structural Variation";
 
   /**
    * Detect if the text is "No Result" or some other capitalization variant

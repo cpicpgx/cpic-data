@@ -19,11 +19,9 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +50,8 @@ public class AlleleDefinitionImporter {
   private String[] m_genoPositions;
   private String[] m_dbSnpIds;
   private Map<String,Map<Integer,String>> m_alleles;
+  private int m_svColIdx = -1;
+  private final Map<String,String> m_svToPvAlleles = new HashMap<>();
 
   public static void main(String[] args) {
     try {
@@ -97,23 +97,28 @@ public class AlleleDefinitionImporter {
         .orElseThrow(IllegalStateException::new)
         .replaceAll("(GENE|Gene):\\s*", "");
   }
-  
+
   private void readLegacyRow(Sheet sheet) {
     Row row = sheet.getRow(1);
-    m_variantColEnd = row.getLastCellNum();
-    m_legacyNames = new String[m_variantColEnd];
+    m_legacyNames = new String[row.getLastCellNum()];
 
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
     
-    for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
-      m_legacyNames[i] = getCellValue(row, i).orElse(null);
+    for (int i=sf_variantColStart; i < row.getLastCellNum(); i++) {
+      String cellContents = getCellValue(row, i).orElse("");
+      if (cellContents.equalsIgnoreCase(Constants.STRUCTURAL_VARIATION)) {
+        m_svColIdx = i;
+      } else {
+        m_legacyNames[i] = getCellValue(row, i).orElse(null);
+        m_variantColEnd = i;
+      }
     }
   }
   
   private void readProteinRow(Sheet sheet) {
     Row row = sheet.getRow(2);
-    m_proteinEffects = new String[m_variantColEnd];
+    m_proteinEffects = new String[row.getLastCellNum()];
     
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
@@ -125,7 +130,7 @@ public class AlleleDefinitionImporter {
   
   private void readChromoRow(Sheet sheet) {
     Row row = sheet.getRow(3);
-    m_chromoPositions = new String[m_variantColEnd];
+    m_chromoPositions = new String[row.getLastCellNum()];
 
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
@@ -137,7 +142,7 @@ public class AlleleDefinitionImporter {
   
   private void readGenoRow(Sheet sheet) {
     Row row = sheet.getRow(4);
-    m_genoPositions = new String[m_variantColEnd];
+    m_genoPositions = new String[row.getLastCellNum()];
 
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
@@ -149,7 +154,7 @@ public class AlleleDefinitionImporter {
   
   private void readDbSnpRow(Sheet sheet) {
     Row row = sheet.getRow(5);
-    m_dbSnpIds = new String[m_variantColEnd];
+    m_dbSnpIds = new String[row.getLastCellNum()];
     
     for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
       Optional<String> rsid = getCellValue(row, i);
@@ -208,8 +213,10 @@ public class AlleleDefinitionImporter {
           throw new RuntimeException("Notes exist in the allele definition sheet, move to a separate tab");
         }
 
+        getCellValue(row, m_svColIdx).ifPresent(pvId -> m_svToPvAlleles.put(alleleName, pvId));
+
         Map<Integer, String> definition = new LinkedHashMap<>();
-        for (int j = sf_variantColStart; j < m_variantColEnd; j++) {
+        for (int j = sf_variantColStart; j <= m_variantColEnd; j++) {
           final int arrayIdx = j;
           getCellValue(row, j).ifPresent(s -> definition.put(arrayIdx, s));
         }
@@ -301,7 +308,11 @@ public class AlleleDefinitionImporter {
         seqLocInsert.setString(2, m_chromoPositions[i]);
         seqLocInsert.setString(3, m_genoPositions[i]);
         seqLocInsert.setString(4, m_proteinEffects[i]);
-        seqLocInsert.setString(5, m_dbSnpIds[i]);
+        if (i < m_dbSnpIds.length && m_dbSnpIds[i] != null) {
+          seqLocInsert.setString(5, m_dbSnpIds[i]);
+        } else {
+          seqLocInsert.setNull(5, Types.VARCHAR);
+        }
         seqLocInsert.setString(6, m_gene);
         ResultSet rs = seqLocInsert.executeQuery();
         rs.next();
@@ -311,13 +322,19 @@ public class AlleleDefinitionImporter {
       }
       sf_logger.debug("created {} new locations", newLocations);
 
-      PreparedStatement alleleDefInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name, reference) values (?,?,?) returning (id)");
+      PreparedStatement alleleDefInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name, reference, structuralvariation, pharmvarid) values (?,?,?,?,?) returning (id)");
       PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(genesymbol, name, definitionId) values (?,?,?)");
       boolean isReference = true;
       for (String alleleName : m_alleles.keySet()) {
         alleleDefInsert.setString(1, m_gene);
         alleleDefInsert.setString(2, alleleName);
         alleleDefInsert.setBoolean(3, isReference);
+        alleleDefInsert.setBoolean(4, m_svToPvAlleles.containsKey(alleleName));
+        if (m_svToPvAlleles.containsKey(alleleName)) {
+          alleleDefInsert.setString(5, m_svToPvAlleles.get(alleleName));
+        } else {
+          alleleDefInsert.setNull(5, Types.VARCHAR);
+        }
         ResultSet rs = alleleDefInsert.executeQuery();
         rs.next();
         int alleleId = rs.getInt(1);
@@ -379,10 +396,13 @@ public class AlleleDefinitionImporter {
   /**
    * Given a row and index, extract the cell's String value
    * @param row a non-null Row object
-   * @param cellIndex the index of a cell in the given row
+   * @param cellIndex the index of a cell in the given row, 0-based
    * @return an Optional String of the cell value
    */
   private static Optional<String> getCellValue(Row row, int cellIndex) {
+    if (cellIndex < 0) {
+      return Optional.empty();
+    }
     Cell cell = Objects.requireNonNull(row).getCell(cellIndex);
     if (cell == null)  return Optional.empty();
     return makeCellString(cell);

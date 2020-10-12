@@ -13,9 +13,11 @@ import java.sql.SQLException;
  * @author Ryan Whaley
  */
 public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
+  //language=PostgreSQL
   private static final String[] sf_deleteStatements = new String[]{
       "delete from change_log where type='" + FileType.ALLELE_DEFINITION.name() + "'",
       "delete from file_note where type='" + FileType.ALLELE_DEFINITION.name() + "'",
+      "delete from allele where not genesymbol ~ '^HLA'",
       "delete from allele_location_value",
       "delete from allele_definition where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from sequence_location"

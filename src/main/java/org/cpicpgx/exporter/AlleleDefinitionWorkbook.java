@@ -25,17 +25,16 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_PATTERN = "%s-Allele_Definition_Table.xlsx";
   private static final Pattern CHR_PATTERN = Pattern.compile("NC_0+(\\d+)\\.\\d{2}");
   
-  private String geneSymbol;
-  private SheetWrapper sheet;
-  private SheetWrapper historySheet;
-  private Row nameRow;
-  private Row proteinRow;
-  private Row chromoRow;
-  private Row geneRow;
-  private Row dbsnpRow;
+  private final String geneSymbol;
+  private final SheetWrapper sheet;
+  private final Row nameRow;
+  private final Row proteinRow;
+  private final Row chromoRow;
+  private final Row geneRow;
+  private final Row dbsnpRow;
   private Row alleleRow;
   
-  private Map<Long, Integer> colLocationMap = new HashMap<>();
+  private final Map<Long, Integer> colLocationMap = new HashMap<>();
 
   /**
    * Constructor. Sets up the Apache POI objects needed to write the values to the file.
