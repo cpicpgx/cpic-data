@@ -1,7 +1,9 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
+import org.cpicpgx.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private final Row geneRow;
   private final Row dbsnpRow;
   private Row alleleRow;
+  private int structuralVariantionRowIdx = -1;
   
   private final Map<Long, Integer> colLocationMap = new HashMap<>();
 
@@ -145,5 +148,17 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     colLocationMap.put(locId, colIdx);
     this.sheet.setColCount(colIdx+1);
     colIdx += 1;
+  }
+
+  void writeStructuralVariantHeader() {
+    writeStringCell(nameRow, colIdx, Constants.STRUCTURAL_VARIATION);
+    this.structuralVariantionRowIdx = colIdx;
+    this.sheet.setColCount(colIdx+1);
+    colIdx += 1;
+  }
+
+  void writeStructrualVariantCell(String pharmvarId) {
+    Preconditions.checkArgument(structuralVariantionRowIdx > -1, "Cannot write SV when no column identified");
+    writeStringCell(alleleRow, structuralVariantionRowIdx, pharmvarId);
   }
 }

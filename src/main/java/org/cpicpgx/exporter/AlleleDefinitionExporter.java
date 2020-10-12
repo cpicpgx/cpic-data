@@ -10,10 +10,7 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Write allele definitions out to Excel XLSX files, one per gene.
@@ -48,11 +45,13 @@ public class AlleleDefinitionExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement(
-             "select g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, " +
-                 "sum(case when a.pharmvarid is null then 0 else 1 end) pvIds from allele_definition a " +
-                 "join gene g on a.geneSymbol = g.symbol join allele_location_value alv on a.id = alv.alleledefinitionid " +
-             "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid " +
-             "order by 1");
+             "select distinct g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, " +
+                 "sum(case when ad.pharmvarid is null then 0 else 1 end) pvIds, " +
+                 "sum(case when ad.structuralvariation is true then 1 else 0 end) as svs " +
+                 "from gene g join allele_definition ad on g.symbol = ad.genesymbol " +
+                 "where symbol not in ('HLA-A', 'HLA-B') " +
+                 "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid " +
+                 "order by 1");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -62,7 +61,8 @@ public class AlleleDefinitionExporter extends BaseExporter {
         String seqGen = grs.getString(4);
         String seqMrna = grs.getString(5);
         Long pvCount = grs.getLong(6);
-      
+        boolean hasStructuralVariation = grs.getLong(7) > 0;
+
         AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, seqChr, seqPro, seqGen, seqMrna, pvCount);
 
         try (PreparedStatement seqLocStmt = conn.prepareStatement(
@@ -82,9 +82,13 @@ public class AlleleDefinitionExporter extends BaseExporter {
             }
           }
         }
+
+        if (hasStructuralVariation) {
+          workbook.writeStructuralVariantHeader();
+        }
       
         try (
-            PreparedStatement alleleStmt = conn.prepareStatement("select name, id, reference from allele_definition where geneSymbol=?");
+            PreparedStatement alleleStmt = conn.prepareStatement("select name, id, reference, structuralvariation, pharmvarid from allele_definition where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleledefinitionid=?")
         ) {
           alleleStmt.setString(1, symbol);
@@ -93,10 +97,15 @@ public class AlleleDefinitionExporter extends BaseExporter {
             // parse to an intermediary map so we can sort the allele names properly
             SortedMap<String, Long> alleleMap = new TreeMap<>(HaplotypeNameComparator.getComparator());
             String referenceAllele = null;
+            Map<String,String> strucVarIdMap = new HashMap<>();
             while (rs.next()) {
               boolean isReference = rs.getBoolean(3);
+              boolean isStrucVar = rs.getBoolean(4);
               if (isReference) {
                 referenceAllele = rs.getString(1);
+              }
+              if (isStrucVar) {
+                strucVarIdMap.put(rs.getString(1), rs.getString(5));
               }
               alleleMap.put(rs.getString(1), rs.getLong(2));
             }
@@ -114,6 +123,9 @@ public class AlleleDefinitionExporter extends BaseExporter {
                 while (vrs.next()) {
                   workbook.writeAlleleLocationValue(vrs.getLong(1), vrs.getString(2));
                 }
+              }
+              if (strucVarIdMap.containsKey(alleleName)) {
+                workbook.writeStructrualVariantCell(strucVarIdMap.get(alleleName));
               }
             }
           }
