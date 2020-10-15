@@ -38,7 +38,7 @@ public class PairImporter extends BaseDirectoryImporter {
             row.getText(1),
             row.getNullableText(2),
             row.getNullableText(3),
-            row.getNullableText(4),
+            row.getNullableText(4, true),
             row.getNullableText(5),
             row.getNullablePmids(6),
             row.getNullableText(7),
