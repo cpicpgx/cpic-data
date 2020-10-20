@@ -1,5 +1,7 @@
 package org.cpicpgx.importer;
 
+import com.google.gson.JsonObject;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -119,8 +121,11 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
   static class GeneDbHarness extends DbHarness {
     private final String gene;
     private final PreparedStatement insertStmt;
+    private final PreparedStatement insertLookupStmt;
+    private final PreparedStatement insertDiplotypeStmt;
     private final PreparedStatement updateStmt;
     private final boolean phenotypesExist;
+    private final boolean alleleStatusGene;
 
     GeneDbHarness(String gene) throws SQLException {
       super(FileType.GENE_CDS);
@@ -129,7 +134,19 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
       //language=PostgreSQL
       insertStmt = prepare(
           "insert into gene_result(geneSymbol, result, ehrPriority, consultationText, activityScore) " +
-              "values (?, ?, ?, ?, ?)"
+              "values (?, ?, ?, ?, ?) returning id"
+      );
+
+      //language=PostgreSQL
+      insertLookupStmt = prepare(
+          "insert into gene_result_lookup(phenotypeid, lookupkey) " +
+              "values (?, ?::jsonb) returning id"
+      );
+
+      //language=PostgreSQL
+      insertDiplotypeStmt = prepare(
+          "insert into gene_result_diplotype(functionphenotypeid, diplotype, diplotypekey) " +
+              "values (?, ?, ?::jsonb)"
       );
 
       //language=PostgreSQL
@@ -146,10 +163,22 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
           phenotypesExist = false;
         }
       }
+
+      //language=PostgreSQL
+      PreparedStatement alleleStautsStmt = prepare("select lookupmethod from gene where symbol=?");
+      alleleStautsStmt.setString(1, gene);
+      try (ResultSet rs = alleleStautsStmt.executeQuery()) {
+        if (rs.next()) {
+          LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(1));
+          alleleStatusGene = lookupMethod == LookupMethod.ALLELE_STATUS;
+        } else {
+          alleleStatusGene = false;
+        }
+      }
     }
 
     void insert(String phenotype, String activity, String ehr, String consultation) throws Exception {
-      String normalizedPhenotype = phenotype.replaceAll(this.gene + "\\s+", "");
+      String normalizedPhenotype = phenotype.replaceAll("^" + this.gene + "\\s*", "");
 
       if (!phenotypesExist) {
         insertStmt.clearParameters();
@@ -158,7 +187,35 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         insertStmt.setString(3, ehr);
         insertStmt.setString(4, consultation);
         insertStmt.setString(5, activity);
-        insertStmt.executeUpdate();
+        try (ResultSet rs = insertStmt.executeQuery()) {
+          if (rs.next()) {
+            int geneResultId = rs.getInt(1);
+
+            if (alleleStatusGene) {
+              JsonObject alleleObject = new JsonObject();
+              alleleObject.addProperty(normalizedPhenotype, 1);
+
+              insertLookupStmt.clearParameters();
+              insertLookupStmt.setInt(1, geneResultId);
+              insertLookupStmt.setString(2, alleleObject.toString());
+
+              try (ResultSet lrs = insertLookupStmt.executeQuery()) {
+                if (lrs.next()) {
+                  int lookupId = lrs.getInt(1);
+                  insertDiplotypeStmt.setInt(1, lookupId);
+                  insertDiplotypeStmt.setString(2, normalizedPhenotype);
+
+                  JsonObject geneObject = new JsonObject();
+                  geneObject.add(gene, alleleObject);
+                  insertDiplotypeStmt.setString(3, geneObject.toString());
+                  insertDiplotypeStmt.executeUpdate();
+                }
+              }
+            }
+          } else {
+            throw new RuntimeException("Unexpected insertion failure");
+          }
+        }
       } else {
         updateStmt.clearParameters();
         setNullableString(updateStmt, 1, ehr);
