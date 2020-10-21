@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -34,9 +35,10 @@ public class FrequencyProcessor extends DbHarness {
   private final PreparedStatement updateMethods;
   private final PreparedStatement updateDiplotypeFrequency;
   private final PreparedStatement updateAlleleFrequency;
-  private final PreparedStatement updatePhenotypeFrequency;
+  private final PreparedStatement updateResultFrequency;
   private final PublicationCatalog publicationCatalog;
   private final Map<String, Long> alleleNameMap;
+  private final LookupMethod lookupMethod;
 
   private int colStartOffset = 0;
 
@@ -72,6 +74,17 @@ public class FrequencyProcessor extends DbHarness {
     }
 
     //language=PostgreSQL
+    PreparedStatement luStmt = prepare("select lookupmethod from gene where symbol=?");
+    luStmt.setString(1, gene);
+    try (ResultSet luRs = luStmt.executeQuery()) {
+      if (luRs.next()) {
+        lookupMethod = LookupMethod.valueOf(luRs.getString(1));
+      } else {
+        throw new RuntimeException("No Gene lookup method found for " + gene);
+      }
+    }
+
+    //language=PostgreSQL
     this.insertStatement =
         prepare("insert into allele_frequency(alleleid, population, frequency, label) values (?, ?, ?, ?)");
 
@@ -99,8 +112,12 @@ public class FrequencyProcessor extends DbHarness {
     this.updateAlleleFrequency.setString(3, gene);
 
     //language=PostgreSQL
-    this.updatePhenotypeFrequency = prepare("update gene_result d set frequency=?::jsonb where result=? and genesymbol=?");
-    this.updatePhenotypeFrequency.setString(3, gene);
+    if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
+      this.updateResultFrequency = prepare("update gene_result d set frequency=?::jsonb where activityscore=? and genesymbol=?");
+    } else {
+      this.updateResultFrequency = prepare("update gene_result d set frequency=?::jsonb where result=? and genesymbol=?");
+    }
+    this.updateResultFrequency.setString(3, gene);
 
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
@@ -256,10 +273,10 @@ public class FrequencyProcessor extends DbHarness {
     }
   }
 
-  void updatePhenotypeFrequency(String phenotype, JsonObject frequency) throws Exception {
-    this.updatePhenotypeFrequency.setString(1, frequency.toString());
-    this.updatePhenotypeFrequency.setString(2, phenotype);
-    int result = this.updatePhenotypeFrequency.executeUpdate();
+  void updateResultFrequency(String phenotype, JsonObject frequency) throws Exception {
+    this.updateResultFrequency.setString(1, frequency.toString());
+    this.updateResultFrequency.setString(2, phenotype);
+    int result = this.updateResultFrequency.executeUpdate();
 
     if (result == 0) {
       throw new NotFoundException("Phenotype not found [" + phenotype + "]");
@@ -320,5 +337,9 @@ public class FrequencyProcessor extends DbHarness {
    */
   private int getNIdx() {
     return this.colStartOffset + 7;
+  }
+
+  LookupMethod getLookupMethod() {
+    return this.lookupMethod;
   }
 }

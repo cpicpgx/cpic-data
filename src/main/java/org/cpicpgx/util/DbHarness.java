@@ -35,6 +35,9 @@ public abstract class DbHarness implements AutoCloseable {
   private final PreparedStatement phenotypeLookup;
   private final Map<String,String> phenotypeLookupCache = new HashMap<>();
 
+  private final PreparedStatement activityLookup;
+  private final Map<String,String> activityLookupCache = new HashMap<>();
+
   private final PreparedStatement insertChangeLog;
 
   public DbHarness(FileType type) throws SQLException {
@@ -52,6 +55,8 @@ public abstract class DbHarness implements AutoCloseable {
     insertChangeLog = prepare("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
     //language=PostgreSQL
     phenotypeLookup = prepare("select a.result from gene_result a where a.genesymbol=? and lower(a.result)=lower(?)");
+    //language=PostgreSQL
+    activityLookup = prepare("select a.activityscore from gene_result a where a.genesymbol=? and a.activityscore=?");
   }
 
   public PreparedStatement prepare(@Nonnull String sql) throws SQLException {
@@ -144,6 +149,37 @@ public abstract class DbHarness implements AutoCloseable {
           return validPhenotype;
         } else {
           throw new NotFoundException("Phenotype not found in allele table for " + gene + ": [" + phenotype + "]");
+        }
+      }
+    }
+  }
+
+  /**
+   * This method is used as a validation step to ensure activity scores are already defined in the gene_result table
+   * @param gene the gene for the activity score
+   * @param activityScore the activity score as a String
+   * @return the valid activity score
+   * @throws SQLException can occur when querying the DB
+   * @throws NotFoundException occurs when the activity score is not valid
+   */
+  public String validActivityScore(String gene, String activityScore) throws SQLException, NotFoundException {
+    if (Constants.isNoResult(activityScore)) return Constants.NO_RESULT;
+    if (Constants.isIndeterminate(activityScore)) return Constants.INDETERMINATE;
+
+    String key = gene + activityScore;
+
+    if (activityLookupCache.containsKey(key)) {
+      return activityLookupCache.get(key);
+    } else {
+      activityLookup.setString(1, gene);
+      activityLookup.setString(2, activityScore);
+      try (ResultSet rs = activityLookup.executeQuery()) {
+        if (rs.next()) {
+          String validActivity = rs.getString(1);
+          activityLookupCache.put(key, validActivity);
+          return validActivity;
+        } else {
+          throw new NotFoundException("Activity score not found in gene_result table for " + gene + ": [" + activityScore + "]");
         }
       }
     }

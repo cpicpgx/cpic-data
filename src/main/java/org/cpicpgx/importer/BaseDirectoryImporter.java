@@ -278,6 +278,20 @@ public abstract class BaseDirectoryImporter {
     }
   }
 
+  /**
+   * Normalize text for activity score, will replace nulls and blanks with "n/a"
+   * @param rawText raw text to describe an activity score
+   * @return a normalized score or "n/a" if no value specified
+   */
+  static String normalizeActivityScore(@Nullable String rawText) {
+    String text = StringUtils.stripToNull(rawText);
+    if (text == null || Constants.isUnspecified(text)) {
+      return Constants.NA;
+    } else {
+      return text.replaceAll(">=", "≥").replaceAll("\\.0$", "");
+    }
+  }
+
   void processChangeLog(DbHarness db, WorkbookWrapper workbook, @Nullable String entityId) throws SQLException {
     for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
       RowWrapper row = workbook.getRow(i);

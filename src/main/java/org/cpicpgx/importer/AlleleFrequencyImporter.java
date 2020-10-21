@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -206,7 +207,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
         Map<Integer,String> colIdxToPopulationMap = new LinkedHashMap<>();
         for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
           RowWrapper headerRow = workbook.getRow(rowIdx);
-          if (headerRow.row != null && (headerRow.hasNoText(0) || headerRow.getText(0).equals("Phenotype"))) {
+          if (headerRow.row != null && (headerRow.hasNoText(0) || headerRow.getText(0).equals("Phenotype") || headerRow.getText(0).equals("Activity Score"))) {
             for (int i=1; i < headerRow.getLastCellNum(); i++) {
               if (headerRow.hasNoText(i)) break;
               colIdxToPopulationMap.put(i, headerRow.getText(i).replaceAll(" Allele Frequency", ""));
@@ -220,14 +221,19 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
           RowWrapper row = workbook.getRow(rowIdx);
           if (row.hasNoText(0)) break;
 
-          String phenotypeName = frequencyProcessor.validPhenotype(gene, normalizeGeneText(gene, row.getText(0)));
+          String resultValue;
+          if (frequencyProcessor.getLookupMethod() == LookupMethod.PHENOTYPE) {
+            resultValue = frequencyProcessor.validPhenotype(gene, normalizeGeneText(gene, row.getText(0)));
+          } else {
+            resultValue = frequencyProcessor.validActivityScore(gene, normalizeActivityScore(row.getNullableText(0)));
+          }
 
           JsonObject frequencyMap = new JsonObject();
           for (Integer colIdx : colIdxToPopulationMap.keySet()) {
             frequencyMap.addProperty(colIdxToPopulationMap.get(colIdx), row.getNullableDouble(colIdx));
           }
 
-          frequencyProcessor.updatePhenotypeFrequency(phenotypeName, frequencyMap);
+          frequencyProcessor.updateResultFrequency(resultValue, frequencyMap);
         }
         frequencyProcessor.endTransaction();
       } catch (RuntimeException|NotFoundException ex) {
@@ -245,7 +251,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       return null;
     }
     else if (diplotype.contains("/")) {
-      String[] alleles = diplotype.split("/");
+      String[] alleles = diplotype.replaceAll(">=", "≥").split("/");
       JsonObject alleleJson = new JsonObject();
       if (alleles[0].equals(alleles[1])) {
         alleleJson.addProperty(alleles[0], 2);
