@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+\\.?\\d*$");
-  private static final Pattern sf_noResultPattern = Pattern.compile("^No [Rr]esult$");
 
   private Path directory;
 
