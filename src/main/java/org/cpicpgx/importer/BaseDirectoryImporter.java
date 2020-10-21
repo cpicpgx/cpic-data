@@ -120,6 +120,7 @@ public abstract class BaseDirectoryImporter {
   public void execute() {
     Arrays.stream(Objects.requireNonNull(this.directory.toFile().listFiles()))
         .filter(f -> f.getName().toLowerCase().endsWith(getFileExtensionToProcess().toLowerCase()) && !f.getName().startsWith("~$"))
+        .sorted()
         .forEach(getFileProcessor());
   }
 
