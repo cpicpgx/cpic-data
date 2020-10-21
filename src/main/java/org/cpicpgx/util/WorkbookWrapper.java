@@ -70,7 +70,7 @@ public class WorkbookWrapper {
     Sheet foundSheet = null;
     for (Iterator<Sheet> sheetIterator = this.workbook.sheetIterator(); sheetIterator.hasNext();) {
       Sheet sheet = sheetIterator.next();
-      if (sheetNamePattern.matcher(sheet.getSheetName()).matches()) {
+      if (sheetNamePattern.matcher(StringUtils.strip(sheet.getSheetName())).matches()) {
         if (foundSheet == null) {
           foundSheet = sheet;
         } else {
