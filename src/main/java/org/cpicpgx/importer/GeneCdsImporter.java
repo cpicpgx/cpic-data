@@ -30,7 +30,11 @@ import java.util.regex.Pattern;
 public class GeneCdsImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern GENE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
+  //language=PostgreSQL
   private static final String[] sf_deleteStatements = new String[]{
+      "delete from gene_result_diplotype where functionphenotypeid in (select l.id from gene_result_lookup l join gene_result gr on l.phenotypeid = gr.id join gene g on gr.genesymbol = g.symbol where lookupmethod='"+LookupMethod.ALLELE_STATUS.name()+"')",
+      "delete from gene_result_lookup where phenotypeid in (select gr.id from gene_result gr join gene g on gr.genesymbol = g.symbol where lookupmethod='"+LookupMethod.ALLELE_STATUS.name()+"')",
+      "delete from gene_result where genesymbol in (select symbol from gene where lookupmethod='"+LookupMethod.ALLELE_STATUS.name()+"')",
       "delete from file_note where type='" + FileType.GENE_CDS.name() + "'",
       "delete from change_log where type='" + FileType.GENE_CDS.name() + "'"
   };
