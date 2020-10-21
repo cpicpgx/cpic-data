@@ -8,6 +8,7 @@ public class Constants {
   public static final String INDETERMINATE = "Indeterminate";
   public static final Pattern INDETERMINATE_PATTERN = Pattern.compile("[Ii]determinate]");
   public static final String NA = "n/a";
+  public static final Pattern NA_PATTERN = Pattern.compile("[Nn]/[Aa]");
   public static final String NO_RESULT = "No Result";
   public static final Pattern NO_RESULT_PATTERN = Pattern.compile("[Nn]o ([Rr]esult|[Tt]est)( on [Ff]ile)?");
   public static final String EXCEL_EXTENSION = ".xlsx";
@@ -37,6 +38,6 @@ public class Constants {
    * @return true if the text is either blank or "n/a"
    */
   public static boolean isUnspecified(String value) {
-    return StringUtils.isBlank(value) || value.equals(NA);
+    return StringUtils.isBlank(value) || NA_PATTERN.matcher(StringUtils.stripToEmpty(value)).matches();
   }
 }
