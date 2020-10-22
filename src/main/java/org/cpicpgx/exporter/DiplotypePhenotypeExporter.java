@@ -46,6 +46,8 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
       while (grs.next()) {
         String gene = grs.getString(1);
         LookupMethod lookupMethod = LookupMethod.valueOf(grs.getString(2));
+        if (lookupMethod == LookupMethod.ALLELE_STATUS) continue;
+
         DiplotypeWorkbook workbook = new DiplotypeWorkbook(gene);
 
         dipStmt.setString(1, gene);
