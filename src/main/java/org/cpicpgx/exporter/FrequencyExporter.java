@@ -223,9 +223,6 @@ public class FrequencyExporter extends BaseExporter {
             }
           }
 
-          // writing the change log
-          workbook.writeChangeLog(queryChangeLog(conn, geneSymbol, getFileType()));
-
           // writing the methods for this gene
           methodsStmt.setString(1, geneSymbol);
           String methods;
@@ -237,6 +234,9 @@ public class FrequencyExporter extends BaseExporter {
             }
           }
           workbook.writeMethods(methods);
+
+          // writing the change log
+          workbook.writeChangeLog(queryChangeLog(conn, geneSymbol, getFileType()));
 
           writeWorkbook(workbook);
           addFileExportHistory(workbook.getFilename(), new String[]{geneSymbol});
