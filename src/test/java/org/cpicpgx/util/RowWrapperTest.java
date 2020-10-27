@@ -1,6 +1,5 @@
 package org.cpicpgx.util;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ public class RowWrapperTest {
   private static final String TEST_EXCEL = "superscript_example.xlsx";
   
   @Test
-  public void testHasNoText() throws IOException, InvalidFormatException {
+  public void testHasNoText() throws IOException {
     try (InputStream in = getClass().getResourceAsStream(TEST_EXCEL)) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
       
@@ -32,7 +31,7 @@ public class RowWrapperTest {
   }
   
   @Test
-  public void testGetNullableText() throws IOException, InvalidFormatException {
+  public void testGetNullableText() throws IOException {
     try (InputStream in = getClass().getResourceAsStream(TEST_EXCEL)) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
       
@@ -54,7 +53,7 @@ public class RowWrapperTest {
   }
   
   @Test
-  public void testStripFootnote() throws IOException, InvalidFormatException {
+  public void testStripFootnote() throws IOException {
     try (InputStream in = getClass().getResourceAsStream(TEST_EXCEL)) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
 
@@ -67,7 +66,7 @@ public class RowWrapperTest {
   }
 
   @Test
-  public void testGetFootnote() throws IOException, InvalidFormatException {
+  public void testGetFootnote() throws IOException {
     try (InputStream in = getClass().getResourceAsStream(TEST_EXCEL)) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
 
@@ -80,7 +79,7 @@ public class RowWrapperTest {
   }
 
   @Test
-  public void testGetNullableDouble() throws IOException, InvalidFormatException {
+  public void testGetNullableDouble() throws IOException {
     try (InputStream in = getClass().getResourceAsStream(TEST_EXCEL)) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
 
@@ -91,7 +90,7 @@ public class RowWrapperTest {
   }
 
   @Test
-  public void testGetNullableLong() throws IOException, InvalidFormatException {
+  public void testGetNullableLong() throws IOException {
     try (InputStream in = getClass().getResourceAsStream(TEST_EXCEL)) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
 
@@ -102,7 +101,7 @@ public class RowWrapperTest {
   }
 
   @Test
-  public void testGetNullableDate() throws IOException, InvalidFormatException, ParseException {
+  public void testGetNullableDate() throws IOException, ParseException {
     try (InputStream in = getClass().getResourceAsStream(TEST_EXCEL)) {
       WorkbookWrapper workbook = new WorkbookWrapper(in);
 
