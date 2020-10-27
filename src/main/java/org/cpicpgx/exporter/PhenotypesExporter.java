@@ -41,7 +41,7 @@ public class PhenotypesExporter extends BaseExporter {
   public void export() throws Exception {
     try (
         Connection conn = ConnectionFactory.newConnection();
-        PreparedStatement stmt = conn.prepareStatement("select distinct p.genesymbol from gene_result p join gene_result_lookup pf on p.id = pf.phenotypeid order by 1");
+        PreparedStatement stmt = conn.prepareStatement("select distinct p.genesymbol, gene.lookupmethod from gene_result p join gene_result_lookup pf on p.id = pf.phenotypeid join gene on p.genesymbol = gene.symbol where p.result is not null and (pf.function1 is not null or pf.activityvalue1 is not null) order by 1");
         ResultSet rs = stmt.executeQuery();
         PreparedStatement pstmt = conn.prepareStatement("select function1, function2, activityvalue1, activityvalue2, totalactivityscore, result, description\n" +
             "from gene_result p join gene_result_lookup pf on p.id = pf.phenotypeid\n" +
