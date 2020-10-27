@@ -1,6 +1,8 @@
 package org.cpicpgx.importer;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
@@ -126,9 +128,9 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
           }
         }
 
-        JsonObject findings = parseFindingsObject(findingsString);
-        if (findings != null) {
-          for (String pmid : findings.keySet()) {
+        JsonElement findings = parseFindingsObject(findingsString);
+        if (findings instanceof JsonObject) {
+          for (String pmid : ((JsonObject)findings).keySet()) {
             if (!citationList.contains(pmid)) {
               sf_logger.warn("PMID ("+pmid+") used in Findings not in PMID field, row " + readableRow);
             }
@@ -186,7 +188,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
 
   private static final String pmidRegex = "(^\\d{7,8}|(?<=\\s)\\d{7,8})";
   private static final Pattern pmidPattern = Pattern.compile(pmidRegex);
-  static JsonObject parseFindingsObject(String findings) {
+  static JsonElement parseFindingsObject(String findings) {
     if (StringUtils.isBlank(findings)) return null;
 
     JsonObject findingsObject = new JsonObject();
@@ -204,7 +206,13 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       }
       findingsObject.addProperty(pmid, description);
     }
-    return findingsObject;
+    if (n == 0 && StringUtils.isNotBlank(findings)) {
+      return new JsonPrimitive(findings);
+    } else if (n > 0) {
+      return findingsObject;
+    } else {
+      return null;
+    }
   }
 
 
@@ -272,7 +280,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String substrate,
         String[] pmids,
         String strength,
-        JsonObject findings,
+        JsonElement findings,
         String comments
     ) throws SQLException {
       Long alleleDefinitionId = lookupAlleleDefinitionId(allele);

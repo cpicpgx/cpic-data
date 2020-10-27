@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,7 @@ public class FunctionReferenceImporterTest {
 
   @Test
   public void testReformatFindings() {
-    JsonObject findingsObject = FunctionReferenceImporter.parseFindingsObject(FINDINGS);
+    JsonObject findingsObject = (JsonObject)FunctionReferenceImporter.parseFindingsObject(FINDINGS);
     assertNotNull(findingsObject);
     assertEquals(95, findingsObject.size());
     assertEquals("bosentan (in vitro) 238.57% relative clearance compared to *1", findingsObject.get("25142737").getAsString());
