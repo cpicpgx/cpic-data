@@ -33,8 +33,8 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final String[] sf_deleteStatements = new String[]{
       "delete from change_log where type='" + FileType.FREQUENCY.name() + "'",
       "delete from file_note where type='" + FileType.FREQUENCY.name() + "'",
-      "delete from allele_frequency",
-      "delete from population",
+      "delete from allele_frequency where alleleid is not null",
+      "delete from population where id is not null",
       "update allele set frequency=null where frequency is not null",
       "update gene_result set frequency=null where frequency is not null",
       "update gene_result_diplotype set frequency=null where frequency is not null",
@@ -150,7 +150,12 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
 
           JsonObject frequencyMap = new JsonObject();
           for (Integer colIdx : colIdxToPopulationMap.keySet()) {
-            frequencyMap.addProperty(colIdxToPopulationMap.get(colIdx), row.getNullableDouble(colIdx));
+            try {
+              Double freq = row.getNullableDouble(colIdx);
+              frequencyMap.addProperty(colIdxToPopulationMap.get(colIdx), freq);
+            } catch (NumberFormatException ex) {
+              sf_logger.warn("Allele frequency value for {} not in proper format [{}]: {}", rawAlleleName, workbook.currentSheet.getSheetName(), ex.getMessage());
+            }
           }
 
           frequencyProcessor.updateAlleleFrequency(rawAlleleName, frequencyMap);

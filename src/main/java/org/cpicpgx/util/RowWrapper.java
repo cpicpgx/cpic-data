@@ -210,7 +210,7 @@ public class RowWrapper {
   /**
    * Gets double value from the cell at the given index. This will NOT try to convert STRING columns. Only NUMBER and 
    * FORMULA columns that evaluate to numbers are supported. Non-supported types will return null.
-   * @param cellIdx the index of a cell in this row
+   * @param cellIdx the index of a cell in this row, 0-based
    * @return a {@link Double} representation of the value in the cell at the given index, or null
    */
   public Double getNullableDouble(int cellIdx) {
@@ -226,10 +226,18 @@ public class RowWrapper {
         return cell.getNumericCellValue();
       case FORMULA:
         CellValue cellValue = formulaEvaluator.evaluate(cell);
-        if (cell.getCellType() == CellType.NUMERIC) {
+        if (cellValue.getCellType() == CellType.NUMERIC) {
           return cellValue.getNumberValue();
+        } else if (cellValue.getCellType() == CellType.STRING) {
+          Matcher m = NUMBER_PATTERN.matcher(cellValue.getStringValue());
+          if (m.find()) {
+            return Double.valueOf(m.group());
+          } else {
+            throw new NumberFormatException("[" + cellValue.getStringValue() + "] is not a valid number in cell " + cell.getAddress());
+          }
+        } else {
+          throw new NumberFormatException("not a valid number in cell " + cell.getAddress());
         }
-        return null;
       default:
         return null;
         
