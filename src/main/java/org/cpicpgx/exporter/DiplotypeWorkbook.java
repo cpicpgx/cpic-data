@@ -10,11 +10,9 @@ import org.apache.poi.ss.usermodel.Row;
 class DiplotypeWorkbook extends AbstractWorkbook {
   private static final String NAME_TEMPLATE = "%s-Diplotype_Phenotype_Table.xlsx";
   private static final String SHEET_NAME = "Diplotypes";
-  private static final String NOTES_SHEET_NAME = "Interpretation Consult Note";
   private final String gene;
   private final SheetWrapper dataSheet;
-  private SheetWrapper noteSheet = null;
-  
+
   DiplotypeWorkbook(String gene) {
     super();
     this.gene = gene;
@@ -36,30 +34,9 @@ class DiplotypeWorkbook extends AbstractWorkbook {
     writeStringCell(row, 2, activity, false);
     writeStringCell(row, 3, ehr);
   }
-  
-  void writeInterpretation(String phenotype, String ehr, String interpreation, String activityScore) {
-    Row row = getNoteSheet().nextRow();
-    writeStringCell(row, 0, phenotype);
-    writeStringCell(row, 1, activityScore);
-    writeStringCell(row, 2, ehr);
-    writeStringCell(row, 3, interpreation, this.wrapStyle);
-  }
-  
+
   @Override
   String getFilename() {
     return String.format(NAME_TEMPLATE, this.gene);
-  }
-
-  private SheetWrapper getNoteSheet() {
-    if (this.noteSheet == null) {
-      this.noteSheet = findSheet(NOTES_SHEET_NAME);
-      this.noteSheet.setColCount(4);
-      Row headerRow = this.noteSheet.nextRow();
-      writeHeaderCell(headerRow, 0, "Coded Genotype/Phenotype Summary");
-      writeHeaderCell(headerRow, 1, "Activity Score");
-      writeHeaderCell(headerRow, 2, "EHR Priority Result Notation");
-      writeHeaderCell(headerRow, 3, "Consultation (Interpretation) Text Provided with Test Result");
-    }
-    return this.noteSheet;
   }
 }
