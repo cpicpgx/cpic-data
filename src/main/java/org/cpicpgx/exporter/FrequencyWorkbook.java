@@ -3,6 +3,7 @@ package org.cpicpgx.exporter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.cpicpgx.db.LookupMethod;
 
 import java.util.*;
 
@@ -25,18 +26,20 @@ class FrequencyWorkbook extends AbstractWorkbook {
   };
 
   private final String geneSymbol;
+  private final boolean byActivityScore;
   private SheetWrapper sheetReferences;
   private SheetWrapper sheetAllele;
   private SheetWrapper sheetDiplotype;
   private SheetWrapper sheetPhenotype;
 
-  FrequencyWorkbook(String geneSymbol) {
+  FrequencyWorkbook(String geneSymbol, LookupMethod lookupMethod) {
     super();
 
     if (StringUtils.isBlank(geneSymbol)) {
       throw new IllegalArgumentException("Must supply a gene");
     }
     this.geneSymbol = geneSymbol;
+    this.byActivityScore = lookupMethod == LookupMethod.ACTIVITY_SCORE;
   }
   
   void writeMethods(String methods) {
@@ -205,7 +208,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
     sheetPhenotype.sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, bioGeoGroups.size()));
 
     header = sheetPhenotype.nextRow();
-    writeHeaderCell(header, 0, String.format(GENE_CELL_TEMPLATE, geneSymbol));
+    writeHeaderCell(header, 0, byActivityScore ? "Activity Score" : "Phenotype");
     int col = 1;
     for (String group : bioGeoGroups) {
       writeHeaderCell(header, col, group);
@@ -214,9 +217,9 @@ class FrequencyWorkbook extends AbstractWorkbook {
     sheetPhenotype.setColCount(col);
   }
 
-  void writePhenotypeFrequency(String diplotype, Double[] frequencies) {
+  void writePhenotypeFrequency(String phenoOrScore, Double[] frequencies) {
     Row row = sheetPhenotype.nextRow();
-    writeStringCell(row, 0, diplotype, false);
+    writeStringCell(row, 0, phenoOrScore, false);
 
     for (int i = 0; i < frequencies.length; i++) {
       writeDoubleCell(row, 1+i, frequencies[i]);

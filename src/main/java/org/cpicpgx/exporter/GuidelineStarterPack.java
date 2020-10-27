@@ -95,7 +95,7 @@ public class GuidelineStarterPack {
           AlleleFunctionalityReferenceWorkbook alleleFunctionalityReferenceWorkbook = new AlleleFunctionalityReferenceWorkbook(gene);
           workbooksToWrite.add(alleleFunctionalityReferenceWorkbook);
 
-          FrequencyWorkbook frequencyWorkbook = new FrequencyWorkbook(gene);
+          FrequencyWorkbook frequencyWorkbook = new FrequencyWorkbook(gene, lookupMethod);
           frequencyWorkbook.writeEthnicityHeader("Example Group", 0);
           workbooksToWrite.add(frequencyWorkbook);
 

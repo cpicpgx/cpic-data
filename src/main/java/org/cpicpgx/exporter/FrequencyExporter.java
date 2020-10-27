@@ -3,8 +3,11 @@ package org.cpicpgx.exporter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.diff.StringsComparator;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.ActivityScoreComparator;
 import org.cpicpgx.util.DbHarness;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
@@ -61,13 +64,14 @@ public class FrequencyExporter extends BaseExporter {
               "select frequencyMethods from gene where symbol=?"
           );
           PreparedStatement geneStmt = conn.prepareStatement(
-              "select distinct geneSymbol from population_frequency_view order by 1");
+              "select distinct a.geneSymbol, g.lookupmethod from allele_frequency f join allele a on f.alleleid = a.id join gene g on a.genesymbol = g.symbol order by 1");
           ResultSet geneResults = geneStmt.executeQuery()
       ) {
         // gene loop
         while (geneResults.next()) {
           String geneSymbol = geneResults.getString(1);
-          FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol);
+          LookupMethod lookupMethod = LookupMethod.valueOf(geneResults.getString(2));
+          FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol, lookupMethod);
 
 
           // start the Allele Frequency sheet
@@ -115,7 +119,7 @@ public class FrequencyExporter extends BaseExporter {
           List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
           if (phenoPops.size() > 0) {
             workbook.writePhenotypeFrequencyHeader(phenoPops);
-            Map<String, HashMap<String,Double>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol);
+            Map<String, HashMap<String,Double>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol, lookupMethod);
 
             for (String phenotype : phenotypeMap.keySet()) {
               Double[] frequencies = new Double[phenoPops.size()];
@@ -256,6 +260,7 @@ public class FrequencyExporter extends BaseExporter {
     PreparedStatement diplotypeDataStmt;
     PreparedStatement phenotypePopStmt;
     PreparedStatement phenotypeDataStmt;
+    PreparedStatement activityDataStmt;
 
     FrequencyDbHarness() throws SQLException {
       super(FileType.FREQUENCY);
@@ -272,6 +277,8 @@ public class FrequencyExporter extends BaseExporter {
       phenotypePopStmt = prepare("select distinct jsonb_object_keys(frequency) from gene_result where genesymbol=? and frequency is not null order by 1");
       //language=PostgreSQL
       phenotypeDataStmt = prepare("select result,frequency from gene_result where genesymbol=? and frequency is not null order by result desc");
+      //language=PostgreSQL
+      activityDataStmt = prepare("select activityscore,frequency from gene_result where genesymbol=? and frequency is not null");
     }
 
     List<String> getAllelePopulations(String gene) throws SQLException {
@@ -330,12 +337,14 @@ public class FrequencyExporter extends BaseExporter {
       return result;
     }
 
-    Map<String, HashMap<String,Double>> getPhenotypeData(String gene) throws SQLException {
-      Map<String, HashMap<String,Double>> result = new TreeMap<>(Comparator.naturalOrder());
+    Map<String, HashMap<String,Double>> getPhenotypeData(String gene, LookupMethod lookupMethod) throws SQLException {
+      Comparator<String> comparator = lookupMethod == LookupMethod.ACTIVITY_SCORE ? ActivityScoreComparator.getComparator() : Comparator.reverseOrder();
+      PreparedStatement query = lookupMethod == LookupMethod.ACTIVITY_SCORE ? this.activityDataStmt : phenotypeDataStmt;
+      Map<String, HashMap<String,Double>> result = new TreeMap<>(comparator);
       if (StringUtils.isNotBlank(gene)) {
-        this.phenotypeDataStmt.clearParameters();
-        this.phenotypeDataStmt.setString(1, gene);
-        try (ResultSet rs = this.phenotypeDataStmt.executeQuery()) {
+        query.clearParameters();
+        query.setString(1, gene);
+        try (ResultSet rs = query.executeQuery()) {
           while (rs.next()) {
             result.put(rs.getString(1), gson.fromJson(rs.getString(2), doubleMapType));
           }
