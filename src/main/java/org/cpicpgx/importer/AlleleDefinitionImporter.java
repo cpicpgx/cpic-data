@@ -123,7 +123,7 @@ public class AlleleDefinitionImporter {
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
     
-    for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
+    for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
       m_proteinEffects[i] = getCellValue(row, i).orElse(null);
     }
   }
@@ -135,7 +135,7 @@ public class AlleleDefinitionImporter {
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
 
-    for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
+    for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
       m_chromoPositions[i] = getCellValue(row, i).orElse(null);
     }
   }
@@ -147,7 +147,7 @@ public class AlleleDefinitionImporter {
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
 
-    for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
+    for (int i=sf_variantColStart; i <=m_variantColEnd; i++) {
       m_genoPositions[i] = getCellValue(row, i).orElse(null);
     }
   }
@@ -156,7 +156,7 @@ public class AlleleDefinitionImporter {
     Row row = sheet.getRow(5);
     m_dbSnpIds = new String[row.getLastCellNum()];
     
-    for (int i=sf_variantColStart; i < m_variantColEnd; i++) {
+    for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
       Optional<String> rsid = getCellValue(row, i);
       if (!rsid.isPresent()) {
         continue;
