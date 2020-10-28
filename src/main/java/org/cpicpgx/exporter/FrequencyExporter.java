@@ -3,7 +3,6 @@ package org.cpicpgx.exporter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.diff.StringsComparator;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.model.FileType;
