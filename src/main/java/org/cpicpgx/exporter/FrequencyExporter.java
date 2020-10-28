@@ -11,6 +11,7 @@ import org.cpicpgx.util.DbHarness;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.sawano.java.text.AlphanumericComparator;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
@@ -63,27 +64,37 @@ public class FrequencyExporter extends BaseExporter {
               "select frequencyMethods from gene where symbol=?"
           );
           PreparedStatement geneStmt = conn.prepareStatement(
-              "select distinct a.geneSymbol, g.lookupmethod from allele_frequency f join allele a on f.alleleid = a.id join gene g on a.genesymbol = g.symbol order by 1");
+              "select distinct a.geneSymbol, g.lookupmethod, ad.name from allele_frequency f join allele a on f.alleleid = a.id join gene g on a.genesymbol = g.symbol join allele_definition ad on g.symbol = ad.genesymbol where ad.reference is true order by 1");
           ResultSet geneResults = geneStmt.executeQuery()
       ) {
         // gene loop
         while (geneResults.next()) {
           String geneSymbol = geneResults.getString(1);
           LookupMethod lookupMethod = LookupMethod.valueOf(geneResults.getString(2));
+          String refAlleleName = geneResults.getString(3);
           FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol, lookupMethod);
 
 
           // start the Allele Frequency sheet
           List<String> allelePops = dbHarness.getAllelePopulations(geneSymbol);
+          Set<String> alleleNames = dbHarness.getAllelesWithFrequencies(geneSymbol);
+
           if (allelePops.size() > 0) {
             workbook.writeAlleleFrequencyHeader(allelePops);
-            Map<String, HashMap<String,Double>> alleleMap = dbHarness.getAlleleData(geneSymbol);
 
-            for (String allele : alleleMap.keySet()) {
+            // infer reference allele values based on other alleles
+            if (!alleleNames.contains(refAlleleName)) {
               Double[] frequencies = new Double[allelePops.size()];
-              Map<String,Double> popMap = alleleMap.get(allele);
               for (String pop : allelePops) {
-                frequencies[allelePops.indexOf(pop)] = popMap.get(pop);
+                frequencies[allelePops.indexOf(pop)] = dbHarness.getInferredReferenceFrequencyForPopulation(geneSymbol, pop);
+              }
+              workbook.writeAlleleFrequency(refAlleleName, frequencies);
+            }
+
+            for (String allele : alleleNames) {
+              Double[] frequencies = new Double[allelePops.size()];
+              for (String pop : allelePops) {
+                frequencies[allelePops.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, allele, pop);
               }
               workbook.writeAlleleFrequency(allele, frequencies);
             }
@@ -256,21 +267,25 @@ public class FrequencyExporter extends BaseExporter {
     final Gson gson = new Gson();
     @SuppressWarnings("UnstableApiUsage")
     final Type doubleMapType = new TypeToken<HashMap<String, Double>>(){}.getType();
-    PreparedStatement allelePopStmt;
-    PreparedStatement alleleDataStmt;
+    PreparedStatement populationsStmt;
+    PreparedStatement allelePopulationStmt;
+    PreparedStatement inferredRefFreqStmt;
     PreparedStatement diplotypePopStmt;
     PreparedStatement diplotypeDataStmt;
     PreparedStatement phenotypePopStmt;
     PreparedStatement phenotypeDataStmt;
     PreparedStatement activityDataStmt;
+    PreparedStatement alleleNameStmt;
 
     FrequencyDbHarness() throws SQLException {
       super(FileType.FREQUENCY);
 
       //language=PostgreSQL
-      allelePopStmt = prepare("select distinct jsonb_object_keys(frequency) from allele where genesymbol=? and frequency is not null order by 1");
+      populationsStmt = prepare("select distinct population_group from population_frequency_view where genesymbol=? and freq_weighted_avg is not null order by 1");
       //language=PostgreSQL
-      alleleDataStmt = prepare("select name,frequency from allele where genesymbol=? and frequency is not null");
+      allelePopulationStmt = prepare("select freq_weighted_avg from population_frequency_view where genesymbol=? and name=? and population_group=?");
+      //language=PostgreSQL
+      inferredRefFreqStmt = prepare("select 1-sum(freq_weighted_avg) freq_weighted, 1-sum(freq_avg) freq from population_frequency_view f where f.genesymbol=? and population_group=?");
       //language=PostgreSQL
       diplotypePopStmt = prepare("select distinct jsonb_object_keys(grd.frequency) from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionphenotypeid where r.genesymbol=? and grd.frequency is not null order by 1");
       //language=PostgreSQL
@@ -281,14 +296,52 @@ public class FrequencyExporter extends BaseExporter {
       phenotypeDataStmt = prepare("select result,frequency from gene_result where genesymbol=? and frequency is not null order by result desc");
       //language=PostgreSQL
       activityDataStmt = prepare("select activityscore,frequency from gene_result where genesymbol=? and frequency is not null");
+      //language=PostgreSQL
+      alleleNameStmt = prepare("select distinct name from population_frequency_view where genesymbol=?");
+    }
+
+    Set<String> getAllelesWithFrequencies(String gene) throws SQLException {
+      Set<String> alleleNames = new TreeSet<>(new AlphanumericComparator());
+      alleleNameStmt.setString(1, gene);
+      try (ResultSet rs = alleleNameStmt.executeQuery()) {
+        while (rs.next()) {
+          alleleNames.add(rs.getString(1));
+        }
+      }
+      return alleleNames;
+    }
+
+    Double getFrequency(String gene, String alleleName, String bioGroup) throws SQLException {
+      this.allelePopulationStmt.setString(1, gene);
+      this.allelePopulationStmt.setString(2, alleleName);
+      this.allelePopulationStmt.setString(3, bioGroup);
+      try (ResultSet rs = this.allelePopulationStmt.executeQuery()) {
+        if (rs.next()) {
+          return rs.getDouble(1);
+        } else {
+          return null;
+        }
+      }
+    }
+
+    Double getInferredReferenceFrequencyForPopulation(String gene, String bioGroup) throws SQLException {
+      this.inferredRefFreqStmt.setString(1, gene);
+      this.inferredRefFreqStmt.setString(2, bioGroup);
+      try (ResultSet rs = this.inferredRefFreqStmt.executeQuery()) {
+        if (rs.next()) {
+          return rs.getDouble(1);
+        } else {
+          throw new RuntimeException("Not able to infer reference allele frequency");
+        }
+      }
     }
 
     List<String> getAllelePopulations(String gene) throws SQLException {
       List<String> result = new ArrayList<>();
       if (StringUtils.isNotBlank(gene)) {
-        this.allelePopStmt.clearParameters();
-        this.allelePopStmt.setString(1, gene);
-        try (ResultSet rs = this.allelePopStmt.executeQuery()) {
+        this.populationsStmt.clearParameters();
+        this.populationsStmt.setString(1, gene);
+        try (ResultSet rs = this.populationsStmt.executeQuery()) {
           while (rs.next()) {
             result.add(rs.getString(1));
           }
@@ -305,20 +358,6 @@ public class FrequencyExporter extends BaseExporter {
         try (ResultSet rs = this.diplotypePopStmt.executeQuery()) {
           while (rs.next()) {
             result.add(rs.getString(1));
-          }
-        }
-      }
-      return result;
-    }
-
-    Map<String, HashMap<String,Double>> getAlleleData(String gene) throws SQLException {
-      Map<String, HashMap<String,Double>> result = new TreeMap<>(HaplotypeNameComparator.getComparator());
-      if (StringUtils.isNotBlank(gene)) {
-        this.alleleDataStmt.clearParameters();
-        this.alleleDataStmt.setString(1, gene);
-        try (ResultSet rs = this.alleleDataStmt.executeQuery()) {
-          while (rs.next()) {
-            result.put(rs.getString(1), gson.fromJson(rs.getString(2), doubleMapType));
           }
         }
       }
