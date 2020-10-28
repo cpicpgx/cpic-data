@@ -116,7 +116,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
         throw new RuntimeException("Could not find methods sheet");
       }
       StringJoiner methodsText = new StringJoiner("\n");
-      for (int i = 0; i < workbook.currentSheet.getLastRowNum(); i++) {
+      for (int i = 0; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
         if (row.hasNoText(0)) {
           methodsText.add("");
