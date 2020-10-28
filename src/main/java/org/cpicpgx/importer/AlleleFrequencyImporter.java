@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
  */
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern SHEET_ALLELE_NAME = Pattern.compile("Allele frequency( by group)?");
   private static final Pattern SHEET_DIPLO_NAME = Pattern.compile("Diplotype frequency( by group)?");
   private static final Pattern SHEET_PHENO_NAME = Pattern.compile("Phenotype frequency( by group)?");
   //language=PostgreSQL
@@ -35,7 +34,6 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       "delete from file_note where type='" + FileType.FREQUENCY.name() + "'",
       "delete from allele_frequency where alleleid is not null",
       "delete from population where id is not null",
-      "update allele set frequency=null where frequency is not null",
       "update gene_result set frequency=null where frequency is not null",
       "update gene_result_diplotype set frequency=null where frequency is not null",
   };
@@ -125,44 +123,6 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
         }
       }
       frequencyProcessor.updateMethods(methodsText.toString());
-
-      // START handling allele frequencies
-      try {
-        workbook.findSheet(SHEET_ALLELE_NAME);
-
-        Map<Integer,String> colIdxToPopulationMap = new LinkedHashMap<>();
-        RowWrapper headerRow = workbook.getRow(1);
-        for (int i=1; i < headerRow.getLastCellNum(); i++) {
-          if (headerRow.hasNoText(i)) continue;
-          colIdxToPopulationMap.put(i, headerRow.getText(i).replaceAll(" Allele Frequency", ""));
-        }
-
-        for (int i = 2; i <= workbook.currentSheet.getLastRowNum(); i++) {
-          RowWrapper row = workbook.getRow(i);
-          if (row.hasNoText(0)) break;
-
-          String rawAlleleName = StringUtils.stripToNull(row.getText(0));
-          rawAlleleName = normalizeGeneText(gene, rawAlleleName);
-          if (!frequencyProcessor.isValidAllele(rawAlleleName)) {
-            sf_logger.warn("Allele not found for gene {}: [{}]", gene, rawAlleleName);
-            continue;
-          }
-
-          JsonObject frequencyMap = new JsonObject();
-          for (Integer colIdx : colIdxToPopulationMap.keySet()) {
-            try {
-              Double freq = row.getNullableDouble(colIdx);
-              frequencyMap.addProperty(colIdxToPopulationMap.get(colIdx), freq);
-            } catch (NumberFormatException ex) {
-              sf_logger.warn("Allele frequency value for {} not in proper format [{}]: {}", rawAlleleName, workbook.currentSheet.getSheetName(), ex.getMessage());
-            }
-          }
-
-          frequencyProcessor.updateAlleleFrequency(rawAlleleName, frequencyMap);
-        }
-      } catch (InvalidParameterException ex) {
-        sf_logger.info("no allele frequency sheet");
-      }
 
       // START handling diplotype frequencies
       try {

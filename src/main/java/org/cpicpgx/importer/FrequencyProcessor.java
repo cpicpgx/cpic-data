@@ -34,10 +34,8 @@ public class FrequencyProcessor extends DbHarness {
   private final PreparedStatement insertHistory;
   private final PreparedStatement updateMethods;
   private final PreparedStatement updateDiplotypeFrequency;
-  private final PreparedStatement updateAlleleFrequency;
   private final PreparedStatement updateResultFrequency;
   private final PublicationCatalog publicationCatalog;
-  private final Map<String, Long> alleleNameMap;
   private final LookupMethod lookupMethod;
 
   private int colStartOffset = 0;
@@ -52,7 +50,7 @@ public class FrequencyProcessor extends DbHarness {
     super(FileType.FREQUENCY);
     publicationCatalog = new PublicationCatalog(getConnection());
 
-    alleleNameMap = new HashMap<>();
+    Map<String, Long> alleleNameMap = new HashMap<>();
     //language=PostgreSQL
     PreparedStatement pstmt = prepare("select name, id from allele where allele.geneSymbol=?");
     if (gene.equals("HLA")) {
@@ -106,10 +104,6 @@ public class FrequencyProcessor extends DbHarness {
     //language=PostgreSQL
     this.updateDiplotypeFrequency = prepare("update gene_result_diplotype d set frequency=?::jsonb where diplotypekey=?::jsonb and functionphenotypeid in (select l.id from gene_result_lookup l join gene_result r on (l.phenotypeId=r.id) where r.genesymbol=?)");
     this.updateDiplotypeFrequency.setString(3, gene);
-
-    //language=PostgreSQL
-    this.updateAlleleFrequency = prepare("update allele d set frequency=?::jsonb where name=? and genesymbol=?");
-    this.updateAlleleFrequency.setString(3, gene);
 
     //language=PostgreSQL
     if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
@@ -261,18 +255,6 @@ public class FrequencyProcessor extends DbHarness {
     }
   }
 
-  void updateAlleleFrequency(String alleleName, JsonObject frequency) throws Exception {
-    this.updateAlleleFrequency.setString(1, frequency.toString());
-    this.updateAlleleFrequency.setString(2, alleleName);
-    int result = this.updateAlleleFrequency.executeUpdate();
-
-    if (result == 0) {
-      sf_logger.warn("Allele not found [{}]", alleleName);
-    } else if (result > 1) {
-      throw new RuntimeException("More than 1 allele found [" + alleleName + "]");
-    }
-  }
-
   void updateResultFrequency(String phenotype, JsonObject frequency) throws Exception {
     this.updateResultFrequency.setString(1, frequency.toString());
     this.updateResultFrequency.setString(2, phenotype);
@@ -283,10 +265,6 @@ public class FrequencyProcessor extends DbHarness {
     } else if (result > 1) {
       throw new RuntimeException("More than 1 phenotype found [" + phenotype + "]");
     }
-  }
-
-  boolean isValidAllele(String alleleName) {
-    return alleleNameMap.containsKey(alleleName);
   }
 
   private int getAuthorIdx() {
