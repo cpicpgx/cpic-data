@@ -239,6 +239,9 @@ public class FrequencyExporter extends BaseExporter {
           }
           workbook.writeMethods(methods);
 
+          // writing the notes
+          workbook.writeNotes(queryNotes(conn, geneSymbol, FileType.FREQUENCY));
+
           // writing the change log
           workbook.writeChangeLog(queryChangeLog(conn, geneSymbol, getFileType()));
 
