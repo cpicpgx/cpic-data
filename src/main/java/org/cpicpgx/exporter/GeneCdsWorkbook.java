@@ -41,7 +41,7 @@ class GeneCdsWorkbook extends AbstractWorkbook {
   
   void writeConsultation(String phenotype, String priority, String consultation, String activityScore) {
     Row headerRow = sheetWrapper.nextRow();
-    writeStringCell(headerRow, 0, this.geneSymbol + " " + phenotype);
+    writeStringCell(headerRow, 0, phenotype);
     writeStringCell(headerRow, 1, activityScore);
     writeStringCell(headerRow, 2, priority);
     writeStringCell(headerRow, 3, consultation, wrapStyle);
