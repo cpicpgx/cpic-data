@@ -2,21 +2,13 @@
 
 This repo contains all the code used to create and maintain the [CPIC](https://cpicpgx.org) data model. This powers the API and the database.
 
-If you're looking to use the REST API or get a copy of the database, go [read the docs](https://github.com/cpicpgx/cpic-data/wiki).
-
-## THIS IS PRE-RELEASE :exclamation:
-:exclamation:  :exclamation:  :exclamation:  
-WARNING: BETA TESTING ONLY  
-:exclamation:  :exclamation:  :exclamation:
-
-__This repo is under active development and, thus, only useful for testing purposes. When this message disappears and a __production__ release is on the [Releases page](https://github.com/cpicpgx/cpic-data/releases) then it will be ready for use. Until then, this is for evaluation only.__
-
+If you're looking to use the REST API or get a copy of the database, go [read the documentation](https://github.com/cpicpgx/cpic-data/wiki).
 
 ## Important Links for Everyone
 
 ### Read the Docs
 
-If you want more information about using the API or database, [read the docs](https://github.com/cpicpgx/cpic-data/wiki).
+If you want more information about using the API or database, [read the documenatation](https://github.com/cpicpgx/cpic-data/wiki).
 
 ### Bugs/Discussion
 
