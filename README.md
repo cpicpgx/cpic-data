@@ -106,3 +106,13 @@ node src/main/node/writeData.js **PATH_TO_EXISTING_DIRECTORY**
 ```
 
 By default, it will use the production API. If you want to use a local development API set the `API` envvar to `dev`.
+
+## Maintenance
+
+To check for dependencies that require updates due to registered vulnerabilities:
+
+```sh
+./gradlew dependencyCheckAnalyze
+```
+
+You'll see terminal output after a couple of minutes and an HTML report will be generated in `build/reports`.
