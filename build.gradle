@@ -14,24 +14,7 @@ group 'org.cpicpgx'
 
 apply plugin: 'java'
 
-def getVersionName() {
-    def errOut = new ByteArrayOutputStream()
-    try {
-        def stdOut = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--tags'
-            standardOutput = stdOut
-            errorOutput = errOut
-        }
-        return stdOut.toString().trim()
-    } catch (ignore) {
-        logger.info('Error running git describe (' + errOut.toString().trim() + '), defaulting to 0.0.0')
-        return '0.0.0'
-    }
-}
-
 sourceCompatibility = 1.8
-project.version = getVersionName()
 
 repositories {
     mavenCentral()
@@ -74,7 +57,6 @@ test {
 jar {
     manifest {
         attributes 'Main-Class': 'org.cpicpgx.DataImport'
-        attributes 'Implementation-Version': project.version
     }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
