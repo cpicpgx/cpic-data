@@ -116,3 +116,11 @@ To check for dependencies that require updates due to registered vulnerabilities
 ```
 
 You'll see terminal output after a couple of minutes and an HTML report will be generated in `build/reports`.
+
+To check for all dependency updates:
+
+```sh
+./gradlew dependencyUpdates -DoutputFormatter=html
+```
+
+You'll see terminal output and an HTML report will be in `build/dependencyUpdates`.
