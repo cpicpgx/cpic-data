@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const db = require('./db');
+const _ = require('lodash');
 
 const fileErrorHandler = (e) => {
   if (e) {
@@ -107,7 +108,7 @@ const lookupAlleleFunctions = async (gene) => {
     rez.forEach((r) => payload[r.name] = r.clinicalfunctionalstatus);
     return payload;
   } catch (err) {
-    zeroResultHandler(err, 'Problem querying allele functions', err);
+    zeroResultHandler(err, 'Problem querying allele functions');
   }
 }
 
@@ -118,7 +119,18 @@ const lookupDiplotypes = async (gene) => {
     rez.forEach((r) => payload.push({phenotype: r.phenotype, diplotype: [r.function1, r.function2]}));
     return payload;
   } catch (err) {
-    zeroResultHandler(err, 'Problem querying diplotype data', err);
+    zeroResultHandler(err, 'Problem querying diplotype data');
+  }
+}
+
+const lookupDiplotypeResults = async (gene) => {
+  try {
+    const rez = await db.many("select genesymbol||':'||diplotype as diplotype, lookupkey ->> genesymbol result from diplotype where genesymbol=$(gene)", {gene});
+    const payload = {};
+    rez.forEach((r) => payload[r.diplotype] = r.result);
+    return payload;
+  } catch (err) {
+    zeroResultHandler(err, 'Problem querying diplotype result map');
   }
 }
 
@@ -188,11 +200,16 @@ const writeGenePhenotypes = async (dirPath) => {
   const payload = [];
   for (let i = 0; i < genes.length; i++) {
     const gene = genes[i];
-    payload.push({
-      gene: gene.genesymbol,
-      haplotypes: await lookupAlleleFunctions(gene.genesymbol),
-      diplotypes: await lookupDiplotypes(gene.genesymbol),
-    });
+    const haplotypes = await lookupAlleleFunctions(gene.genesymbol);
+
+    if (_.size(haplotypes) > 0) {
+      payload.push({
+        gene: gene.genesymbol,
+        haplotypes,
+        diplotypes: await lookupDiplotypes(gene.genesymbol),
+        diplotypeResults: await lookupDiplotypeResults(gene.genesymbol),
+      });
+    }
   }
 
   await fs.writeFile(
@@ -203,9 +220,45 @@ const writeGenePhenotypes = async (dirPath) => {
   console.log(`wrote ${filePath}`);
 }
 
+const lookupDrugs = async () => {
+  try {
+    return await db.many(`select d.drugid, d.name as drugname, g.name as guidelinename, g.url, g.pharmgkbid as guidelinePharmgkbIds, g.genes, json_agg(distinct p) as citations
+from guideline g join recommendation r on (g.id=r.guidelineid) join drug d on (r.drugid = d.drugid) join publication p on (g.id = p.guidelineid)
+group by d.drugid, d.name, g.name, g.url, g.pharmgkbid, g.genes order by d.name`);
+  } catch (err) {
+    zeroResultHandler(err, 'No guidelines found');
+  }
+}
+
+const lookupRecommendations = async (drugId) => {
+  try {
+    return await db.many(`select r.implications, r.drugrecommendation, r.classification, r.phenotypes, 
+        r.activityscore, r.allelestatus, r.lookupkey, r.comments 
+        from recommendation r where r.drugid=$(drugId) order by r.lookupkey`, {drugId});
+  } catch (err) {
+    zeroResultHandler(err, 'No recommendations for a guideline');
+  }
+}
+
+const writeGuidelines = async (rootPath) => {
+  const drugs = await lookupDrugs();
+
+  const payload = [];
+  for (let i = 0; i < drugs.length; i++) {
+    const drug = drugs[i];
+    drug.recommendations = await lookupRecommendations(drug.drugid);
+    payload.push(drug);
+  }
+
+  const filePath = path.join(rootPath, 'drugs.json');
+  await fs.writeFile(filePath, JSON.stringify(payload, null, 2), fileErrorHandler);
+  console.log(`wrote ${filePath}`);
+}
+
 try {
   writeAlleleDefinitions(process.argv[2]);
   writeGenePhenotypes(process.argv[2]);
+  writeGuidelines(process.argv[2]);
 } catch (err) {
   console.error('Error writing allele definitions', err);
   process.exit(1);
