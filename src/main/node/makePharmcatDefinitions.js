@@ -29,16 +29,32 @@ const zeroResultHandler = (err, message) => {
  * @returns {Promise<[]>} an array of location data
  */
 const lookupVariants = async (gene) => {
-  const rez = await db.many('select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id from allele_definition a join allele_location_value alv on a.id = alv.alleledefinitionid join sequence_location sl on alv.locationid = sl.id where a.genesymbol=$(gene) and reference is true', {gene});
+  const rez = await db.many(`
+select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id, g.chr
+from allele_definition a join allele_location_value alv on a.id = alv.alleledefinitionid
+    join sequence_location sl on alv.locationid = sl.id join gene g on a.genesymbol = g.symbol
+where a.genesymbol=$(gene) and reference is true`, {gene});
   const payload = [];
   for (let i = 0; i < rez.length; i++) {
+    const positionPattern = /g\.(\d+)/g;
     const r = rez[i];
+    const positionMatch = positionPattern.exec(r.chromosomelocation);
+    let type = 'SNP';
+    if (r.chromosomelocation.includes('ins')) {
+      type = 'INS';
+    } else if (r.chromosomelocation.includes('del')) {
+      type = 'DEL';
+    }
     payload.push({
+      chromosome: r.chr,
+      position: _.toNumber(_.get(positionMatch, '[1]', null)),
+      rsid: r.dbsnpid,
       chromosomeHgvsName: r.chromosomelocation,
       geneHgvsName: r.genelocation,
       proteinNote: r.proteinlocation,
       resourceNote: r.name,
-      rsid: r.dbsnpid,
+      type,
+      referenceRepeat: null,
       sequenceLocationId: r.id,
     });
   }
@@ -112,23 +128,9 @@ const lookupAlleleFunctions = async (gene) => {
   }
 }
 
-const lookupDiplotypes = async (gene) => {
+const listDiplotypeData = async (gene) => {
   try {
-    const rez = await db.many('select r.result as phenotype, grl.function1, grl.function2 from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid where genesymbol=$(gene)', {gene});
-    const payload = [];
-    rez.forEach((r) => payload.push({phenotype: r.phenotype, diplotype: [r.function1, r.function2]}));
-    return payload;
-  } catch (err) {
-    zeroResultHandler(err, 'Problem querying diplotype data');
-  }
-}
-
-const lookupDiplotypeResults = async (gene) => {
-  try {
-    const rez = await db.many("select genesymbol||':'||diplotype as diplotype, lookupkey ->> genesymbol result from diplotype where genesymbol=$(gene)", {gene});
-    const payload = {};
-    rez.forEach((r) => payload[r.diplotype] = r.result);
-    return payload;
+    return await db.many("select diplotype, generesult, description, lookupkey ->> genesymbol lookupkey from diplotype where genesymbol=$(gene)", {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying diplotype result map');
   }
@@ -206,8 +208,7 @@ const writeGenePhenotypes = async (dirPath) => {
       payload.push({
         gene: gene.genesymbol,
         haplotypes,
-        diplotypes: await lookupDiplotypes(gene.genesymbol),
-        diplotypeResults: await lookupDiplotypeResults(gene.genesymbol),
+        diplotypes: await listDiplotypeData(gene.genesymbol),
       });
     }
   }
@@ -222,9 +223,9 @@ const writeGenePhenotypes = async (dirPath) => {
 
 const lookupDrugs = async () => {
   try {
-    return await db.many(`select d.drugid, d.name as drugname, g.name as guidelinename, g.url, g.pharmgkbid as guidelinePharmgkbIds, g.genes, json_agg(distinct p) as citations
-from guideline g join recommendation r on (g.id=r.guidelineid) join drug d on (r.drugid = d.drugid) join publication p on (g.id = p.guidelineid)
-group by d.drugid, d.name, g.name, g.url, g.pharmgkbid, g.genes order by d.name`);
+    return await db.many(`select d.drugid, d.name as drugname, g.name as guidelinename, g.url, g.pharmgkbid as guidelinePharmgkbIds, array_agg(distinct gene) genes, json_agg(distinct p) as citations
+from guideline g join recommendation r on (g.id=r.guidelineid) join drug d on (r.drugid = d.drugid) join publication p on (g.id = p.guidelineid), jsonb_object_keys(r.lookupkey) gene
+group by d.drugid, d.name, g.name, g.url, g.pharmgkbid order by d.name`);
   } catch (err) {
     zeroResultHandler(err, 'No guidelines found');
   }
@@ -233,7 +234,7 @@ group by d.drugid, d.name, g.name, g.url, g.pharmgkbid, g.genes order by d.name`
 const lookupRecommendations = async (drugId) => {
   try {
     return await db.many(`select r.implications, r.drugrecommendation, r.classification, r.phenotypes, 
-        r.activityscore, r.allelestatus, r.lookupkey, r.comments 
+        r.activityscore, r.allelestatus, r.lookupkey, r.comments, r.population 
         from recommendation r where r.drugid=$(drugId) order by r.lookupkey`, {drugId});
   } catch (err) {
     zeroResultHandler(err, 'No recommendations for a guideline');
