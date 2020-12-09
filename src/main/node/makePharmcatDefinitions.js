@@ -33,7 +33,7 @@ const lookupVariants = async (gene) => {
 select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id, g.chr
 from allele_definition a join allele_location_value alv on a.id = alv.alleledefinitionid
     join sequence_location sl on alv.locationid = sl.id join gene g on a.genesymbol = g.symbol
-where a.genesymbol=$(gene) and reference is true`, {gene});
+where a.genesymbol=$(gene) and reference is true order by sl.chromosomelocation`, {gene});
   const payload = [];
   for (let i = 0; i < rez.length; i++) {
     const positionPattern = /g\.(\d+)/g;
@@ -111,7 +111,7 @@ const lookupVariantAlleles = async (sequenceLocationId) => {
  */
 const lookupNamedAlleles = async (gene) => {
   try {
-    return await db.many('select a.name, a.id::text as id, array_agg(v.variantallele) as alleles from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid) where a.genesymbol=$(gene) group by a.name, a.id::text', {gene});
+    return await db.many('select a.name, a.id::text as id, array_agg(v.variantallele order by sl.chromosomelocation) as alleles from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid) where a.genesymbol=$(gene) group by a.name, a.id::text order by a.name', {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying possible alleles');
   }
