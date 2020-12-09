@@ -63,13 +63,13 @@ where a.genesymbol=$(gene) and reference is true`, {gene});
 
 /**
  * Queries the DB for genes that have allele definitions. This limits to genes that have a "reference" allele in order
- * to avoid non-standard allele sets like the HLA's.
+ * to avoid non-standard allele sets like the HLA's. Also explicitly excludes G6PD since it's not supported yet.
  * @returns {Promise<Object[]>} an array of gene objects
  */
 const lookupGenes = async () => {
   return await db.many(`
     select distinct a.genesymbol, g.chr, g.genesequenceid, g.chromosequenceid, g.proteinsequenceid 
-    from allele_definition a join gene g on a.genesymbol = g.symbol where a.reference is true order by 1
+    from allele_definition a join gene g on a.genesymbol = g.symbol where a.reference is true and g.symbol!='G6PD' order by 1
     `);
 };
 
