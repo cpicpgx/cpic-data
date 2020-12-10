@@ -111,7 +111,7 @@ const lookupVariantAlleles = async (sequenceLocationId) => {
  */
 const lookupNamedAlleles = async (gene) => {
   try {
-    return await db.many('select a.name, a.id::text as id, array_agg(v.variantallele order by sl.chromosomelocation) as alleles from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid) where a.genesymbol=$(gene) group by a.name, a.id::text order by a.name', {gene});
+    return await db.many('select a.name, a.id::text as id, array_agg(v.variantallele order by sl.chromosomelocation) as alleles from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid) where a.genesymbol=$(gene) group by a.reference, a.name, a.id::text order by a.reference desc, a.name', {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying possible alleles');
   }
