@@ -16,8 +16,8 @@ const updatePublication = async (pmid) => {
     {params: {view: 'base', "crossReferences.resourceId": pmid, 'crossReferences.resource': 'PubMed'}});
   const lit = response.data.data[0];
   lit.pmid = pmid;
-  lit.doi = getXrefId(lit.xrefs, 'DOI');
-  lit.pmcid = getXrefId(lit.xrefs, 'PubMed Central');
+  lit.doi = getXrefId(lit.crossReferences, 'DOI');
+  lit.pmcid = getXrefId(lit.crossReferences, 'PubMed Central');
 
   await db.none(`
 insert into publication(title, authors, journal, month, year, pmid, doi, pmcid) 
@@ -30,7 +30,7 @@ set title=excluded.title, authors=excluded.authors, journal=excluded.journal, mo
 
 const getXrefId = (xrefs = [], resource) => {
   const rez = xrefs.filter((x) => x.resource === resource);
-  if (rez) return rez[0].resourceId;
+  if (rez) return rez[0]?.resourceId;
   return null;
 }
 
