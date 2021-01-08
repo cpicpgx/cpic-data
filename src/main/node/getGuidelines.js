@@ -13,7 +13,7 @@ exports.getGuidelines = (path) => {
     {params: {select: 'name,url,gene(symbol),guideline_for_drug(name)', order: 'name'}},
   )
     .then((r) => {
-      fs.writeFile(jsonFile, JSON.stringify(r.data, null, 2), (e) => {
+      fs.writeFile(jsonFile, JSON.stringify(r.data, null, 2).replace(/guideline_for_drug/gi, 'drug'), (e) => {
         if (e) console.log(e);
         console.log(`Done writing ${jsonFile}`);
       });
