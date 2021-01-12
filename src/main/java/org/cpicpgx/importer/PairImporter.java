@@ -32,20 +32,28 @@ public class PairImporter extends BaseDirectoryImporter {
     try (PairDbHarness db = new PairDbHarness()) {
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
+        // skip any rows that have blank gene and drug fields
+        if (row.hasNoText(0) && row.hasNoText(1)) {
+          continue;
+        }
 
-        db.write(
-            row.getText(0),
-            row.getText(1),
-            row.getNullableText(2),
-            row.getNullableText(3),
-            row.getNullableText(4, true),
-            row.getNullableText(5),
-            row.getNullablePmids(6),
-            row.getNullableText(7),
-            row.getText(8),
-            row.getNullableDate(9),
-            row.getNullableText(10)
-        );
+        try {
+          db.write(
+              row.getText(0),
+              row.getText(1),
+              row.getNullableText(2),
+              row.getNullableText(3),
+              row.getNullableText(4, true),
+              row.getNullableText(5),
+              row.getNullablePmids(6),
+              row.getNullableText(7),
+              row.getText(8),
+              row.getNullableDate(9),
+              row.getNullableText(10)
+          );
+        } catch (Exception ex) {
+          throw new RuntimeException("Error reading row " + (i + 1), ex);
+        }
       }
 
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
