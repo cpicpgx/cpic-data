@@ -11,6 +11,7 @@
   "author": "Ryan Whaley",
   "license": "CC0-1.0",
   "dependencies": {
+    "aws-sdk": "^2.827.0",
     "axios": "^0.21.1",
     "csv-generate": "^3.3.0",
     "dayjs": "^1.10.3",

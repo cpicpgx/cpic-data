@@ -1,12 +1,15 @@
 /**
  * This script writes allele definition data to JSON files, one per Gene. These definition files should be used in
  * PharmCAT.
+ *
+ * IMPORTANT: you may need to set the AWS_PROFILE env var if you're using a different profile for CPIC
  */
 
 const fs = require('fs');
 const path = require('path');
 const db = require('./db');
 const _ = require('lodash');
+const S3 = require('aws-sdk/clients/s3');
 
 const fileErrorHandler = (e) => {
   if (e) {
@@ -21,6 +24,24 @@ const zeroResultHandler = (err, message) => {
     console.warn(message, err);
     return undefined;
   }
+}
+
+const uploadToS3 = (fileName, content) => {
+  const upload = new S3.ManagedUpload({params: {
+      Bucket: 'files.cpicpgx.org',
+      Key: `data/report/current/${fileName}`,
+      Body: content
+    }});
+  upload.send(
+    (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log(`uploaded ${data.Location}`);
+      }
+    },
+  );
+
 }
 
 /**
@@ -185,6 +206,8 @@ const writeAlleleDefinitions = async (dirPath) => {
     fileErrorHandler
   );
   console.log(`wrote ${alleleDefPath}`);
+  uploadToS3('allele_definitions.json', JSON.stringify(alleleDefinitions, null, 2));
+
   const idFilePath = path.join(dirPath, 'haplotype_id_list.tsv');
   await fs.writeFileSync(
     idFilePath,
@@ -192,6 +215,7 @@ const writeAlleleDefinitions = async (dirPath) => {
     fileErrorHandler
   );
   console.log(`wrote ${idFilePath}`);
+  uploadToS3('haplotype_id_list.tsv', idList.join('\n'));
 }
 
 const writeGenePhenotypes = async (dirPath) => {
@@ -216,6 +240,7 @@ const writeGenePhenotypes = async (dirPath) => {
     JSON.stringify(payload, null, 2),
     fileErrorHandler
   );
+  uploadToS3('gene_phenotypes.json', JSON.stringify(payload, null, 2));
   console.log(`wrote ${filePath}`);
 }
 
@@ -252,6 +277,7 @@ const writeGuidelines = async (rootPath) => {
   const filePath = path.join(rootPath, 'drugs.json');
   await fs.writeFile(filePath, JSON.stringify(payload, null, 2), fileErrorHandler);
   console.log(`wrote ${filePath}`);
+  uploadToS3('drugs.json', JSON.stringify(payload, null, 2));
 }
 
 try {
