@@ -142,21 +142,17 @@ const listDiplotypeData = async (gene) => {
  * @return {Promise<void>}
  */
 const writeAlleleDefinitions = async (dirPath) => {
-  const allelesDir = path.join(dirPath, 'alleles');
-  if (!fs.existsSync(allelesDir)) {
-    fs.mkdirSync(allelesDir);
-  }
   const genes = await lookupGenes();
   const idList = ['gene\tallele\tID'];
+  const alleleDefinitions = [];
   for (let i = 0; i < genes.length; i++) {
     const gene = genes[i];
-    const filePath = path.join(allelesDir, `${gene.genesymbol}_translation.json`);
 
     try {
       const variants = await lookupVariants(gene.genesymbol);
       const variantAlleles = await Promise.all(variants.map(async (v) => await lookupVariantAlleles(v.sequenceLocationId)));
       const namedAlleles = await lookupNamedAlleles(gene.genesymbol);
-      const geneFileContent = {
+      const geneAlleleDefinition = {
         formatVersion: 1,
         modificationDate: new Date().toISOString(),
         gene: gene.genesymbol,
@@ -170,12 +166,7 @@ const writeAlleleDefinitions = async (dirPath) => {
         variantAlleles,
         namedAlleles,
       };
-      await fs.writeFile(
-        filePath,
-        JSON.stringify(geneFileContent, null, 2),
-        fileErrorHandler,
-      );
-      console.log(`wrote ${filePath}`);
+      alleleDefinitions.push(geneAlleleDefinition);
 
       namedAlleles.forEach((a) => idList.push(`${gene.genesymbol}\t${a.name}\t${a.id}`));
     } catch (err) {
@@ -187,8 +178,15 @@ const writeAlleleDefinitions = async (dirPath) => {
       }
     }
   }
-  const idFilePath = path.join(dirPath, 'haplotype.id.list.tsv');
-  await fs.writeFile(
+  const alleleDefPath = path.join(dirPath, 'allele_definitions.json');
+  await fs.writeFileSync(
+    alleleDefPath,
+    JSON.stringify(alleleDefinitions, null, 2),
+    fileErrorHandler
+  );
+  console.log(`wrote ${alleleDefPath}`);
+  const idFilePath = path.join(dirPath, 'haplotype_id_list.tsv');
+  await fs.writeFileSync(
     idFilePath,
     idList.join('\n'),
     fileErrorHandler
@@ -197,7 +195,7 @@ const writeAlleleDefinitions = async (dirPath) => {
 }
 
 const writeGenePhenotypes = async (dirPath) => {
-  const filePath = path.join(dirPath, 'gene.phenotypes.json');
+  const filePath = path.join(dirPath, 'gene_phenotypes.json');
   const genes = await lookupGenes();
   const payload = [];
   for (let i = 0; i < genes.length; i++) {
