@@ -13,3 +13,7 @@ upload:
 
 .PHONY: archive
 archive: dump upload
+
+.PHONY: update-wiki-toc
+update-wiki-toc:
+	markdown-toc -i cpic-data.wiki/Home.md
