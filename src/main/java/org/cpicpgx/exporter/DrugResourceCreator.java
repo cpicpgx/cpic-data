@@ -123,11 +123,11 @@ public class DrugResourceCreator {
       }
     }
 
-    JsonArray xrefArray = drugJson.getAsJsonArray("xrefs");
-    for (JsonElement xrefElement : xrefArray) {
-      String resource = xrefElement.getAsJsonObject().get("resource").getAsString();
+    JsonArray crossReferenceArray = drugJson.getAsJsonArray("crossReferences");
+    for (JsonElement crossReferenceElement : crossReferenceArray) {
+      String resource = crossReferenceElement.getAsJsonObject().get("resource").getAsString();
       if (resource.equals("DrugBank")) {
-        drugBankId = xrefElement.getAsJsonObject().get("resourceId").getAsString();
+        drugBankId = crossReferenceElement.getAsJsonObject().get("resourceId").getAsString();
       }
     }
 
