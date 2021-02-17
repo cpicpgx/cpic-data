@@ -36,7 +36,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
       "delete from gene_result_lookup",
       "delete from gene_result"
   };
-  private static final Pattern GENE_PATTERN = Pattern.compile("Gene:\\s+(\\w+)");
+  private static final Pattern GENE_PATTERN = Pattern.compile("Gene:\\s+([\\w-]+)");
 
   private static final int COL_A1_FN = 0;
   private static final int COL_A2_FN = 1;
