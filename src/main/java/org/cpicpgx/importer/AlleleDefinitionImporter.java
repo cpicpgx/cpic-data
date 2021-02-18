@@ -35,6 +35,7 @@ public class AlleleDefinitionImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int sf_variantColStart = 1;
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
+  private static final Pattern sf_seqPositionPattern = Pattern.compile("g\\.(\\d+(_(\\d+))?)");
   private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
   private static final int sf_alleleRowStart = 7;
 
@@ -52,6 +53,7 @@ public class AlleleDefinitionImporter {
   private Map<String,Map<Integer,String>> m_alleles;
   private int m_svColIdx = -1;
   private final Map<String,String> m_svToPvAlleles = new HashMap<>();
+  private final Set<String> m_positionCache = new HashSet<>();
 
   public static void main(String[] args) {
     try {
@@ -134,9 +136,11 @@ public class AlleleDefinitionImporter {
 
     Cell description = row.getCell(0);
     findSeqId(description.getStringCellValue());
+    checkPosition(description.getStringCellValue());
 
     for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
       m_chromoPositions[i] = getCellValue(row, i).orElse(null);
+      checkPosition(m_chromoPositions[i]);
     }
   }
   
@@ -186,6 +190,23 @@ public class AlleleDefinitionImporter {
         m_chromoSeqId = seqId;
       } else if (seqId.startsWith("NP_")) {
         m_proteinSeqId = seqId;
+      }
+    }
+  }
+
+  /**
+   * Check to make sure the position found in this cell occurs once and only once
+   * @param cellContent chromosomal cell content
+   */
+  private void checkPosition(String cellContent) {
+    if (StringUtils.isBlank(cellContent)) return;
+
+    Matcher m = sf_seqPositionPattern.matcher(cellContent);
+    if (m.find()) {
+      String position = m.group(1);
+      boolean isUnfound = m_positionCache.add(position);
+      if (!isUnfound) {
+        throw new RuntimeException("Chromosomal position [" + cellContent + "] used twice");
       }
     }
   }
