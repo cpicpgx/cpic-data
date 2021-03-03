@@ -2,6 +2,7 @@ package org.cpicpgx.db;
 
 import org.apache.commons.cli.*;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.output.MigrateResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +38,8 @@ public class FlywayMigrate {
       } else {
         sf_logger.info("Starting at version {}", flyway.info().current().getVersion());
       }
-      int migrations = flyway.migrate();
-      sf_logger.info("Applied {} changes, now at version {}", migrations, flyway.info().current().getVersion());
+      MigrateResult result = flyway.migrate();
+      sf_logger.info("Applied {} changes, now at version {}", result.migrationsExecuted, flyway.info().current().getVersion());
     }
     catch (ParseException ex) {
       sf_logger.error("Error parsing args", ex);
