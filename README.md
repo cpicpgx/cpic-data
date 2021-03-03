@@ -109,6 +109,8 @@ By default, it will use the production API. If you want to use a local developme
 
 ## Maintenance
 
+### Java dependencies
+
 To check for dependencies that require updates due to registered vulnerabilities:
 
 ```sh
@@ -124,3 +126,11 @@ To check for all dependency updates:
 ```
 
 You'll see terminal output and an HTML report will be in `build/dependencyUpdates`.
+
+### Gradle wrapper update
+
+To update the gradle wrapper for the project
+
+```shell
+./gradlew wrapper --gradle-version <new version>
+```
