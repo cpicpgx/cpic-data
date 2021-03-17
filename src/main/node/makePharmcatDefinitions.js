@@ -62,10 +62,14 @@ const uploadToS3 = (fileName, content) => {
  */
 const lookupVariants = async (gene) => {
   const rez = await db.many(`
-select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id, g.chr
-from allele_definition a join allele_location_value alv on a.id = alv.alleledefinitionid
-    join sequence_location sl on alv.locationid = sl.id join gene g on a.genesymbol = g.symbol
-where a.genesymbol=$(gene) and reference is true order by sl.chromosomelocation`, {gene});
+      select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id, g.chr
+      from allele_definition a
+               join allele_location_value alv on a.id = alv.alleledefinitionid
+               join sequence_location sl on alv.locationid = sl.id
+               join gene g on a.genesymbol = g.symbol
+      where a.genesymbol=$(gene) and reference is true
+      order by sl.chromosomelocation
+  `, {gene});
   const payload = [];
   for (let i = 0; i < rez.length; i++) {
     const positionPattern = /g\.(\d+)/g;
@@ -100,8 +104,21 @@ where a.genesymbol=$(gene) and reference is true order by sl.chromosomelocation`
  */
 const lookupGenes = async () => {
   return await db.many(`
-    select distinct a.genesymbol, g.chr, g.genesequenceid, g.chromosequenceid, g.proteinsequenceid 
-    from allele_definition a join gene g on a.genesymbol = g.symbol where a.reference is true and g.symbol!='G6PD' order by 1
+      select distinct a.genesymbol, g.chr, g.genesequenceid, g.chromosequenceid, g.proteinsequenceid
+      from allele_definition a join gene g on a.genesymbol = g.symbol
+      where a.reference is true and g.symbol!='G6PD'
+      order by 1
+    `);
+};
+
+/**
+ * Queries the DB for genes that have alleles. This is different than the list of genes that have allele definitions
+ * because not all alleles used in the system have definitions (e.g. HLAs).
+ * @returns {Promise<Object[]>} an array of objects with the genesymbol property
+ */
+const lookupGenesWithAlleles = async () => {
+  return await db.many(`
+      select distinct genesymbol from allele where genesymbol!='G6PD' order by 1
     `);
 };
 
@@ -129,7 +146,11 @@ const lookupNotes = async (gene) => {
  */
 const lookupVariantAlleles = async (sequenceLocationId) => {
   try {
-    const rez = await db.many('select distinct variantallele from allele_location_value where locationid=$(sequenceLocationId)', {sequenceLocationId});
+    const rez = await db.many(`
+        select distinct v.variantallele from allele_location_value v
+            join allele_definition ad on v.alleledefinitionid = ad.id
+        where v.locationid=$(sequenceLocationId) and ad.structuralvariation is false
+    `, {sequenceLocationId});
     return rez.map((r) => r.variantallele);
   } catch (err) {
     zeroResultHandler(err, 'Problem querying possible alleles');
@@ -143,7 +164,12 @@ const lookupVariantAlleles = async (sequenceLocationId) => {
  */
 const lookupNamedAlleles = async (gene) => {
   try {
-    return await db.many('select a.name, a.id::text as id, array_agg(v.variantallele order by sl.chromosomelocation) as alleles, a.reference from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid) where a.genesymbol=$(gene) group by a.reference, a.name, a.id::text order by a.reference desc, a.name', {gene});
+    return await db.many(`
+        select a.name, a.id::text as id, array_agg(v.variantallele order by sl.chromosomelocation) as alleles, a.reference 
+        from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol 
+            left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid)
+        where a.genesymbol=$(gene) and a.structuralvariation is false group by a.reference, a.name, a.id::text order by a.reference desc, a.name
+        `, {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying possible alleles');
   }
@@ -231,7 +257,7 @@ const writeAlleleDefinitions = async (dirPath) => {
 
 const writeGenePhenotypes = async (dirPath) => {
   const filePath = path.join(dirPath, 'gene_phenotypes.json');
-  const genes = await lookupGenes();
+  const genes = await lookupGenesWithAlleles();
   const payload = [];
   for (let i = 0; i < genes.length; i++) {
     const gene = genes[i];
