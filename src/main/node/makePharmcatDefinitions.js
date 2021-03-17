@@ -10,6 +10,14 @@ const path = require('path');
 const db = require('./db');
 const _ = require('lodash');
 const S3 = require('aws-sdk/clients/s3');
+const { program } = require('commander');
+
+program.version('1.0');
+program
+  .option('-o, --output-path <path>', 'directory path to write output to')
+  .option('-u, --upload', 'should the generated files be uploaded');
+program.parse(process.argv);
+const options = program.opts();
 
 const fileErrorHandler = (e) => {
   if (e) {
@@ -27,21 +35,24 @@ const zeroResultHandler = (err, message) => {
 }
 
 const uploadToS3 = (fileName, content) => {
-  const upload = new S3.ManagedUpload({params: {
-      Bucket: 'files.cpicpgx.org',
-      Key: `data/report/current/${fileName}`,
-      Body: content
-    }});
-  upload.send(
-    (err, data) => {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log(`uploaded ${data.Location}`);
+  if (options.upload) {
+    const upload = new S3.ManagedUpload({
+      params: {
+        Bucket: 'files.cpicpgx.org',
+        Key: `data/report/current/${fileName}`,
+        Body: content
       }
-    },
-  );
-
+    });
+    upload.send(
+      (err, data) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(`uploaded ${data.Location}`);
+        }
+      },
+    );
+  }
 }
 
 /**
@@ -281,9 +292,9 @@ const writeGuidelines = async (rootPath) => {
 }
 
 try {
-  writeAlleleDefinitions(process.argv[2]);
-  writeGenePhenotypes(process.argv[2]);
-  writeGuidelines(process.argv[2]);
+  writeAlleleDefinitions(options.outputPath).then(() => console.log('done with allele definitions'));
+  writeGenePhenotypes(options.outputPath).then(() => console.log('done with gene phenotypes'));
+  writeGuidelines(options.outputPath).then(() => console.log('done with recommendations'));
 } catch (err) {
   console.error('Error writing allele definitions', err);
   process.exit(1);
