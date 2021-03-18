@@ -283,9 +283,25 @@ const writeGenePhenotypes = async (dirPath) => {
 
 const lookupDrugs = async () => {
   try {
-    return await db.many(`select d.drugid, d.name as drugname, g.name as guidelinename, g.url, g.pharmgkbid as guidelinePharmgkbIds, array_agg(distinct gene) genes, json_agg(distinct p) as citations
-from guideline g join recommendation r on (g.id=r.guidelineid) join drug d on (r.drugid = d.drugid) join publication p on (g.id = p.guidelineid), jsonb_object_keys(r.lookupkey) gene
-group by d.drugid, d.name, g.name, g.url, g.pharmgkbid order by d.name`);
+    return await db.many(`
+        with x as (
+            select r.drugid, array_agg(distinct gene) as genes from recommendation r, jsonb_object_keys(r.lookupkey) gene group by r.drugid
+        )
+        select pair.drugid, d.name as drugname, g.name as guidelinename, g.url,
+               g.pharmgkbid as guidelinePharmgkbIds,
+               coalesce(x.genes, g.genes) genes,
+               json_agg(distinct p) as citations,
+               g.notesonusage
+        from
+            guideline g
+                join pair on g.id=pair.guidelineid
+                join drug d on pair.drugid = d.drugid
+                left join publication p on g.id = p.guidelineid
+                left join x on pair.drugid = x.drugid
+        where pair.usedforrecommendation is true and pair.removed is false
+        group by pair.drugid,d.name,g.name,g.url,g.pharmgkbid,coalesce(x.genes, g.genes),g.notesonusage
+        order by d.name
+    `);
   } catch (err) {
     zeroResultHandler(err, 'No guidelines found');
   }
