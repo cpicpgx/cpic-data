@@ -188,7 +188,10 @@ const lookupAlleleFunctions = async (gene) => {
 
 const listDiplotypeData = async (gene) => {
   try {
-    return await db.many("select diplotype, generesult, description, lookupkey ->> genesymbol lookupkey from diplotype where genesymbol=$(gene)", {gene});
+    return await db.many(`
+        select diplotype, generesult, description, lookupkey ->> genesymbol lookupkey,
+               diplotypekey -> genesymbol diplotypekey
+        from diplotype where genesymbol=$(gene)`, {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying diplotype result map');
   }
