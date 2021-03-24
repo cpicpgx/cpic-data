@@ -2,11 +2,12 @@ const fs = require('fs');
 const axios = require('axios');
 const cpicapi = require('./cpicapi');
 const _ = require('lodash');
+const Papa = require('papaparse');
 
 const defaultFilename = 'cpic.alleles';
 
 exports.getAlleles = (path) => {
-  const url = cpicapi.apiUrl('/allele_guideline_view');
+  const url = cpicapi.apiUrl('/allele_guideline_view?order=genesymbol,allele_name');
   console.log(`Fetching data from: ${url}`);
   axios.get(url, {})
     .then((r) => {
@@ -34,12 +35,11 @@ exports.getAlleles = (path) => {
         console.log('Done writing ' + jsonFile);
       });
 
-      const csv = ['Gene,Allele,Guideline,URL'];
-      _.forEach(original, (o) => {
-        csv.push(o.genesymbol + ',' + o.allele_name + ',' + o.guideline_name + ',' + o.guideline_url)
-      });
+      const fields = ['Gene', 'Allele', 'Guideline', 'URL'];
+      const data = original.map((o) => [o.genesymbol, o.allele_name, o.guideline_name, o.guideline_url]);
+      const csv = Papa.unparse({fields, data}, {quotes: true});
       const csvFile = path + "/" + defaultFilename + ".csv";
-      fs.writeFile(csvFile, csv.join('\n'), (e) => {
+      fs.writeFile(csvFile, csv, (e) => {
         if (e) console.log(e);
         console.log('Done writing ' + csvFile);
       });
