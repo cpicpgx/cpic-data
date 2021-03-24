@@ -69,6 +69,7 @@ public class DataArtifactArchive {
     exporters.add(new RecommendationExporter());
     exporters.add(new TestAlertExporter());
     exporters.add(new PairsExporter());
+    exporters.add(new AlleleSummaryExporter());
 
     exporters.forEach(e -> {
       Path dirPath = getDirectoryPath(e.getFileType().name().toLowerCase());
