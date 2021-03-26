@@ -8,14 +8,44 @@
           <option name="name" value="Postgres DDL" />
           <option name="urls">
             <array>
-              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V3__views.sql" />
-              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V2__initial_data.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/R__apply_permissions.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__Initial_bootstrap.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V2__initial_data.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V3__views.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V4__flow_charts.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V6__nsaid_release.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V7__nsaid_pair_data.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V8__data_progress_view.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V9__file_view.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V10__pair_data_update.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V11__guideline_in_drug_model.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V12__pair_data_update.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V13__add_publications.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V14__add_highlighted_publications.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V15__pair_data_update.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V16__update_ibuprofen_ATC.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V18__allele_status_lookup.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V19__new_publication.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V20__update_sequence_IDs.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V21__recommendation_lookup_fn.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V22__ppi_release.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V23__helpful_views.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V24__new_drug_flowcharts.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V25__phenytoin_guideline_update.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V26__validate_pair_pmids.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V27__reference_allele.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V28__more_allele_frequency.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V29__gene_notes_on_diplotype.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V30__fix_diplotype_note_column_name.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V31__structural_variant_alleles.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V32__more_notes.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V33__remove_allele_frequency.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V34__add_constraints_to_publication.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V35__opioid_release.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V36__update_allele_view.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V37__remove_unused column.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V38__gene_urls.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V39__guideline_summary_view.sql" />
             </array>
           </option>
         </State>
