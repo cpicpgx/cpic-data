@@ -6,6 +6,7 @@ import org.cpicpgx.exception.NotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -128,6 +129,10 @@ public class WorkbookWrapper {
 
   public Iterator<Sheet> getSheetIterator() {
     return this.workbook.sheetIterator();
+  }
+
+  public void write(OutputStream out) throws IOException {
+    this.workbook.write(out);
   }
 
   /**
