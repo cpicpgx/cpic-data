@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Whaley
  */
-public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
+public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   //language=PostgreSQL
   private static final String[] sf_deleteStatements = new String[]{
@@ -56,10 +56,10 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
   private Set<String> m_positionCache;
 
   public static void main(String[] args) {
-    rebuild(new AlleleDirectoryProcessor(), args);
+    rebuild(new AlleleDefinitionImporter(), args);
   }
 
-  public AlleleDirectoryProcessor() { }
+  public AlleleDefinitionImporter() { }
 
   @Override
   public FileType getFileType() {
