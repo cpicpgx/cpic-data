@@ -150,15 +150,15 @@ public class WorkbookWrapper {
     List<String> notes = new ArrayList<>();
     // intentionally skip first header row
     for (int i = 1; i <= currentSheet.getLastRowNum(); i++) {
-      Row row = currentSheet.getRow(i);
+      RowWrapper row = getRow(i);
       if (row == null) {
         continue;
       }
-      Cell cell = row.getCell(0);
-      if (cell == null || cell.getStringCellValue().length() == 0) {
+      String note = row.getNullableText(0);
+      if (note == null) {
         continue;
       }
-      notes.add(StringUtils.strip(row.getCell(0).toString()));
+      notes.add(note);
     }
     return notes;
   }

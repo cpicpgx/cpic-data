@@ -1,27 +1,59 @@
 package org.cpicpgx.importer;
 
+import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
+import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
+import java.lang.invoke.MethodHandles;
+import java.sql.*;
+import java.util.Date;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * This class crawls the given directory for <code>.xlsx</code> files and runs the {@link AlleleDefinitionImporter} on 
- * each one in succession.
+ * This class crawls the given directory for <code>.xlsx</code> files and runs on each gene file in succession.
  *
  * @author Ryan Whaley
  */
 public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
+  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   //language=PostgreSQL
   private static final String[] sf_deleteStatements = new String[]{
       "delete from change_log where type='" + FileType.ALLELE_DEFINITION.name() + "'",
       "delete from file_note where type='" + FileType.ALLELE_DEFINITION.name() + "'",
       "delete from allele where not genesymbol ~ '^HLA'",
-      "delete from allele_location_value",
+      "delete from allele_location_value where locationId is not null",
       "delete from allele_definition where geneSymbol not in ('HLA-A','HLA-B')",
-      "delete from sequence_location"
+      "delete from sequence_location where id is not null"
   };
+  private static final int sf_variantColStart = 1;
+  private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
+  private static final Pattern sf_seqPositionPattern = Pattern.compile("g\\.(\\d+(_(\\d+))?)");
+  private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
+  private static final int sf_alleleRowStart = 7;
+
+  private String m_gene;
+  private int m_variantColEnd;
+  private String m_proteinSeqId = "";
+  private String m_chromoSeqId = "";
+  private String m_geneSeqId = "";
+  private String m_mrnaSeqId = "";
+  private String[] m_legacyNames;
+  private String[] m_proteinEffects;
+  private String[] m_chromoPositions;
+  private String[] m_genoPositions;
+  private String[] m_dbSnpIds;
+  private Map<String,Map<Integer,String>> m_alleles;
+  private Map<String,String> m_svToPvAlleles;
+  private int m_svColIdx = -1;
+  private Set<String> m_positionCache;
 
   public static void main(String[] args) {
     rebuild(new AlleleDirectoryProcessor(), args);
@@ -45,14 +77,282 @@ public class AlleleDirectoryProcessor extends BaseDirectoryImporter {
   }
 
   @Override
-  void processWorkbook(WorkbookWrapper workbook) {
-    try {
-      AlleleDefinitionImporter importer = new AlleleDefinitionImporter(workbook);
-      importer.writeToDB();
-      writeNotes(importer.getGene(), workbook.getNotes());
-      importer.writeHistory(workbook);
-    } catch (SQLException e) {
-      throw new RuntimeException("Error processing " + workbook, e);
+  void processWorkbook(WorkbookWrapper workbook) throws Exception {
+    readGene(workbook);
+    readLegacyRow(workbook);
+    readProteinRow(workbook);
+    readChromoRow(workbook);
+    readGenoRow(workbook);
+    readDbSnpRow(workbook);
+    readAlleles(workbook);
+    writeToDB();
+
+    writeNotes(m_gene, workbook.getNotes());
+    writeHistory(workbook);
+  }
+
+  private void readGene(WorkbookWrapper workbook) {
+    RowWrapper row = workbook.getRow(0);
+    m_gene = row.getText(0)
+        .replaceAll("(GENE|Gene):\\s*", "");
+  }
+
+  private void readLegacyRow(WorkbookWrapper workbook) {
+    RowWrapper row = workbook.getRow(1);
+    m_legacyNames = new String[row.getLastCellNum()];
+    m_svColIdx = -1;
+
+    findSeqId(row.getNullableText(0));
+
+    for (int i=sf_variantColStart; i < row.getLastCellNum(); i++) {
+      String cellContents = row.getNullableText(i);
+      if (cellContents != null && cellContents.equalsIgnoreCase(Constants.STRUCTURAL_VARIATION)) {
+        m_svColIdx = i;
+      } else {
+        m_legacyNames[i] = cellContents;
+        m_variantColEnd = i;
+      }
+    }
+  }
+
+  private void readProteinRow(WorkbookWrapper workbook) {
+    RowWrapper row = workbook.getRow(2);
+    m_proteinEffects = new String[row.getLastCellNum()];
+
+    findSeqId(row.getNullableText(0));
+
+    for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
+      m_proteinEffects[i] = row.getNullableText(i);
+    }
+  }
+
+  private void readChromoRow(WorkbookWrapper workbook) {
+    RowWrapper row = workbook.getRow(3);
+    m_chromoPositions = new String[row.getLastCellNum()];
+    m_positionCache = new HashSet<>();
+
+    String description = row.getNullableText(0);
+    findSeqId(description);
+    checkPosition(description);
+
+    for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
+      m_chromoPositions[i] = row.getNullableText(i);
+      checkPosition(m_chromoPositions[i]);
+    }
+  }
+
+  private void readGenoRow(WorkbookWrapper workbook) {
+    RowWrapper row = workbook.getRow(4);
+    m_genoPositions = new String[row.getLastCellNum()];
+
+    findSeqId(row.getNullableText(0));
+
+    for (int i=sf_variantColStart; i <=m_variantColEnd; i++) {
+      m_genoPositions[i] = row.getNullableText(i);
+    }
+  }
+
+  private void readDbSnpRow(WorkbookWrapper workbook) {
+    RowWrapper row = workbook.getRow(5);
+    m_dbSnpIds = new String[row.getLastCellNum()];
+
+    for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
+      String rsid = row.getNullableText(i);
+      if (rsid == null) {
+        continue;
+      }
+
+      Matcher m = sf_rsidPattern.matcher(rsid);
+      if (m.matches()) {
+        m_dbSnpIds[i] = m.group();
+      }
+      else {
+        sf_logger.warn("Invalid RSID found in {}, skipping", row.getAddress(i));
+      }
+    }
+  }
+
+  private void findSeqId(String cellContent) {
+    if (StringUtils.isBlank(cellContent)) return;
+
+    Matcher m = sf_seqIdPattern.matcher(cellContent);
+    if (m.find()) {
+      String seqId = m.group();
+      if (seqId.startsWith("NG_")) {
+        m_geneSeqId = seqId;
+      } else if (seqId.startsWith("NM_")) {
+        m_mrnaSeqId = seqId;
+      } else if (seqId.startsWith("NC_")) {
+        m_chromoSeqId = seqId;
+      } else if (seqId.startsWith("NP_")) {
+        m_proteinSeqId = seqId;
+      }
+    }
+  }
+
+  /**
+   * Check to make sure the position found in this cell occurs once and only once
+   * @param cellContent chromosomal cell content
+   */
+  private void checkPosition(String cellContent) {
+    if (StringUtils.isBlank(cellContent)) return;
+
+    Matcher m = sf_seqPositionPattern.matcher(cellContent);
+    if (m.find()) {
+      String position = m.group(1);
+      boolean isUnfound = m_positionCache.add(position);
+      if (!isUnfound) {
+        throw new RuntimeException("Chromosomal position [" + cellContent + "] used twice");
+      }
+    }
+  }
+
+  private void readAlleles(WorkbookWrapper workbook) {
+    m_alleles = new LinkedHashMap<>();
+    m_svToPvAlleles = new HashMap<>();
+    for (int i=sf_alleleRowStart; i <= workbook.currentSheet.getLastRowNum(); i++) {
+      try {
+        RowWrapper row = workbook.getRow(i);
+        if (row == null) {
+          continue;
+        }
+
+        String alleleName = row.getNullableText(0);
+        if (alleleName == null) {
+          continue;
+        }
+
+        if (alleleName.toLowerCase().startsWith("notes")) {
+          throw new RuntimeException("Notes exist in the allele definition sheet, move to a separate tab");
+        }
+
+        if (m_svColIdx >=0 && row.getNullableText(m_svColIdx) != null) {
+          m_svToPvAlleles.put(alleleName, row.getNullableText(m_svColIdx));
+        }
+
+        Map<Integer, String> definition = new LinkedHashMap<>();
+        for (int j = sf_variantColStart; j <= m_variantColEnd; j++) {
+          if (row.getNullableText(j) != null) {
+            definition.put(j, row.getText(j));
+          }
+        }
+
+        m_alleles.put(alleleName, definition);
+      } catch (Exception e) {
+        sf_logger.error("Error parsing row {}", i+1);
+        throw e;
+      }
+    }
+  }
+
+  void writeHistory(WorkbookWrapper workbook) throws SQLException {
+    workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      PreparedStatement insertStmt = conn.prepareStatement("insert into change_log (entityId, type, date, note) values (?, ?, ?, ?)");
+      insertStmt.setString(1, m_gene);
+      insertStmt.setString(2, FileType.ALLELE_DEFINITION.name());
+
+      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+        RowWrapper row = workbook.getRow(i);
+        if (row.hasNoText(0) ^ row.hasNoText(1)) {
+          throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
+        }
+        else if (row.hasNoText(0)) continue;
+
+        Date date = row.getDate(0);
+        String note = row.getNullableText(1);
+
+        if (note.equalsIgnoreCase(AbstractWorkbook.LOG_FILE_CREATED)) continue;
+
+        insertStmt.setDate(3, new java.sql.Date(date.getTime()));
+        if (StringUtils.isNotBlank(note)) {
+          insertStmt.setString(4, note);
+        } else {
+          insertStmt.setString(4, Constants.NA);
+        }
+
+        insertStmt.executeUpdate();
+      }
+    }
+  }
+
+  void writeToDB() throws SQLException {
+    try (Connection conn = ConnectionFactory.newConnection()) {
+
+      PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleledefinitionid, locationid, variantallele) values (?,?,?)");
+
+      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,mrnaSequenceId=? where symbol=?");
+      geneUpdate.setString(1, m_geneSeqId);
+      geneUpdate.setString(2, m_proteinSeqId);
+      geneUpdate.setString(3, m_chromoSeqId);
+      geneUpdate.setString(4, m_mrnaSeqId);
+      geneUpdate.setString(5, m_gene);
+      geneUpdate.executeUpdate();
+
+      PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) values (?,?,?,?,?,?) returning (id)");
+      Integer[] locIdAssignements = new Integer[m_chromoPositions.length];
+      int newLocations = 0;
+      for (int i=0; i < m_chromoPositions.length; i++) {
+
+        // here we want to guard against over-running the location columns
+        // we can't rely on either the legacy row or the chromo row singly since there are sheets that have missing
+        // values in both so we need to check for either
+        if (m_chromoPositions[i] == null && m_legacyNames[i] == null) {
+          continue;
+        }
+
+        seqLocInsert.setString(1, m_legacyNames[i]);
+        seqLocInsert.setString(2, m_chromoPositions[i]);
+        seqLocInsert.setString(3, m_genoPositions[i]);
+        seqLocInsert.setString(4, m_proteinEffects[i]);
+        if (i < m_dbSnpIds.length && m_dbSnpIds[i] != null) {
+          seqLocInsert.setString(5, m_dbSnpIds[i]);
+        } else {
+          seqLocInsert.setNull(5, Types.VARCHAR);
+        }
+        seqLocInsert.setString(6, m_gene);
+        ResultSet rs = seqLocInsert.executeQuery();
+        rs.next();
+        int locId = rs.getInt(1);
+        locIdAssignements[i] = locId;
+        newLocations += 1;
+      }
+      sf_logger.debug("created {} new locations", newLocations);
+
+      PreparedStatement alleleDefInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name, reference, structuralvariation, pharmvarid) values (?,?,?,?,?) returning (id)");
+      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(genesymbol, name, definitionId) values (?,?,?)");
+      boolean isReference = true;
+      for (String alleleName : m_alleles.keySet()) {
+        alleleDefInsert.setString(1, m_gene);
+        alleleDefInsert.setString(2, alleleName);
+        alleleDefInsert.setBoolean(3, isReference);
+        alleleDefInsert.setBoolean(4, m_svToPvAlleles.containsKey(alleleName));
+        if (m_svToPvAlleles.containsKey(alleleName)) {
+          alleleDefInsert.setString(5, m_svToPvAlleles.get(alleleName));
+        } else {
+          alleleDefInsert.setNull(5, Types.VARCHAR);
+        }
+        ResultSet rs = alleleDefInsert.executeQuery();
+        rs.next();
+        int alleleId = rs.getInt(1);
+
+        alleleInsert.clearParameters();
+        alleleInsert.setString(1, m_gene);
+        alleleInsert.setString(2, alleleName);
+        alleleInsert.setInt(3, alleleId);
+        alleleInsert.executeUpdate();
+
+        Map<Integer,String> allelePosMap = m_alleles.get(alleleName);
+        for (Integer locIdx : allelePosMap.keySet()) {
+          joinTableInsert.setInt(1, alleleId);
+          joinTableInsert.setInt(2, locIdAssignements[locIdx]);
+          joinTableInsert.setString(3, allelePosMap.get(locIdx));
+          joinTableInsert.executeUpdate();
+        }
+        isReference = false;
+      }
+      sf_logger.debug("created {} new alleles", m_alleles.keySet().size());
     }
   }
 }

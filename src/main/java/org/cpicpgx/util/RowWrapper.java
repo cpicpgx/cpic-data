@@ -2,6 +2,7 @@ package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
 import java.text.SimpleDateFormat;
@@ -33,6 +34,14 @@ public class RowWrapper {
 
   public short getLastCellNum() {
     return this.row.getLastCellNum();
+  }
+
+  public CellAddress getAddress(int cellIdx) {
+    Cell cell = this.row.getCell(cellIdx);
+    if (cell == null) {
+      return null;
+    } else
+      return cell.getAddress();
   }
 
   /**
@@ -83,13 +92,17 @@ public class RowWrapper {
     if (cellIdx < 0) {
       throw new RuntimeException("Bad cell index, must be >= 0");
     }
+
+    if (this.row == null) {
+      return null;
+    }
     
     Cell cell = this.row.getCell(cellIdx);
     if (cell == null) return null;
     
     switch (cell.getCellType()) {
       case STRING:
-        return stripFootnote(cellIdx);
+        return TextUtils.normalize(stripFootnote(cellIdx));
       case NUMERIC:
         if (DateUtil.isCellDateFormatted(cell)) {
           return DATE_FORMAT.format(cell.getDateCellValue());
@@ -109,7 +122,7 @@ public class RowWrapper {
         CellValue cellValue = formulaEvaluator.evaluate(cell);
         switch (cellValue.getCellType()) {
           case STRING:
-            return StringUtils.stripToNull(cellValue.getStringValue());
+            return TextUtils.normalize(cellValue.getStringValue());
           case NUMERIC:
             if (DateUtil.isCellDateFormatted(cell)) {
               return cellValue.getStringValue();
