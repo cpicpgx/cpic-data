@@ -1,5 +1,7 @@
 # CPIC Data
 
+[![Build project](https://github.com/cpicpgx/cpic-data/actions/workflows/build.yml/badge.svg?branch=development)](https://github.com/cpicpgx/cpic-data/actions/workflows/build.yml)
+
 This repo contains all the code used to create and maintain the [CPIC](https://cpicpgx.org) data model. This powers the API and the database.
 
 If you're looking to use the REST API or get a copy of the database, go [read the documentation](https://github.com/cpicpgx/cpic-data/wiki).
