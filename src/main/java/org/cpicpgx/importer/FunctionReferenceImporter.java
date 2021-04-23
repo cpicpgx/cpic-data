@@ -48,7 +48,6 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final int COL_IDX_COMMENTS = 8;
 
   private static final String[] sf_deleteStatements = new String[]{
-      "delete from allele where geneSymbol not in ('HLA-A','HLA-B')",
       "delete from change_log where type='" + FileType.ALLELE_FUNCTION_REFERENCE.name() + "'",
       "delete from file_note where type='" + FileType.ALLELE_FUNCTION_REFERENCE.name() + "'"
   };
