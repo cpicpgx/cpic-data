@@ -33,11 +33,13 @@ This project assumes you're running a Postgres 11+ database for loading/querying
 
 Configuration happens with environment variables. Here's what needs to be set:
 
-- _CPIC_DB_ = the hostname for the db server (default `localhost`)
+- _CPIC_HOST_ = the hostname for the db server (default `localhost`)
 - _CPIC_USER_ = the postgresql role name to connect as (default `cpic`)
 - _CPIC_PASS_ = the password for the postgresql role (default blank)
+- _CPIC_DB_ = the postgresql database to connect to (default `cpic`, but could also be `cpic_staging`)
 
-For local development you won't need to specify these. Set them if you want to connect to a different DB (e.g. push to prod). 
+For local development you won't need to specify these. Set them if you're running in a different environment like the
+production or staging servers.
 
 ## Running
 
@@ -65,7 +67,7 @@ This project uses Flyway to set up the DB. Schema definition files are in the `s
 Run the following to build the db:
 
 ```sh
-java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.db.FlywayMigrate
+java -cp build/libs/CpicData.jar org.cpicpgx.db.FlywayMigrate
 ```
 
 ### Bootstrapping Information
@@ -86,7 +88,7 @@ To load all data at once, use the `DataImport` class. This takes a `-d` paramete
 Then put that jar on the classpath and run `org.cpicpgx.DataImport` class:
 
 ```sh
-java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.DataImport -d **PATH_TO_DATA_DIRECTORY**
+java -cp build/libs/CpicData.jar org.cpicpgx.DataImport -d <PATH_TO_DATA_DIRECTORY>
 ```
 
 
@@ -95,7 +97,7 @@ java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.DataImport -d **PATH_TO_DATA
 To export file artifacts of compiled data in the database use the `DataArtifactArchive` class. It expects a command line argument of a directory to write to. By default, it will write to a subdirectory with a datestamped name. Inside that folder will be subfolders for the different types of exported data.
 
 ```sh
-java -cp build/libs/**CURRENT_JAR**.jar org.cpicpgx.DataArtifactArchive -d **PATH_TO_EXISTING_DIRECTORY**
+java -cp build/libs/CpicData.jar org.cpicpgx.DataArtifactArchive -d <PATH_TO_EXISTING_DIRECTORY>
 ```
 
 
