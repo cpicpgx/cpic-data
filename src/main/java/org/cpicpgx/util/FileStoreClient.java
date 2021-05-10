@@ -28,7 +28,7 @@ public class FileStoreClient implements AutoCloseable {
   
   private static final String S3_PUBLIC_BUCKET      = "files.cpicpgx.org";
   private static final String S3_GENERIC_KEY_PREFIX = "data/report/";
-  private static final String S3_URL_FORMAT         = "http://" + S3_PUBLIC_BUCKET + "/%s%s";
+  private static final String S3_URL_FORMAT         = "https://" + S3_PUBLIC_BUCKET + "/%s%s";
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
   
   private final AmazonS3 s3;
