@@ -132,6 +132,13 @@ class FrequencyWorkbook extends AbstractWorkbook {
     currentPopSummaryAlleleCol += 1;
   }
   
+  void writeReferencePopulationSummary(Double freq) {
+    writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
+    writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, "");
+    writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, "");
+    currentPopSummaryAlleleCol += 1;
+  }
+
   private static final String TITLE_TEMPLATE = "Frequencies of %s alleles in major race/ethnic groups";
   private static final String GENE_CELL_TEMPLATE = "%s allele";
 

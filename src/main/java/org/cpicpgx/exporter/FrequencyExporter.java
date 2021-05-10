@@ -46,7 +46,7 @@ public class FrequencyExporter extends BaseExporter {
       try (
           FrequencyDbHarness dbHarness = new FrequencyDbHarness();
           PreparedStatement stmt = conn.prepareStatement(
-              "select distinct a.name, a.id from allele_frequency f join allele a on f.alleleid = a.id where a.genesymbol=? order by 1");
+              "select distinct a.name, a.id, ad.reference from allele_frequency f join allele a on f.alleleid = a.id join allele_definition ad on a.definitionid = ad.id where a.genesymbol=? order by 1");
           PreparedStatement popsStmt = conn.prepareStatement(
               "select distinct coalesce(p2.pmid, p2.url, p2.pmcid, p2.doi), p.ethnicity, p.population, p.populationinfo, p.subjecttype, p2.authors, p2.year, p.id, p.subjectcount\n" +
               "from allele_frequency f join population p on f.population = p.id join allele a on f.alleleid = a.id\n" +
@@ -59,6 +59,9 @@ public class FrequencyExporter extends BaseExporter {
                   "from population_frequency_view v where v.population_group != 'n/a' and v.genesymbol=?");
           PreparedStatement ethAlleleStmt = conn.prepareStatement(
               "select freq_weighted_avg, freq_max, freq_min from population_frequency_view v where v.name=? and v.population_group=? and v.genesymbol=?"
+          );
+          PreparedStatement ethRefStmt = conn.prepareStatement(
+              "select 1-sum(freq_weighted_avg) as ref_freq from population_frequency_view v where v.population_group=? and v.genesymbol=?"
           );
           PreparedStatement methodsStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"
@@ -159,10 +162,14 @@ public class FrequencyExporter extends BaseExporter {
 
           // write the header row
           Map<String, Integer> alleles = new TreeMap<>(HaplotypeNameComparator.getComparator());
+          String refAllele = "";
           stmt.setString(1, geneSymbol);
           try (ResultSet r = stmt.executeQuery()) {
             while (r.next()) {
               alleles.put(r.getString(1), r.getInt(2));
+              if (r.getBoolean(3)) {
+                refAllele = r.getString(1);
+              }
             }
           }
           workbook.writeReferenceHeader(alleles.keySet());
@@ -219,6 +226,15 @@ public class FrequencyExporter extends BaseExporter {
               }
             }
 
+            ethRefStmt.setString(1, ethnicity);
+            ethRefStmt.setString(2, geneSymbol);
+            Double refAvg = null;
+            try (ResultSet rsRef = ethRefStmt.executeQuery()) {
+              while (rsRef.next()) {
+                refAvg = rsRef.getDouble(1);
+              }
+            }
+
             workbook.startPopulationSummary();
             for (String allele : alleles.keySet()) {
               ethAlleleStmt.setString(1, allele);
@@ -231,7 +247,11 @@ public class FrequencyExporter extends BaseExporter {
                   wroteSummary = true;
                 }
                 if (!wroteSummary) {
-                  workbook.writeEmptyPopulationSummary();
+                  if (allele.equals(refAllele)) {
+                    workbook.writeReferencePopulationSummary(refAvg);
+                  } else {
+                    workbook.writeEmptyPopulationSummary();
+                  }
                 }
               }
             }
