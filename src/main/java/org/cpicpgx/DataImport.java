@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +58,7 @@ public class DataImport {
     m_directory = directoryPath;
   }
 
-  private void execute() throws SQLException {
+  private void execute() throws Exception {
 
     // order is important in this list, later importers may add data to previously imported data
     List<BaseDirectoryImporter> importers = new ArrayList<>();
@@ -67,7 +66,6 @@ public class DataImport {
     importers.add(new DrugImporter().setDirectory(m_directory, null));
     importers.add(new PairImporter().setDirectory(m_directory, null));
     importers.add(new AlleleDefinitionImporter().setDirectory(m_directory, null));
-    importers.add(new PharmVarImporter().setDirectory(m_directory, null));
     importers.add(new FunctionReferenceImporter().setDirectory(m_directory, null));
     importers.add(new GenePhenotypeImporter().setDirectory(m_directory, null));
     importers.add(new GeneCdsImporter().setDirectory(m_directory, null));
@@ -86,5 +84,8 @@ public class DataImport {
     for (BaseDirectoryImporter importer : importers) {
       importer.execute();
     }
+
+    // load PharmVar data
+    PharmVarApiImporter.execute();
   }
 }

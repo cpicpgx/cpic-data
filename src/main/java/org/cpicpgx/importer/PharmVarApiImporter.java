@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static org.cpicpgx.util.HttpUtils.apiRequest;
 
@@ -36,7 +38,7 @@ public class PharmVarApiImporter {
     }
   }
 
-  private static void execute() throws IOException, SQLException, NotFoundException {
+  public static void execute() throws IOException, SQLException, NotFoundException {
     OkHttpClient client = new OkHttpClient().newBuilder()
         .build();
     Gson gson = new Gson();
@@ -53,6 +55,7 @@ public class PharmVarApiImporter {
         PreparedStatement updateAllele = conn.prepareStatement("update allele_definition a set pharmvarId=? where id=?")
     ) {
       geneListStmt.setArray(1, conn.createArrayOf("TEXT", geneList));
+      SortedSet<String> updatedGenes = new TreeSet<>();
       try (
           ResultSet rs = geneListStmt.executeQuery()
       ) {
@@ -69,18 +72,22 @@ public class PharmVarApiImporter {
             if (!StringUtils.isBlank(alleleResponse)) {
               String[] idArray = gson.fromJson(alleleResponse, String[].class);
               if (idArray.length == 1) {
-                sf_logger.info("{} {} = PVID {}", gene, alleleName, idArray[0]);
+                sf_logger.debug("{} {} = PVID {}", gene, alleleName, idArray[0]);
                 updateAllele.setString(1, idArray[0]);
                 updateAllele.setInt(2, id);
                 updateAllele.executeUpdate();
+                updatedGenes.add(gene);
               } else {
-                sf_logger.info("No ID found for {}", gene + alleleName);
+                sf_logger.debug("No ID found for {}", gene + alleleName);
               }
             }
           } catch (IOException ex) {
-            sf_logger.warn("Request failed for {} {}: {}", gene, alleleName, url);
+            sf_logger.debug("Request failed for {} {}: {}", gene, alleleName, url);
           }
         }
+      }
+      if (updatedGenes.size() > 0) {
+        sf_logger.info("Processed {}", String.join("; ", updatedGenes));
       }
     }
   }
