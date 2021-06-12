@@ -64,11 +64,8 @@ public class PharmVarApiImporter {
           String alleleName = rs.getString(2);
           int id = rs.getInt(3);
 
-          String allelePath = UrlEscapers.urlPathSegmentEscaper().escape(gene + alleleName);
-
-          String url = sf_pharmVarApi + "/alleles/" + allelePath + "/pvid";
           try {
-            String alleleResponse = apiRequest(client, url);
+            String alleleResponse = requestFromPharmVar(client, gene, alleleName);
             if (!StringUtils.isBlank(alleleResponse)) {
               String[] idArray = gson.fromJson(alleleResponse, String[].class);
               if (idArray.length == 1) {
@@ -80,9 +77,13 @@ public class PharmVarApiImporter {
               } else {
                 sf_logger.debug("No ID found for {}", gene + alleleName);
               }
+            } else {
+              throw new NotFoundException("Got an empty response for " + gene + alleleName);
             }
           } catch (IOException ex) {
-            sf_logger.debug("Request failed for {} {}: {}", gene, alleleName, url);
+            sf_logger.debug("Request failed for {} {}", gene, alleleName);
+          } catch (NotFoundException ex) {
+            sf_logger.warn("Got no response from PharmVar for {} {}, continuing", gene, alleleName);
           }
         }
       }
@@ -90,5 +91,33 @@ public class PharmVarApiImporter {
         sf_logger.info("Processed {}", String.join("; ", updatedGenes));
       }
     }
+  }
+
+  /**
+   * Get PharmVar's record for a gene-allele and retry a commonly used allele name format if the "normal" format gives
+   * no result. The retry will only work for alleles in the format "*\d+"
+   * @param client an {@link OkHttpClient}
+   * @param gene the gene to request
+   * @param alleleName the allele name to request (e.g. *3)
+   * @return the String content of the HTTP response
+   * @throws IOException can occur from netowrk IO
+   * @throws NotFoundException can occur if PharmVar has no record for the allele
+   */
+  private static String requestFromPharmVar(OkHttpClient client, String gene, String alleleName) throws IOException, NotFoundException {
+    boolean ableToRetry = alleleName.matches("\\*\\d+");
+    String allelePath = UrlEscapers.urlPathSegmentEscaper().escape(gene + alleleName);
+    String url = sf_pharmVarApi + "/alleles/" + allelePath + "/pvid";
+    String response = null;
+    try {
+      response = apiRequest(client, url);
+    } catch (NotFoundException ex) {
+      if (ableToRetry) {
+        // if not no response and allele is in typical format, we can retry with a common suffix
+        String retryPath = UrlEscapers.urlPathSegmentEscaper().escape(gene + alleleName + ".001");
+        String retryUrl = sf_pharmVarApi + "/alleles/" + retryPath + "/pvid";
+        response = apiRequest(client, retryUrl);
+      }
+    }
+    return response;
   }
 }
