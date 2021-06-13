@@ -28,10 +28,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private static final String[] sf_deleteStatements = new String[]{
       "delete from change_log where type='" + FileType.ALLELE_DEFINITION.name() + "'",
       "delete from file_note where type='" + FileType.ALLELE_DEFINITION.name() + "'",
-      "delete from allele where not genesymbol ~ '^HLA'",
       "delete from allele_location_value where locationId is not null",
-      "delete from allele_definition where geneSymbol not in ('HLA-A','HLA-B')",
-      "delete from sequence_location where id is not null"
   };
   private static final int sf_variantColStart = 1;
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
@@ -279,10 +276,22 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
 
   void writeToDB() throws SQLException {
     try (Connection conn = ConnectionFactory.newConnection()) {
+      PreparedStatement selectExistingAlleles = conn.prepareStatement("select name from allele_definition where genesymbol=?");
+      selectExistingAlleles.setString(1, m_gene);
+      Set<String> alleleNamesNotUpdated = new HashSet<>();
+      try (ResultSet existingRs = selectExistingAlleles.executeQuery()) {
+        while (existingRs.next()) {
+          alleleNamesNotUpdated.add(existingRs.getString(1));
+        }
+      }
 
-      PreparedStatement joinTableInsert = conn.prepareStatement("insert into allele_location_value(alleledefinitionid, locationid, variantallele) values (?,?,?)");
+      PreparedStatement joinTableInsert = conn.prepareStatement(
+          "insert into allele_location_value(alleledefinitionid, locationid, variantallele) values (?,?,?)");
+      PreparedStatement joinTableDelete = conn.prepareStatement(
+          "delete from allele_location_value where alleledefinitionid=?");
 
-      PreparedStatement geneUpdate = conn.prepareStatement("update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,mrnaSequenceId=? where symbol=?");
+      PreparedStatement geneUpdate = conn.prepareStatement(
+          "update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,mrnaSequenceId=? where symbol=?");
       geneUpdate.setString(1, m_geneSeqId);
       geneUpdate.setString(2, m_proteinSeqId);
       geneUpdate.setString(3, m_chromoSeqId);
@@ -290,7 +299,11 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       geneUpdate.setString(5, m_gene);
       geneUpdate.executeUpdate();
 
-      PreparedStatement seqLocInsert = conn.prepareStatement("insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) values (?,?,?,?,?,?) returning (id)");
+      PreparedStatement seqLocInsert = conn.prepareStatement(
+          "insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) " +
+              "values (?,?,?,?,?,?) " +
+              "on conflict (chromosomelocation) do update set name=excluded.name, chromosomelocation=excluded.chromosomelocation, genelocation=excluded.genelocation, proteinlocation=excluded.proteinlocation, dbsnpid=excluded.dbsnpid " +
+              "returning (id)");
       Integer[] locIdAssignements = new Integer[m_chromoPositions.length];
       int newLocations = 0;
       for (int i=0; i < m_chromoPositions.length; i++) {
@@ -320,8 +333,12 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       }
       sf_logger.debug("created {} new locations", newLocations);
 
-      PreparedStatement alleleDefInsert = conn.prepareStatement("insert into allele_definition(geneSymbol, name, reference, structuralvariation, pharmvarid) values (?,?,?,?,?) returning (id)");
-      PreparedStatement alleleInsert = conn.prepareStatement("insert into allele(genesymbol, name, definitionId) values (?,?,?)");
+      PreparedStatement alleleDefInsert = conn.prepareStatement(
+          "insert into allele_definition(geneSymbol, name, reference, structuralvariation, pharmvarid) values (?,?,?,?,?) " +
+              "on conflict (genesymbol,name) do update set reference=excluded.reference, structuralvariation=excluded.structuralvariation, pharmvarid=excluded.pharmvarid " +
+              "returning (id)");
+      PreparedStatement alleleInsert = conn.prepareStatement(
+          "insert into allele(genesymbol, name, definitionId) values (?,?,?) on conflict do nothing");
       boolean isReference = true;
       for (String alleleName : m_alleles.keySet()) {
         alleleDefInsert.setString(1, m_gene);
@@ -343,6 +360,8 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
         alleleInsert.setInt(3, alleleId);
         alleleInsert.executeUpdate();
 
+        joinTableDelete.setInt(1, alleleId);
+        joinTableDelete.executeUpdate();
         Map<Integer,String> allelePosMap = m_alleles.get(alleleName);
         for (Integer locIdx : allelePosMap.keySet()) {
           joinTableInsert.setInt(1, alleleId);
@@ -351,8 +370,30 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
           joinTableInsert.executeUpdate();
         }
         isReference = false;
+        alleleNamesNotUpdated.remove(alleleName);
       }
-      sf_logger.debug("created {} new alleles", m_alleles.keySet().size());
+      sf_logger.debug("processed {} alleles", m_alleles.keySet().size());
+
+      if (alleleNamesNotUpdated.size() > 0) {
+        PreparedStatement deleteAllele = conn.prepareStatement("delete from allele where definitionid=(select id from allele_definition where genesymbol=? and name=?)");
+        PreparedStatement deleteAlleleDef = conn.prepareStatement("delete from allele_definition where genesymbol=? and name=?");
+        PreparedStatement deleteLocValue = conn.prepareStatement("delete from allele_location_value where alleledefinitionid=(select id from allele_definition where genesymbol=? and name=?)");
+
+        for (String alleleName : alleleNamesNotUpdated) {
+          deleteAllele.setString(1, m_gene);
+          deleteAllele.setString(2, alleleName);
+          deleteAllele.executeUpdate();
+
+          deleteLocValue.setString(1, m_gene);
+          deleteLocValue.setString(2, alleleName);
+          deleteLocValue.executeUpdate();
+
+          deleteAlleleDef.setString(1, m_gene);
+          deleteAlleleDef.setString(2, alleleName);
+          deleteAlleleDef.executeUpdate();
+          sf_logger.warn("removed allele: {} {}", m_gene, alleleName);
+        }
+      }
     }
   }
 }
