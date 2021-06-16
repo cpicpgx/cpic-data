@@ -16,13 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class to handle exporting a CPIC report out to filesystem.
+ * This class exports gene-drug pair information. It exports two views of pairs.
  *
  * @author Ryan Whaley
  */
 public class PairsExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String sf_pairQuery = "select " +
+  private static final String sf_allPairQuery = "select " +
       "    p.genesymbol as \"Gene\", " +
       "    d.name as \"Drug\", " +
       "    g.url as \"Guideline URL\", " +
@@ -41,8 +41,18 @@ public class PairsExporter extends BaseExporter {
       "         join drug d on p.drugid = d.drugid " +
       "         left join guideline g on p.guidelineid = g.id " +
       "order by p.cpiclevel, d.name, p.genesymbol";
-  //language=PostgreSQL
   private static final String sf_changeLogQuery = "select date, note from change_log where type=?";
+  private static final String sf_currentPairQuery = "select\n" +
+      "       genesymbol as \"Gene\",\n" +
+      "       drugname as \"Drug\",\n" +
+      "       guidelineurl as \"Guideline\",\n" +
+      "       cpiclevel as \"CPIC Level\",\n" +
+      "       case when provisional is true then 'Final' else 'Provisional' end \"CPIC Level Status\",\n" +
+      "       pgkbcalevel as \"PharmGKB Level of Evidence\",\n" +
+      "       pgxtesting as \"PGx on FDA Label\",\n" +
+      "       array_to_string(pmids, ';') as \"CPIC Publications (PMID)\"\n" +
+      "from pair_view\n" +
+      "order by cpiclevel, drugname, genesymbol";
 
   public static void main(String[] args) {
     try {
@@ -61,18 +71,8 @@ public class PairsExporter extends BaseExporter {
   public void export() {
     try (
         Connection conn = ConnectionFactory.newConnection();
-        PreparedStatement stmt = conn.prepareStatement(sf_pairQuery);
         PreparedStatement changeStmt = conn.prepareStatement(sf_changeLogQuery)
     ) {
-      PairWorkbook pairWorkbook = new PairWorkbook();
-      pairWorkbook.writeHeader(stmt.getMetaData());
-      try (ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-          pairWorkbook.writePair(rs);
-        }
-      }
-
-
       // NOTE: this is a non-standard query so don't use the "queryChangeLog" method
       changeStmt.setString(1, FileType.PAIR.name());
       List<Object[]> changeLogEvents = new ArrayList<>();
@@ -81,12 +81,16 @@ public class PairsExporter extends BaseExporter {
           changeLogEvents.add(new Object[]{rs.getDate(1), rs.getString(2)});
         }
       }
-      pairWorkbook.writeChangeLog(changeLogEvents);
 
-      addFileExportHistory(pairWorkbook.getFilename(), new String[]{});
+      try (PreparedStatement stmt = conn.prepareStatement(sf_allPairQuery)) {
+        PairWorkbook pairWorkbook = new PairWorkbook(true);
+        writeToFile(pairWorkbook, stmt, changeLogEvents);
+      }
 
-      writeWorkbook(pairWorkbook);
-      handleFileUpload();
+      try (PreparedStatement stmt = conn.prepareStatement(sf_currentPairQuery)) {
+        PairWorkbook pairWorkbook = new PairWorkbook(false);
+        writeToFile(pairWorkbook, stmt, changeLogEvents);
+      }
     } catch (IOException e) {
       sf_logger.error("Couldn't write to filesystem", e);
     } catch (SQLException e) {
@@ -94,5 +98,18 @@ public class PairsExporter extends BaseExporter {
     } catch (Exception e) {
       sf_logger.error("Error making pairs", e);
     }
+  }
+
+  private void writeToFile(PairWorkbook pairWorkbook, PreparedStatement stmt, List<Object[]> changeLogEvents) throws Exception {
+    pairWorkbook.writeHeader(stmt.getMetaData());
+    try (ResultSet rs = stmt.executeQuery()) {
+      while (rs.next()) {
+        pairWorkbook.writePair(rs);
+      }
+    }
+    pairWorkbook.writeChangeLog(changeLogEvents);
+    addFileExportHistory(pairWorkbook.getFilename(), new String[]{});
+    writeWorkbook(pairWorkbook);
+    handleFileUpload();
   }
 }

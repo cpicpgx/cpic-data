@@ -7,13 +7,16 @@ import java.sql.*;
 public class PairWorkbook extends AbstractWorkbook {
 
   private static final String SHEET_NAME = "CPIC Gene-Drug Pairs";
-  private static final String FILE_NAME = "cpicPairs.xlsx";
+  private static final String ALL_FILE_NAME = "cpicPairs.xlsx";
+  private static final String CURRENT_FILE_NAME = "cpic_gene-drug_pairs.xlsx";
 
   private final SheetWrapper sheet;
+  private final boolean includeRemoved;
 
-  PairWorkbook() {
+  PairWorkbook(boolean includeRemoved) {
     super();
     this.sheet = findSheet(SHEET_NAME);
+    this.includeRemoved = includeRemoved;
   }
 
   void writeHeader(ResultSetMetaData metadata) throws SQLException {
@@ -42,6 +45,10 @@ public class PairWorkbook extends AbstractWorkbook {
 
   @Override
   String getFilename() {
-    return FILE_NAME;
+    if (includeRemoved) {
+      return ALL_FILE_NAME;
+    } else {
+      return CURRENT_FILE_NAME;
+    }
   }
 }
