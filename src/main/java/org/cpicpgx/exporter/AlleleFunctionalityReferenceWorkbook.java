@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import com.google.common.base.Joiner;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 
 /**
@@ -55,5 +56,19 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     writeStringCell(row, 6, strength, false);
     writeStringCell(row, 7, finding, false);
     writeStringCell(row, 8, comments, false);
+  }
+
+  void writeMethods(String methods) {
+    if (StringUtils.isBlank(methods)) {
+      return;
+    }
+    SheetWrapper sheet = findSheet(METHODS_SHEET_NAME);
+    sheet.setColCount(1);
+    sheet.setWidths(new Integer[]{100*256});
+
+    for (String line : methods.split("\n")) {
+      Row row = sheet.nextRow();
+      writeStringCell(row, 0, line, wrapStyle);
+    }
   }
 }

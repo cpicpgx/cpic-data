@@ -17,9 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -163,6 +161,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       }
       writeNotes(geneSymbol, notes);
 
+      dbHarness.updateMethods(processMethods(workbook));
+
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
       processChangeLog(dbHarness, workbook, geneSymbol);
     }
@@ -221,6 +221,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   static class FunctionDbHarness extends DbHarness {
     private final Map<String, Long> alleleNameMap = new HashMap<>();
     private final PreparedStatement insertAlleleStmt;
+    private final PreparedStatement updateMethodsStmt;
     private final String gene;
     private final LookupMethod geneLookupMethod;
 
@@ -261,6 +262,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
               "clinicalFunctionalSubstrate=excluded.clinicalFunctionalSubstrate,citations=excluded.citations," +
               "strength=excluded.strength,findings=excluded.findings,functioncomments=excluded.functioncomments"
       );
+
+      updateMethodsStmt = prepare("update gene set functionmethods=? where symbol=?");
     }
 
     private Long lookupAlleleDefinitionId(String alleleName) {
@@ -304,6 +307,16 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       if (inserted == 0) {
         throw new RuntimeException("No allele inserted");
       }
+    }
+
+    void updateMethods(String methods) throws SQLException {
+      if (StringUtils.isBlank(methods)) {
+        updateMethodsStmt.setNull(1, Types.VARCHAR);
+      } else {
+        updateMethodsStmt.setString(1, methods);
+      }
+      updateMethodsStmt.setString(2, this.gene);
+      updateMethodsStmt.executeUpdate();
     }
 
     private String normalizeFunction(String fn) {

@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Shared workbook code that all exported workbooks can use.
@@ -19,6 +20,8 @@ public abstract class AbstractWorkbook {
   public static final String HISTORY_SHEET_NAME = "Change log";
   public static final String NOTES_SHEET_NAME = "Notes";
   public static final String LOG_FILE_CREATED = "File generated and data queried";
+  public static final String METHODS_SHEET_NAME = "Methods";
+  public static final Pattern METHODS_SHEET_PATTERN = Pattern.compile("^[Mm]ethods( and [Cc]aveats)?$");
   private final Workbook workbook;
   private final CreationHelper createHelper;
   private final List<SheetWrapper> sheets = new ArrayList<>();

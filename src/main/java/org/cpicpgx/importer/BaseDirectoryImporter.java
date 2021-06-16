@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;
@@ -26,6 +28,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -47,12 +50,14 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Gets the String file extension to look for in the given directory. This should be something like ".xlsx" or ".csv".
+   *
    * @return a file extension to filter for
    */
   abstract String getFileExtensionToProcess();
 
   /**
    * Gets the type of file this importer is importing
+   *
    * @return a {@link FileType} enum value
    */
   abstract FileType getFileType();
@@ -61,6 +66,7 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Gets the default directory name for the data type. Should rely on {@link FileType}
+   *
    * @return a default directory name, all lowercase
    */
   String getDefaultDirectoryName() {
@@ -68,7 +74,7 @@ public abstract class BaseDirectoryImporter {
   }
 
   /**
-   * Calling this method 
+   * Calling this method
    */
   public void clearAllData() throws SQLException {
     try (Connection conn = ConnectionFactory.newConnection()) {
@@ -83,7 +89,7 @@ public abstract class BaseDirectoryImporter {
       }
     }
   }
-  
+
   static void rebuild(BaseDirectoryImporter importer, String[] args) {
     try {
       importer.parseArgs(args);
@@ -98,14 +104,15 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Parse arguments from the command line.
-   * 
+   * <p>
    * Expect a "d" argument that gives the directory to crawl through. Must exist and must contain files.
+   *
    * @param args an array of command line arguments
    * @throws ParseException can occur from bad argument syntax
    */
-  private void parseArgs(String [] args) throws ParseException {
+  private void parseArgs(String[] args) throws ParseException {
     Options options = new Options();
-    options.addOption("d", true,"directory containing files to process (*.xlsx)");
+    options.addOption("d", true, "directory containing files to process (*.xlsx)");
     CommandLineParser clParser = new DefaultParser();
     CommandLine cli = clParser.parse(options, args);
 
@@ -125,8 +132,9 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * A {@link Consumer} that will take a {@link File} objects and then run {@link BaseDirectoryImporter#processWorkbook(WorkbookWrapper)}
-   * on them. You either need to override {@link BaseDirectoryImporter#processWorkbook(WorkbookWrapper)} or override 
-   * this method to do something different with the {@link File} 
+   * on them. You either need to override {@link BaseDirectoryImporter#processWorkbook(WorkbookWrapper)} or override
+   * this method to do something different with the {@link File}
+   *
    * @return a Consumer of File objects
    */
   Consumer<File> getFileProcessor() {
@@ -144,8 +152,9 @@ public abstract class BaseDirectoryImporter {
   }
 
   /**
-   * This method is meant to pass in a parsed {@link WorkbookWrapper} object and then do something with it. This must 
+   * This method is meant to pass in a parsed {@link WorkbookWrapper} object and then do something with it. This must
    * be overriden and will throw an error if it is not.
+   *
    * @param workbook a workbook pulled from the specified directory
    * @throws Exception will be thrown if this method is not overridden
    */
@@ -160,6 +169,7 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Sets a directory to search for files to process. The path must exist and be for a directory (not a file)
+   *
    * @param directory a directory in the filesystem
    */
   private void setDirectory(Path directory) {
@@ -178,8 +188,9 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Creates the lookup key used for linking recommendations and test alerts to gene phenotypes
-   * @param f1 the first allele function
-   * @param f2 the second allele function, possibly n/a
+   *
+   * @param f1  the first allele function
+   * @param f2  the second allele function, possibly n/a
    * @param as1 the first activity value
    * @param as2 the second activity value, possibly n/a
    * @return a string to match the lookup key between recommendation and phenotype
@@ -211,8 +222,9 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Writes the supplied list of notes to the DB for the given id
+   *
    * @param entityId the ID of the object to note
-   * @param notes a List of String notes
+   * @param notes    a List of String notes
    * @throws SQLException can occur from DB inserts
    */
   void writeNotes(String entityId, List<String> notes) throws SQLException {
@@ -248,11 +260,9 @@ public abstract class BaseDirectoryImporter {
     } else {
       if (score.toLowerCase().equals(Constants.NA)) {
         return Constants.NA;
-      }
-      else if (Constants.isNoResult(score)) {
+      } else if (Constants.isNoResult(score)) {
         return Constants.NO_RESULT;
-      }
-      else if (sf_activityScorePattern.matcher(score).matches()) {
+      } else if (sf_activityScorePattern.matcher(score).matches()) {
         return score.replaceAll("\\.0$", "");
       } else {
         throw new RuntimeException("Activity score not in expected format: " + score);
@@ -262,6 +272,7 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Normalize text by taking out the gene name and stripping extraneous whitespace.
+   *
    * @param gene the gene text to be removed
    * @param text the text to normalize
    * @return normalized version of input "text", possibly null
@@ -280,6 +291,7 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Normalize text for activity score, will replace nulls and blanks with "n/a"
+   *
    * @param rawText raw text to describe an activity score
    * @return a normalized score or "n/a" if no value specified
    */
@@ -303,5 +315,23 @@ public abstract class BaseDirectoryImporter {
       String note = row.getText(1);
       db.writeChangeLog(entityId, date, note);
     }
+  }
+
+  String processMethods(WorkbookWrapper workbook) throws SQLException {
+    StringJoiner methodsText = new StringJoiner("\n");
+    try {
+      workbook.findSheet(AbstractWorkbook.METHODS_SHEET_PATTERN);
+      for (int i = 0; i <= workbook.currentSheet.getLastRowNum(); i++) {
+        RowWrapper row = workbook.getRow(i);
+        if (row.hasNoText(0)) {
+          methodsText.add("");
+        } else {
+          methodsText.add(StringUtils.defaultIfBlank(row.getNullableText(0), ""));
+        }
+      }
+    } catch (NotFoundException ex) {
+      sf_logger.debug("No methods sheet found");
+    }
+    return methodsText.toString();
   }
 }

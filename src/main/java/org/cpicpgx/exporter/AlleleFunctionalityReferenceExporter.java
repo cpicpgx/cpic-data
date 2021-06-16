@@ -46,7 +46,8 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
              "select a.name, a.activityvalue, a.functionalstatus, a.clinicalfunctionalstatus, " +
                  "a.clinicalfunctionalsubstrate, a.citations, a.strength, a.findings, a.functioncomments " +
                  "from allele a where a.genesymbol=? and a.name=?");
-         ResultSet grs = geneStmt.executeQuery()
+         ResultSet grs = geneStmt.executeQuery();
+         PreparedStatement methodsStmt = conn.prepareStatement("select functionmethods from gene where symbol=?")
     ) {
       while (grs.next()) {
         String symbol = grs.getString(1);
@@ -84,6 +85,14 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
         }
         
         workbook.writeNotes(queryNotes(conn, symbol, FileType.ALLELE_FUNCTION_REFERENCE));
+
+        methodsStmt.setString(1, symbol);
+        try (ResultSet rs = methodsStmt.executeQuery()) {
+          while (rs.next()) {
+            String methods = rs.getString(1);
+            workbook.writeMethods(methods);
+          }
+        }
 
         workbook.writeChangeLog(queryChangeLog(conn, symbol, getFileType()));
 

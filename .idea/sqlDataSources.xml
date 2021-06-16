@@ -49,6 +49,8 @@
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V40__fix_flowchart_urls.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V41__publication_files.sql" />
               <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V42__aminoglycosides_guideline.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V43__seq_loc_unique_key.sql" />
+              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration/V44__functionmethods.sql" />
             </array>
           </option>
         </State>
