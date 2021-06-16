@@ -33,6 +33,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private static final int sf_variantColStart = 1;
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
   private static final Pattern sf_seqPositionPattern = Pattern.compile("g\\.(\\d+(_(\\d+))?)");
+  private static final Pattern sf_wobbleCodePattern = Pattern.compile("[BD-FH-SU-Z]");
   private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
   private static final int sf_alleleRowStart = 7;
 
@@ -50,7 +51,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private Map<String,Map<Integer,String>> m_alleles;
   private Map<String,String> m_svToPvAlleles;
   private int m_svColIdx = -1;
-  private Set<String> m_positionCache;
+  private final Set<String> m_positionCache = new HashSet<>();
 
   public static void main(String[] args) {
     rebuild(new AlleleDefinitionImporter(), args);
@@ -126,7 +127,6 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private void readChromoRow(WorkbookWrapper workbook) {
     RowWrapper row = workbook.getRow(3);
     m_chromoPositions = new String[row.getLastCellNum()];
-    m_positionCache = new HashSet<>();
 
     String description = row.getNullableText(0);
     findSeqId(description);
@@ -191,7 +191,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
    * Check to make sure the position found in this cell occurs once and only once
    * @param cellContent chromosomal cell content
    */
-  private void checkPosition(String cellContent) {
+  void checkPosition(String cellContent) {
     if (StringUtils.isBlank(cellContent)) return;
 
     Matcher m = sf_seqPositionPattern.matcher(cellContent);
@@ -201,6 +201,12 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       if (!isUnfound) {
         throw new RuntimeException("Chromosomal position [" + cellContent + "] used twice");
       }
+    }
+
+    Matcher wm = sf_wobbleCodePattern.matcher(cellContent);
+    if (wm.find()) {
+      String code = m.group(0);
+      throw new RuntimeException("Found a wobble code in chromosome posiiton, [" + code + "]");
     }
   }
 
