@@ -72,7 +72,7 @@ const lookupVariants = async (gene) => {
   `, {gene});
   const payload = [];
   for (let i = 0; i < rez.length; i++) {
-    const positionPattern = /g\.(\d+)/g;
+    const positionPattern = /[gm]\.(\d+)/g;
     const r = rez[i];
     const positionMatch = positionPattern.exec(r.chromosomelocation);
     let type = 'SNP';
