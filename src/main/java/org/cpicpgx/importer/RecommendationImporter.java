@@ -206,15 +206,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 phenotype.put(gene, validPhenotype);
               }
 
-              // Validate not all "No Result" in multi-gene rec
-              if (phenotype.size() > 1 && phenotype.values().stream().allMatch((v) -> v.equals(Constants.NO_RESULT))) {
-                sf_logger.warn("Row {} contains all No Result", k + 1);
-              }
-              // Validate no use of "No Result in single-gene rec
-              if (phenotype.size() == 1 && phenotype.containsValue(Constants.NO_RESULT)) {
-                sf_logger.warn("Single-gene recommendations should not use 'No Result'");
-              }
-
               for (String gene : dbHarness.getGenes()) {
                 switch (dbHarness.geneLookupCache.get(gene)) {
                   case ACTIVITY_SCORE:
@@ -240,6 +231,19 @@ public class RecommendationImporter extends BaseDirectoryImporter {
               for (String gene : alleleIdxMap.keySet()) {
                 alleleStatus.put(gene, dataRow.getText(alleleIdxMap.get(gene)));
               }
+
+              // Validate not all "No Result" in multi-gene rec
+              if (
+                  phenotype.values().stream().allMatch((v) -> v.equals(Constants.NO_RESULT))
+                  && alleleStatus.values().stream().allMatch((v) -> v.equals(Constants.NO_RESULT))
+              ) {
+                sf_logger.warn("Row {} contains all No Result", k + 1);
+              }
+              // Validate no use of "No Result in single-gene rec
+              if ((alleleStatus.size() + phenotype.size()) == 1 && phenotype.containsValue(Constants.NO_RESULT)) {
+                sf_logger.warn("Single-gene recommendations should not use 'No Result'");
+              }
+
               dbHarness.insert(
                   phenotype,
                   implication,
