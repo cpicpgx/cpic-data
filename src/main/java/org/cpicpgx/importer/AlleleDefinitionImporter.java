@@ -32,7 +32,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   };
   private static final int sf_variantColStart = 1;
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
-  private static final Pattern sf_seqPositionPattern = Pattern.compile("g\\.(\\d+(_(\\d+))?)");
+  private static final Pattern sf_seqPositionPattern = Pattern.compile("[gm]\\.(\\d+(_(\\d+))?)");
   private static final Pattern sf_wobbleCodePattern = Pattern.compile("[BD-FH-SU-Z]");
   private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
   private static final int sf_alleleRowStart = 7;
@@ -130,11 +130,14 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
 
     String description = row.getNullableText(0);
     findSeqId(description);
-    checkPosition(description);
 
     for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
       m_chromoPositions[i] = row.getNullableText(i);
-      checkPosition(m_chromoPositions[i]);
+      try {
+        checkPosition(m_chromoPositions[i]);
+      } catch (Exception ex) {
+        throw new RuntimeException("Error with cell " + row.getAddress(i), ex);
+      }
     }
   }
 
@@ -201,6 +204,8 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       if (!isUnfound) {
         throw new RuntimeException("Chromosomal position [" + cellContent + "] used twice");
       }
+    } else {
+      throw new RuntimeException("No position found for [" + cellContent + "]");
     }
 
     Matcher wm = sf_wobbleCodePattern.matcher(cellContent);
