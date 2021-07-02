@@ -32,7 +32,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   };
   private static final int sf_variantColStart = 1;
   private static final Pattern sf_seqIdPattern = Pattern.compile("N\\D_\\d+\\.\\d+");
-  private static final Pattern sf_seqPositionPattern = Pattern.compile("[gm]\\.(\\d+(_(\\d+))?)");
+  private static final Pattern sf_seqPositionPattern = Pattern.compile("[gm]\\.((\\d+)(_(\\d+))?)");
   private static final Pattern sf_wobbleCodePattern = Pattern.compile("[BD-FH-SU-Z]");
   private static final Pattern sf_rsidPattern = Pattern.compile("^rs\\d+$");
   private static final int sf_alleleRowStart = 7;
@@ -46,6 +46,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private String[] m_legacyNames;
   private String[] m_proteinEffects;
   private String[] m_chromoPositions;
+  private Integer[] m_chromoStartPositions;
   private String[] m_genoPositions;
   private String[] m_dbSnpIds;
   private Map<String,Map<Integer,String>> m_alleles;
@@ -127,6 +128,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private void readChromoRow(WorkbookWrapper workbook) {
     RowWrapper row = workbook.getRow(3);
     m_chromoPositions = new String[row.getLastCellNum()];
+    m_chromoStartPositions = new Integer[row.getLastCellNum()];
 
     String description = row.getNullableText(0);
     findSeqId(description);
@@ -134,7 +136,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
       m_chromoPositions[i] = row.getNullableText(i);
       try {
-        checkPosition(m_chromoPositions[i]);
+        m_chromoStartPositions[i] = checkPosition(m_chromoPositions[i]);
       } catch (Exception ex) {
         throw new RuntimeException("Error with cell " + row.getAddress(i), ex);
       }
@@ -193,13 +195,16 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   /**
    * Check to make sure the position found in this cell occurs once and only once
    * @param cellContent chromosomal cell content
+   * @return the Integer start position for the chromosomal value
    */
-  void checkPosition(String cellContent) {
-    if (StringUtils.isBlank(cellContent)) return;
+  Integer checkPosition(String cellContent) {
+    if (StringUtils.isBlank(cellContent)) return null;
 
     Matcher m = sf_seqPositionPattern.matcher(cellContent);
+    Integer startPosition;
     if (m.find()) {
       String position = m.group(1);
+      startPosition = Integer.valueOf(m.group(2));
       boolean isUnfound = m_positionCache.add(position);
       if (!isUnfound) {
         throw new RuntimeException("Chromosomal position [" + cellContent + "] used twice");
@@ -213,6 +218,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       String code = m.group(0);
       throw new RuntimeException("Found a wobble code in chromosome posiiton, [" + code + "]");
     }
+    return startPosition;
   }
 
   private void readAlleles(WorkbookWrapper workbook) {
@@ -311,8 +317,8 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       geneUpdate.executeUpdate();
 
       PreparedStatement seqLocInsert = conn.prepareStatement(
-          "insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol) " +
-              "values (?,?,?,?,?,?) " +
+          "insert into sequence_location(name, chromosomelocation, genelocation, proteinlocation, dbsnpid, geneSymbol, position) " +
+              "values (?,?,?,?,?,?, ?) " +
               "on conflict (chromosomelocation) do update set name=excluded.name, chromosomelocation=excluded.chromosomelocation, genelocation=excluded.genelocation, proteinlocation=excluded.proteinlocation, dbsnpid=excluded.dbsnpid " +
               "returning (id)");
       Integer[] locIdAssignements = new Integer[m_chromoPositions.length];
@@ -336,6 +342,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
           seqLocInsert.setNull(5, Types.VARCHAR);
         }
         seqLocInsert.setString(6, m_gene);
+        seqLocInsert.setInt(7, m_chromoStartPositions[i]);
         ResultSet rs = seqLocInsert.executeQuery();
         rs.next();
         int locId = rs.getInt(1);
@@ -403,6 +410,13 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
           deleteAlleleDef.setString(2, alleleName);
           deleteAlleleDef.executeUpdate();
           sf_logger.warn("removed allele: {} {}", m_gene, alleleName);
+        }
+      }
+
+      try (PreparedStatement deleteUnusedLocs = conn.prepareStatement("delete from sequence_location where id in (select locationid from allele_location_value)")) {
+        int deletedLocations = deleteUnusedLocs.executeUpdate();
+        if (deletedLocations > 0) {
+          sf_logger.warn("removed {} unused sequence locations", deletedLocations);
         }
       }
     }
