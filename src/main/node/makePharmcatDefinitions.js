@@ -62,19 +62,17 @@ const uploadToS3 = (fileName, content) => {
  */
 const lookupVariants = async (gene) => {
   const rez = await db.many(`
-      select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id, g.chr
+      select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id, g.chr, sl.position
       from allele_definition a
                join allele_location_value alv on a.id = alv.alleledefinitionid
                join sequence_location sl on alv.locationid = sl.id
                join gene g on a.genesymbol = g.symbol
       where a.genesymbol=$(gene) and reference is true
-      order by sl.chromosomelocation
+      order by sl.position
   `, {gene});
   const payload = [];
   for (let i = 0; i < rez.length; i++) {
-    const positionPattern = /[gm]\.(\d+)/g;
     const r = rez[i];
-    const positionMatch = positionPattern.exec(r.chromosomelocation);
     let type = 'SNP';
     if (r.chromosomelocation.includes('ins')) {
       type = 'INS';
@@ -83,7 +81,7 @@ const lookupVariants = async (gene) => {
     }
     payload.push({
       chromosome: r.chr,
-      position: _.toNumber(_.get(positionMatch, '[1]', null)),
+      position: r.position,
       rsid: r.dbsnpid,
       chromosomeHgvsName: r.chromosomelocation,
       geneHgvsName: r.genelocation,
@@ -142,7 +140,7 @@ const lookupNotes = async (gene) => {
 /**
  * Query the alleles used in the definitions for a particular location used in allele definitions
  * @param sequenceLocationId the primary key ID for a sequence location
- * @returns {Promise<*[]>} an array of objects wiht a "variantallele" property
+ * @returns {Promise<*[]>} an array of objects with a "variantallele" property
  */
 const lookupVariantAlleles = async (sequenceLocationId) => {
   try {
@@ -165,10 +163,11 @@ const lookupVariantAlleles = async (sequenceLocationId) => {
 const lookupNamedAlleles = async (gene) => {
   try {
     return await db.many(`
-        select a.name, a.id::text as id, array_agg(v.variantallele order by sl.chromosomelocation) as alleles, a.reference 
+        select a.name, a.id::text as id, array_agg(v.variantallele order by sl.position) as alleles, a.reference 
         from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol 
             left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid)
-        where a.genesymbol=$(gene) and a.structuralvariation is false group by a.reference, a.name, a.id::text order by a.reference desc, a.name
+        where a.genesymbol=$(gene) and a.structuralvariation is false and sl.id in (select locationid from allele_location_value)
+        group by a.reference, a.name, a.id::text order by a.reference desc, a.name
         `, {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying possible alleles');
