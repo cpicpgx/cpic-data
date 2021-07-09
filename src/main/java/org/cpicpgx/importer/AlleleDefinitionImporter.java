@@ -413,7 +413,8 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
         }
       }
 
-      try (PreparedStatement deleteUnusedLocs = conn.prepareStatement("delete from sequence_location where id in (select locationid from allele_location_value)")) {
+      try (PreparedStatement deleteUnusedLocs = conn.prepareStatement("delete from sequence_location where id not in (select locationid from allele_location_value) and genesymbol=?")) {
+        deleteUnusedLocs.setString(1, m_gene);
         int deletedLocations = deleteUnusedLocs.executeUpdate();
         if (deletedLocations > 0) {
           sf_logger.warn("removed {} unused sequence locations", deletedLocations);
