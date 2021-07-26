@@ -47,7 +47,7 @@ public class PairsExporter extends BaseExporter {
       "       drugname as \"Drug\",\n" +
       "       guidelineurl as \"Guideline\",\n" +
       "       cpiclevel as \"CPIC Level\",\n" +
-      "       case when provisional is true then 'Final' else 'Provisional' end \"CPIC Level Status\",\n" +
+      "       case when provisional is true then 'Provisional' else 'Final' end \"CPIC Level Status\",\n" +
       "       pgkbcalevel as \"PharmGKB Level of Evidence\",\n" +
       "       pgxtesting as \"PGx on FDA Label\",\n" +
       "       array_to_string(pmids, ';') as \"CPIC Publications (PMID)\"\n" +
