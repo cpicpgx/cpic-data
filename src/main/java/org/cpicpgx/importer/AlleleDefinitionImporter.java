@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * This class crawls the given directory for <code>.xlsx</code> files and runs on each gene file in succession.
@@ -159,16 +160,15 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     m_dbSnpIds = new String[row.getLastCellNum()];
 
     for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
-      String rsid = row.getNullableText(i);
-      if (rsid == null) {
+      String rsidField = row.getNullableText(i);
+      if (rsidField == null) {
         continue;
       }
 
-      Matcher m = sf_rsidPattern.matcher(rsid);
-      if (m.matches()) {
-        m_dbSnpIds[i] = m.group();
-      }
-      else {
+      String[] rsids = rsidField.split(";\\s*");
+      if (Stream.of(rsids).allMatch((r) -> sf_rsidPattern.matcher(r).matches())) {
+        m_dbSnpIds[i] = rsidField;
+      } else {
         sf_logger.warn("Invalid RSID found in {}, skipping", row.getAddress(i));
       }
     }
