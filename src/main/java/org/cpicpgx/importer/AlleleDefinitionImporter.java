@@ -53,7 +53,6 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private Map<String,Map<Integer,String>> m_alleles;
   private Map<String,String> m_svToPvAlleles;
   private int m_svColIdx = -1;
-  private final Set<String> m_positionCache = new HashSet<>();
 
   public static void main(String[] args) {
     rebuild(new AlleleDefinitionImporter(), args);
@@ -136,11 +135,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
 
     for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
       m_chromoPositions[i] = row.getNullableText(i);
-      try {
-        m_chromoStartPositions[i] = checkPosition(m_chromoPositions[i]);
-      } catch (Exception ex) {
-        throw new RuntimeException("Error with cell " + row.getAddress(i), ex);
-      }
+      m_chromoStartPositions[i] = checkPosition(m_chromoPositions[i]);
     }
   }
 
@@ -193,32 +188,25 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   }
 
   /**
-   * Check to make sure the position found in this cell occurs once and only once
+   * Check to make sure the position found in this cell matches the expected format and doesn't include a wobble
    * @param cellContent chromosomal cell content
    * @return the Integer start position for the chromosomal value
    */
   Integer checkPosition(String cellContent) {
     if (StringUtils.isBlank(cellContent)) return null;
 
+    Matcher wm = sf_wobbleCodePattern.matcher(cellContent);
+    if (wm.find()) {
+      String code = wm.group(0);
+      throw new RuntimeException("Found a wobble code in chromosome posiiton, [" + code + "]");
+    }
+
     Matcher m = sf_seqPositionPattern.matcher(cellContent);
-    Integer startPosition;
     if (m.find()) {
-      String position = m.group(1);
-      startPosition = Integer.valueOf(m.group(2));
-      boolean isUnfound = m_positionCache.add(position);
-      if (!isUnfound) {
-        throw new RuntimeException("Chromosomal position [" + cellContent + "] used twice");
-      }
+      return Integer.valueOf(m.group(2));
     } else {
       throw new RuntimeException("No position found for [" + cellContent + "]");
     }
-
-    Matcher wm = sf_wobbleCodePattern.matcher(cellContent);
-    if (wm.find()) {
-      String code = m.group(0);
-      throw new RuntimeException("Found a wobble code in chromosome posiiton, [" + code + "]");
-    }
-    return startPosition;
   }
 
   private void readAlleles(WorkbookWrapper workbook) {
