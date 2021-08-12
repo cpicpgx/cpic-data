@@ -1,12 +1,19 @@
-create function cpic.pharmgkb_guideline_alleles(guidelineid text)
+create function cpic.pharmgkb_guideline_alleles(pharmgkbdrugid text)
     returns table(genesymbol text, chr text, alleles text[]) as
 $$
 select
-   a.genesymbol,
-   gene.chr,
-   array_agg(a.name) as alleles
-from guideline g join allele a on a.genesymbol = any(g.genes) join gene on gene.symbol=a.genesymbol
-where guidelineid = any(g.pharmgkbid) group by a.genesymbol, gene.chr order by a.genesymbol
+    a.genesymbol,
+    g.chr,
+    array_agg(distinct a.name order by a.name) as alleles
+from allele a join gene g on a.genesymbol=g.symbol
+where
+    a.clinicalfunctionalstatus is not null
+  and a.genesymbol in (
+    select distinct jsonb_object_keys(p.lookupkey) as genes
+    from recommendation p join guideline g on p.guidelineid = g.id join drug d on g.id = d.guidelineid
+    where d.pharmgkbid=pharmgkbdrugid
+)
+group by a.genesymbol, g.chr order by a.genesymbol
 $$ language SQL stable;
 
 comment on function cpic.pharmgkb_guideline_alleles(guidelineid text)
