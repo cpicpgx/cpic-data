@@ -67,9 +67,9 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     try (TestDbHarness dbHarness = new TestDbHarness()) {
       for (Iterator<Sheet> sheetIterator = workbook.getSheetIterator(); sheetIterator.hasNext(); ) {
         Sheet sheet = sheetIterator.next();
+        workbook.currentSheetIs(sheet.getSheetName());
 
         if (AbstractWorkbook.HISTORY_SHEET_NAME.equalsIgnoreCase(sheet.getSheetName())) {
-          workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
           processHistory(workbook, dbHarness);
         }
         else if (!sheet.getSheetName().equalsIgnoreCase("flow chart")) {
