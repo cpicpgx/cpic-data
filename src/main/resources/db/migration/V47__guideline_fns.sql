@@ -10,7 +10,7 @@ where
     a.clinicalfunctionalstatus is not null
   and a.genesymbol in (
     select distinct jsonb_object_keys(p.lookupkey) as genes
-    from recommendation p join guideline g on p.guidelineid = g.id join drug d on g.id = d.guidelineid
+    from recommendation p join guideline g on p.guidelineid = g.id join drug d on p.drugid=d.drugid
     where d.pharmgkbid=pharmgkbdrugid
 )
 group by a.genesymbol, g.chr order by a.genesymbol
