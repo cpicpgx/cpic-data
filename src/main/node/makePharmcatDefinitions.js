@@ -11,6 +11,8 @@ const db = require('./db');
 const _ = require('lodash');
 const S3 = require('aws-sdk/clients/s3');
 const { program } = require('commander');
+const { promisify } = require('util');
+const exec = promisify(require('child_process').exec);
 
 program.version('1.0');
 program
@@ -188,8 +190,8 @@ const lookupAlleleFunctions = async (gene) => {
 const listDiplotypeData = async (gene) => {
   try {
     return await db.many(`
-        select diplotype, generesult, description, lookupkey ->> genesymbol lookupkey,
-               diplotypekey -> genesymbol diplotypekey
+        select diplotype, generesult, description, lookupkey ->> genesymbol as lookupkey,
+               diplotypekey -> genesymbol as diplotypekey
         from diplotype where genesymbol=$(gene)`, {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying diplotype result map');
@@ -199,9 +201,10 @@ const listDiplotypeData = async (gene) => {
 /**
  * Write PharmCAT allele definition files to the given directory
  * @param dirPath directory to write definition files to
+ * @param cpicVersion the version of the CPIC DB this data is from
  * @return {Promise<void>}
  */
-const writeAlleleDefinitions = async (dirPath) => {
+const writeAlleleDefinitions = async (dirPath, cpicVersion) => {
   const genes = await lookupGenes();
   const idList = ['gene\tallele\tID'];
   const alleleDefinitions = [];
@@ -214,6 +217,7 @@ const writeAlleleDefinitions = async (dirPath) => {
       const namedAlleles = await lookupNamedAlleles(gene.genesymbol);
       const geneAlleleDefinition = {
         formatVersion: 1,
+        cpicVersion,
         modificationDate: new Date().toISOString(),
         gene: gene.genesymbol,
         chromosome: gene.chr,
@@ -257,7 +261,7 @@ const writeAlleleDefinitions = async (dirPath) => {
   uploadToS3('haplotype_id_list.tsv', idList.join('\n'));
 }
 
-const writeGenePhenotypes = async (dirPath) => {
+const writeGenePhenotypes = async (dirPath, cpicVersion) => {
   const filePath = path.join(dirPath, 'gene_phenotypes.json');
   const genes = await lookupGenesWithAlleles();
   const payload = [];
@@ -268,6 +272,7 @@ const writeGenePhenotypes = async (dirPath) => {
     if (_.size(haplotypes) > 0) {
       payload.push({
         gene: gene.genesymbol,
+        cpicVersion,
         haplotypes,
         diplotypes: await listDiplotypeData(gene.genesymbol),
       });
@@ -319,12 +324,13 @@ const lookupRecommendations = async (drugId) => {
   }
 }
 
-const writeGuidelines = async (rootPath) => {
+const writeGuidelines = async (rootPath, cpicVersion) => {
   const drugs = await lookupDrugs();
 
   const payload = [];
   for (let i = 0; i < drugs.length; i++) {
     const drug = drugs[i];
+    drug.cpicVersion = cpicVersion;
     drug.recommendations = await lookupRecommendations(drug.drugid);
     payload.push(drug);
   }
@@ -335,10 +341,17 @@ const writeGuidelines = async (rootPath) => {
   uploadToS3('drugs.json', JSON.stringify(payload, null, 2));
 }
 
+const getGitUser = async function getGitVersion () {
+  const version = await exec('git describe --tags');
+  return version.stdout.trim();
+};
+
 try {
-  writeAlleleDefinitions(options.outputPath).then(() => console.log('done with allele definitions'));
-  writeGenePhenotypes(options.outputPath).then(() => console.log('done with gene phenotypes'));
-  writeGuidelines(options.outputPath).then(() => console.log('done with recommendations'));
+  getGitUser().then((version) => {
+    writeAlleleDefinitions(options.outputPath, version).then(() => console.log('done with allele definitions'));
+    writeGenePhenotypes(options.outputPath, version).then(() => console.log('done with gene phenotypes'));
+    writeGuidelines(options.outputPath, version).then(() => console.log('done with recommendations'));
+  });
 } catch (err) {
   console.error('Error writing allele definitions', err);
   process.exit(1);
