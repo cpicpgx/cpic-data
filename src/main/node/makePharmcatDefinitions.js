@@ -99,14 +99,15 @@ const lookupVariants = async (gene) => {
 
 /**
  * Queries the DB for genes that have allele definitions. This limits to genes that have a "reference" allele in order
- * to avoid non-standard allele sets like the HLA's. Also explicitly excludes G6PD since it's not supported yet.
+ * to avoid non-standard allele sets like the HLA's. This also explictly ignores CYP2D6 and G6PD since they are not
+ * supported by PharmCAT at this time.
  * @returns {Promise<Object[]>} an array of gene objects
  */
 const lookupGenes = async () => {
   return await db.many(`
       select distinct a.genesymbol, g.chr, g.genesequenceid, g.chromosequenceid, g.proteinsequenceid
       from allele_definition a join gene g on a.genesymbol = g.symbol
-      where a.reference is true and g.symbol!='G6PD'
+      where a.reference is true and g.symbol not in ('CYP2D6', 'G6PD')
       order by 1
     `);
 };
@@ -118,7 +119,7 @@ const lookupGenes = async () => {
  */
 const lookupGenesWithAlleles = async () => {
   return await db.many(`
-      select distinct genesymbol from allele where genesymbol!='G6PD' order by 1
+      select distinct genesymbol from allele where clinicalfunctionalstatus is not null order by 1
     `);
 };
 
@@ -199,7 +200,10 @@ const listDiplotypeData = async (gene) => {
 }
 
 /**
- * Write PharmCAT allele definition files to the given directory
+ * Write PharmCAT allele definition files to the given directory.
+ *
+ * This will be the list of genes that the allele matcher will attempt to make matches for.
+ *
  * @param dirPath directory to write definition files to
  * @param cpicVersion the version of the CPIC DB this data is from
  * @return {Promise<void>}
@@ -261,6 +265,14 @@ const writeAlleleDefinitions = async (dirPath, cpicVersion) => {
   uploadToS3('haplotype_id_list.tsv', idList.join('\n'));
 }
 
+/**
+ * This will write the list of alleles and diplotypes used by the phenotyper and the reporter. Some genes may have
+ * allele information here that are not in allele definition data.
+ *
+ * @param dirPath - directory path to write to
+ * @param cpicVersion - the current version of the CPIC DB
+ * @return {Promise<void>}
+ */
 const writeGenePhenotypes = async (dirPath, cpicVersion) => {
   const filePath = path.join(dirPath, 'gene_phenotypes.json');
   const genes = await lookupGenesWithAlleles();
