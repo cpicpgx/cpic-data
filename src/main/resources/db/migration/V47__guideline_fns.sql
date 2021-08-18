@@ -20,7 +20,7 @@ comment on function cpic.pharmgkb_guideline_alleles(guidelineid text)
     is 'For a given PharmGKB guideline ID, list the alleles that are options for looking up recommendations';
 
 
-create function cpic.pharmgkb_guideline_recommendation(guidelineidArg text, lookupkeyArg text) returns
+create function cpic.pharmgkb_guideline_recommendation(drugidArg text, lookupkeyArg text) returns
     table
     (
         drugName text,
@@ -51,7 +51,7 @@ where lookupkey <@ (
         select jsonb_object_agg(key, value) as lookupkey
         from (select lookupkey from diplotype where diplotypekey <@ lookupkeyArg::jsonb) x, json_each(x.lookupkey)
     )
-    and guidelineidArg = any(g.pharmgkbid)
+    and drugidArg = d.pharmgkbid
 $$ language SQL stable;
 
 comment on function cpic.pharmgkb_guideline_recommendation(guidelineidArg text, lookupkeyArg text)
