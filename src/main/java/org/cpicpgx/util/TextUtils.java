@@ -2,6 +2,10 @@ package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class TextUtils {
 
   /**
@@ -16,5 +20,29 @@ public class TextUtils {
       text = StringUtils.stripToNull(text);         // trim whitespace and default to null
     }
     return text;
+  }
+
+  private static final Pattern PVID_PATTERN = Pattern.compile("PV\\d+");
+
+  /**
+   * Find a single PharmVar ID (PVID) in the given text.
+   * @param text nullable text to look for PVID in
+   * @return an Optional containing the PVID if found
+   * @throws RuntimeException when more than one PharmVar ID is in the text
+   */
+  public static Optional<String> extractPvid(String text) {
+    if (StringUtils.isBlank(text)) {
+      return Optional.empty();
+    }
+
+    Matcher m = PVID_PATTERN.matcher(text);
+    if (m.find()) {
+      String pvid = m.group(0);
+      if (m.find()) {
+        throw new RuntimeException("More than one PVID for [" + text + "]");
+      }
+      return Optional.of(pvid);
+    }
+    return Optional.empty();
   }
 }

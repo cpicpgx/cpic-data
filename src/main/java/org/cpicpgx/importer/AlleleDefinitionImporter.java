@@ -6,6 +6,7 @@ import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
+import org.cpicpgx.util.TextUtils;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -228,8 +229,9 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Notes exist in the allele definition sheet, move to a separate tab");
         }
 
-        if (m_svColIdx >=0 && row.getNullableText(m_svColIdx) != null) {
-          m_svToPvAlleles.put(alleleName, row.getNullableText(m_svColIdx));
+        if (m_svColIdx >=0) {
+          TextUtils.extractPvid(row.getNullableText(m_svColIdx))
+              .ifPresent((pvid) -> m_svToPvAlleles.put(alleleName, pvid));
         }
 
         Map<Integer, String> definition = new LinkedHashMap<>();
