@@ -143,7 +143,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
               substrate,
               citationList.toArray(new String[0]),
               strength,
-              findings,
+              findingsString,
               comments
           );
         }
@@ -256,7 +256,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       insertAlleleStmt = prepare(
           "insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, " +
               "clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) " +
-              "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?) on conflict (genesymbol, name) " +
+              "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, name) " +
               "do update set functionalStatus=excluded.functionalStatus,activityvalue=excluded.activityvalue," +
               "clinicalfunctionalstatus=excluded.clinicalfunctionalstatus," +
               "clinicalFunctionalSubstrate=excluded.clinicalFunctionalSubstrate,citations=excluded.citations," +
@@ -282,7 +282,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         String substrate,
         String[] pmids,
         String strength,
-        JsonElement findings,
+        String findings,
         String comments
     ) throws SQLException {
       Long alleleDefinitionId = lookupAlleleDefinitionId(allele);
@@ -301,7 +301,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       setNullableString(this.insertAlleleStmt, 7, substrate);
       this.insertAlleleStmt.setArray(8, createArrayOf(pmids));
       setNullableString(this.insertAlleleStmt, 9, strength);
-      setNullableString(this.insertAlleleStmt, 10, findings != null ? findings.toString() : null);
+      setNullableString(this.insertAlleleStmt, 10, findings);
       setNullableString(this.insertAlleleStmt, 11, comments);
       int inserted = this.insertAlleleStmt.executeUpdate();
       if (inserted == 0) {
