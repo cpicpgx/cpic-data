@@ -75,12 +75,8 @@ const lookupVariants = async (gene) => {
   const payload = [];
   for (let i = 0; i < rez.length; i++) {
     const r = rez[i];
-    let type = 'SNP';
-    if (r.chromosomelocation.includes('ins')) {
-      type = 'INS';
-    } else if (r.chromosomelocation.includes('del')) {
-      type = 'DEL';
-    }
+    const cpicAlleles = await lookupVariantAlleles(r.id);
+
     payload.push({
       chromosome: r.chr,
       position: r.position,
@@ -89,9 +85,8 @@ const lookupVariants = async (gene) => {
       geneHgvsName: r.genelocation,
       proteinNote: r.proteinlocation,
       resourceNote: r.name,
-      type,
-      referenceRepeat: null,
       sequenceLocationId: r.id,
+      cpicAlleles,
     });
   }
   return payload;
@@ -217,10 +212,9 @@ const writeAlleleDefinitions = async (dirPath, cpicVersion) => {
 
     try {
       const variants = await lookupVariants(gene.genesymbol);
-      const variantAlleles = await Promise.all(variants.map(async (v) => await lookupVariantAlleles(v.sequenceLocationId)));
       const namedAlleles = await lookupNamedAlleles(gene.genesymbol);
       const geneAlleleDefinition = {
-        formatVersion: 1,
+        formatVersion: 2,
         cpicVersion,
         modificationDate: new Date().toISOString(),
         gene: gene.genesymbol,
@@ -231,7 +225,6 @@ const writeAlleleDefinitions = async (dirPath, cpicVersion) => {
         refSeqProteinId: gene.proteinsequenceid,
         notes: await lookupNotes(gene.genesymbol),
         variants,
-        variantAlleles,
         namedAlleles,
       };
       alleleDefinitions.push(geneAlleleDefinition);
