@@ -6,7 +6,6 @@ import org.cpicpgx.exporter.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
-import org.cpicpgx.util.TextUtils;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private String[] m_genoPositions;
   private String[] m_dbSnpIds;
   private Map<String,Map<Integer,String>> m_alleles;
-  private Map<String,String> m_svToPvAlleles;
+  private Map<String,String> m_svTextMap;
   private int m_svColIdx = -1;
 
   public static void main(String[] args) {
@@ -212,7 +211,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
 
   private void readAlleles(WorkbookWrapper workbook) {
     m_alleles = new LinkedHashMap<>();
-    m_svToPvAlleles = new HashMap<>();
+    m_svTextMap = new HashMap<>();
     for (int i=sf_alleleRowStart; i <= workbook.currentSheet.getLastRowNum(); i++) {
       try {
         RowWrapper row = workbook.getRow(i);
@@ -230,8 +229,10 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
         }
 
         if (m_svColIdx >=0) {
-          TextUtils.extractPvid(row.getNullableText(m_svColIdx))
-              .ifPresent((pvid) -> m_svToPvAlleles.put(alleleName, pvid));
+          String svText = row.getNullableText(m_svColIdx);
+          if (svText != null) {
+            m_svTextMap.put(alleleName, svText);
+          }
         }
 
         Map<Integer, String> definition = new LinkedHashMap<>();
@@ -342,7 +343,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       sf_logger.debug("created {} new locations", newLocations);
 
       PreparedStatement alleleDefInsert = conn.prepareStatement(
-          "insert into allele_definition(geneSymbol, name, reference, structuralvariation, pharmvarid) values (?,?,?,?,?) " +
+          "insert into allele_definition(geneSymbol, name, reference, structuralvariation) values (?,?,?,?) " +
               "on conflict (genesymbol,name) do update set reference=excluded.reference, structuralvariation=excluded.structuralvariation, pharmvarid=excluded.pharmvarid " +
               "returning (id)");
       PreparedStatement alleleInsert = conn.prepareStatement(
@@ -352,12 +353,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
         alleleDefInsert.setString(1, m_gene);
         alleleDefInsert.setString(2, alleleName);
         alleleDefInsert.setBoolean(3, isReference);
-        alleleDefInsert.setBoolean(4, m_svToPvAlleles.containsKey(alleleName));
-        if (m_svToPvAlleles.containsKey(alleleName)) {
-          alleleDefInsert.setString(5, m_svToPvAlleles.get(alleleName));
-        } else {
-          alleleDefInsert.setNull(5, Types.VARCHAR);
-        }
+        alleleDefInsert.setBoolean(4, m_svTextMap.containsKey(alleleName));
         ResultSet rs = alleleDefInsert.executeQuery();
         rs.next();
         int alleleId = rs.getInt(1);
