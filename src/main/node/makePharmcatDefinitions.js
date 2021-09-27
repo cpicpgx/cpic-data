@@ -64,7 +64,7 @@ const uploadToS3 = (fileName, content) => {
  */
 const lookupVariants = async (gene) => {
   const rez = await db.many(`
-      select sl.chromosomelocation, sl.genelocation, sl.proteinlocation, sl.name, sl.dbsnpid, sl.id, g.chr, sl.position
+      select sl.chromosomelocation, sl.dbsnpid, sl.id, g.chr, sl.position
       from allele_definition a
                join allele_location_value alv on a.id = alv.alleledefinitionid
                join sequence_location sl on alv.locationid = sl.id
@@ -82,9 +82,6 @@ const lookupVariants = async (gene) => {
       cpicPosition: r.position,
       rsid: r.dbsnpid,
       chromosomeHgvsName: r.chromosomelocation,
-      geneHgvsName: r.genelocation,
-      proteinNote: r.proteinlocation,
-      resourceNote: r.name,
       sequenceLocationId: r.id,
       cpicAlleles,
     });
@@ -219,7 +216,7 @@ const writeAlleleDefinitions = async (dirPath, cpicVersion) => {
         modificationDate: new Date().toISOString(),
         gene: gene.genesymbol,
         chromosome: gene.chr,
-        genomeBuild: 'b38',
+        genomeBuild: 'GRCh38.p13',
         refSeqChromosomeId: gene.chromosequenceid,
         refSeqGeneId: gene.genesequenceid,
         refSeqProteinId: gene.proteinsequenceid,
