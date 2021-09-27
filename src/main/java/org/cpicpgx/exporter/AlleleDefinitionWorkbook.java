@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final String DEFAULT_SHEET_NAME = "Definitions";
+  private static final String DEFAULT_SHEET_NAME = "Alleles";
   private static final String CELL_PATTERN_GENE = "Gene:%s";
   private static final String CELL_PATTERN_HEADER_ALLELE = "%s Allele";
   private static final String FILE_NAME_PATTERN = "%s-Allele_Definition_Table.xlsx";
