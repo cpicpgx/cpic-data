@@ -8,10 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -129,6 +126,14 @@ public class WorkbookWrapper {
 
   public Iterator<Sheet> getSheetIterator() {
     return this.workbook.sheetIterator();
+  }
+
+  public List<String> getSheetNameList() {
+    List<String> sheetNames = new ArrayList<>();
+    for (int i = 0; i < this.workbook.getNumberOfSheets(); i++) {
+      sheetNames.add(this.workbook.getSheetName(i));
+    }
+    return sheetNames;
   }
 
   public void write(OutputStream out) throws IOException {
