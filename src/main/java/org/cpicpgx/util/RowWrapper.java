@@ -33,6 +33,9 @@ public class RowWrapper {
   }
 
   public short getLastCellNum() {
+    if (this.row == null) {
+      return 0;
+    }
     return this.row.getLastCellNum();
   }
 
