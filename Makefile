@@ -21,3 +21,8 @@ archive: dump upload
 .PHONY: update-wiki-toc
 update-wiki-toc:
 	markdown-toc -i cpic-data.wiki/Home.md
+
+.PHONY: db-refresh
+db-refresh:
+	dropdb cpic && createdb cpic
+	gzip -cd out/cpic_prod_db.sql.gz | psql cpic
