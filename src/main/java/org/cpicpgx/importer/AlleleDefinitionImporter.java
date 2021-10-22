@@ -116,7 +116,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
 
   private void readProteinRow(WorkbookWrapper workbook) {
     RowWrapper row = workbook.getRow(2);
-    m_proteinEffects = new String[row.getLastCellNum()];
+    m_proteinEffects = new String[m_variantColEnd + 1];
 
     findSeqId(row.getNullableText(0));
 
@@ -141,7 +141,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
 
   private void readGenoRow(WorkbookWrapper workbook) {
     RowWrapper row = workbook.getRow(4);
-    m_genoPositions = new String[row.getLastCellNum()];
+    m_genoPositions = new String[m_variantColEnd + 1];
 
     findSeqId(row.getNullableText(0));
 
