@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.cpicpgx.util.Constants.isUnspecified;
+
 /**
  * Class to parse references for functional assignments from a directory of excel files.
  *
@@ -115,7 +117,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
 
         List<String> citationList = new ArrayList<>();
-        if (StringUtils.isNotBlank(citationClump)) {
+        if (StringUtils.isNotBlank(citationClump) && !isUnspecified(citationClump)) {
           for (String citation : citationClump.split("[;,.]")) {
             String pmid = StringUtils.strip(citation);
             if (!sf_pmidPattern.matcher(pmid).matches()) {
