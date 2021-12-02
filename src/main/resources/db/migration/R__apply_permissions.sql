@@ -18,3 +18,4 @@ grant select on pair_view to web_anon;
 grant select on change_log_view to web_anon;
 grant select on allele_guideline to web_anon;
 grant select on guideline_summary_view to web_anon;
+grant select on recommendation_alleles_view to web_anon;
