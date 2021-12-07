@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
  * @author Ryan Whaley
  */
 class DiplotypeWorkbook extends AbstractWorkbook {
-  private static final String NAME_TEMPLATE = "%s-Diplotype_Phenotype_Table.xlsx";
+  private static final String NAME_TEMPLATE = "%s_Diplotype_Phenotype_Table.xlsx";
   private static final String SHEET_NAME = "Diplotypes";
   private final String gene;
   private final SheetWrapper dataSheet;
