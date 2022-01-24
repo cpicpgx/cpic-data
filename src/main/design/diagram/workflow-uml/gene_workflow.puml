@@ -1,0 +1,18 @@
+@startuml
+:PGx test result obtained;
+:Enter test result in EHR;
+:Add consult/ interpretation to EHR;
+if (Priority Result?) then (yes)
+    if (??) then (yes)
+        :Add coded diplotype/ phenotype to EHR;
+    else (no)
+        if (Patient on relevant drug now?) then (yes)
+            :Medication evaluation or reassessment;
+        else (no)
+            :Result available for post-test CDS;
+        endif
+    endif
+else (no)
+    :No additional gene-based CDS;
+endif
+@enduml

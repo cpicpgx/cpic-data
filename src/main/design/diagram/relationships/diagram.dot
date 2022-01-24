@@ -1,0 +1,24 @@
+digraph group_relationships {
+
+    graph [overlap = true, fontsize = 10, bgcolor="#f5f7f6", rankdir=LR, dpi=200]
+    
+    node [shape=circle, fontname = Helvetica, color="#ff5a3c", style=filled, fillcolor="white", fontsize = 10]
+    cpic [label="CPIC"];
+
+    
+    node [shape=box, color="#00da9d"];
+    pgkb [label = "PharmGKB"];
+    pharmvar [label = "PharmVar"]; 
+    clinvar [label = "ClinVar"]; 
+    clingen [label = "ClinGen"];
+    pharmcat [label = "PharmCAT"];
+    
+    edge [color = "#", fontname = Helvetica, fontsize=8, color="#7f9298", labelfontcolor="#0d404e", labeljust=r]
+    pgkb->cpic [label = "supports"]
+    cpic->pgkb [label = "authors guidelines"]
+    pgkb->pharmcat [label = "maintains"]
+    pgkb->clinvar [label = "publishes to"]
+    cpic->clinvar [label = "publishes to"]
+    clingen->clinvar [label = "curates data from"]
+    pharmvar->pgkb [label = "maintains definitions for"]
+}

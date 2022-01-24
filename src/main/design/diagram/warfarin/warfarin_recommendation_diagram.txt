@@ -1,0 +1,10 @@
+FIGURE 2. DOSING RECOMMENDATIONS FOR WARFARIN DOSING BASED ON GENOTYPE FOR ADULT PATIENTS
+
+(a) “Dose clinically” means to dose without genetic information, which may include use of a clinical dosing algorithm or standard dose approach
+(b) Data strongest for European and East Asian ancestry populations and consistent in other populations.
+(c) 45-50% of individuals with self-reported African ancestry carry CYP2C9*5,*6,*8,*11, or rs12777823. IF CYP2C9*5, *6, *8, and *11 WERE NOT TESTED, DOSE WARFARIN CLINICALLY. Note: these data derive primarily from African Americans, who are largely from West Africa. It is unknown if the same associations are present for those from other parts of Africa.
+(d) Most algorithms are developed for the target INR 2-3.
+(e) Consider an alternative agent in individuals with genotypes associated with CYP2C9 poor metabolism (e.g., CYP2C9*3/*3, *2/*3, *3/*3) or both increased sensitivity (VKORC1 A/G or A/A) and CYP2C9 poor metabolism.
+(f) See the EU-PACT trial for pharmacogenetics-based warfarin initiation (loading) dose algorithm (33) with the caveat that the loading dose PG algorithm has not been specifically tested or validated in populations of African ancestry.
+(g) Larger dose reduction might be needed in variant homozygotes (i.e. 20-40%).
+(h) African American refers to individuals mainly originating from West Africa.

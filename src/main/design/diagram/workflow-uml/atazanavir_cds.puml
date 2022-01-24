@@ -1,0 +1,15 @@
+@startuml
+:Atazanavir order initiated;
+if (UGT1A1 results on file?) then (Yes)
+    if (Priority Result?) then (Yes)
+        :CDS post-test alert or notify
+        prescriber with recommendation;
+    else (No)
+        :No post-test alert required
+        continue with drug order;
+    endif
+else (No)
+    :CDS pre-test alert
+    (additional action may be considered);
+endif
+@enduml

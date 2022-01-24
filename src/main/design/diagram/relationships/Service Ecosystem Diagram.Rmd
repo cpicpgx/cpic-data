@@ -1,0 +1,36 @@
+---
+title: "Service Ecosystem"
+author: "Ryan Whaley"
+date: "June 23, 2017"
+output: html_notebook
+---
+
+This is my interpretation of how some PGx resources relate to each other.
+
+```{r, echo = FALSE}
+DiagrammeR::grViz(engine = "circo", "
+digraph group_relationships {
+
+    graph [overlap = true, fontsize = 10, bgcolor=\"#f5f7f6\"]
+    
+    node [shape=circle, fontname = Helvetica, color=\"#ff5a3c\", style=filled, fillcolor=\"white\", fontsize = 10]
+    cpic [label=\"CPIC\"];
+    
+    node [shape=box, color=\"#00da9d\"];
+    pgkb [label = \"PharmGKB\"];
+    pharmvar [label = \"PharmVar\"]; 
+    clinvar [label = \"ClinVar\"]; 
+    clingen [label = \"ClinGen\"];
+    pharmcat [label = \"PharmCAT\"];
+    
+    edge [color = black, fontname = Helvetica, fontsize=8, color=\"#7f9298\", labelfontcolor=\"#0d404e\", labeljust=r]
+    pgkb->cpic [label = \"authors\"]
+    cpic->pgkb [label = \"publishes guidelines\"]
+    pgkb->pharmcat [label = \"maintains\"]
+    pgkb->clinvar [label = \"publishes to\"]
+    cpic->clinvar [label = \"publishes to\"]
+    clingen->clinvar [label = \"curates data from\"]
+    pharmvar->pgkb [label = \"publishes & consumed by\"]
+}
+                  ")
+```
