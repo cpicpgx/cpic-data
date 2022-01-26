@@ -1,6 +1,5 @@
 package org.cpicpgx.util;
 
-import com.google.common.net.UrlEscapers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -71,7 +70,7 @@ public class HttpUtils {
     if (queryParams != null && queryParams.length > 0) {
       List<String> params = new ArrayList<>();
       for (int i = 0; i < queryParams.length / 2; i++) {
-        params.add(queryParams[i*2] + "=" + UrlEscapers.urlFragmentEscaper().escape(queryParams[(i*2)+1]));
+        params.add(queryParams[i*2] + "=" + queryParams[(i*2)+1]);
       }
       url = url.concat("?").concat(String.join("&", params));
     }

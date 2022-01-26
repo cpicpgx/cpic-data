@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.cli.*;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
@@ -43,9 +44,9 @@ public class GuidelineStarterPack {
 
   private void parseArgs(String[] args) throws ParseException {
     Options options = new Options()
-        .addOption("o", true, "output directory")
-        .addOption("g", true, "gene symbol")
-        .addOption("d", true,"drug name");
+        .addOption("o", true, "output directory, required")
+        .addOption("g", true, "gene symbol, required")
+        .addOption("d", true,"drug name, optional");
     CommandLine cli = new DefaultParser()
         .parse(options, args);
 
@@ -68,7 +69,12 @@ public class GuidelineStarterPack {
   }
 
   private void execute() throws Exception {
-    sf_logger.info("Make starter for {} and {}", String.join("/", f_genes), String.join("/", f_drugs));
+    if (!f_genes.isEmpty()) {
+      sf_logger.info("Make starter for {}", String.join("; ", f_genes));
+    }
+    if (!f_drugs.isEmpty()) {
+      sf_logger.info("Make starter for {}", String.join("; ", f_drugs));
+    }
 
     try (
         Connection conn = ConnectionFactory.newConnection();
@@ -96,6 +102,7 @@ public class GuidelineStarterPack {
           workbooksToWrite.add(alleleFunctionalityReferenceWorkbook);
 
           FrequencyWorkbook frequencyWorkbook = new FrequencyWorkbook(gene, lookupMethod);
+          frequencyWorkbook.writeReferenceHeader(ImmutableSet.of("ALLELE"));
           frequencyWorkbook.writeEthnicityHeader("Example Group", 0);
           workbooksToWrite.add(frequencyWorkbook);
 
@@ -110,15 +117,14 @@ public class GuidelineStarterPack {
           workbooksToWrite.add(g);
         }
       }
+      DrugResourceCreator drugResourceCreator = new DrugResourceCreator(m_path.toString());
       for (String drug : f_drugs) {
         drugStmt.setString(1, drug);
         try (ResultSet rs = drugStmt.executeQuery()) {
           if (rs.next()) {
             sf_logger.info("{} already exists, starter files will not include possibly extant data", rs.getString(1));
           }
-          DrugResourceWorkbook w = new DrugResourceWorkbook(drug);
-          w.writeMapping("", "", new String[]{}, "");
-          workbooksToWrite.add(w);
+          drugResourceCreator.create(drug);
 
           RecommendationWorkbook recommendationWorkbook = new RecommendationWorkbook(drug, geneLookupMap);
           recommendationWorkbook.setupSheet("population general");
@@ -130,6 +136,12 @@ public class GuidelineStarterPack {
           writeAlertCombos(conn, testAlertWorkbook, geneLookupMap, drug);
           workbooksToWrite.add(testAlertWorkbook);
         }
+      }
+
+      for (String drugName : drugResourceCreator.getNoDrugFoundSet()) {
+        DrugResourceWorkbook w = new DrugResourceWorkbook(drugName);
+        w.writeMapping("", "", new String[]{}, "");
+        workbooksToWrite.add(w);
       }
 
       if (workbooksToWrite.isEmpty()) {

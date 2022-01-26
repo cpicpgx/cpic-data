@@ -33,12 +33,13 @@ public class DrugResourceCreator {
     try {
       Options options = new Options();
       options.addOption("n", true,"1 or more drug names separated by semi-colons (;)");
+      options.addOption("o", true,"path to output directory");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
 
       String drugNames = cli.getOptionValue("n");
 
-      DrugResourceCreator drugResourceCreator = new DrugResourceCreator();
+      DrugResourceCreator drugResourceCreator = new DrugResourceCreator(cli.getOptionValue("o", "out"));
       for (String name : drugNames.split(";")) {
         drugResourceCreator.create(name);
       }
@@ -66,27 +67,27 @@ public class DrugResourceCreator {
   private final Map<String,String> lackingDataMap = new TreeMap<>();
   private final OkHttpClient f_httpClient;
   private final Gson f_gson;
+  private final String f_outputPath;
 
   /**
    *
    */
-  public DrugResourceCreator() {
+  public DrugResourceCreator(String outputPath) {
     f_httpClient = new OkHttpClient().newBuilder()
         .build();
     f_gson = new Gson();
+    f_outputPath = outputPath;
   }
 
   public void create(String rawName) throws Exception {
     Thread.sleep(HttpUtils.API_WAIT_TIME);
     String name = StringUtils.strip(rawName);
 
-    sf_logger.info("add {}", name);
-
     String response;
     try {
-      response = apiRequest(f_httpClient, buildPgkbUrl("data/chemical", "view", "max", "name", name));
+      response = apiRequest(f_httpClient, buildPgkbUrl("data/chemical", "view", "max", "name", name.toLowerCase(Locale.ROOT)));
     } catch (Exception ex) {
-      sf_logger.warn("No data found for {}: {}", name, ex.getMessage());
+      sf_logger.warn("No PharmGKB entry found for {}: {}", name, ex.getMessage());
       if (ex instanceof NotFoundException) {
         noDrugFoundSet.add(name);
       }
@@ -131,15 +132,13 @@ public class DrugResourceCreator {
       }
     }
 
-    sf_logger.info("PharmGKB ID {} = RxNorm {}, DrugBank {}, ATC {}", pharmgkbId, rxNormId, drugBankId, String.join(";", atcIds));
-
     if (rxNormId == null && drugBankId == null && atcIds.size() == 0) {
       lackingDataMap.put(name, pharmgkbId);
     } else {
       DrugResourceWorkbook workbook = new DrugResourceWorkbook(name);
       workbook.writeMapping(rxNormId, drugBankId, atcIds.toArray(new String[]{}), pharmgkbId);
       workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
-      try (OutputStream fo = Files.newOutputStream(Paths.get("out", workbook.getFilename()))) {
+      try (OutputStream fo = Files.newOutputStream(Paths.get(f_outputPath, workbook.getFilename()))) {
         workbook.write(fo);
       }
     }

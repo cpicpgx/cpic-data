@@ -76,6 +76,6 @@ class TestAlertWorkbook extends AbstractWorkbook {
   
   @Override
   String getFilename() {
-    return String.format(FILE_NAME_TEMPLATE, this.drug);
+    return String.format(FILE_NAME_TEMPLATE, this.drug.replaceAll("/", "_"));
   }
 }
