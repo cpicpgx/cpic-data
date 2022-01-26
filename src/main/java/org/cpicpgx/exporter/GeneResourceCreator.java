@@ -1,5 +1,6 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.*;
 
 import static org.cpicpgx.util.HttpUtils.apiRequest;
@@ -38,7 +39,7 @@ public class GeneResourceCreator {
 
       String geneSymbols = cli.getOptionValue("n");
 
-      GeneResourceCreator geneResourceCreator = new GeneResourceCreator();
+      GeneResourceCreator geneResourceCreator = new GeneResourceCreator(Path.of("out"));
       for (String gene : geneSymbols.split(";")) {
         geneResourceCreator.create(gene);
       }
@@ -66,21 +67,23 @@ public class GeneResourceCreator {
   private final Map<String,String> lackingDataMap = new TreeMap<>();
   private final OkHttpClient f_httpClient;
   private final Gson f_gson;
+  private final Path f_outputDir;
 
   /**
    *
    */
-  public GeneResourceCreator() {
+  public GeneResourceCreator(Path outputDir) {
+    Preconditions.checkArgument(outputDir.toFile().exists(), "Output dir does not exist");
+    Preconditions.checkArgument(outputDir.toFile().isDirectory(), "Output dir is not a directory");
     f_httpClient = new OkHttpClient().newBuilder()
         .build();
     f_gson = new Gson();
+    f_outputDir = outputDir;
   }
 
   public void create(String rawSymbol) throws Exception {
     Thread.sleep(HttpUtils.API_WAIT_TIME);
     String symbol = StringUtils.strip(rawSymbol);
-
-    sf_logger.info("add {}", symbol);
 
     String response;
     try {
@@ -112,23 +115,23 @@ public class GeneResourceCreator {
     String ncbiId = null;
     String ensemblId = null;
 
-    JsonArray xrefArray = geneJson.getAsJsonArray("xrefs");
-    for (JsonElement xrefElement : xrefArray) {
-      String resource = xrefElement.getAsJsonObject().get("resource").getAsString();
-      switch (resource) {
-        case "NCBI Gene":
-          ncbiId = xrefElement.getAsJsonObject().get("resourceId").getAsString();
-          break;
-        case "Ensembl":
-          ensemblId = xrefElement.getAsJsonObject().get("resourceId").getAsString();
-          break;
-        case "HGNC":
-          hgncId = "HGNC:" + xrefElement.getAsJsonObject().get("resourceId").getAsString();
-          break;
+    JsonArray xrefArray = geneJson.getAsJsonArray("crossReferences");
+    if (xrefArray != null) {
+      for (JsonElement xrefElement : xrefArray) {
+        String resource = xrefElement.getAsJsonObject().get("resource").getAsString();
+        switch (resource) {
+          case "NCBI Gene":
+            ncbiId = xrefElement.getAsJsonObject().get("resourceId").getAsString();
+            break;
+          case "Ensembl":
+            ensemblId = xrefElement.getAsJsonObject().get("resourceId").getAsString();
+            break;
+          case "HGNC":
+            hgncId = xrefElement.getAsJsonObject().get("resourceId").getAsString();
+            break;
+        }
       }
     }
-
-    sf_logger.info("PharmGKB ID {} = HGNC {}, NCBI Gene {}, Ensembl {}", pharmgkbId, hgncId, ncbiId, ensemblId);
 
     if (hgncId == null && ncbiId == null && ensemblId == null) {
       lackingDataMap.put(symbol, pharmgkbId);
@@ -136,9 +139,11 @@ public class GeneResourceCreator {
       GeneResourceWorkbook workbook = new GeneResourceWorkbook(symbol);
       workbook.writeIds(hgncId, ncbiId, ensemblId, pharmgkbId);
       workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
-      try (OutputStream fo = Files.newOutputStream(Paths.get("out", workbook.getFilename()))) {
+      Path filePath = f_outputDir.resolve(workbook.getFilename());
+      try (OutputStream fo = Files.newOutputStream(filePath)) {
         workbook.write(fo);
       }
+      sf_logger.info("wrote {}", filePath.toAbsolutePath());
     }
   }
 

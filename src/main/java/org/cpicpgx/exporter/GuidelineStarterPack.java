@@ -39,7 +39,9 @@ public class GuidelineStarterPack {
       starterPack.execute();
     } catch (Exception e) {
       sf_logger.error("Error making starter pack", e);
+      System.exit(1);
     }
+    System.exit(0);
   }
 
   private void parseArgs(String[] args) throws ParseException {
@@ -84,13 +86,15 @@ public class GuidelineStarterPack {
       List<AbstractWorkbook> workbooksToWrite = new ArrayList<>();
       Map<String, LookupMethod> geneLookupMap = new LinkedHashMap<>();
 
+      GeneResourceCreator geneResourceCreator = new GeneResourceCreator(m_path);
       for (String gene : f_genes) {
         geneStmt.setString(1, gene);
         try (ResultSet rs = geneStmt.executeQuery()) {
+          LookupMethod lookupMethod = LookupMethod.PHENOTYPE;
           if (rs.next()) {
             sf_logger.warn("{} already exists, starter files will not include possibly extant data", gene);
+            lookupMethod = LookupMethod.valueOf(rs.getString(2));
           }
-          LookupMethod lookupMethod = LookupMethod.valueOf(rs.getString(2));
           geneLookupMap.put(gene, lookupMethod);
 
           AlleleDefinitionWorkbook alleleDefinitionWorkbook = new AlleleDefinitionWorkbook(gene, "NC_#######", "NP_#######", "NG_#######", "NM_#######", 0L);
@@ -112,11 +116,13 @@ public class GuidelineStarterPack {
           PhenotypesWorkbook phenotypesWorkbook = new PhenotypesWorkbook(gene);
           workbooksToWrite.add(phenotypesWorkbook);
 
-          GeneResourceWorkbook g = new GeneResourceWorkbook(gene);
-          g.writeIds("", "", "", "");
-          workbooksToWrite.add(g);
+          geneResourceCreator.create(gene);
         }
       }
+      if (geneResourceCreator.getNoGeneFoundSet().size() > 0) {
+        throw new RuntimeException("No genes found in PharmGKB for: " + String.join("; ", geneResourceCreator.getNoGeneFoundSet()));
+      }
+
       DrugResourceCreator drugResourceCreator = new DrugResourceCreator(m_path.toString());
       for (String drug : f_drugs) {
         drugStmt.setString(1, drug);

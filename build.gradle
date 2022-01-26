@@ -14,7 +14,7 @@ group 'org.cpicpgx'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -62,3 +62,4 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+targetCompatibility = JavaVersion.VERSION_11
