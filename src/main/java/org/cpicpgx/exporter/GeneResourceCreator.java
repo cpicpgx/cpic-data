@@ -8,16 +8,19 @@ import com.google.gson.JsonObject;
 import okhttp3.OkHttpClient;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
-import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.cpicpgx.util.HttpUtils.apiRequest;
 import static org.cpicpgx.util.HttpUtils.buildPgkbUrl;
@@ -81,31 +84,25 @@ public class GeneResourceCreator {
     f_outputDir = outputDir;
   }
 
-  public void create(String rawSymbol) throws Exception {
-    Thread.sleep(HttpUtils.API_WAIT_TIME);
+  public Path create(String rawSymbol) {
     String symbol = StringUtils.strip(rawSymbol);
 
     String response;
     try {
+      Thread.sleep(HttpUtils.API_WAIT_TIME);
       response = apiRequest(f_httpClient, buildPgkbUrl("data/gene", "view", "max", "symbol", symbol));
     } catch (Exception ex) {
-      sf_logger.warn("No data found for {}: {}", symbol, ex.getMessage());
-      if (ex instanceof NotFoundException) {
-        noGeneFoundSet.add(symbol);
-      }
-      return;
+      throw new RuntimeException("No gene data found for " + symbol, ex);
     }
 
     if (StringUtils.isBlank(response)) {
-      sf_logger.warn("No data found for {}", symbol);
-      return;
+      throw new RuntimeException("No gene data found for " + symbol);
     }
 
     JsonObject responseJson = f_gson.fromJson(response, JsonObject.class);
     JsonArray dataArray = responseJson.getAsJsonArray("data");
     if (dataArray.size() > 1) {
-      sf_logger.warn("More than one gene found for {}", symbol);
-      return;
+      throw new RuntimeException("More than one gene record found for " + symbol);
     }
 
     JsonObject geneJson = dataArray.get(0).getAsJsonObject();
@@ -135,6 +132,7 @@ public class GeneResourceCreator {
 
     if (hgncId == null && ncbiId == null && ensemblId == null) {
       lackingDataMap.put(symbol, pharmgkbId);
+      throw new RuntimeException("Gene record has no external IDs for " + symbol);
     } else {
       GeneResourceWorkbook workbook = new GeneResourceWorkbook(symbol);
       workbook.writeIds(hgncId, ncbiId, ensemblId, pharmgkbId);
@@ -142,8 +140,10 @@ public class GeneResourceCreator {
       Path filePath = f_outputDir.resolve(workbook.getFilename());
       try (OutputStream fo = Files.newOutputStream(filePath)) {
         workbook.write(fo);
+      } catch (IOException ex) {
+        throw new RuntimeException("Error writing " + filePath, ex);
       }
-      sf_logger.info("wrote {}", filePath.toAbsolutePath());
+      return filePath;
     }
   }
 

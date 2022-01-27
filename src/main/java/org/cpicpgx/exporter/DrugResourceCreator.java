@@ -12,9 +12,11 @@ import org.cpicpgx.util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -79,69 +81,63 @@ public class DrugResourceCreator {
     f_outputPath = outputPath;
   }
 
-  public void create(String rawName) throws Exception {
-    Thread.sleep(HttpUtils.API_WAIT_TIME);
+  public Path create(String rawName) {
     String name = StringUtils.strip(rawName);
 
-    String response;
+    String response = null;
     try {
+      Thread.sleep(HttpUtils.API_WAIT_TIME);
       response = apiRequest(f_httpClient, buildPgkbUrl("data/chemical", "view", "max", "name", name.toLowerCase(Locale.ROOT)));
+    } catch (NotFoundException ex) {
+      // safe to ignore 404's
     } catch (Exception ex) {
-      sf_logger.warn("No PharmGKB entry found for {}: {}", name, ex.getMessage());
-      if (ex instanceof NotFoundException) {
-        noDrugFoundSet.add(name);
-      }
-      return;
+      throw new RuntimeException("Problem getting drug data", ex);
     }
 
-    if (StringUtils.isBlank(response)) {
-      sf_logger.warn("No data found for {}", name);
-      return;
-    }
-
-    JsonObject responseJson = f_gson.fromJson(response, JsonObject.class);
-    JsonArray dataArray = responseJson.getAsJsonArray("data");
-    if (dataArray.size() > 1) {
-      sf_logger.warn("More than one drug found for {}", name);
-      return;
-    }
-
-    JsonObject drugJson = dataArray.get(0).getAsJsonObject();
-
-    String pharmgkbId = drugJson.get("id").getAsString();
-    String rxNormId = null;
-    String drugBankId = null;
+    String pharmgkbId = "";
+    String rxNormId = "";
+    String drugBankId = "";
     List<String> atcIds = new ArrayList<>();
 
-    JsonArray termArray = drugJson.getAsJsonArray("terms");
-    for (JsonElement termElement : termArray) {
-      String resource = termElement.getAsJsonObject().get("resource").getAsString();
-      if (resource.equals("RxNorm")) {
-        rxNormId = termElement.getAsJsonObject().get("termId").getAsString();
+    if (StringUtils.isNotBlank(response)) {
+      JsonObject responseJson = f_gson.fromJson(response, JsonObject.class);
+      JsonArray dataArray = responseJson.getAsJsonArray("data");
+      if (dataArray.size() > 1) {
+        throw new RuntimeException("More than one drug found for " + name);
       }
-      else if (resource.equals("Anatomical Therapeutic Chemical Classification")) {
-        atcIds.add(termElement.getAsJsonObject().get("termId").getAsString());
+      JsonObject drugJson = dataArray.get(0).getAsJsonObject();
+
+      pharmgkbId = drugJson.get("id").getAsString();
+
+      JsonArray termArray = drugJson.getAsJsonArray("terms");
+      for (JsonElement termElement : termArray) {
+        String resource = termElement.getAsJsonObject().get("resource").getAsString();
+        if (resource.equals("RxNorm")) {
+          rxNormId = termElement.getAsJsonObject().get("termId").getAsString();
+        } else if (resource.equals("Anatomical Therapeutic Chemical Classification")) {
+          atcIds.add(termElement.getAsJsonObject().get("termId").getAsString());
+        }
+      }
+
+      JsonArray crossReferenceArray = drugJson.getAsJsonArray("crossReferences");
+      for (JsonElement crossReferenceElement : crossReferenceArray) {
+        String resource = crossReferenceElement.getAsJsonObject().get("resource").getAsString();
+        if (resource.equals("DrugBank")) {
+          drugBankId = crossReferenceElement.getAsJsonObject().get("resourceId").getAsString();
+        }
       }
     }
 
-    JsonArray crossReferenceArray = drugJson.getAsJsonArray("crossReferences");
-    for (JsonElement crossReferenceElement : crossReferenceArray) {
-      String resource = crossReferenceElement.getAsJsonObject().get("resource").getAsString();
-      if (resource.equals("DrugBank")) {
-        drugBankId = crossReferenceElement.getAsJsonObject().get("resourceId").getAsString();
-      }
+    DrugResourceWorkbook workbook = new DrugResourceWorkbook(name);
+    workbook.writeMapping(rxNormId, drugBankId, atcIds.toArray(new String[]{}), pharmgkbId);
+    workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
+    Path filePath = Paths.get(f_outputPath, workbook.getFilename());
+    try (OutputStream fo = Files.newOutputStream(filePath)) {
+      workbook.write(fo);
+    } catch (IOException ex) {
+      throw new RuntimeException("Could not write drug resource file for " + workbook.getFilename(), ex);
     }
-
-    if (rxNormId == null && drugBankId == null && atcIds.size() == 0) {
-      lackingDataMap.put(name, pharmgkbId);
-    } else {
-      DrugResourceWorkbook workbook = new DrugResourceWorkbook(name);
-      workbook.writeMapping(rxNormId, drugBankId, atcIds.toArray(new String[]{}), pharmgkbId);
-      workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
-      try (OutputStream fo = Files.newOutputStream(Paths.get(f_outputPath, workbook.getFilename()))) {
-        workbook.write(fo);
-      }
-    }
+    return filePath;
   }
 
   public Set<String> getNoDrugFoundSet() {

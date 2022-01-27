@@ -2,6 +2,7 @@ package org.cpicpgx.util;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import org.apache.http.client.utils.URIUtils;
 import org.cpicpgx.db.FileHistoryWriter;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -28,6 +31,7 @@ public class FileStoreClient implements AutoCloseable {
   
   private static final String S3_PUBLIC_BUCKET      = "files.cpicpgx.org";
   private static final String S3_GENERIC_KEY_PREFIX = "data/report/";
+  private static final String S3_GUIDELINE_STAGING_FORMAT = "data/guideline/staging/%s/";
   private static final String S3_URL_FORMAT         = "https://" + S3_PUBLIC_BUCKET + "/%s%s";
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
   
@@ -43,14 +47,14 @@ public class FileStoreClient implements AutoCloseable {
     }
   }
   
-  public void putArtifact(Path geneFilePath, FileType type) {
-    String fileName = geneFilePath.getFileName().toString();
+  public void putArtifact(Path filePath, FileType type) {
+    String fileName = filePath.getFileName().toString();
 
     String datedDirPath = S3_GENERIC_KEY_PREFIX + DATE_FORMAT.format(new Date()) + "/" + type.name().toLowerCase() + "/";
-    putFile(datedDirPath, fileName, geneFilePath.toFile());
+    putFile(datedDirPath, fileName, filePath.toFile());
 
     String currentDirPath = S3_GENERIC_KEY_PREFIX + "current/" + type.name().toLowerCase() + "/";
-    putFile(currentDirPath, fileName, geneFilePath.toFile());
+    putFile(currentDirPath, fileName, filePath.toFile());
 
     try {
       fileHistoryWriter.writeUpload(fileName, String.format(S3_URL_FORMAT, datedDirPath, fileName));
@@ -59,8 +63,15 @@ public class FileStoreClient implements AutoCloseable {
     }
   }
 
-  private void putFile(String directoryPath, String fileName, File geneFile) {
-    s3.putObject(S3_PUBLIC_BUCKET, directoryPath + fileName, geneFile);
+  public String putGuidelineStagingFile(Path filePath, String timestamp) {
+    String fileName = filePath.getFileName().toString();
+    String prefix = String.format(S3_GUIDELINE_STAGING_FORMAT, timestamp);
+    putFile(prefix, fileName, filePath.toFile());
+    return String.format(S3_URL_FORMAT, prefix, URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+  }
+
+  private void putFile(String directoryPath, String fileName, File file) {
+    s3.putObject(S3_PUBLIC_BUCKET, directoryPath + fileName, file);
     sf_logger.info("Uploaded {}", String.format("s3:///%s/%s%s", S3_PUBLIC_BUCKET, directoryPath, fileName));
   }
   
