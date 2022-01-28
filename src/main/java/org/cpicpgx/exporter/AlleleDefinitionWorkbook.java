@@ -24,7 +24,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private static final String DEFAULT_SHEET_NAME = "Alleles";
   private static final String CELL_PATTERN_GENE = "Gene:%s";
   private static final String CELL_PATTERN_HEADER_ALLELE = "%s Allele";
-  private static final String FILE_NAME_PATTERN = "%s-Allele_Definition_Table.xlsx";
+  private static final String FILE_NAME_PATTERN = "%s_allele_definition_table.xlsx";
   private static final Pattern CHR_PATTERN = Pattern.compile("NC_0+(\\d+)\\.\\d{2}");
   
   private final String geneSymbol;

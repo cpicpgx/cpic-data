@@ -9,7 +9,7 @@ import org.cpicpgx.db.LookupMethod;
  * @author Ryan Whaley
  */
 class GeneCdsWorkbook extends AbstractWorkbook {
-  private static final String FILE_NAME_PATTERN = "%s-CDS.xlsx";
+  private static final String FILE_NAME_PATTERN = "%s_CDS.xlsx";
   private static final String SHEET_NAME = "CDS";
   private final String geneSymbol;
   private final SheetWrapper sheetWrapper;

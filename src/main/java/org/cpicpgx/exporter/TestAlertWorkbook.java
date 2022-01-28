@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Ryan Whaley
  */
 class TestAlertWorkbook extends AbstractWorkbook {
-  private static final String FILE_NAME_TEMPLATE = "%s-Pre_and_Post_Test_Alerts.xlsx";
+  private static final String FILE_NAME_TEMPLATE = "%s_Pre_and_Post_Test_Alerts.xlsx";
   
   private final String drug;
   private SheetWrapper sheet;

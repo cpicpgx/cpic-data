@@ -13,7 +13,7 @@ import java.util.*;
  * @author Ryan Whaley
  */
 class FrequencyWorkbook extends AbstractWorkbook {
-  private static final String FILE_NAME_PATTERN = "%s-Frequency.xlsx";
+  private static final String FILE_NAME_PATTERN = "%s_frequency_table.xlsx";
 
   private static final String SHEET_NAME_METHODS = "Methods and Caveats";
   private static final String SHEET_NAME_REFERENCES = "References";

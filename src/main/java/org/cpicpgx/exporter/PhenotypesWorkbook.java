@@ -3,7 +3,7 @@ package org.cpicpgx.exporter;
 import org.apache.poi.ss.usermodel.Row;
 
 public class PhenotypesWorkbook extends AbstractWorkbook {
-  private static final String FILE_NAME_TEMPLATE = "%s-Phenotypes.xlsx";
+  private static final String FILE_NAME_TEMPLATE = "%s_phenotypes.xlsx";
   private static final String SHEET_NAME = "Phenotype";
 
   private String gene;
