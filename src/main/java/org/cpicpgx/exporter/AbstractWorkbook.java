@@ -1,5 +1,6 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
@@ -19,7 +20,7 @@ public abstract class AbstractWorkbook {
 
   public static final String HISTORY_SHEET_NAME = "Change log";
   public static final String NOTES_SHEET_NAME = "Notes";
-  public static final String LOG_FILE_CREATED = "File generated and data queried";
+  public static final String LOG_FILE_CREATED = "File generated and data compiled";
   public static final String METHODS_SHEET_NAME = "Methods";
   public static final Pattern METHODS_SHEET_PATTERN = Pattern.compile("^[Mm]ethods( and [Cc]aveats)?$");
   private final Workbook workbook;
@@ -264,6 +265,10 @@ public abstract class AbstractWorkbook {
     sheet.sheet.setColumnWidth(0, 100 * 256);
   }
 
+  void writeStarterChangeLogMessage() {
+    writeChangeLog(ImmutableList.of(new Object[]{new Date(), LOG_FILE_CREATED}));
+  }
+
   void writeChangeLog(List<Object[]> changeLogEvents) {
     boolean sheetExists = this.getSheets().stream().anyMatch((s) -> s.getName().equals(HISTORY_SHEET_NAME));
     SheetWrapper historySheet = this.findSheet(HISTORY_SHEET_NAME);
@@ -273,10 +278,6 @@ public abstract class AbstractWorkbook {
       Row headerRow = historySheet.nextRow();
       writeHeaderCell(headerRow, 0, "Date");
       writeHeaderCell(headerRow, 1, "Note");
-
-      Row generatedRow = historySheet.nextRow();
-      writeDateCell(generatedRow, 0, new Date());
-      writeStringCell(generatedRow, 1, LOG_FILE_CREATED, false);
     }
     for (Object[] changeLogEvent : changeLogEvents) {
       Row row = historySheet.nextRow();

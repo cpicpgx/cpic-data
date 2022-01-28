@@ -2,7 +2,6 @@ package org.cpicpgx.util;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import org.apache.http.client.utils.URIUtils;
 import org.cpicpgx.db.FileHistoryWriter;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -10,8 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -67,12 +68,28 @@ public class FileStoreClient implements AutoCloseable {
     String fileName = filePath.getFileName().toString();
     String prefix = String.format(S3_GUIDELINE_STAGING_FORMAT, timestamp);
     putFile(prefix, fileName, filePath.toFile());
-    return String.format(S3_URL_FORMAT, prefix, URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+    return escapeUrl(String.format(S3_URL_FORMAT, prefix, fileName));
   }
 
   private void putFile(String directoryPath, String fileName, File file) {
     s3.putObject(S3_PUBLIC_BUCKET, directoryPath + fileName, file);
     sf_logger.info("Uploaded {}", String.format("s3:///%s/%s%s", S3_PUBLIC_BUCKET, directoryPath, fileName));
+  }
+
+  public static String escapeUrl(String rawUrl) {
+    try {
+      URL parsedUrl = new URL(rawUrl);
+      URI parsedUri = new URI(parsedUrl.getProtocol(),
+          null,
+          parsedUrl.getHost(),
+          parsedUrl.getPort(),
+          parsedUrl.getPath(),
+          parsedUrl.getQuery(),
+          parsedUrl.getRef());
+      return parsedUri.toURL().toString();
+    } catch (MalformedURLException|URISyntaxException e) {
+      throw new RuntimeException("Error escaping URL text", e);
+    }
   }
   
   @Override

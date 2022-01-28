@@ -1,6 +1,5 @@
 package org.cpicpgx.exporter;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -9,6 +8,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
+import org.cpicpgx.model.DrugGenePair;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.FileStoreClient;
 import org.slf4j.Logger;
@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,17 +30,26 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class will create "starter" files for new guidelines. The starter files have standard file, sheet, and column
  * header text with minimal data filled in.
  *
- * The command line options are "g" for gene HGNC symbols and "d" for drug names. 1 or more of each can be specified.
+ * You must supply drug-gene pairs to the starter. These pairs are specified using the "p" flag (can be more than one)
+ * and the value is a pipe-delimited list of drug (only one) and then one or more genes. You can use the "n" flag in
+ * the same way but for pairs that have no recommendation.
+ *
+ * You must also specify an output directory using the "o" flag that will hold the newly generated, empty files that
+ * the curators must fill in.
+ *
+ * Upon successful run, this tool will output a list of links to files that curators can use.
  */
 public class GuidelineStarterPack {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private final Set<String> f_genes = new TreeSet<>();
   private final Set<String> f_drugs = new TreeSet<>();
+  private final List<DrugGenePair> f_pairs = new ArrayList<>();
   private Path m_path;
 
   public static void main(String[] args) {
@@ -60,8 +67,8 @@ public class GuidelineStarterPack {
   private void parseArgs(String[] args) throws ParseException {
     Options options = new Options()
         .addOption("o", true, "output directory, required")
-        .addOption("g", true, "gene symbol, required")
-        .addOption("d", true,"drug name, optional");
+        .addOption("p", true, "drug-gene pair, pipe-delimited between entities, required")
+        .addOption("n", true, "no recommendation drug-gene pair");
     CommandLine cli = new DefaultParser()
         .parse(options, args);
 
@@ -74,13 +81,20 @@ public class GuidelineStarterPack {
       }
     }
 
-    String[] genes = cli.getOptionValues("g");
-    f_genes.addAll(Arrays.asList(genes));
+    String[] pairs = cli.getOptionValues("p");
+    String[] norecPairs = cli.getOptionValues("n");
 
-    String[] drugs = cli.getOptionValues("d");
-    if (drugs != null) {
-      f_drugs.addAll(Arrays.asList(drugs));
+    Stream.of(pairs)
+        .map(p -> new DrugGenePair(p, true))
+        .forEach(f_pairs::add);
+    if (norecPairs != null) {
+      Stream.of(norecPairs)
+          .map(p -> new DrugGenePair(p, false))
+          .forEach(f_pairs::add);
     }
+
+    f_pairs.stream().map(DrugGenePair::getDrugName).forEach(f_drugs::add);
+    f_pairs.stream().flatMap(p -> p.getGenes().stream()).forEach(f_genes::add);
   }
 
   private void execute() throws Exception {
@@ -165,10 +179,24 @@ public class GuidelineStarterPack {
             () -> urlMap.put(FileType.DRUG_RESOURCE, uploadHandler.upload(drugResourceCreator.create(drug)))
         );
 
+        fileMap.put(drug, urlMap);
+      }
+
+      for (DrugGenePair pair : f_pairs) {
+        if (!pair.hasRecommendation()) continue;
+
+        String drugId = queryHandler.lookupDrugId(pair.getDrugName()).orElse(null);
+        Map<FileType, String> urlMap = fileMap.get(pair.getDrugName());
+
+        Map<String,LookupMethod> pairGeneMap = new HashMap<>();
+        for (String gene : pair.getGenes()) {
+          pairGeneMap.put(gene, geneLookupMap.get(gene));
+        }
+
         queryHandler.lookupFile(drugId, FileType.RECOMMENDATION).ifPresentOrElse(
             (url) -> urlMap.put(FileType.RECOMMENDATION, url),
             () -> {
-              RecommendationWorkbook recommendationWorkbook = new RecommendationWorkbook(drug, geneLookupMap);
+              RecommendationWorkbook recommendationWorkbook = new RecommendationWorkbook(pair.getDrugName(), pairGeneMap);
               recommendationWorkbook.setupSheet("population general");
               queryHandler.writePhenotypeCombos(recommendationWorkbook, geneLookupMap);
               urlMap.put(FileType.RECOMMENDATION, uploadHandler.upload(recommendationWorkbook));
@@ -177,13 +205,11 @@ public class GuidelineStarterPack {
         queryHandler.lookupFile(drugId, FileType.TEST_ALERT).ifPresentOrElse(
             (url) -> urlMap.put(FileType.TEST_ALERT, url),
             () -> {
-              TestAlertWorkbook testAlertWorkbook = new TestAlertWorkbook(drug);
-              testAlertWorkbook.writeSheet("population general", geneLookupMap);
-              queryHandler.writeAlertCombos(testAlertWorkbook, geneLookupMap, drug);
+              TestAlertWorkbook testAlertWorkbook = new TestAlertWorkbook(pair.getDrugName());
+              testAlertWorkbook.writeSheet("population general", pairGeneMap);
+              queryHandler.writeAlertCombos(testAlertWorkbook, pairGeneMap, pair.getDrugName());
               urlMap.put(FileType.TEST_ALERT, uploadHandler.upload(testAlertWorkbook));
             });
-
-        fileMap.put(drug, urlMap);
       }
     }
 
@@ -196,7 +222,7 @@ public class GuidelineStarterPack {
       }
       text.append("\n");
     }
-    sf_logger.info("Files to use for this guideline\n" + text.toString());
+    sf_logger.info("Files to use for this guideline\n" + text);
   }
 
   private static class UploadHandler implements AutoCloseable {
@@ -211,7 +237,7 @@ public class GuidelineStarterPack {
     }
 
     String upload(AbstractWorkbook workbook) {
-      workbook.writeChangeLog(ImmutableList.of(new Object[]{new Date(), "File created"}));
+      workbook.writeStarterChangeLogMessage();
       workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
       Path filePath = f_localPath.resolve(workbook.getFilename());
       try (OutputStream out = Files.newOutputStream(filePath)) {
@@ -227,7 +253,7 @@ public class GuidelineStarterPack {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
       f_fileStoreClient.close();
     }
   }
@@ -238,6 +264,7 @@ public class GuidelineStarterPack {
     final PreparedStatement f_geneStmt;
     final PreparedStatement f_drugStmt;
     final PreparedStatement f_fileStmt;
+    final Map<String,String> f_drugIdCache = new HashMap<>();
 
     QueryHandler() throws SQLException {
       f_conn = ConnectionFactory.newConnection();
@@ -248,10 +275,16 @@ public class GuidelineStarterPack {
 
     Optional<String> lookupDrugId(String name) throws SQLException {
       String id = null;
+
+      if (f_drugIdCache.containsKey(name)) {
+        return Optional.of(f_drugIdCache.get(name));
+      }
+
       f_drugStmt.setString(1, name);
       try (ResultSet rs = f_drugStmt.executeQuery()) {
         if (rs.next()) {
           id = rs.getString(1);
+          f_drugIdCache.put(name, id);
         } else if (rs.next()) {
           throw new RuntimeException("More than one ID found for " + name);
         }
@@ -284,10 +317,7 @@ public class GuidelineStarterPack {
       f_fileStmt.setString(2, fileType.name());
       try (ResultSet rs = f_fileStmt.executeQuery()) {
         if (rs.next()) {
-          String rawUrl = rs.getString(1);
-          URL parsedUrl = new URL(rawUrl);
-          URI parsedUri = new URI(parsedUrl.getProtocol(), null, parsedUrl.getHost(), parsedUrl.getPort(), parsedUrl.getPath(), parsedUrl.getQuery(), parsedUrl.getRef());
-          url = parsedUri.toURL().toString();
+          url = FileStoreClient.escapeUrl(rs.getString(1));
         } else if (rs.next()) {
           throw new RuntimeException("More than one record found for " + entityId + " " + fileType);
         }
