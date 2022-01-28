@@ -25,7 +25,7 @@ class RecommendationWorkbook extends AbstractWorkbook {
   }
 
   void setupSheet(String population) {
-    this.sheet = findSheet(population);
+    this.sheet = findSheet("population " + population);
 
     int colIdx = 0;
     Row headerRow = this.sheet.nextRow();

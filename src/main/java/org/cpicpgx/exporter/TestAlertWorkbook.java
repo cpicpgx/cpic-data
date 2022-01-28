@@ -22,7 +22,7 @@ class TestAlertWorkbook extends AbstractWorkbook {
   }
 
   void writeSheet(String population, Map<String, LookupMethod> genes) {
-    this.sheet = findSheet(population);
+    this.sheet = findSheet("population " + population);
     this.colIdx = 0;
 
     Row headerRow = this.sheet.nextRow();
