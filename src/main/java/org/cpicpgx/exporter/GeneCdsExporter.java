@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
+import org.cpicpgx.workbook.GeneCdsWorkbook;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

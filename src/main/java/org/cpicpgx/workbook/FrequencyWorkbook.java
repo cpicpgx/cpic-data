@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -12,7 +12,7 @@ import java.util.*;
  *
  * @author Ryan Whaley
  */
-class FrequencyWorkbook extends AbstractWorkbook {
+public class FrequencyWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_PATTERN = "%s_frequency_table.xlsx";
 
   private static final String SHEET_NAME_METHODS = "Methods and Caveats";
@@ -32,7 +32,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private SheetWrapper sheetDiplotype;
   private SheetWrapper sheetPhenotype;
 
-  FrequencyWorkbook(String geneSymbol, LookupMethod lookupMethod) {
+  public FrequencyWorkbook(String geneSymbol, LookupMethod lookupMethod) {
     super();
 
     if (StringUtils.isBlank(geneSymbol)) {
@@ -41,8 +41,8 @@ class FrequencyWorkbook extends AbstractWorkbook {
     this.geneSymbol = geneSymbol;
     this.byActivityScore = lookupMethod == LookupMethod.ACTIVITY_SCORE;
   }
-  
-  void writeMethods(String methods) {
+
+  public void writeMethods(String methods) {
     SheetWrapper sheetMethods = findSheet(SHEET_NAME_METHODS);
     sheetMethods.setColCount(1);
     sheetMethods.setWidths(new Integer[]{100*256});
@@ -52,8 +52,8 @@ class FrequencyWorkbook extends AbstractWorkbook {
       writeStringCell(row, 0, line, wrapStyle);
     }
   }
-  
-  void writeReferenceHeader(Set<String> alleles) {
+
+  public void writeReferenceHeader(Set<String> alleles) {
     sheetReferences = findSheet(SHEET_NAME_REFERENCES);
     Row header = sheetReferences.nextRow();
     int headerIdx = 0;
@@ -69,7 +69,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   }
   
   private static final int REFERENCE_POP_HEADER_COL_COUNT = 8;
-  void writePopulation(String[] authors, Integer year, String pmid, String ethnicity, String population, String popInfo,
+  public void writePopulation(String[] authors, Integer year, String pmid, String ethnicity, String population, String popInfo,
                        String subjectType, Integer subjectCount, String[] frequencies) {
 
     Row row = sheetReferences.nextRow();
@@ -97,7 +97,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   private Row currentMaxFreqRow;
   private int currentPopSummaryAlleleCol;
 
-  void writeEthnicityHeader(String ethnicity, int numAlleles) {
+  public void writeEthnicityHeader(String ethnicity, int numAlleles) {
     Row row = sheetReferences.nextRow();
     writeTopBorderCell(row, 0, ethnicity);
     for (int i = 1; i < REFERENCE_POP_HEADER_COL_COUNT + numAlleles; i++) {
@@ -106,7 +106,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
     sheetReferences.sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, REFERENCE_POP_HEADER_COL_COUNT + numAlleles));
   }
 
-  void startPopulationSummary() {
+  public void startPopulationSummary() {
     currentFreqRow = sheetReferences.nextRow();
     currentMinFreqRow = sheetReferences.nextRow();
     currentMaxFreqRow = sheetReferences.nextRow();
@@ -117,22 +117,22 @@ class FrequencyWorkbook extends AbstractWorkbook {
     writeHighlightCell(currentFreqRow, REFERENCE_POP_HEADER_COL_COUNT-1, "Average");
     writeHighlightCell(currentMaxFreqRow, REFERENCE_POP_HEADER_COL_COUNT-1, "Max");
   }
-  
-  void writePopulationSummary(double minFreq, double freq, double maxFreq) {
+
+  public void writePopulationSummary(double minFreq, double freq, double maxFreq) {
     writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq);
     writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
     writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq);
     currentPopSummaryAlleleCol += 1;
   }
-  
-  void writeEmptyPopulationSummary() {
+
+  public void writeEmptyPopulationSummary() {
     writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, "");
     writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, "");
     writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, "");
     currentPopSummaryAlleleCol += 1;
   }
-  
-  void writeReferencePopulationSummary(Double freq) {
+
+  public void writeReferencePopulationSummary(Double freq) {
     writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
     writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, "");
     writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, "");
@@ -145,7 +145,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   /**
    * Start the allele frequency file
    */
-  void writeAlleleFrequencyHeader(List<String> bioGeoGroups) {
+  public void writeAlleleFrequencyHeader(List<String> bioGeoGroups) {
     sheetAllele = findSheet(SHEET_NAME_ALLELE);
     Row header = sheetAllele.nextRow();
     writeHeaderCell(header, 0, String.format(TITLE_TEMPLATE, geneSymbol));
@@ -166,7 +166,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
    * @param allele the gene allele
    * @param frequencies an array of frequency data
    */
-  void writeAlleleFrequency(String allele, Double[] frequencies) {
+  public void writeAlleleFrequency(String allele, Double[] frequencies) {
     Row row = sheetAllele.nextRow();
     writeStringCell(row, 0, allele, false);
 
@@ -179,7 +179,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   /**
    * Write header for the diplotype sheet
    */
-  void writeDiplotypeFrequencyHeader(List<String> bioGeoGroups) {
+  public void writeDiplotypeFrequencyHeader(List<String> bioGeoGroups) {
     sheetDiplotype = findSheet(SHEET_DIPLOTYPE);
     Row header = sheetDiplotype.nextRow();
     writeHeaderCell(header, 0, String.format(TITLE_DIPLO_TEMPLATE, geneSymbol));
@@ -195,7 +195,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
     sheetDiplotype.setColCount(col);
   }
 
-  void writeDiplotypeFrequency(String diplotype, Double[] frequencies) {
+  public void writeDiplotypeFrequency(String diplotype, Double[] frequencies) {
     Row row = sheetDiplotype.nextRow();
     writeStringCell(row, 0, diplotype, false);
 
@@ -208,7 +208,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   /**
    * Write header for the phenotype sheet
    */
-  void writePhenotypeFrequencyHeader(List<String> bioGeoGroups) {
+  public void writePhenotypeFrequencyHeader(List<String> bioGeoGroups) {
     sheetPhenotype = findSheet(SHEET_PHENOTYPE);
     Row header = sheetPhenotype.nextRow();
     writeHeaderCell(header, 0, String.format(TITLE_PHENO_TEMPLATE, geneSymbol));
@@ -224,7 +224,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
     sheetPhenotype.setColCount(col);
   }
 
-  void writePhenotypeFrequency(String phenoOrScore, Double[] frequencies) {
+  public void writePhenotypeFrequency(String phenoOrScore, Double[] frequencies) {
     Row row = sheetPhenotype.nextRow();
     writeStringCell(row, 0, phenoOrScore, false);
 
@@ -234,7 +234,7 @@ class FrequencyWorkbook extends AbstractWorkbook {
   }
 
   @Override
-  String getFilename() {
+  public String getFilename() {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
 }

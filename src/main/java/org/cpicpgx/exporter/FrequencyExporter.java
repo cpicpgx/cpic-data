@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
+import org.cpicpgx.workbook.FrequencyWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.ActivityScoreComparator;
 import org.cpicpgx.util.DbHarness;

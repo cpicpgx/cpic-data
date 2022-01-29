@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
@@ -9,15 +9,15 @@ import org.apache.poi.ss.usermodel.Row;
  *
  * @author Ryan Whaley
  */
-class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
+public class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
   private static final String FUNCTION_SHEET_NAME = "Allele Function";
   private static final String CELL_PATTERN_GENE = "Gene: %s";
   private static final String FILE_NAME_PATTERN = "%s_allele_functionality_reference.xlsx";
   private final String geneSymbol;
   private final SheetWrapper sheet;
 
-  
-  AlleleFunctionalityReferenceWorkbook(String gene) {
+
+  public AlleleFunctionalityReferenceWorkbook(String gene) {
     super();
     this.geneSymbol = gene;
     
@@ -40,12 +40,12 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     
     this.colIdx = 8;
   }
-  
-  String getFilename() {
+
+  public String getFilename() {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
-  
-  void writeAlleleRow(String allele, String activity, String function, String clinFunction, String clinSubstrate, String[] citations, String strength, String finding, String comments) {
+
+  public void writeAlleleRow(String allele, String activity, String function, String clinFunction, String clinSubstrate, String[] citations, String strength, String finding, String comments) {
     Row row = this.sheet.nextRow();
     writeStringCell(row, 0, allele, false);
     writeStringCell(row, 1, activity, false);
@@ -58,7 +58,7 @@ class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     writeStringCell(row, 8, comments, false);
   }
 
-  void writeMethods(String methods) {
+  public void writeMethods(String methods) {
     if (StringUtils.isBlank(methods)) {
       return;
     }

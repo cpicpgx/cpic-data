@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 
@@ -7,13 +7,13 @@ import org.apache.poi.ss.usermodel.Row;
  *
  * @author Ryan Whaley
  */
-class GeneResourceWorkbook extends AbstractWorkbook {
+public class GeneResourceWorkbook extends AbstractWorkbook {
   private static final String NAME_TEMPLATE = "%s-Gene_Resource_Mappings.xlsx";
   private static final String SHEET_NAME = "mapping";
   private String gene;
   private SheetWrapper sheet;
-  
-  GeneResourceWorkbook(String gene) {
+
+  public GeneResourceWorkbook(String gene) {
     super();
     this.gene = gene;
     
@@ -29,7 +29,7 @@ class GeneResourceWorkbook extends AbstractWorkbook {
     this.colIdx = 3;
   }
 
-  void writeIds(String hgncId, String ncbiId, String ensemblId, String pharmgkbId) {
+  public void writeIds(String hgncId, String ncbiId, String ensemblId, String pharmgkbId) {
     writeMapping("HGNC", "Symbol", this.gene);
     writeMapping("HGNC", "HGNC ID", hgncId);
     writeMapping("NCBI", "Gene ID", ncbiId);
@@ -44,12 +44,8 @@ class GeneResourceWorkbook extends AbstractWorkbook {
     writeStringCell(row, 2, type, false);
     writeStringCell(row, 3, code, false);
   }
-  
-  String getFilename() {
+
+  public String getFilename() {
     return String.format(NAME_TEMPLATE, this.gene);
-  }
-  
-  String getSheetName() {
-    return SHEET_NAME;
   }
 }

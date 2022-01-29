@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 
@@ -9,7 +9,7 @@ public class PhenotypesWorkbook extends AbstractWorkbook {
   private String gene;
   private SheetWrapper sheet;
 
-  PhenotypesWorkbook(String gene) {
+  public PhenotypesWorkbook(String gene) {
     super();
     this.gene = gene;
     this.sheet = findSheet(SHEET_NAME);
@@ -29,7 +29,7 @@ public class PhenotypesWorkbook extends AbstractWorkbook {
     writeHeaderCell(columnHeaderRow, 6, "Description");
   }
 
-  void writePhenotype(
+  public void writePhenotype(
       String fn1,
       String fn2,
       String score1,
@@ -49,7 +49,7 @@ public class PhenotypesWorkbook extends AbstractWorkbook {
   }
 
   @Override
-  String getFilename() {
+  public String getFilename() {
     return String.format(FILE_NAME_TEMPLATE, this.gene);
   }
 }

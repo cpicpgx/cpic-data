@@ -2,6 +2,7 @@ package org.cpicpgx.exporter;
 
 import org.apache.commons.cli.ParseException;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.workbook.PairWorkbook;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

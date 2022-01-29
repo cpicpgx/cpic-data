@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.cpicpgx.db.LookupMethod;
@@ -10,21 +10,21 @@ import java.util.Map;
  *
  * @author Ryan Whaley
  */
-class RecommendationWorkbook extends AbstractWorkbook {
+public class RecommendationWorkbook extends AbstractWorkbook {
   
   private static final String FILE_NAME_TEMPLATE = "%s recommendation.xlsx";
 
   private SheetWrapper sheet;
   private final String drug;
   private final Map<String, LookupMethod> genes;
-  
-  RecommendationWorkbook(String drug, Map<String, LookupMethod> geneMap) {
+
+  public RecommendationWorkbook(String drug, Map<String, LookupMethod> geneMap) {
     super();
     this.drug = drug;
     this.genes = geneMap;
   }
 
-  void setupSheet(String population) {
+  public void setupSheet(String population) {
     this.sheet = findSheet("population " + population);
 
     int colIdx = 0;
@@ -51,8 +51,8 @@ class RecommendationWorkbook extends AbstractWorkbook {
     writeHeaderCell(headerRow, colIdx++, "Comments");
     this.sheet.setColCount(colIdx);
   }
-  
-  void writeRec(
+
+  public void writeRec(
       Map<String,String> phenotypeMap,
       Map<String,String> activityMap,
       Map<String,String> implicationMap,
@@ -86,7 +86,7 @@ class RecommendationWorkbook extends AbstractWorkbook {
   }
 
   @Override
-  String getFilename() {
+  public String getFilename() {
     return String.format(FILE_NAME_TEMPLATE, this.drug.replaceAll("/", "_"));
   }
 }

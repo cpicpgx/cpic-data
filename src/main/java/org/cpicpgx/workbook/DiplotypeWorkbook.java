@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 
@@ -7,13 +7,13 @@ import org.apache.poi.ss.usermodel.Row;
  *
  * @author Ryan Whaley
  */
-class DiplotypeWorkbook extends AbstractWorkbook {
+public class DiplotypeWorkbook extends AbstractWorkbook {
   private static final String NAME_TEMPLATE = "%s_Diplotype_Phenotype_Table.xlsx";
   private static final String SHEET_NAME = "Diplotypes";
   private final String gene;
   private final SheetWrapper dataSheet;
 
-  DiplotypeWorkbook(String gene) {
+  public DiplotypeWorkbook(String gene) {
     super();
     this.gene = gene;
     
@@ -26,8 +26,8 @@ class DiplotypeWorkbook extends AbstractWorkbook {
     writeHeaderCell(row, 2, "Coded Diplotype/Phenotype Summary");
     writeHeaderCell(row, 3, "EHR Priority Notation");
   }
-  
-  void writeDiplotype(String diplotype, String phenotype, String ehr, String activity) {
+
+  public void writeDiplotype(String diplotype, String phenotype, String ehr, String activity) {
     Row row = dataSheet.nextRow();
     writeStringCell(row, 0, diplotype, false);
     writeStringCell(row, 1, activity, false);
@@ -36,7 +36,7 @@ class DiplotypeWorkbook extends AbstractWorkbook {
   }
 
   @Override
-  String getFilename() {
+  public String getFilename() {
     return String.format(NAME_TEMPLATE, this.gene);
   }
 }

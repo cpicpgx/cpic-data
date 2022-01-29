@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import com.google.common.base.Joiner;
 import org.apache.poi.ss.usermodel.Row;
@@ -14,7 +14,7 @@ public class DrugResourceWorkbook extends AbstractWorkbook {
   private final SheetWrapper sheet;
   private final String drug;
 
-  DrugResourceWorkbook(String drugName) {
+  public DrugResourceWorkbook(String drugName) {
     super();
     this.drug = drugName;
 
@@ -29,7 +29,7 @@ public class DrugResourceWorkbook extends AbstractWorkbook {
     this.sheet.setColCount(4);
   }
 
-  void writeMapping(String rxnorm, String drugbank, String[] atc, String pharmgkb) {
+  public void writeMapping(String rxnorm, String drugbank, String[] atc, String pharmgkb) {
     writeRow("RxNorm", "RxCUI", rxnorm);
     writeRow("DrugBank", "Accession Number", drugbank);
     writeRow("ATC", "ATC Code", Joiner.on(";").join(atc));
@@ -45,7 +45,7 @@ public class DrugResourceWorkbook extends AbstractWorkbook {
   }
 
   @Override
-  String getFilename() {
+  public String getFilename() {
     return String.format(NAME_TEMPLATE, this.drug.replaceAll("/", "_"));
   }
 }

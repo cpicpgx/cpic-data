@@ -2,7 +2,7 @@ package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.DbHarness;
 import org.cpicpgx.util.RowWrapper;

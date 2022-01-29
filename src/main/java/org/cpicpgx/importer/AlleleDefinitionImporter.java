@@ -2,7 +2,7 @@ package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;

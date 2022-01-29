@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 
@@ -13,13 +13,13 @@ public class PairWorkbook extends AbstractWorkbook {
   private final SheetWrapper sheet;
   private final boolean includeRemoved;
 
-  PairWorkbook(boolean includeRemoved) {
+  public PairWorkbook(boolean includeRemoved) {
     super();
     this.sheet = findSheet(SHEET_NAME);
     this.includeRemoved = includeRemoved;
   }
 
-  void writeHeader(ResultSetMetaData metadata) throws SQLException {
+  public void writeHeader(ResultSetMetaData metadata) throws SQLException {
     this.sheet.setColCount(metadata.getColumnCount());
     Row headerRow = sheet.nextRow();
     for (int colIdx = 0; colIdx < metadata.getColumnCount(); colIdx++) {
@@ -27,7 +27,7 @@ public class PairWorkbook extends AbstractWorkbook {
     }
   }
 
-  void writePair(ResultSet rs) throws SQLException {
+  public void writePair(ResultSet rs) throws SQLException {
     Row dataRow = sheet.nextRow();
     for (int colIdx = 0; colIdx < rs.getMetaData().getColumnCount(); colIdx++) {
       Object colObject = rs.getObject(colIdx + 1);
@@ -44,7 +44,7 @@ public class PairWorkbook extends AbstractWorkbook {
   }
 
   @Override
-  String getFilename() {
+  public String getFilename() {
     if (includeRemoved) {
       return ALL_FILE_NAME;
     } else {

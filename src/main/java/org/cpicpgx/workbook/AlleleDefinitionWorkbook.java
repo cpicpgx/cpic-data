@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Whaley
  */
-class AlleleDefinitionWorkbook extends AbstractWorkbook {
+public class AlleleDefinitionWorkbook extends AbstractWorkbook {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DEFAULT_SHEET_NAME = "Alleles";
@@ -43,7 +43,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * Constructor. Sets up the Apache POI objects needed to write the values to the file.
    * @param gene an HGNC gene symbol
    */
-  AlleleDefinitionWorkbook(String gene, String seqChr, String seqPro, String seqGen, String seqMrna, Long pvCount) {
+  public AlleleDefinitionWorkbook(String gene, String seqChr, String seqPro, String seqGen, String seqMrna, Long pvCount) {
     super();
     if (StringUtils.stripToNull(gene) == null) {
       throw new IllegalArgumentException("Gene must be specified");
@@ -81,7 +81,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     }
 
     if (pvCount > 0) {
-      writeStringCell(nameRow, 0, "Nucleotide change per gene from http://www.pharmvar.org", wrapStyle);
+      writeStringCell(nameRow, 0, "Nucleotide change per gene from https://www.pharmvar.org", wrapStyle);
     } else if (StringUtils.isNotBlank(seqMrna)) {
       writeStringCell(nameRow, 0, String.format("Nucleotide change on cDNA (%s)", seqMrna), wrapStyle);
     } else {
@@ -100,7 +100,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * Generates the file name with the gene symbol in it
    * @return a file name for this workbook
    */
-  String getFilename() {
+  public String getFilename() {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
   
@@ -108,7 +108,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * Write an allele row. Do this before writing allele location values
    * @param name the name of the allele (e.g. "*2")
    */
-  void writeAllele(String name) {
+  public void writeAllele(String name) {
     alleleRow = sheet.nextRow();
 
     writeStringCell(alleleRow, 0, name, leftTextStyle);
@@ -120,7 +120,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * @param locId the ID of an allele that appears in this sheet
    * @param value the value to write to the allele-location intersecting cell
    */
-  void writeAlleleLocationValue(Long locId, String value) {
+  public void writeAlleleLocationValue(Long locId, String value) {
     if (!colLocationMap.containsKey(locId)) {
       throw new IllegalArgumentException("No location with ID specified " + locId);
     }
@@ -138,7 +138,7 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * @param dbSnpId the ID of this variant assigned by dbSNP
    * @param locId the ID for this location assigned by the DB
    */
-  void writeVariant(String name, String protein, String chromo, String gene, String dbSnpId, Long locId) {
+  public void writeVariant(String name, String protein, String chromo, String gene, String dbSnpId, Long locId) {
     writeStringCell(nameRow, colIdx, name);
     writeStringCell(proteinRow, colIdx, protein);
     writeStringCell(chromoRow, colIdx, chromo);
@@ -150,14 +150,14 @@ class AlleleDefinitionWorkbook extends AbstractWorkbook {
     colIdx += 1;
   }
 
-  void writeStructuralVariantHeader() {
+  public void writeStructuralVariantHeader() {
     writeStringCell(nameRow, colIdx, Constants.STRUCTURAL_VARIATION);
     this.structuralVariantionRowIdx = colIdx;
     this.sheet.setColCount(colIdx+1);
     colIdx += 1;
   }
 
-  void writeStructrualVariantCell(String pharmvarId) {
+  public void writeStructrualVariantCell(String pharmvarId) {
     Preconditions.checkArgument(structuralVariantionRowIdx > -1, "Cannot write SV when no column identified");
     writeStringCell(alleleRow, structuralVariantionRowIdx, pharmvarId);
   }

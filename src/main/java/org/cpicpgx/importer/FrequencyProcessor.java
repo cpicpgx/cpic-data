@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;

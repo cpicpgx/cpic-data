@@ -3,6 +3,8 @@ package org.cpicpgx.exporter;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.FileHistoryWriter;
+import org.cpicpgx.workbook.AbstractWorkbook;
+import org.cpicpgx.workbook.SheetWrapper;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.FileStoreClient;
 import org.slf4j.Logger;

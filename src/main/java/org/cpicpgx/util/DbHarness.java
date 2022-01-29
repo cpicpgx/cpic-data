@@ -3,7 +3,7 @@ package org.cpicpgx.util;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

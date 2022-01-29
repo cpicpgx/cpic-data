@@ -5,7 +5,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;

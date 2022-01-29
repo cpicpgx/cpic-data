@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.ObjectUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
+import org.cpicpgx.workbook.PhenotypesWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.ActivityScoreComparator;
 import org.slf4j.Logger;

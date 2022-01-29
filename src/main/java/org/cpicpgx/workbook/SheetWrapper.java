@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -13,8 +13,8 @@ public class SheetWrapper {
   private Integer[] widths;
   private int colCount;
   private int rowIdx = 0;
-  
-  SheetWrapper(Sheet sheet, int colCount) {
+
+  public SheetWrapper(Sheet sheet, int colCount) {
     this.sheet = sheet;
     setColCount(colCount);
   }
@@ -51,7 +51,7 @@ public class SheetWrapper {
   /**
    * Automatically set the width of the columns to display the contents or follow the widths specified in setWidths
    */
-  void autosizeColumns() {
+  public void autosizeColumns() {
     if (widths == null) {
       for (int i = 0; i < this.colCount; i++) {
         sheet.autoSizeColumn(i);

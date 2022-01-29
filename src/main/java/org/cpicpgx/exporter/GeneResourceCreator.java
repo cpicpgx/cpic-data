@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import okhttp3.OkHttpClient;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+import org.cpicpgx.workbook.GeneResourceWorkbook;
+import org.cpicpgx.workbook.SheetWrapper;
 import org.cpicpgx.util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

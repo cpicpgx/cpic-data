@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 
@@ -7,13 +7,13 @@ import org.apache.poi.ss.usermodel.Row;
  *
  * @author Ryan Whaley
  */
-class TermsWorkbook extends AbstractWorkbook {
+public class TermsWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME = "standardized.terms.xlsx"; 
   private static final String SHEET_NAME = "Terms";
   
   private SheetWrapper sheet;
 
-  TermsWorkbook() {
+  public TermsWorkbook() {
     super();
     this.sheet = findSheet(SHEET_NAME);
     sheet.setColCount(4);
@@ -24,8 +24,8 @@ class TermsWorkbook extends AbstractWorkbook {
     writeHeaderCell(headerRow, 2, "Phenotypic Description");
     writeHeaderCell(headerRow, 3, "Genotypic Description");
   }
-  
-  void writeTerm(String category, String fnDef, String gxDef, String term) {
+
+  public void writeTerm(String category, String fnDef, String gxDef, String term) {
     Row row = this.sheet.nextRow();
     writeStringCell(row, 0, category);
     writeStringCell(row, 1, term);
@@ -34,7 +34,7 @@ class TermsWorkbook extends AbstractWorkbook {
   }
   
   @Override
-  String getFilename() {
+  public String getFilename() {
     return FILE_NAME;
   }
 }

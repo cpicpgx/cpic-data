@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 
@@ -12,7 +12,7 @@ public class AlleleSummaryWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME = "cpic_alleles.xlsx";
   private final SheetWrapper sheet;
 
-  AlleleSummaryWorkbook() {
+  public AlleleSummaryWorkbook() {
     super();
     this.sheet = findSheet(SHEET_NAME);
     this.sheet.setColCount(4);
@@ -24,7 +24,7 @@ public class AlleleSummaryWorkbook extends AbstractWorkbook {
     writeHeaderCell(row, 3, "URL");
   }
 
-  void writeRow(String gene, String allele, String guideline, String url) {
+  public void writeRow(String gene, String allele, String guideline, String url) {
     Row row = this.sheet.nextRow();
     writeStringCell(row, 0, gene, false);
     writeStringCell(row, 1, allele, false);
@@ -33,7 +33,7 @@ public class AlleleSummaryWorkbook extends AbstractWorkbook {
   }
 
   @Override
-  String getFilename() {
+  public String getFilename() {
     return FILE_NAME;
   }
 }

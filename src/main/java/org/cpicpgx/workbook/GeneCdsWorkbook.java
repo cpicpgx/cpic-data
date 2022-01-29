@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.cpicpgx.db.LookupMethod;
@@ -8,13 +8,13 @@ import org.cpicpgx.db.LookupMethod;
  *
  * @author Ryan Whaley
  */
-class GeneCdsWorkbook extends AbstractWorkbook {
+public class GeneCdsWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_PATTERN = "%s_CDS.xlsx";
   private static final String SHEET_NAME = "CDS";
   private final String geneSymbol;
   private final SheetWrapper sheetWrapper;
 
-  GeneCdsWorkbook(String geneSymbol, LookupMethod lookupMethod) {
+  public GeneCdsWorkbook(String geneSymbol, LookupMethod lookupMethod) {
     super();
     this.geneSymbol = geneSymbol;
     this.sheetWrapper = findSheet(SHEET_NAME);
@@ -35,11 +35,11 @@ class GeneCdsWorkbook extends AbstractWorkbook {
   }
   
   @Override
-  String getFilename() {
+  public String getFilename() {
     return String.format(FILE_NAME_PATTERN, this.geneSymbol);
   }
-  
-  void writeConsultation(String phenotype, String priority, String consultation, String activityScore) {
+
+  public void writeConsultation(String phenotype, String priority, String consultation, String activityScore) {
     Row headerRow = sheetWrapper.nextRow();
     writeStringCell(headerRow, 0, phenotype);
     writeStringCell(headerRow, 1, activityScore);

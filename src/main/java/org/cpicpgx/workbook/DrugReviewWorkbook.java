@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 
@@ -7,14 +7,14 @@ import org.apache.poi.ss.usermodel.Row;
  *
  * @author Ryan Whaley
  */
-class DrugReviewWorkbook extends AbstractWorkbook {
+public class DrugReviewWorkbook extends AbstractWorkbook {
   
   private static final String SHEET_NAME = "CPIC Drug Review";
   private static final String FILE_NAME = "cpic_drug_review.xlsx";
   
   private SheetWrapper sheet;
-  
-  DrugReviewWorkbook() {
+
+  public DrugReviewWorkbook() {
     super();
     this.sheet = findSheet(SHEET_NAME);
     this.sheet.setColCount(6);
@@ -27,8 +27,8 @@ class DrugReviewWorkbook extends AbstractWorkbook {
     writeHeaderCell(headerRow, 4, "DrugBank ID");
     writeHeaderCell(headerRow, 5, "ATC ID");
   }
-  
-  void writeDrug(String name, String id, String pgkb, String rxnorm, String drugbank, String[] atc) {
+
+  public void writeDrug(String name, String id, String pgkb, String rxnorm, String drugbank, String[] atc) {
     Row drugRow = sheet.nextRow();
     writeStringCell(drugRow, 0, name, false);
     writeStringCell(drugRow, 1, id, false);
@@ -44,7 +44,7 @@ class DrugReviewWorkbook extends AbstractWorkbook {
   }
   
   @Override
-  String getFilename() {
+  public String getFilename() {
     return FILE_NAME;
   }
 }

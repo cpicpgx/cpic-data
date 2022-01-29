@@ -6,7 +6,7 @@ import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.exporter.AbstractWorkbook;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;

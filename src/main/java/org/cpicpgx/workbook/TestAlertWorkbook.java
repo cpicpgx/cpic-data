@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.cpicpgx.db.LookupMethod;
@@ -10,18 +10,18 @@ import java.util.Map;
  *
  * @author Ryan Whaley
  */
-class TestAlertWorkbook extends AbstractWorkbook {
+public class TestAlertWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_TEMPLATE = "%s_Pre_and_Post_Test_Alerts.xlsx";
   
   private final String drug;
   private SheetWrapper sheet;
 
-  TestAlertWorkbook(String drug) {
+  public TestAlertWorkbook(String drug) {
     super();
     this.drug = drug;
   }
 
-  void writeSheet(String population, Map<String, LookupMethod> genes) {
+  public void writeSheet(String population, Map<String, LookupMethod> genes) {
     this.sheet = findSheet("population " + population);
     this.colIdx = 0;
 
@@ -50,8 +50,8 @@ class TestAlertWorkbook extends AbstractWorkbook {
     columnSizes[colIdx] = 15*256;
     this.sheet.setWidths(columnSizes);
   }
-  
-  void writeAlert(Map<String,LookupMethod> genes, String context, String[] alertText, String drugName, Map<String,String> activity, Map<String,String> phenotype, Map<String,String> alleleStatus) {
+
+  public void writeAlert(Map<String,LookupMethod> genes, String context, String[] alertText, String drugName, Map<String,String> activity, Map<String,String> phenotype, Map<String,String> alleleStatus) {
     this.colIdx = 0;
     Row row = this.sheet.nextRow();
     writeStringCell(row, colIdx++, drugName);
@@ -75,7 +75,7 @@ class TestAlertWorkbook extends AbstractWorkbook {
   }
   
   @Override
-  String getFilename() {
+  public String getFilename() {
     return String.format(FILE_NAME_TEMPLATE, this.drug.replaceAll("/", "_"));
   }
 }

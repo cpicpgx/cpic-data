@@ -1,4 +1,4 @@
-package org.cpicpgx.exporter;
+package org.cpicpgx.workbook;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
@@ -125,14 +125,14 @@ public abstract class AbstractWorkbook {
     this.highlightDoubleStyle.setBorderLeft(BorderStyle.HAIR);
     this.highlightDoubleStyle.setBorderRight(BorderStyle.HAIR);
   }
-  
-  abstract String getFilename();
+
+  public abstract String getFilename();
 
   private Workbook getWorkbook() {
     return this.workbook;
   }
-  
-  List<SheetWrapper> getSheets() {
+
+  public List<SheetWrapper> getSheets() {
     return this.sheets;
   }
 
@@ -241,7 +241,7 @@ public abstract class AbstractWorkbook {
    * @param out an initialized {@link OutputStream}
    * @throws IOException can occur when writing the workbook
    */
-  void write(OutputStream out) throws IOException {
+  public void write(OutputStream out) throws IOException {
     getWorkbook().write(out);
   }
 
@@ -249,7 +249,7 @@ public abstract class AbstractWorkbook {
    * Create the "Notes" tab and populate it with note lines
    * @param notes a List of notes to write, one per line
    */
-  void writeNotes(List<String> notes) {
+  public void writeNotes(List<String> notes) {
     SheetWrapper sheet = findSheet(NOTES_SHEET_NAME);
 
     Row headerRow = sheet.nextRow();
@@ -265,11 +265,11 @@ public abstract class AbstractWorkbook {
     sheet.sheet.setColumnWidth(0, 100 * 256);
   }
 
-  void writeStarterChangeLogMessage() {
+  public void writeStarterChangeLogMessage() {
     writeChangeLog(ImmutableList.of(new Object[]{new Date(), LOG_FILE_CREATED}));
   }
 
-  void writeChangeLog(List<Object[]> changeLogEvents) {
+  public void writeChangeLog(List<Object[]> changeLogEvents) {
     boolean sheetExists = this.getSheets().stream().anyMatch((s) -> s.getName().equals(HISTORY_SHEET_NAME));
     SheetWrapper historySheet = this.findSheet(HISTORY_SHEET_NAME);
     historySheet.setWidths(new Integer[]{20*256, 100*256});

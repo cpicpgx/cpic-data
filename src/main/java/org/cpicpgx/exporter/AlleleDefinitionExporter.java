@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.workbook.AlleleDefinitionWorkbook;
 import org.cpicpgx.model.FileType;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
