@@ -146,7 +146,7 @@ public class FrequencyCreator {
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
       sf_logger.debug("Requesting frequencies from PharmGKB for: {}", rsid);
-      response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadExome"));
+      response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadGenome"));
     } catch (NotFoundException e) {
       // safe to ignore, just means no frequency data available
     } catch (Exception e) {
@@ -231,7 +231,6 @@ public class FrequencyCreator {
       workbook.writeEthnicityHeader(population.getName(), f_allAlleles.size());
 
       List<String> freqsForAllelesList = new ArrayList<>();
-      Integer size = f_alleleDistributions.stream().map(d -> d.getSize(population)).reduce(0, Integer::sum);
       for (String alleleName : f_allAlleles) {
         f_alleleDistributions.stream().filter(d -> d.getAlleleName().equals(alleleName)).findFirst()
             .ifPresentOrElse(
@@ -248,7 +247,7 @@ public class FrequencyCreator {
           "GnomAD population " + population.name(),
           "",
           "",
-          size,
+          null,
           freqsForAllelesList
       );
 
