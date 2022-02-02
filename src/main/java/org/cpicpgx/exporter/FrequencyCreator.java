@@ -17,9 +17,12 @@ import org.cpicpgx.util.HttpUtils;
 import org.cpicpgx.workbook.FrequencyWorkbook;
 import org.cpicpgx.workbook.SheetWrapper;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,11 +39,13 @@ import static org.cpicpgx.util.HttpUtils.apiRequest;
 import static org.cpicpgx.util.HttpUtils.buildPgkbUrl;
 
 public class FrequencyCreator {
+  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static void main(String[] args) {
     try {
       Options options = new Options();
       options.addOption("g", true,"gene to make frequency data for");
+      options.addOption("d", true,"directory to write output to, optional ('out' default)");
       CommandLineParser clParser = new DefaultParser();
       CommandLine cli = clParser.parse(options, args);
 
@@ -72,12 +77,13 @@ public class FrequencyCreator {
     f_httpClient = new OkHttpClient().newBuilder().build();
     f_gson = new Gson();
     f_gene = gene;
-    System.out.println("Writing new frequency data for: " + f_gene);
+    sf_logger.info("Writing new frequency data for: " + f_gene);
     loadAlleles();
     f_alleleRsidMap.keySet().forEach(this::loadFrequency);
   }
 
   private void loadAlleles() {
+    sf_logger.debug("Load data from DB for {}", f_gene);
     try (Connection conn = ConnectionFactory.newConnection()) {
       PreparedStatement stmt = conn.prepareStatement(
           "with x as (\n" +
@@ -96,6 +102,8 @@ public class FrequencyCreator {
           String alleleName = results.getString(3);
           String rsid = results.getString(4);
           String variant = results.getString(5);
+
+          sf_logger.debug("{} >>> {}", alleleName, rsid);
 
           f_alleleRsidMap.put(alleleName, rsid);
           f_alleleMap.put(alleleName, variant);
@@ -137,6 +145,7 @@ public class FrequencyCreator {
     String response = null;
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
+      sf_logger.debug("Requesting frequencies from PharmGKB for: {}", rsid);
       response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadExome"));
     } catch (NotFoundException e) {
       // safe to ignore, just means no frequency data available
@@ -268,6 +277,6 @@ public class FrequencyCreator {
     try (OutputStream out = Files.newOutputStream(filePath)) {
       workbook.write(out);
     }
-    System.out.println("Wrote " + filePath.toAbsolutePath());
+    sf_logger.info("Wrote {}", filePath.toAbsolutePath());
   }
 }
