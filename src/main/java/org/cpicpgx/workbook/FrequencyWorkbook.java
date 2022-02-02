@@ -69,9 +69,13 @@ public class FrequencyWorkbook extends AbstractWorkbook {
   }
   
   private static final int REFERENCE_POP_HEADER_COL_COUNT = 8;
-  public void writePopulation(String[] authors, Integer year, String pmid, String ethnicity, String population, String popInfo,
-                       String subjectType, Integer subjectCount, String[] frequencies) {
-
+  public void writePopulation(String[] authors, Integer year, String pmid, String ethnicity, String population,
+                              String popInfo, String subjectType, Integer subjectCount, String[] frequencies) {
+    writePopulation(authors, year, pmid, ethnicity, population, popInfo, subjectType, subjectCount,
+        Arrays.asList(frequencies));
+  }
+  public void writePopulation(String[] authors, Integer year, String pmid, String ethnicity, String population,
+                              String popInfo, String subjectType, Integer subjectCount, List<String> frequencies) {
     Row row = sheetReferences.nextRow();
     writeStringCell(row, 0, Optional.ofNullable(authors).map(a -> a[0]).orElse(""));
     if (year != null && year > 0) {
