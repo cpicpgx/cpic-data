@@ -149,7 +149,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       if (row.hasNoText(COL_DRUG) && row.hasNoText(idxAlert)) continue;
 
       String firstValue = row.getNullableText(COL_DRUG);
-      if (firstValue.equalsIgnoreCase("notes")) {
+      if (firstValue != null && firstValue.equalsIgnoreCase("notes")) {
         noteMode = true;
         continue;
       }
