@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,6 +50,7 @@ public class GuidelineStarterPack {
   private final Set<String> f_drugs = new TreeSet<>();
   private final List<DrugGenePair> f_pairs = new ArrayList<>();
   private Path m_path;
+  private boolean m_localOnly = false;
 
   public static void main(String[] args) {
     try {
@@ -69,7 +68,8 @@ public class GuidelineStarterPack {
     Options options = new Options()
         .addOption("o", true, "output directory, required")
         .addOption("p", true, "drug-gene pair, pipe-delimited between entities, required")
-        .addOption("n", true, "no recommendation drug-gene pair");
+        .addOption("n", true, "no recommendation drug-gene pair")
+        .addOption("l", "local storage only");
     CommandLine cli = new DefaultParser()
         .parse(options, args);
 
@@ -96,6 +96,8 @@ public class GuidelineStarterPack {
 
     f_pairs.stream().map(DrugGenePair::getDrugName).forEach(f_drugs::add);
     f_pairs.stream().flatMap(p -> p.getGenes().stream()).forEach(f_genes::add);
+
+    m_localOnly = cli.hasOption("l");
   }
 
   private void execute() throws Exception {
@@ -109,7 +111,7 @@ public class GuidelineStarterPack {
     Map<String, Map<FileType, String>> fileMap = new TreeMap<>();
     try (
         QueryHandler queryHandler = new QueryHandler();
-        UploadHandler uploadHandler = new UploadHandler(m_path)
+        UploadHandler uploadHandler = new UploadHandler(m_path, m_localOnly)
     ) {
       Map<String, LookupMethod> geneLookupMap = new LinkedHashMap<>();
 
@@ -197,10 +199,14 @@ public class GuidelineStarterPack {
         queryHandler.lookupFile(drugId, FileType.RECOMMENDATION).ifPresentOrElse(
             (url) -> urlMap.put(FileType.RECOMMENDATION, url),
             () -> {
-              RecommendationWorkbook recommendationWorkbook = new RecommendationWorkbook(pair.getDrugName(), pairGeneMap);
-              recommendationWorkbook.setupSheet("population general");
-              queryHandler.writePhenotypeCombos(recommendationWorkbook, geneLookupMap);
-              urlMap.put(FileType.RECOMMENDATION, uploadHandler.upload(recommendationWorkbook));
+              try {
+                RecommendationCreator rc = new RecommendationCreator(pair.getDrugName(), pairGeneMap);
+                rc.loadData();
+                RecommendationWorkbook recommendationWorkbook = rc.write();
+                urlMap.put(FileType.RECOMMENDATION, uploadHandler.upload(recommendationWorkbook));
+              } catch (SQLException ex) {
+                throw new RuntimeException("Error getting data for recommendation file", ex);
+              }
             });
 
         queryHandler.lookupFile(drugId, FileType.TEST_ALERT).ifPresentOrElse(
@@ -230,11 +236,13 @@ public class GuidelineStarterPack {
     private final FileStoreClient f_fileStoreClient;
     private final String f_timestamp;
     private final Path f_localPath;
+    private final boolean f_localOnly;
 
-    UploadHandler(Path localPath) {
+    UploadHandler(Path localPath, boolean localOnly) {
       f_fileStoreClient = new FileStoreClient();
       f_timestamp = String.valueOf(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
       f_localPath = localPath;
+      f_localOnly = localOnly;
     }
 
     String upload(AbstractWorkbook workbook) {
@@ -246,11 +254,19 @@ public class GuidelineStarterPack {
       } catch (IOException e) {
         throw new RuntimeException("Error writing file: " + filePath, e);
       }
-      return f_fileStoreClient.putGuidelineStagingFile(filePath, f_timestamp);
+      if (f_localOnly) {
+        return filePath.toAbsolutePath().toString();
+      } else {
+        return f_fileStoreClient.putGuidelineStagingFile(filePath, f_timestamp);
+      }
     }
 
     String upload(Path filePath) {
-      return f_fileStoreClient.putGuidelineStagingFile(filePath, f_timestamp);
+      if (f_localOnly) {
+        return filePath.toAbsolutePath().toString();
+      } else {
+        return f_fileStoreClient.putGuidelineStagingFile(filePath, f_timestamp);
+      }
     }
 
     @Override
@@ -308,7 +324,7 @@ public class GuidelineStarterPack {
       return Optional.of(lookupMethodEnum);
     }
 
-    Optional<String> lookupFile(String entityId, FileType fileType) throws SQLException, URISyntaxException, MalformedURLException {
+    Optional<String> lookupFile(String entityId, FileType fileType) throws SQLException {
       if (StringUtils.isBlank(entityId)) {
         return Optional.empty();
       }
@@ -364,51 +380,6 @@ public class GuidelineStarterPack {
             colIdx += 1;
           }
           workbook.writeAlert(geneMap, "", new String[0], drug, scoreMap, phenoMap, alleleMap);
-        }
-      } catch (SQLException ex) {
-        throw new RuntimeException("DB Error", ex);
-      }
-    }
-
-    private void writePhenotypeCombos(RecommendationWorkbook workbook, Map<String, LookupMethod> geneMap) {
-      Map<String,String> aliases = new TreeMap<>();
-      int i=1;
-      for (String gene : geneMap.keySet()) {
-        aliases.put("g" + i, gene);
-        i += 1;
-      }
-      String selectClause = aliases.keySet().stream().map(a -> a + ".result, " + a + ".activityscore").collect(Collectors.joining(", "));
-      String fromClause = aliases.keySet().stream().map(a -> "gene_result " + a).collect(Collectors.joining(" cross join "));
-      String whereClause = aliases.keySet().stream().map(a -> a + ".genesymbol='"+aliases.get(a)+"' ").collect(Collectors.joining(" and "));
-
-      String query = String.format("select distinct %s from %s where %s", selectClause, fromClause, whereClause);
-
-      Map<String, String> phenoMap = new TreeMap<>();
-      Map<String, String> scoreMap = new TreeMap<>();
-      Map<String, String> alleleMap = new TreeMap<>();
-      Map<String, String> implMap = new TreeMap<>();
-      try (ResultSet rs = f_conn.prepareStatement(query).executeQuery()) {
-        while (rs.next()) {
-          int colIdx = 1;
-          for (String alias : aliases.keySet()) {
-            String geneSymbol = aliases.get(alias);
-            LookupMethod lookupMethod = geneMap.get(geneSymbol);
-            switch(lookupMethod) {
-              case PHENOTYPE:
-                phenoMap.put(geneSymbol, rs.getString(colIdx));
-                break;
-              case ALLELE_STATUS:
-                alleleMap.put(geneSymbol, rs.getString(colIdx));
-                break;
-              case ACTIVITY_SCORE:
-                scoreMap.put(geneSymbol, rs.getString(colIdx));
-                break;
-              default:
-                throw new RuntimeException("Lookup method not implemented");
-            }
-            colIdx += 1;
-          }
-          workbook.writeRec(phenoMap, scoreMap, implMap, alleleMap, "", "", "");
         }
       } catch (SQLException ex) {
         throw new RuntimeException("DB Error", ex);
