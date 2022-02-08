@@ -86,7 +86,11 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     writeStringCell(row, 4, population);
     writeStringCell(row, 5, popInfo);
     writeStringCell(row, 6, subjectType);
-    writeIntegerCell(row, 7, subjectCount);
+    if (subjectCount == null) {
+      writeStringCell(row, 7, "");
+    } else {
+      writeIntegerCell(row, 7, subjectCount);
+    }
     int i = REFERENCE_POP_HEADER_COL_COUNT;
     for (String frequency : frequencies) {
       if (frequency != null) {

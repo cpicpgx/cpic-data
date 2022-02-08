@@ -171,7 +171,7 @@ public class FrequencyCreator {
       String populationString = populationObject.get("population").getAsString();
       GnomadPopulation population = GnomadPopulation.valueOf(populationString);
 
-      Double freq = null;
+      double freq = 0d;
       for (JsonElement alleleElement : populationObject.getAsJsonArray("bases")) {
         JsonObject alleleObject = alleleElement.getAsJsonObject();
         if (f_alleleMap.get(alleleName).equals(alleleObject.get("base").getAsString())) {
