@@ -8,7 +8,7 @@ public enum GnomadPopulation {
   AFR("African/African American", "Sub-Saharan African"),
   AMI("Amish", null),
   AMR ("Latino", "Latino"),
-  ASJ("Ashkenazi Jewish", null),
+  ASJ("Ashkenazi Jewish", "Near Eastern"),
   EAS("East Asian", "East Asian"),
   FIN("Finnish", "European"),
   NFE("Non-Finnish European", "European"),
