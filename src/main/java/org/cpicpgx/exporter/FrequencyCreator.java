@@ -32,8 +32,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.cpicpgx.util.HttpUtils.apiRequest;
 import static org.cpicpgx.util.HttpUtils.buildPgkbUrl;
@@ -189,75 +187,70 @@ public class FrequencyCreator {
 
   public void write(Path outputDir) throws IOException {
     FrequencyWorkbook workbook = new FrequencyWorkbook(f_gene, m_lookupMethod);
-    List<GnomadPopulation> populations = Stream.of(GnomadPopulation.values())
-        .filter(GnomadPopulation::isNotSummary)
-        .collect(Collectors.toList());
-    List<String> populationNames = populations.stream()
-        .map(GnomadPopulation::getName)
-        .collect(Collectors.toList());
+    List<String> groupNames = GnomadPopulation.getPgkbGroups();
 
     // start allele sheet writing
-    workbook.writeAlleleFrequencyHeader(populationNames);
+    workbook.writeAlleleFrequencyHeader(groupNames);
     for (String alleleName : f_allAlleles) {
       f_alleleDistributions.stream()
           .filter((d) -> d.getAlleleName().equals(alleleName))
           .findFirst()
           .ifPresentOrElse(
               (d) -> {
-                Double[] popFreq = new Double[populations.size()];
-                for (int i = 0; i < populations.size(); i++) {
-                  GnomadPopulation pop = populations.get(i);
-                  popFreq[i] = d.getFreq(pop);
+                Double[] popFreq = new Double[groupNames.size()];
+                for (int i = 0; i < groupNames.size(); i++) {
+                  popFreq[i] = d.getAvgFreqForGroup(groupNames.get(i));
                 }
                 workbook.writeAlleleFrequency(alleleName, popFreq);
               },
               () -> {
-                Double[] popFreq = new Double[populations.size()];
+                Double[] popFreq = new Double[groupNames.size()];
                 workbook.writeAlleleFrequency(alleleName, popFreq);
               }
           );
-
-
     }
     // finish allele sheet writing
 
-    workbook.writeDiplotypeFrequencyHeader(populationNames);
-    workbook.writePhenotypeFrequencyHeader(populationNames);
+    workbook.writeDiplotypeFrequencyHeader(groupNames);
+    workbook.writePhenotypeFrequencyHeader(groupNames);
 
     // start "Reference" sheet writing
     workbook.writeReferenceHeader(f_allAlleles);
     String[] dummyAuthors = new String[]{""};
-    for (GnomadPopulation population : populations) {
-      workbook.writeEthnicityHeader(population.getName(), f_allAlleles.size());
+    for (String groupName : GnomadPopulation.getPgkbGroups()) {
+      workbook.writeEthnicityHeader(groupName, f_allAlleles.size());
+      for (GnomadPopulation population : GnomadPopulation.getGnomadsForPgkb(groupName)) {
+        List<String> freqsForAllelesList = new ArrayList<>();
+        for (String alleleName : f_allAlleles) {
+          f_alleleDistributions.stream().filter(d -> d.getAlleleName().equals(alleleName)).findFirst()
+              .ifPresentOrElse(
+                  (d) -> freqsForAllelesList.add(d.getFreqAsString(population)),
+                  () -> freqsForAllelesList.add("")
+              );
+        }
 
-      List<String> freqsForAllelesList = new ArrayList<>();
-      for (String alleleName : f_allAlleles) {
-        f_alleleDistributions.stream().filter(d -> d.getAlleleName().equals(alleleName)).findFirst()
-            .ifPresentOrElse(
-                (d) -> freqsForAllelesList.add(d.getFreqAsString(population)),
-                () -> freqsForAllelesList.add("")
-            );
+        workbook.writePopulation(
+            dummyAuthors,
+            LocalDate.now().getYear(),
+            "",
+            population.getName(),
+            "GnomAD population " + population.name(),
+            "",
+            "",
+            null,
+            freqsForAllelesList
+        );
+
       }
-
-      workbook.writePopulation(
-          dummyAuthors,
-          LocalDate.now().getYear(),
-          "",
-          population.getName(),
-          "GnomAD population " + population.name(),
-          "",
-          "",
-          null,
-          freqsForAllelesList
-      );
-
       workbook.startPopulationSummary();
       for (String alleleName : f_allAlleles) {
         f_alleleDistributions.stream().filter(d -> d.getAlleleName().equals(alleleName)).findFirst()
             .ifPresentOrElse(
                 (d) -> {
-                  double freq = Optional.ofNullable(d.getFreq(population)).orElse(0d);
-                  workbook.writePopulationSummary(freq, freq, freq);
+                  double avg = d.getAvgFreqForGroup(groupName);
+                  double max = d.getMaxFreqForGroup(groupName);
+                  double min = d.getMinFreqForGroup(groupName);
+                  workbook.writePopulationSummary(min, avg, max);
                 },
                 () -> workbook.writePopulationSummary(0f, 0f, 0f)
             );

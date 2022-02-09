@@ -1,7 +1,7 @@
 package org.cpicpgx.model;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AlleleDistribution {
 
@@ -34,6 +34,52 @@ public class AlleleDistribution {
 
   public Integer getSize(GnomadPopulation pop) {
     return f_sizeMap.getOrDefault(pop, 0);
+  }
+
+  public Double getAvgFreqForGroup(String group) {
+    List<GnomadPopulation> pops = f_freqMap.keySet().stream()
+        .filter(p -> Objects.equals(p.getPgkbGroup(), group))
+        .collect(Collectors.toList());
+
+    if (pops.size() == 0) {
+      return 0d;
+    }
+
+    double num = pops.stream()
+        .map(p -> f_freqMap.get(p) * f_sizeMap.get(p))
+        .reduce(0d, Double::sum);
+    double den = pops.stream()
+        .map(f_sizeMap::get)
+        .reduce(0, Integer::sum);
+    return num/den;
+  }
+
+  public Double getMaxFreqForGroup(String group) {
+    List<GnomadPopulation> pops = f_freqMap.keySet().stream()
+        .filter(p -> Objects.equals(p.getPgkbGroup(), group))
+        .collect(Collectors.toList());
+
+    if (pops.size() == 0) {
+      return 0d;
+    }
+
+    return pops.stream()
+        .map(f_freqMap::get)
+        .max(Double::compare).orElse(0d);
+  }
+
+  public Double getMinFreqForGroup(String group) {
+    List<GnomadPopulation> pops = f_freqMap.keySet().stream()
+        .filter(p -> Objects.equals(p.getPgkbGroup(), group))
+        .collect(Collectors.toList());
+
+    if (pops.size() == 0) {
+      return 0d;
+    }
+
+    return pops.stream()
+        .map(f_freqMap::get)
+        .min(Double::compare).orElse(0d);
   }
 
   public void addSize(GnomadPopulation pop, Integer size) {
