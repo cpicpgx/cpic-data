@@ -26,3 +26,11 @@ update-wiki-toc:
 db-refresh:
 	dropdb cpic && createdb cpic
 	gzip -cd out/cpic_prod_db.sql.gz | psql cpic
+
+.PHONY: compile
+compile:
+	./gradlew jar
+
+.PHONY: db-migrate
+db-migrate: compile
+	java -cp build/libs/CpicData.jar org.cpicpgx.db.FlywayMigrate
