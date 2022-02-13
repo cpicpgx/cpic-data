@@ -11,13 +11,13 @@
   "author": "Ryan Whaley",
   "license": "CC0-1.0",
   "dependencies": {
-    "aws-sdk": "2.985.0",
-    "axios": "0.21.4",
-    "commander": "8.1.0",
-    "csv-generate": "3.4.3",
-    "dayjs": "1.10.6",
+    "aws-sdk": "2.1073.0",
+    "axios": "0.26.0",
+    "commander": "9.0.0",
+    "csv-generate": "4.0.4",
+    "dayjs": "1.10.7",
     "lodash": "4.17.21",
     "papaparse": "5.3.1",
-    "pg-promise": "10.11.0"
+    "pg-promise": "10.11.1"
   }
 }
