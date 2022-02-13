@@ -202,12 +202,8 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 if (normalizedPheno == null) {
                   throw new RuntimeException("No phenotype found");
                 }
-                try {
-                  String validPhenotype = dbHarness.validPhenotype(gene, normalizedPheno);
-                  phenotype.put(gene, validPhenotype);
-                } catch (NotFoundException ex) {
-                  sf_logger.warn("No existing phenotype for {} {}", gene, normalizedPheno);
-                }
+                String validPhenotype = dbHarness.validPhenotype(gene, normalizedPheno);
+                phenotype.put(gene, validPhenotype);
               }
 
               for (String gene : dbHarness.getGenes()) {

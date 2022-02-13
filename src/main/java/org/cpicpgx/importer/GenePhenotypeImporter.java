@@ -165,7 +165,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
         if (rs.next()) {
           int count = rs.getInt(1);
           if (count == 0 && !(allowSingleAlleles && Constants.isUnspecified(fn))) {
-            sf_logger.warn("No count found for {} allele function [{}]", this.geneSymbol, fn);
+            throw new NotFoundException(String.format("No %s alleles have been assigned function [%s]", this.geneSymbol, fn));
           }
           return fn;
         } else {

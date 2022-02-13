@@ -3,17 +3,14 @@ package org.cpicpgx.util;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.cpicpgx.workbook.AbstractWorkbook;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.invoke.MethodHandles;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 /**
  * Helper class to interact with the database. Handles connection creation and closing any generated SQL
@@ -22,7 +19,6 @@ import java.util.Date;
  * Extend this class in your own class and add your own write statements to it.
  */
 public abstract class DbHarness implements AutoCloseable {
-  private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private final List<AutoCloseable> closables = new ArrayList<>();
   private final Connection f_conn;
   private final FileType f_fileType;
@@ -152,9 +148,7 @@ public abstract class DbHarness implements AutoCloseable {
           phenotypeLookupCache.put(key, validPhenotype);
           return validPhenotype;
         } else {
-          phenotypeLookupCache.put(key, phenotype);
-          sf_logger.warn("Phenotype not found in allele table for " + gene + ": [" + phenotype + "]");
-          return phenotype;
+          throw new NotFoundException("Phenotype not found in allele table for " + gene + ": [" + phenotype + "]");
         }
       }
     }

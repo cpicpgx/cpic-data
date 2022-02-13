@@ -230,7 +230,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
 
         int result = updateStmt.executeUpdate();
         if (result == 0) {
-          sf_logger.warn("No phenotype row exists for {} {} [activity:{}]", gene, normalizedPhenotype, activity);
+          throw new NotFoundException(String.format("No phenotype row exists for %s %s [activity:%s]", gene, normalizedPhenotype, activity));
         }
       }
     }
