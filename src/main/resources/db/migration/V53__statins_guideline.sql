@@ -5,7 +5,7 @@ do $$
         statinGuidelineId INT  := -1;
     BEGIN
         -- update guideline info to supercede the previous simvastatin guideline
-        update guideline set name=guidelineName, genes='{SLCO1B1,ABCG2,CYP2C9}', url=guidelineUrl
+        update guideline set name=guidelineName, genes='{SLCO1B1,ABCG2,CYP2C9}', url=guidelineUrl, pharmgkbId='{PA166105005,PA166262221,PA166262241,PA166262261,PA166262281,PA166262321,PA166262341}'
         where name='SLCO1B1 and Simvastatin' returning id into statinGuidelineId;
 
         update publication set guidelineid=statinGuidelineId where pmid='35152405';
