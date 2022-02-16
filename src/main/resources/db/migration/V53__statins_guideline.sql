@@ -26,7 +26,7 @@ do $$
         insert into pair as p (genesymbol, cpiclevel, drugid, guidelineid, usedforrecommendation, citations) values ('ABCG2', 'A', (select drugid from drug where name='rosuvastatin'), (select id from guideline where name=guidelineName), true, '{35152405}') on conflict (genesymbol, drugid) do update set cpiclevel=excluded.cpiclevel, guidelineid=excluded.guidelineid, usedforrecommendation=excluded.usedforrecommendation, citations=array_cat(p.citations, excluded.citations);
 
         -- update drugs
-        update drug set guidelineid=(select id from guideline where name=guidelineName)
+        update drug set guidelineid=(select id from guideline where name=guidelineName), flowchart='https://files.cpicpgx.org/images/flow_chart/'||initcap(name)||'_CDS_Flow_Chart.jpg'
         where name in (
                        'simvastatin', 'rosuvastatin', 'pravastatin', 'pitavastatin', 'atorvastatin', 'fluvastatin', 'lovastatin'
             );
