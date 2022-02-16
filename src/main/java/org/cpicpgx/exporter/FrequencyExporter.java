@@ -318,7 +318,7 @@ public class FrequencyExporter extends BaseExporter {
       //language=PostgreSQL
       activityDataStmt = prepare("select activityscore,frequency from gene_result where genesymbol=? and frequency is not null");
       //language=PostgreSQL
-      alleleNameStmt = prepare("select distinct name from population_frequency_view where genesymbol=?");
+      alleleNameStmt = prepare("select distinct name from allele where genesymbol=?");
     }
 
     Set<String> getAllelesWithFrequencies(String gene) throws SQLException {
