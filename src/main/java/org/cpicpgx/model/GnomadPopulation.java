@@ -15,6 +15,7 @@ public enum GnomadPopulation {
   SAS("South Asian", "Central/South Asian"),
   OTH("Other", null);
 
+  public static final String GNOMAD_VERSION = "GnomAD v2.1.1";
   private final String f_name;
   private final String f_pgkbGroup;
 
@@ -23,8 +24,21 @@ public enum GnomadPopulation {
     f_pgkbGroup = pgkbGroup;
   }
 
+  /**
+   * Gets the spelled-out population name, not the 3-letter code. For the code, use the {@link GnomadPopulation#name()}
+   * method.
+   * @return a String name
+   */
   public String getName() {
     return f_name;
+  }
+
+  /**
+   * Gets the gnomad version number and uses the 3-letter code for the population
+   * @return a String name
+   */
+  public String getVersionedName() {
+    return String.format("%s population %s", GNOMAD_VERSION, this.name());
   }
 
   public boolean isNotSummary() {

@@ -234,7 +234,7 @@ public class FrequencyCreator {
             LocalDate.now().getYear(),
             "",
             population.getName(),
-            "GnomAD population " + population.name(),
+            population.getVersionedName(),
             "",
             "",
             null,
