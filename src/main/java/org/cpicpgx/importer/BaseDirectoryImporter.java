@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -45,6 +46,7 @@ import java.util.regex.Pattern;
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+\\.?\\d*$");
+  private static final Pattern sf_noResultPattern = Pattern.compile("^No (.*)Result$");
 
   private Path directory;
 
@@ -285,7 +287,16 @@ public abstract class BaseDirectoryImporter {
     } else if (strippedText.equalsIgnoreCase(Constants.NA)) {
       return Constants.NA;
     } else {
-      return strippedText.replaceAll(gene + "\\s*", "");
+      String normalName = strippedText.replaceAll(gene + "\\s*", "");
+
+      Matcher m = sf_noResultPattern.matcher(normalName);
+      if (m.matches()) {
+        if (StringUtils.isNotBlank(m.group(1))) {
+          throw new RuntimeException("No Result value [" + text + "] should not include text [" + m.group(1) + "]");
+        }
+      }
+
+      return normalName;
     }
   }
 
