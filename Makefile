@@ -34,3 +34,7 @@ compile:
 .PHONY: db-migrate
 db-migrate: compile
 	java -cp build/libs/CpicData.jar org.cpicpgx.db.FlywayMigrate
+
+.PHONY: api
+api:
+	postgrest

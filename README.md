@@ -101,6 +101,19 @@ java -cp build/libs/CpicData.jar org.cpicpgx.DataArtifactArchive -d <PATH_TO_EXI
 ```
 
 
+### Running the API
+
+This system relies on [postgrest](https://postgrest.org/) to run the API. The executable can be downloaded from the 
+postgrest website or installed through a package manager. To run the API you can use the `make` target:
+
+```shell
+make api
+```
+
+This assumes two things:
+1. `postgrest` is in your `$PATH`
+2. you have all the required configurations [set up as environment variables as outlined in the docs](https://postgrest.org/en/stable/configuration.html).
+
 ### Exporting Web Data
 
 To export JSON files that cache data for the website, just the following node script:
