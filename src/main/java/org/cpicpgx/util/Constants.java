@@ -13,6 +13,7 @@ public class Constants {
   public static final Pattern NO_RESULT_PATTERN = Pattern.compile("[Nn]o ([Rr]esult|[Tt]est)( on [Ff]ile)?");
   public static final String EXCEL_EXTENSION = ".xlsx";
   public static final String STRUCTURAL_VARIATION = "Structural Variation";
+  public static final Pattern SINGLE_PATTERN = Pattern.compile("chr[MY]");
 
   /**
    * Detect if the text is "No Result" or some other capitalization variant
@@ -39,5 +40,14 @@ public class Constants {
    */
   public static boolean isUnspecified(String value) {
     return StringUtils.isBlank(value) || NA_PATTERN.matcher(StringUtils.stripToEmpty(value)).matches();
+  }
+
+  /**
+   * Detect if a chromosome is single, and not double-stranded (M and Y)
+   * @param chr chromosome name in form "chr##"
+   * @return true if the chromosome is single stranded
+   */
+  public static boolean isSinglePloidy(String chr) {
+    return StringUtils.isNotBlank(chr) && SINGLE_PATTERN.matcher(chr).matches();
   }
 }

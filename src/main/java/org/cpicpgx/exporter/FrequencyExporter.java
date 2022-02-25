@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.workbook.FrequencyWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.ActivityScoreComparator;
@@ -68,7 +69,7 @@ public class FrequencyExporter extends BaseExporter {
               "select frequencyMethods from gene where symbol=?"
           );
           PreparedStatement geneStmt = conn.prepareStatement(
-              "select distinct a.geneSymbol, g.lookupmethod, ad.name from allele_frequency f join allele a on f.alleleid = a.id join gene g on a.genesymbol = g.symbol join allele_definition ad on g.symbol = ad.genesymbol where ad.reference is true order by 1");
+              "select distinct a.geneSymbol, g.lookupmethod, ad.name, g.chr from allele_frequency f join allele a on f.alleleid = a.id join gene g on a.genesymbol = g.symbol join allele_definition ad on g.symbol = ad.genesymbol where ad.reference is true order by 1");
           ResultSet geneResults = geneStmt.executeQuery()
       ) {
         // gene loop
@@ -76,6 +77,7 @@ public class FrequencyExporter extends BaseExporter {
           String geneSymbol = geneResults.getString(1);
           LookupMethod lookupMethod = LookupMethod.valueOf(geneResults.getString(2));
           String refAlleleName = geneResults.getString(3);
+          String chr = geneResults.getString(4);
           FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol, lookupMethod);
 
 
@@ -107,23 +109,25 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // start the Diplotype Frequency sheet
-          List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
-          if (dipPops.size() > 0) {
-            workbook.writeDiplotypeFrequencyHeader(dipPops);
-            Map<String, HashMap<String,Double>> diplotypeMap = dbHarness.getDiplotypeData(geneSymbol);
+          if (!Constants.isSinglePloidy(chr)) {
+            List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
+            if (dipPops.size() > 0) {
+              workbook.writeDiplotypeFrequencyHeader(dipPops);
+              Map<String, HashMap<String, Double>> diplotypeMap = dbHarness.getDiplotypeData(geneSymbol);
 
-            for (String diplotype : diplotypeMap.keySet()) {
-              Double[] frequencies = new Double[dipPops.size()];
-              Map<String,Double> popMap = diplotypeMap.get(diplotype);
-              if (popMap != null) {
-                for (String pop : dipPops) {
-                  int idx = dipPops.indexOf(pop);
-                  if (idx > -1) {
-                    frequencies[idx] = popMap.get(pop);
+              for (String diplotype : diplotypeMap.keySet()) {
+                Double[] frequencies = new Double[dipPops.size()];
+                Map<String, Double> popMap = diplotypeMap.get(diplotype);
+                if (popMap != null) {
+                  for (String pop : dipPops) {
+                    int idx = dipPops.indexOf(pop);
+                    if (idx > -1) {
+                      frequencies[idx] = popMap.get(pop);
+                    }
                   }
                 }
+                workbook.writeDiplotypeFrequency(diplotype, frequencies);
               }
-              workbook.writeDiplotypeFrequency(diplotype, frequencies);
             }
           }
           // end the Diplotype Frequency sheet
