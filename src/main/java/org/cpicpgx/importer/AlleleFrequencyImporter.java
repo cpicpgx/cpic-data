@@ -1,21 +1,18 @@
 package org.cpicpgx.importer;
 
-import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.workbook.AbstractWorkbook;
+import org.cpicpgx.FrequencyGenerator;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.security.InvalidParameterException;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.StringJoiner;
 
 /**
  * Class to read all excel files in the given directory and store the allele frequency information found in them.
@@ -26,8 +23,6 @@ import java.util.regex.Pattern;
  */
 public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern SHEET_DIPLO_NAME = Pattern.compile("Diplotype frequency( by group)?");
-  private static final Pattern SHEET_PHENO_NAME = Pattern.compile("Phenotype frequency( by group)?");
   //language=PostgreSQL
   private static final String[] sf_deleteStatements = new String[]{
       "delete from change_log where type='" + FileType.FREQUENCY.name() + "'",
@@ -74,6 +69,8 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
   private void processAlleles(WorkbookWrapper workbook, String gene) throws Exception {
     workbook.currentSheetIs("References");
     try (FrequencyProcessor frequencyProcessor = new FrequencyProcessor(gene, workbook.getRow(0))) {
+
+      // START processing References sheet
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         try {
           frequencyProcessor.insertPopulation(workbook.getRow(i));
@@ -81,22 +78,15 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Error parsing row " + (i+1), ex);
         }
       }
-
       writeNotes(gene, workbook.getNotes());
+      // END processing References sheet
 
+      // START processing Change log sheet
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
-      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
-        RowWrapper row = workbook.getRow(i);
-        if (row.hasNoText(0) ^ row.hasNoText(1)) {
-          throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
-        }
-        else if (row.hasNoText(0)) continue;
-        
-        Date date = row.getDate(0);
-        String note = row.getNullableText(1);
-        frequencyProcessor.insertHistory(date, note);
-      }
+      processChangeLog(frequencyProcessor, workbook, gene);
+      // END processing Change log sheet
 
+      // START processing Methods sheet
       boolean foundSheet = false;
       try {
         workbook.currentSheetIs("Methods and caveats");
@@ -123,118 +113,14 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
         }
       }
       frequencyProcessor.updateMethods(methodsText.toString());
-
-      // START handling diplotype frequencies
-      try {
-        frequencyProcessor.startTransaction();
-        workbook.findSheet(SHEET_DIPLO_NAME);
-
-        int rowIdx =0;
-        Map<Integer,String> colIdxToPopulationMap = new LinkedHashMap<>();
-        for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-          RowWrapper headerRow = workbook.getRow(rowIdx);
-          if (headerRow.row != null && (headerRow.hasNoText(0) || headerRow.getText(0).equals("Diplotype"))) {
-            for (int i=1; i < headerRow.getLastCellNum(); i++) {
-              if (headerRow.hasNoText(i)) break;
-              colIdxToPopulationMap.put(i, headerRow.getText(i).replaceAll(" Allele Frequency", ""));
-            }
-            if (colIdxToPopulationMap.size()>0) break;
-          }
-        }
-
-        rowIdx += 1;
-        for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-          RowWrapper row = workbook.getRow(rowIdx);
-          if (row.hasNoText(0)) break;
-
-          String rawDiplotype = StringUtils.stripToNull(row.getText(0));
-          JsonObject diplotypeJson = makeDiplotyepJson(gene, rawDiplotype);
-
-          JsonObject frequencyMap = new JsonObject();
-          for (Integer colIdx : colIdxToPopulationMap.keySet()) {
-            frequencyMap.addProperty(colIdxToPopulationMap.get(colIdx), row.getNullableDouble(colIdx));
-          }
-
-          frequencyProcessor.updateDiplotypeFrequency(diplotypeJson, frequencyMap);
-        }
-        frequencyProcessor.endTransaction();
-      } catch (RuntimeException|NotFoundException ex) {
-        sf_logger.info(ex.getMessage());
-        frequencyProcessor.rollbackTransaction();
-      }
-
-      // START handling phenotype frequencies
-      try {
-        frequencyProcessor.startTransaction();
-        workbook.findSheet(SHEET_PHENO_NAME);
-
-        int rowIdx =0;
-        Map<Integer,String> colIdxToPopulationMap = new LinkedHashMap<>();
-        for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-          RowWrapper headerRow = workbook.getRow(rowIdx);
-          if (headerRow.row != null && (headerRow.hasNoText(0) || headerRow.getText(0).equals("Phenotype") || headerRow.getText(0).equals("Activity Score"))) {
-            for (int i=1; i < headerRow.getLastCellNum(); i++) {
-              if (headerRow.hasNoText(i)) break;
-              colIdxToPopulationMap.put(i, headerRow.getText(i).replaceAll(" Allele Frequency", ""));
-            }
-            if (colIdxToPopulationMap.size()>0) break;
-          }
-        }
-
-        rowIdx += 1;
-        for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-          RowWrapper row = workbook.getRow(rowIdx);
-          if (row.hasNoText(0)) break;
-
-          String resultValue;
-          if (frequencyProcessor.getLookupMethod() == LookupMethod.PHENOTYPE) {
-            resultValue = frequencyProcessor.validPhenotype(gene, normalizeGeneText(gene, row.getText(0)));
-          } else {
-            resultValue = frequencyProcessor.validActivityScore(gene, normalizeActivityScore(row.getNullableText(0)));
-          }
-
-          JsonObject frequencyMap = new JsonObject();
-          for (Integer colIdx : colIdxToPopulationMap.keySet()) {
-            frequencyMap.addProperty(colIdxToPopulationMap.get(colIdx), row.getNullableDouble(colIdx));
-          }
-
-          frequencyProcessor.updateResultFrequency(resultValue, frequencyMap);
-        }
-        frequencyProcessor.endTransaction();
-      } catch (RuntimeException|NotFoundException ex) {
-        sf_logger.info(ex.getMessage());
-        frequencyProcessor.rollbackTransaction();
-      }
+      // END processing Methods sheet
 
       sf_logger.debug("Successfully parsed " + gene + " frequencies");
-    }
-  }
 
-  JsonObject makeDiplotyepJson(String gene, String rawDiplotype) {
-    String diplotype = StringUtils.stripToNull(rawDiplotype);
-    if (diplotype == null) {
-      return null;
-    }
-    else if (diplotype.contains("/")) {
-      String[] alleles = diplotype.replaceAll(">=", "≥").split("/");
-      JsonObject alleleJson = new JsonObject();
-      if (alleles[0].equals(alleles[1])) {
-        alleleJson.addProperty(alleles[0], 2);
-      } else {
-        alleleJson.addProperty(alleles[0], 1);
-        alleleJson.addProperty(alleles[1], 1);
-      }
+      FrequencyGenerator generator = new FrequencyGenerator(gene);
+      generator.calculate();
 
-      JsonObject geneJson = new JsonObject();
-      geneJson.add(gene, alleleJson);
-      return geneJson;
-    }
-    else {
-      JsonObject alleleJson = new JsonObject();
-      alleleJson.addProperty(diplotype, 1);
-      JsonObject geneJson = new JsonObject();
-      geneJson.add(gene, alleleJson);
-      return geneJson;
+      sf_logger.debug("Successfully calculated " + gene + " diplotype/phenotype frequencies");
     }
   }
 }

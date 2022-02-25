@@ -49,18 +49,22 @@ public class FrequencyGenerator {
     }
   }
 
-  FrequencyGenerator(String gene) {
+  public FrequencyGenerator(String gene) {
     f_gene = gene;
   }
 
-  private void calculate() throws Exception {
+  public void calculate() throws Exception {
     try (DataHarness dataHarness = new DataHarness(f_gene)) {
 
       // START Assign reference frequency
-      int referenceAlleleId = dataHarness.lookupRefAlleleId();
+      Integer referenceAlleleId = dataHarness.lookupRefAlleleId();
+      if (referenceAlleleId == null) {
+        // if this is a gene with no reference allele then data cannot be calculated
+        return;
+      }
       sf_logger.debug("The ref allele ID is {} ({})", referenceAlleleId, dataHarness.getReferenceAlleleName());
 
-      Integer count = dataHarness.lookupRefFrequencies(referenceAlleleId);
+      Integer count = dataHarness.lookupRefFreqCount(referenceAlleleId);
       sf_logger.debug("ref allele frequency count {}", count);
 
       Set<Integer> popIds = dataHarness.lookupPopulations();
@@ -124,7 +128,9 @@ public class FrequencyGenerator {
     }
 
     Integer lookupRefAlleleId() throws SQLException {
-      PreparedStatement refAlleleStmt = conn.prepareStatement("select a.id, a.name from allele a join allele_definition ad on a.definitionId=ad.id where a.genesymbol=? and ad.reference = true");
+      PreparedStatement refAlleleStmt = conn.prepareStatement(
+          "select a.id, a.name from allele a join allele_definition ad on a.definitionId=ad.id " +
+              "where a.genesymbol=? and ad.reference = true and ad.name=a.name");
       refAlleleStmt.setString(1, this.geneSymbol);
       try (ResultSet rs = refAlleleStmt.executeQuery()) {
         boolean foundOne = false;
@@ -149,9 +155,11 @@ public class FrequencyGenerator {
       return ethnicitySet;
     }
 
-    Integer lookupRefFrequencies(int freqCount) throws SQLException {
-      PreparedStatement stmt = conn.prepareStatement("select count(*) from allele_frequency where alleleid=?");
-      stmt.setInt(1, freqCount);
+    Integer lookupRefFreqCount(int alleleId) throws SQLException {
+      PreparedStatement stmt = conn.prepareStatement(
+          "select count(*) from allele_frequency where alleleid=? and frequency is not null");
+      stmt.setInt(1, alleleId);
+      int freqCount = 0;
       try (ResultSet rs = stmt.executeQuery()) {
         boolean foundOne = false;
         while (rs.next()) {
