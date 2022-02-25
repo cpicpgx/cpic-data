@@ -69,17 +69,27 @@ public class FrequencyExporter extends BaseExporter {
               "select frequencyMethods from gene where symbol=?"
           );
           PreparedStatement geneStmt = conn.prepareStatement(
-              "select distinct a.geneSymbol, g.lookupmethod, ad.name, g.chr from allele_frequency f join allele a on f.alleleid = a.id join gene g on a.genesymbol = g.symbol join allele_definition ad on g.symbol = ad.genesymbol where ad.reference is true order by 1");
-          ResultSet geneResults = geneStmt.executeQuery()
+              "select distinct a.genesymbol, g.lookupmethod, g.chr from allele_frequency f join allele a on a.id = f.alleleid\n" +
+                  "    join gene g on a.genesymbol = g.symbol\n" +
+                  "order by 1");
+          ResultSet geneResults = geneStmt.executeQuery();
+          PreparedStatement refAlleleStmt = conn.prepareStatement(
+              "select name from allele_definition where reference is true and genesymbol=?")
       ) {
         // gene loop
         while (geneResults.next()) {
           String geneSymbol = geneResults.getString(1);
           LookupMethod lookupMethod = LookupMethod.valueOf(geneResults.getString(2));
-          String refAlleleName = geneResults.getString(3);
-          String chr = geneResults.getString(4);
+          String chr = geneResults.getString(3);
           FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol, lookupMethod);
 
+          // look up the ref allele name
+          String refAlleleName = null;
+          refAlleleStmt.setString(1, geneSymbol);
+          ResultSet rsRefAllele = refAlleleStmt.executeQuery();
+          if (rsRefAllele.next()) {
+            refAlleleName = rsRefAllele.getString(1);
+          }
 
           // start the Allele Frequency sheet
           List<String> allelePops = dbHarness.getAllelePopulations(geneSymbol);
@@ -89,7 +99,7 @@ public class FrequencyExporter extends BaseExporter {
             workbook.writeAlleleFrequencyHeader(allelePops);
 
             // infer reference allele values based on other alleles
-            if (!alleleNames.contains(refAlleleName)) {
+            if (refAlleleName != null && !alleleNames.contains(refAlleleName)) {
               Double[] frequencies = new Double[allelePops.size()];
               for (String pop : allelePops) {
                 frequencies[allelePops.indexOf(pop)] = dbHarness.getInferredReferenceFrequencyForPopulation(geneSymbol, pop);
