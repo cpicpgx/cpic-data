@@ -224,8 +224,8 @@ public class RowWrapper {
   }
 
   /**
-   * Gets double value from the cell at the given index. This will NOT try to convert STRING columns. Only NUMBER and 
-   * FORMULA columns that evaluate to numbers are supported. Non-supported types will return null.
+   * Gets double value from the cell at the given index. This will try to convert STRING columns. This will evaluate
+   * FORMULA columns and fail if they don't evaluate to NUMERICs. Non-supported types will return null.
    * @param cellIdx the index of a cell in this row, 0-based
    * @return a {@link Double} representation of the value in the cell at the given index, or null
    */
@@ -240,6 +240,15 @@ public class RowWrapper {
     switch (cell.getCellType()) {
       case NUMERIC:
         return cell.getNumericCellValue();
+      case STRING:
+        if (StringUtils.isBlank(cell.getStringCellValue())) {
+          return null;
+        }
+        try {
+          return Double.valueOf(cell.getStringCellValue());
+        } catch (NumberFormatException e) {
+          throw new RuntimeException("Field is not a number " + cell.getAddress() + " [" + cell.getStringCellValue() + "]", e);
+        }
       case FORMULA:
         CellValue cellValue = formulaEvaluator.evaluate(cell);
         if (cellValue.getCellType() == CellType.NUMERIC) {
