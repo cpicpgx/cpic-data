@@ -194,8 +194,8 @@ public class FrequencyProcessor extends DbHarness {
     String externalId = row.getNullableText(getPmidIdx(), true);
     Integer publicationId = this.publicationCatalog.lookupId(externalId, pubYear, author);
 
-    this.insertPopulation.setString(1, row.getNullableText(getEthIdx()));
-    this.insertPopulation.setString(2, row.getNullableText(getPopIdx()));
+    this.insertPopulation.setString(1, row.getText(getEthIdx()));
+    this.insertPopulation.setString(2, row.getText(getPopIdx()));
     this.insertPopulation.setString(3, row.getNullableText(getPopInfoIdx()));
     this.insertPopulation.setString(4, row.getNullableText(getSubjTypeIdx()));
     Long nSubjects = 0L;
