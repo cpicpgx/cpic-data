@@ -56,14 +56,8 @@ public class FrequencyExporter extends BaseExporter {
               "where a.genesymbol=? and p.ethnicity=? order by p.ethnicity, p2.year, p2.authors, p.population");
           PreparedStatement afStmt = conn.prepareStatement(
               "select f.label, f.frequency from allele_frequency f where f.population=? and f.alleleid=?");
-          PreparedStatement ethStmt = conn.prepareStatement(
-              "select distinct population_group " +
-                  "from population_frequency_view v where v.population_group != 'n/a' and v.genesymbol=?");
           PreparedStatement ethAlleleStmt = conn.prepareStatement(
               "select freq_weighted_avg, freq_max, freq_min from population_frequency_view v where v.name=? and v.population_group=? and v.genesymbol=?"
-          );
-          PreparedStatement ethRefStmt = conn.prepareStatement(
-              "select 1-sum(freq_weighted_avg) as ref_freq from population_frequency_view v where v.population_group=? and v.genesymbol=?"
           );
           PreparedStatement methodsStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"
@@ -92,25 +86,25 @@ public class FrequencyExporter extends BaseExporter {
           }
 
           // start the Allele Frequency sheet
-          List<String> allelePops = dbHarness.getAllelePopulations(geneSymbol);
+          List<String> ethnicities = dbHarness.getEthnicities(geneSymbol);
           Set<String> alleleNames = dbHarness.getAllelesWithFrequencies(geneSymbol);
 
-          if (allelePops.size() > 0) {
-            workbook.writeAlleleFrequencyHeader(allelePops);
+          if (ethnicities.size() > 0) {
+            workbook.writeAlleleFrequencyHeader(ethnicities);
 
             // infer reference allele values based on other alleles
             if (refAlleleName != null && !alleleNames.contains(refAlleleName)) {
-              Double[] frequencies = new Double[allelePops.size()];
-              for (String pop : allelePops) {
-                frequencies[allelePops.indexOf(pop)] = dbHarness.getInferredReferenceFrequencyForPopulation(geneSymbol, pop);
+              Double[] frequencies = new Double[ethnicities.size()];
+              for (String pop : ethnicities) {
+                frequencies[ethnicities.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, refAlleleName, pop);
               }
               workbook.writeAlleleFrequency(refAlleleName, frequencies);
             }
 
             for (String allele : alleleNames) {
-              Double[] frequencies = new Double[allelePops.size()];
-              for (String pop : allelePops) {
-                frequencies[allelePops.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, allele, pop);
+              Double[] frequencies = new Double[ethnicities.size()];
+              for (String pop : ethnicities) {
+                frequencies[ethnicities.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, allele, pop);
               }
               workbook.writeAlleleFrequency(allele, frequencies);
             }
@@ -165,15 +159,6 @@ public class FrequencyExporter extends BaseExporter {
           }
           // end the Phenotype Frequency sheet
 
-
-          // get the ethnicities applicable to this gene
-          ethStmt.setString(1, geneSymbol);
-          SortedSet<String> ethnicities = new TreeSet<>();
-          try (ResultSet eth = ethStmt.executeQuery()) {
-            while (eth.next()) {
-              ethnicities.add(eth.getString(1));
-            }
-          }
 
           // write the header row
           Map<String, Integer> alleles = new TreeMap<>(HaplotypeNameComparator.getComparator());
@@ -241,29 +226,24 @@ public class FrequencyExporter extends BaseExporter {
               }
             }
 
-            ethRefStmt.setString(1, ethnicity);
-            ethRefStmt.setString(2, geneSymbol);
-            Double refAvg = null;
-            try (ResultSet rsRef = ethRefStmt.executeQuery()) {
-              while (rsRef.next()) {
-                refAvg = rsRef.getDouble(1);
-              }
-            }
+            Double refAlleleFrequency = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, refAlleleName, ethnicity)).orElse(0d);
 
             workbook.startPopulationSummary();
             for (String allele : alleles.keySet()) {
+              double refFreq = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, allele, ethnicity)).orElse(0d);
+
               ethAlleleStmt.setString(1, allele);
               ethAlleleStmt.setString(2, ethnicity);
               ethAlleleStmt.setString(3, geneSymbol);
               try (ResultSet rsEth = ethAlleleStmt.executeQuery()) {
                 boolean wroteSummary = false;
                 while (rsEth.next()) {
-                  workbook.writePopulationSummary(rsEth.getDouble(3), rsEth.getDouble(1), rsEth.getDouble(2));
+                  workbook.writePopulationSummary(rsEth.getDouble(3), refFreq, rsEth.getDouble(2));
                   wroteSummary = true;
                 }
                 if (!wroteSummary) {
                   if (allele.equals(refAllele)) {
-                    workbook.writeReferencePopulationSummary(refAvg);
+                    workbook.writeReferencePopulationSummary(refAlleleFrequency);
                   } else {
                     workbook.writeEmptyPopulationSummary();
                   }
@@ -302,9 +282,8 @@ public class FrequencyExporter extends BaseExporter {
     final Gson gson = new Gson();
     @SuppressWarnings("UnstableApiUsage")
     final Type doubleMapType = new TypeToken<HashMap<String, Double>>(){}.getType();
-    PreparedStatement populationsStmt;
+    PreparedStatement ethnicitiesStmt;
     PreparedStatement allelePopulationStmt;
-    PreparedStatement inferredRefFreqStmt;
     PreparedStatement diplotypePopStmt;
     PreparedStatement diplotypeDataStmt;
     PreparedStatement phenotypePopStmt;
@@ -316,11 +295,9 @@ public class FrequencyExporter extends BaseExporter {
       super(FileType.FREQUENCY);
 
       //language=PostgreSQL
-      populationsStmt = prepare("select distinct population_group from population_frequency_view where genesymbol=? and freq_weighted_avg is not null order by 1");
+      ethnicitiesStmt = prepare("select distinct p.ethnicity from allele_frequency f join allele a on a.id = f.alleleid join population p on f.population = p.id where a.genesymbol=? order by 1");
       //language=PostgreSQL
-      allelePopulationStmt = prepare("select freq_weighted_avg from population_frequency_view where genesymbol=? and name=? and population_group=?");
-      //language=PostgreSQL
-      inferredRefFreqStmt = prepare("select 1-sum(freq_weighted_avg) freq_weighted, 1-sum(freq_avg) freq from population_frequency_view f where f.genesymbol=? and population_group=?");
+      allelePopulationStmt = prepare("select frequency -> ? from allele where genesymbol=? and name=?");
       //language=PostgreSQL
       diplotypePopStmt = prepare("select distinct jsonb_object_keys(grd.frequency) from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionphenotypeid where r.genesymbol=? and grd.frequency is not null order by 1");
       //language=PostgreSQL
@@ -346,10 +323,10 @@ public class FrequencyExporter extends BaseExporter {
       return alleleNames;
     }
 
-    Double getFrequency(String gene, String alleleName, String bioGroup) throws SQLException {
-      this.allelePopulationStmt.setString(1, gene);
-      this.allelePopulationStmt.setString(2, alleleName);
-      this.allelePopulationStmt.setString(3, bioGroup);
+    Double getFrequency(String gene, String alleleName, String ethnicity) throws SQLException {
+      this.allelePopulationStmt.setString(2, gene);
+      this.allelePopulationStmt.setString(3, alleleName);
+      this.allelePopulationStmt.setString(1, ethnicity);
       try (ResultSet rs = this.allelePopulationStmt.executeQuery()) {
         if (rs.next()) {
           return rs.getDouble(1);
@@ -359,24 +336,12 @@ public class FrequencyExporter extends BaseExporter {
       }
     }
 
-    Double getInferredReferenceFrequencyForPopulation(String gene, String bioGroup) throws SQLException {
-      this.inferredRefFreqStmt.setString(1, gene);
-      this.inferredRefFreqStmt.setString(2, bioGroup);
-      try (ResultSet rs = this.inferredRefFreqStmt.executeQuery()) {
-        if (rs.next()) {
-          return rs.getDouble(1);
-        } else {
-          throw new RuntimeException("Not able to infer reference allele frequency");
-        }
-      }
-    }
-
-    List<String> getAllelePopulations(String gene) throws SQLException {
+    List<String> getEthnicities(String gene) throws SQLException {
       List<String> result = new ArrayList<>();
       if (StringUtils.isNotBlank(gene)) {
-        this.populationsStmt.clearParameters();
-        this.populationsStmt.setString(1, gene);
-        try (ResultSet rs = this.populationsStmt.executeQuery()) {
+        this.ethnicitiesStmt.clearParameters();
+        this.ethnicitiesStmt.setString(1, gene);
+        try (ResultSet rs = this.ethnicitiesStmt.executeQuery()) {
           while (rs.next()) {
             result.add(rs.getString(1));
           }

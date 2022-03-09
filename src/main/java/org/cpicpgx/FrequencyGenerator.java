@@ -71,33 +71,53 @@ public class FrequencyGenerator {
 
       SortedMap<String,Integer> alleleMap = dataHarness.lookupAlleles();
 
-      if (count == 0) {
-        sf_logger.debug("make data for {}", popIds);
+      sf_logger.debug("make data for {}", popIds);
 
-        for (Integer popId : popIds) {
-          Float freq = dataHarness.lookupNonreferenceFrequency(popId);
-          sf_logger.debug("pop {} freq {}", popId, freq);
+      for (Integer popId : popIds) {
+        Float nonreferenceFrequency = dataHarness.lookupNonreferenceFrequency(popId);
+        sf_logger.debug("pop {}, non-reference frequency {}", popId, nonreferenceFrequency);
 
-          Float refFreq = 1f - freq;
-          int results = dataHarness.writeReferenceFrequency(referenceAlleleId, popId, refFreq);
-          if (results == 0) {
-            throw new RuntimeException("No frequency data written");
-          }
+        Float refFreq = 1f - nonreferenceFrequency;
+        int results = dataHarness.writeReferenceFrequency(referenceAlleleId, popId, refFreq);
+        if (results == 0) {
+          throw new RuntimeException("No frequency data written");
         }
-      } else {
-        sf_logger.info("Skipping reference allele frequency generation, already exists");
       }
       // END Assign reference frequency
 
 
-      // START Assign diplotype frequency
+      // START Assign allele + diplotype frequency
+      JsonObject refAlleleFrequencyJson = new JsonObject();
       for (String alleleName : alleleMap.keySet()) {
-        for (String ethnicity : dataHarness.getEthnicitySet()) {
-          dataHarness.lookupFrequency(ethnicity, alleleMap.get(alleleName), alleleName);
+        boolean isReference = referenceAlleleId.equals(alleleMap.get(alleleName));
+        if (!isReference) {
+          JsonObject alleleFrequencyJson = new JsonObject();
+          for (String ethnicity : dataHarness.getEthnicitySet()) {
+            Float freq = dataHarness.lookupFrequency(ethnicity, alleleMap.get(alleleName));
+            alleleFrequencyJson.addProperty(ethnicity, freq);
+
+            if (!refAlleleFrequencyJson.has(ethnicity)) {
+              refAlleleFrequencyJson.addProperty(ethnicity, freq);
+            } else {
+              refAlleleFrequencyJson.addProperty(ethnicity, freq + refAlleleFrequencyJson.get(ethnicity).getAsFloat());
+            }
+          }
+          int rez = dataHarness.writeAlleleFrequency(alleleMap.get(alleleName), alleleFrequencyJson);
+          if (rez == 0) {
+            throw new RuntimeException("Missed write of allele frequency for " + alleleName);
+          }
         }
       }
+      for (String ethnicity : refAlleleFrequencyJson.keySet()) {
+        refAlleleFrequencyJson.addProperty(ethnicity, 1f - refAlleleFrequencyJson.get(ethnicity).getAsFloat());
+      }
+      int rez = dataHarness.writeAlleleFrequency(referenceAlleleId, refAlleleFrequencyJson);
+      if (rez == 0) {
+        throw new RuntimeException("Missed write of allele frequency for allele ID " + referenceAlleleId);
+      }
+
       dataHarness.updateDiplotypeFrequencies();
-      // END Assign diplotype frequency
+      // END Assign allele + diplotype frequency
 
       // START Assign phenotype frequency
       dataHarness.updatePhenotypeFrequencies();
@@ -111,12 +131,13 @@ public class FrequencyGenerator {
     private Integer m_referenceAlleleId = null;
     private String m_referenceAlleleName = null;
     private final SortedSet<String> ethnicitySet = new TreeSet<>();
-    private final List<AllelePopulation> allelePopulationList = new ArrayList<>();
     private final SortedMap<String,Integer> alleleMap = new TreeMap<>(HaplotypeNameComparator.getComparator());
     private static final Gson gson = new Gson();
 
     PreparedStatement updateDiplotypeFrequency;
+    PreparedStatement updateAlleleFrequency;
     PreparedStatement insertAlleleFrequency;
+    PreparedStatement findAlleleFrequency;
 
     DataHarness(String geneSymbol) throws SQLException {
       conn = ConnectionFactory.newConnection();
@@ -125,6 +146,8 @@ public class FrequencyGenerator {
       insertAlleleFrequency = conn.prepareStatement(
           "insert into allele_frequency(alleleid, population, frequency, label) values (?, ?, ?, ?) " +
               "on conflict (alleleid, population) do update set frequency=excluded.frequency, label=excluded.label");
+      updateAlleleFrequency = conn.prepareStatement("update allele set frequency=?::jsonb where id=?");
+      findAlleleFrequency = conn.prepareStatement("select frequency -> ? from allele where genesymbol=? and name=?");
     }
 
     Integer lookupRefAlleleId() throws SQLException {
@@ -202,11 +225,12 @@ public class FrequencyGenerator {
     }
 
     Float lookupNonreferenceFrequency(Integer popId) throws SQLException {
-      PreparedStatement stmt = conn.prepareStatement("select sum(frequency)\n" +
+      PreparedStatement stmt = conn.prepareStatement("select sum(f.frequency)\n" +
           "from allele_frequency f\n" +
           "         join allele a on f.alleleid = a.id\n" +
+          "join allele_definition ad on a.definitionid = ad.id\n" +
           "         join population p on f.population = p.id\n" +
-          "where a.genesymbol=? and f.population=?");
+          "where a.genesymbol=? and f.population=? and ad.reference=false");
       stmt.setString(1, geneSymbol);
       stmt.setInt(2, popId);
       Float freq = null;
@@ -218,7 +242,7 @@ public class FrequencyGenerator {
       return freq;
     }
 
-    void lookupFrequency(String ethnicity, Integer alleleId, String alleleName) throws SQLException {
+    Float lookupFrequency(String ethnicity, Integer alleleId) throws SQLException {
       PreparedStatement stmt = conn.prepareStatement("SELECT\n" +
           "       sum(p.subjectcount),\n" +
           "       sum(p.subjectcount::numeric * af.frequency / 100::numeric) / sum(p.subjectcount)::numeric *\n" +
@@ -229,27 +253,40 @@ public class FrequencyGenerator {
           "WHERE af.frequency IS NOT NULL and af.alleleid=? and p.ethnicity=?");
       stmt.setInt(1, alleleId);
       stmt.setString(2, ethnicity);
+      Float freq = null;
       try (ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-          float freq = rs.getFloat(2);
-
-          AllelePopulation ap = new AllelePopulation(alleleName, ethnicity, freq);
-          allelePopulationList.add(ap);
+        if (rs.next()) {
+          freq = rs.getFloat(2);
+        }
+        if (rs.next()) {
+          throw new RuntimeException("Single result expected");
         }
       }
+      return freq;
     }
 
-    Float findFrequency(String alleleName, String ethnicity) {
-      return allelePopulationList.stream()
-          .filter(p -> p.getAlleleName().equals(alleleName) && p.getEthnicity().equals(ethnicity))
-          .findFirst()
-          .map(AllelePopulation::getFreq)
-          .orElse(0f);
+    Float findFrequency(String alleleName, String ethnicity) throws SQLException {
+      findAlleleFrequency.setString(1, ethnicity);
+      findAlleleFrequency.setString(2, geneSymbol);
+      findAlleleFrequency.setString(3, alleleName);
+      float freqeuncy = 0f;
+      try (ResultSet r = findAlleleFrequency.executeQuery()) {
+        if (r.next()) {
+          freqeuncy = r.getFloat(1);
+        }
+        if (r.next()) {
+          throw new RuntimeException("More than one result returned");
+        }
+      }
+      return freqeuncy;
     }
 
     void updateDiplotypeFrequencies() throws SQLException {
-      PreparedStatement stmt = conn.prepareStatement("select grd.id, grd.diplotypekey from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionphenotypeid\n" +
-          "where r.genesymbol=?");
+      PreparedStatement stmt = conn.prepareStatement(
+          "select grd.id, grd.diplotypekey from gene_result r " +
+              "join gene_result_lookup grl on r.id = grl.phenotypeid " +
+              "join gene_result_diplotype grd on grl.id = grd.functionphenotypeid " +
+              "where r.genesymbol=?");
       stmt.setString(1, geneSymbol);
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
@@ -322,6 +359,8 @@ public class FrequencyGenerator {
     }
 
     int writeReferenceFrequency(Integer alleleId, Integer popId, Float freq) throws SQLException {
+      sf_logger.debug("pop {}, reference frequency: {}", popId, freq);
+
       insertAlleleFrequency.setInt(1, alleleId);
       insertAlleleFrequency.setInt(2, popId);
       insertAlleleFrequency.setFloat(3, freq);
@@ -335,33 +374,15 @@ public class FrequencyGenerator {
       return updateDiplotypeFrequency.executeUpdate();
     }
 
+    int writeAlleleFrequency(Integer alleleId, JsonObject frequency) throws SQLException {
+      updateAlleleFrequency.setString(1, frequency.toString());
+      updateAlleleFrequency.setInt(2, alleleId);
+      return updateAlleleFrequency.executeUpdate();
+    }
+
     @Override
     public void close() throws Exception {
       conn.close();
-    }
-  }
-
-  private static class AllelePopulation {
-    private final String alleleName;
-    private final String ethnicity;
-    private final Float freq;
-
-    AllelePopulation(String alleleName, String ethnicity, Float freq) {
-      this.alleleName = alleleName;
-      this.ethnicity = ethnicity;
-      this.freq = freq;
-    }
-
-    public String getAlleleName() {
-      return alleleName;
-    }
-
-    public String getEthnicity() {
-      return ethnicity;
-    }
-
-    public Float getFreq() {
-      return freq;
     }
   }
 }
