@@ -1,19 +1,18 @@
 package org.cpicpgx.importer;
 
-import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
-import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;
 import org.cpicpgx.util.RowWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,12 +30,8 @@ public class FrequencyProcessor extends DbHarness {
   private final Map<Integer, Long> colIdxAlleleIdMap = new HashMap<>();
   private final PreparedStatement insertStatement;
   private final PreparedStatement insertPopulation;
-  private final PreparedStatement insertHistory;
   private final PreparedStatement updateMethods;
-  private final PreparedStatement updateDiplotypeFrequency;
-  private final PreparedStatement updateResultFrequency;
   private final PublicationCatalog publicationCatalog;
-  private final LookupMethod lookupMethod;
 
   private int colStartOffset = 0;
 
@@ -72,17 +67,6 @@ public class FrequencyProcessor extends DbHarness {
     }
 
     //language=PostgreSQL
-    PreparedStatement luStmt = prepare("select lookupmethod from gene where symbol=?");
-    luStmt.setString(1, gene);
-    try (ResultSet luRs = luStmt.executeQuery()) {
-      if (luRs.next()) {
-        lookupMethod = LookupMethod.valueOf(luRs.getString(1));
-      } else {
-        throw new RuntimeException("No Gene lookup method found for " + gene);
-      }
-    }
-
-    //language=PostgreSQL
     this.insertStatement =
         prepare("insert into allele_frequency(alleleid, population, frequency, label) values (?, ?, ?, ?)");
 
@@ -91,27 +75,9 @@ public class FrequencyProcessor extends DbHarness {
         prepare("insert into population(ethnicity, population, populationinfo, subjecttype, subjectcount, publicationId) values (?, ?, ?, ?, ?, ?) returning (id)");
 
     //language=PostgreSQL
-    this.insertHistory =
-        prepare("insert into change_log(entityId, note, type, date) values (?, ?, ?, ?)");
-    this.insertHistory.setString(1, gene);
-    this.insertHistory.setString(3, FileType.FREQUENCY.name());
-
-    //language=PostgreSQL
     this.updateMethods =
         prepare("update gene set frequencyMethods=? where symbol=?");
     this.updateMethods.setString(2, gene);
-
-    //language=PostgreSQL
-    this.updateDiplotypeFrequency = prepare("update gene_result_diplotype d set frequency=?::jsonb where diplotypekey=?::jsonb and functionphenotypeid in (select l.id from gene_result_lookup l join gene_result r on (l.phenotypeId=r.id) where r.genesymbol=?)");
-    this.updateDiplotypeFrequency.setString(3, gene);
-
-    //language=PostgreSQL
-    if (lookupMethod == LookupMethod.ACTIVITY_SCORE) {
-      this.updateResultFrequency = prepare("update gene_result d set frequency=?::jsonb where activityscore=? and genesymbol=?");
-    } else {
-      this.updateResultFrequency = prepare("update gene_result d set frequency=?::jsonb where result=? and genesymbol=?");
-    }
-    this.updateResultFrequency.setString(3, gene);
 
     for (short i = headerRow.row.getFirstCellNum(); i < headerRow.row.getLastCellNum(); i++) {
       String cellText = headerRow.getNullableText(i);
@@ -222,48 +188,10 @@ public class FrequencyProcessor extends DbHarness {
     this.insertPopulation.clearParameters();
   }
 
-  void insertHistory(java.util.Date date, String note) throws SQLException {
-    if (note.equalsIgnoreCase(AbstractWorkbook.LOG_FILE_CREATED)) return;
-
-    if (StringUtils.isNotBlank(note)) {
-      insertHistory.setString(2, note);
-    } else {
-      insertHistory.setString(2, Constants.NA);
-    }
-    insertHistory.setDate(4, new Date(date.getTime()));
-    insertHistory.executeUpdate();
-  }
-
   void updateMethods(String methodsText) throws SQLException {
     if (!StringUtils.isBlank(methodsText)) {
       this.updateMethods.setString(1, methodsText);
       this.updateMethods.executeUpdate();
-    }
-  }
-
-  void updateDiplotypeFrequency(JsonObject diplotype, JsonObject frequency) throws Exception {
-
-
-    this.updateDiplotypeFrequency.setString(1, frequency.toString());
-    this.updateDiplotypeFrequency.setString(2, diplotype.toString());
-    int result = this.updateDiplotypeFrequency.executeUpdate();
-
-    if (result == 0) {
-      sf_logger.warn("Diplotype not found [{}]", diplotype.toString());
-    } else if (result > 1) {
-      throw new RuntimeException("More than 1 diplotype found [" + diplotype + "]");
-    }
-  }
-
-  void updateResultFrequency(String phenotype, JsonObject frequency) throws Exception {
-    this.updateResultFrequency.setString(1, frequency.toString());
-    this.updateResultFrequency.setString(2, phenotype);
-    int result = this.updateResultFrequency.executeUpdate();
-
-    if (result == 0) {
-      throw new NotFoundException("Phenotype not found [" + phenotype + "]");
-    } else if (result > 1) {
-      throw new RuntimeException("More than 1 phenotype found [" + phenotype + "]");
     }
   }
 
@@ -315,9 +243,5 @@ public class FrequencyProcessor extends DbHarness {
    */
   private int getNIdx() {
     return this.colStartOffset + 7;
-  }
-
-  LookupMethod getLookupMethod() {
-    return this.lookupMethod;
   }
 }
