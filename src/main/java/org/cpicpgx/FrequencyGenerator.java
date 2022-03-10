@@ -57,32 +57,24 @@ public class FrequencyGenerator {
 
   public void calculate() throws Exception {
     try (DataHarness dataHarness = new DataHarness(f_gene)) {
+      Set<Integer> popIds = dataHarness.lookupPopulations();
+      sf_logger.debug("make data for population {}", popIds);
+      SortedMap<String,Integer> alleleMap = dataHarness.lookupAlleles();
 
       // START Assign reference frequency
       Integer referenceAlleleId = dataHarness.lookupRefAlleleId();
-      if (referenceAlleleId == null) {
-        // if this is a gene with no reference allele then data cannot be calculated
-        return;
-      }
-      sf_logger.debug("The ref allele ID is {} ({})", referenceAlleleId, dataHarness.getReferenceAlleleName());
+      if (referenceAlleleId != null) {
+        sf_logger.debug("The ref allele ID is {} ({})", referenceAlleleId, dataHarness.getReferenceAlleleName());
 
-      Integer count = dataHarness.lookupRefFreqCount(referenceAlleleId);
-      sf_logger.debug("ref allele frequency count {}", count);
+        for (Integer popId : popIds) {
+          Float nonreferenceFrequency = dataHarness.lookupNonreferenceFrequency(popId);
+          sf_logger.debug("pop {}, non-reference frequency {}", popId, nonreferenceFrequency);
 
-      Set<Integer> popIds = dataHarness.lookupPopulations();
-
-      SortedMap<String,Integer> alleleMap = dataHarness.lookupAlleles();
-
-      sf_logger.debug("make data for {}", popIds);
-
-      for (Integer popId : popIds) {
-        Float nonreferenceFrequency = dataHarness.lookupNonreferenceFrequency(popId);
-        sf_logger.debug("pop {}, non-reference frequency {}", popId, nonreferenceFrequency);
-
-        Float refFreq = 1f - nonreferenceFrequency;
-        int results = dataHarness.writeReferenceFrequency(referenceAlleleId, popId, refFreq);
-        if (results == 0) {
-          throw new RuntimeException("No frequency data written");
+          Float refFreq = 1f - nonreferenceFrequency;
+          int results = dataHarness.writeReferenceFrequency(referenceAlleleId, popId, refFreq);
+          if (results == 0) {
+            throw new RuntimeException("No frequency data written");
+          }
         }
       }
       // END Assign reference frequency
@@ -91,7 +83,7 @@ public class FrequencyGenerator {
       // START Assign allele + diplotype frequency
       JsonObject refAlleleFrequencyJson = new JsonObject();
       for (String alleleName : alleleMap.keySet()) {
-        boolean isReference = referenceAlleleId.equals(alleleMap.get(alleleName));
+        boolean isReference = referenceAlleleId != null && referenceAlleleId.equals(alleleMap.get(alleleName));
         if (!isReference) {
           JsonObject alleleFrequencyJson = new JsonObject();
           for (String ethnicity : dataHarness.getEthnicitySet()) {
@@ -118,12 +110,15 @@ public class FrequencyGenerator {
           }
         }
       }
-      for (String ethnicity : refAlleleFrequencyJson.keySet()) {
-        refAlleleFrequencyJson.addProperty(ethnicity, 1f - refAlleleFrequencyJson.get(ethnicity).getAsFloat());
-      }
-      int rez = dataHarness.writeAlleleFrequency(referenceAlleleId, refAlleleFrequencyJson);
-      if (rez == 0) {
-        throw new RuntimeException("Missed write of allele frequency for allele ID " + referenceAlleleId);
+
+      if (referenceAlleleId != null) {
+        for (String ethnicity : refAlleleFrequencyJson.keySet()) {
+          refAlleleFrequencyJson.addProperty(ethnicity, 1f - refAlleleFrequencyJson.get(ethnicity).getAsFloat());
+        }
+        int rez = dataHarness.writeAlleleFrequency(referenceAlleleId, refAlleleFrequencyJson);
+        if (rez == 0) {
+          throw new RuntimeException("Missed write of allele frequency for allele ID " + referenceAlleleId);
+        }
       }
 
       dataHarness.updateDiplotypeFrequencies();
