@@ -31,6 +31,8 @@ public abstract class AbstractWorkbook {
   CellStyle leftTextStyle;
   CellStyle rightNumberStyle;
   private final CellStyle decimalNumberStyle;
+  private final CellStyle expoNumberStyle;
+  private final CellStyle zeroNumberStyle;
   private final CellStyle headerStyle;
   private final CellStyle boldStyle;
   private final CellStyle topBorderStyle;
@@ -82,6 +84,18 @@ public abstract class AbstractWorkbook {
     this.decimalNumberStyle.setAlignment(HorizontalAlignment.RIGHT);
     this.decimalNumberStyle.setVerticalAlignment(VerticalAlignment.TOP);
     this.decimalNumberStyle.setFont(newFont);
+
+    this.expoNumberStyle = this.workbook.createCellStyle();
+    this.expoNumberStyle.setDataFormat(this.workbook.createDataFormat().getFormat("0.00E+00"));
+    this.expoNumberStyle.setAlignment(HorizontalAlignment.RIGHT);
+    this.expoNumberStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.expoNumberStyle.setFont(newFont);
+
+    this.zeroNumberStyle = this.workbook.createCellStyle();
+    this.zeroNumberStyle.setDataFormat(this.workbook.createDataFormat().getFormat("0"));
+    this.zeroNumberStyle.setAlignment(HorizontalAlignment.RIGHT);
+    this.zeroNumberStyle.setVerticalAlignment(VerticalAlignment.TOP);
+    this.zeroNumberStyle.setFont(newFont);
 
     this.wrapStyle = this.workbook.createCellStyle();
     this.wrapStyle.setAlignment(HorizontalAlignment.LEFT);
@@ -206,7 +220,13 @@ public abstract class AbstractWorkbook {
     if (value != null) {
       Cell cell = row.createCell(colIdx);
       cell.setCellValue(value);
-      cell.setCellStyle(this.decimalNumberStyle);
+      if (value == 0d) {
+        cell.setCellStyle(this.zeroNumberStyle);
+      } else if (value < 0.0001d) {
+        cell.setCellStyle(this.expoNumberStyle);
+      } else {
+        cell.setCellStyle(this.decimalNumberStyle);
+      }
     }
   }
 
