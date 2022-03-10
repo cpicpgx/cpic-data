@@ -22,7 +22,7 @@ public class FrequencyWorkbook extends AbstractWorkbook {
   private static final String SHEET_PHENOTYPE = "Phenotype frequency";
 
   private static final String[] REFERENCE_COLUMNS = new String[]{
-      "Authors", "Year", "PMID", "Major ethnicity", "Population", "Add'l population info", "Subject type", "N subjects genotyped"
+      "Authors", "Year", "PMID", "Population group", "Population", "Add'l population info", "Subject type", "N subjects genotyped"
   };
 
   private final String geneSymbol;
