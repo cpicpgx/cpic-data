@@ -29,6 +29,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       "delete from file_note where type='" + FileType.FREQUENCY.name() + "'",
       "delete from allele_frequency where alleleid is not null",
       "delete from population where id is not null",
+      "update allele set frequency=null where frequency is not null",
       "update gene_result set frequency=null where frequency is not null",
       "update gene_result_diplotype set frequency=null where frequency is not null",
   };
@@ -78,7 +79,6 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Error parsing row " + (i+1), ex);
         }
       }
-      writeNotes(gene, workbook.getNotes());
       // END processing References sheet
 
       // START processing Change log sheet
@@ -114,6 +114,10 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       }
       frequencyProcessor.updateMethods(methodsText.toString());
       // END processing Methods sheet
+
+      // START processing notes sheet
+      writeNotes(gene, workbook.getNotes());
+      // END processing notes sheet
 
       sf_logger.debug("Successfully parsed " + gene + " frequencies");
 
