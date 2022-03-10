@@ -52,7 +52,7 @@ public class WorkbookWrapper {
     
     Sheet nextSheet = this.workbook.getSheet(name);
     if (nextSheet == null) {
-      throw new InvalidParameterException("No sheet with given name found");
+      throw new InvalidParameterException("No sheet with given name found [" + name + "]");
     }
     
     this.currentSheet = nextSheet;
