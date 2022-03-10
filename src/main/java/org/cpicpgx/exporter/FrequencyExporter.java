@@ -28,8 +28,8 @@ import java.util.*;
  */
 public class FrequencyExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final List<String> BLOCKLIST_DIPLO = ImmutableList.of("CACNA1S", "RYR1");
-  private static final List<String> BLOCKLIST_PHENO = ImmutableList.of("CACNA1S", "RYR1", "MT-RNR1", "VKORC1", "CYP4F2");
+  private static final List<String> BLOCKLIST_DIPLO = ImmutableList.of("CACNA1S", "RYR1", "HLA-A", "HLA-B");
+  private static final List<String> BLOCKLIST_PHENO = ImmutableList.of("CACNA1S", "RYR1", "HLA-A", "HLA-B", "MT-RNR1", "VKORC1", "CYP4F2");
 
   public static void main(String[] args) {
     FrequencyExporter exporter = new FrequencyExporter();
