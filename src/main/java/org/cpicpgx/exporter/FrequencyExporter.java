@@ -297,7 +297,7 @@ public class FrequencyExporter extends BaseExporter {
       //language=PostgreSQL
       ethnicitiesStmt = prepare("select distinct p.ethnicity from allele_frequency f join allele a on a.id = f.alleleid join population p on f.population = p.id where a.genesymbol=? order by 1");
       //language=PostgreSQL
-      allelePopulationStmt = prepare("select frequency -> ? from allele where genesymbol=? and name=?");
+      allelePopulationStmt = prepare("with x as (select frequency -> ? as frequency from allele where genesymbol=? and name=?) select * from x where x.frequency::text != 'null'");
       //language=PostgreSQL
       diplotypePopStmt = prepare("select distinct jsonb_object_keys(grd.frequency) from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionphenotypeid where r.genesymbol=? and grd.frequency is not null order by 1");
       //language=PostgreSQL

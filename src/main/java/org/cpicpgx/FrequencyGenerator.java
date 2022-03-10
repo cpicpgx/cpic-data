@@ -8,9 +8,11 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.cpicpgx.db.ConnectionFactory;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -99,7 +101,15 @@ public class FrequencyGenerator {
             if (!refAlleleFrequencyJson.has(ethnicity)) {
               refAlleleFrequencyJson.addProperty(ethnicity, freq);
             } else {
-              refAlleleFrequencyJson.addProperty(ethnicity, freq + refAlleleFrequencyJson.get(ethnicity).getAsFloat());
+              if (freq == null) {
+                refAlleleFrequencyJson.add(ethnicity, refAlleleFrequencyJson.get(ethnicity));
+              } else {
+                if (refAlleleFrequencyJson.get(ethnicity).isJsonNull()) {
+                  refAlleleFrequencyJson.addProperty(ethnicity, freq);
+                } else {
+                  refAlleleFrequencyJson.addProperty(ethnicity, freq + refAlleleFrequencyJson.get(ethnicity).getAsFloat());
+                }
+              }
             }
           }
           int rez = dataHarness.writeAlleleFrequency(alleleMap.get(alleleName), alleleFrequencyJson);
@@ -242,21 +252,25 @@ public class FrequencyGenerator {
       return freq;
     }
 
+    @Nullable
     Float lookupFrequency(String ethnicity, Integer alleleId) throws SQLException {
-      PreparedStatement stmt = conn.prepareStatement("SELECT\n" +
-          "       sum(p.subjectcount),\n" +
-          "       sum(p.subjectcount::numeric * af.frequency / 100::numeric) / sum(p.subjectcount)::numeric *\n" +
-          "       100::numeric\n" +
-          "FROM population p\n" +
-          "         JOIN allele_frequency af ON p.id = af.population\n" +
-          "         JOIN allele a ON af.alleleid = a.id\n" +
+      PreparedStatement stmt = conn.prepareStatement("SELECT" +
+          "       sum(p.subjectcount)," +
+          "       sum(p.subjectcount::numeric * af.frequency / 100::numeric) / sum(p.subjectcount)::numeric * 100::numeric," +
+          "       bool_or(af.frequency is not null) " +
+          "FROM population p" +
+          "         JOIN allele_frequency af ON p.id = af.population" +
+          "         JOIN allele a ON af.alleleid = a.id " +
           "WHERE af.frequency IS NOT NULL and af.alleleid=? and p.ethnicity=?");
       stmt.setInt(1, alleleId);
       stmt.setString(2, ethnicity);
       Float freq = null;
       try (ResultSet rs = stmt.executeQuery()) {
         if (rs.next()) {
-          freq = rs.getFloat(2);
+          boolean hasData = rs.getBoolean(3);
+          if (hasData) {
+            freq = rs.getFloat(2);
+          }
         }
         if (rs.next()) {
           throw new RuntimeException("Single result expected");
@@ -265,14 +279,22 @@ public class FrequencyGenerator {
       return freq;
     }
 
+    @Nullable
     Float findFrequency(String alleleName, String ethnicity) throws SQLException {
       findAlleleFrequency.setString(1, ethnicity);
       findAlleleFrequency.setString(2, geneSymbol);
       findAlleleFrequency.setString(3, alleleName);
-      float freqeuncy = 0f;
+      Float freqeuncy = null;
       try (ResultSet r = findAlleleFrequency.executeQuery()) {
         if (r.next()) {
-          freqeuncy = r.getFloat(1);
+          Object freqObj = r.getObject(1);
+          if (freqObj != null) {
+            try {
+              freqeuncy = r.getFloat(1);
+            } catch (PSQLException ex) {
+              // drop and skip
+            }
+          }
         }
         if (r.next()) {
           throw new RuntimeException("More than one result returned");
@@ -302,7 +324,10 @@ public class FrequencyGenerator {
             String alleleName = alleles.stream().findFirst().orElseThrow(() -> new RuntimeException("Allele not found"));
             for (String ethnicity : ethnicitySet) {
               Float individualFrequency = findFrequency(alleleName, ethnicity);
-              Float diplotypeFrequency = individualFrequency * individualFrequency;
+              Float diplotypeFrequency = null;
+              if (individualFrequency != null) {
+                diplotypeFrequency = individualFrequency * individualFrequency;
+              }
               frequencyByEthnicityObject.addProperty(ethnicity, diplotypeFrequency);
             }
             writeDiplotypeFrequency(diplotypeId, frequencyByEthnicityObject);
@@ -317,7 +342,10 @@ public class FrequencyGenerator {
                   findFrequency(alleleNameArray[0], ethnicity),
                   findFrequency(alleleNameArray[1], ethnicity)
               };
-              Float freq = alleleFreqArray[0] * alleleFreqArray[1] * 2;
+              Float freq = null;
+              if (alleleFreqArray[0] != null && alleleFreqArray[1] != null) {
+                freq = alleleFreqArray[0] * alleleFreqArray[1] * 2;
+              }
               frequencyByEthnicityObject.addProperty(ethnicity, freq);
             }
             int result = writeDiplotypeFrequency(diplotypeId, frequencyByEthnicityObject);
@@ -330,7 +358,12 @@ public class FrequencyGenerator {
     }
 
     void updatePhenotypeFrequencies() throws SQLException {
-      PreparedStatement dipStmt = conn.prepareStatement("select sum((grd.frequency -> ?)::numeric) from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionPhenotypeId where r.id=?");
+      PreparedStatement dipStmt = conn.prepareStatement("select sum(f.value::numeric) " +
+          "from gene_result r " +
+          "    join gene_result_lookup grl on r.id = grl.phenotypeid " +
+          "    join gene_result_diplotype grd on grl.id = grd.functionPhenotypeId, " +
+          "     jsonb_each(grd.frequency) f " +
+          "where f.key=? and r.id=? and f.value::text!='null'");
       PreparedStatement updateStmt = conn.prepareStatement("update gene_result set frequency=?::jsonb where id=?");
       PreparedStatement stmt = conn.prepareStatement("select id from gene_result where genesymbol=?");
       stmt.setString(1, geneSymbol);
