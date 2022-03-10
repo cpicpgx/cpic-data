@@ -1,5 +1,6 @@
 package org.cpicpgx.exporter;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,8 @@ import java.util.*;
  */
 public class FrequencyExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final List<String> BLOCKLIST_DIPLO = ImmutableList.of("CACNA1S", "RYR1");
+  private static final List<String> BLOCKLIST_PHENO = ImmutableList.of("CACNA1S", "RYR1", "MT-RNR1", "VKORC1", "CYP4F2");
 
   public static void main(String[] args) {
     FrequencyExporter exporter = new FrequencyExporter();
@@ -113,7 +116,7 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // start the Diplotype Frequency sheet
-          if (!Constants.isSinglePloidy(chr)) {
+          if (!Constants.isSinglePloidy(chr) && !BLOCKLIST_DIPLO.contains(geneSymbol)) {
             List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
             if (dipPops.size() > 0) {
               workbook.writeDiplotypeFrequencyHeader(dipPops);
@@ -138,21 +141,23 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // start the Phenotype Frequency sheet
-          List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
-          if (phenoPops.size() > 0) {
-            workbook.writePhenotypeFrequencyHeader(phenoPops);
-            Map<String, HashMap<String,Double>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol, lookupMethod);
+          if (!BLOCKLIST_PHENO.contains(geneSymbol)) {
+            List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
+            if (phenoPops.size() > 0) {
+              workbook.writePhenotypeFrequencyHeader(phenoPops);
+              Map<String, HashMap<String, Double>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol, lookupMethod);
 
-            phenotypeMap.forEach((phenotype, popMap) -> {
-              Double[] frequencies = new Double[phenoPops.size()];
-              for (String pop : phenoPops) {
-                int idx = phenoPops.indexOf(pop);
-                if (idx > -1) {
-                  frequencies[idx] = popMap.get(pop);
+              phenotypeMap.forEach((phenotype, popMap) -> {
+                Double[] frequencies = new Double[phenoPops.size()];
+                for (String pop : phenoPops) {
+                  int idx = phenoPops.indexOf(pop);
+                  if (idx > -1) {
+                    frequencies[idx] = popMap.get(pop);
+                  }
                 }
-              }
-              workbook.writePhenotypeFrequency(phenotype, frequencies);
-            });
+                workbook.writePhenotypeFrequency(phenotype, frequencies);
+              });
+            }
           }
           // end the Phenotype Frequency sheet
 
