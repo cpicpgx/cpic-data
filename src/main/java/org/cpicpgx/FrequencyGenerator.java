@@ -103,10 +103,10 @@ public class FrequencyGenerator {
                 }
               }
             }
-          }
-          int rez = dataHarness.writeAlleleFrequency(alleleMap.get(alleleName), alleleFrequencyJson);
-          if (rez == 0) {
-            throw new RuntimeException("Missed write of allele frequency for " + alleleName);
+            int rez = dataHarness.writeAlleleFrequency(alleleMap.get(alleleName), alleleFrequencyJson);
+            if (rez == 0) {
+              throw new RuntimeException("Missed write of allele frequency for " + alleleName);
+            }
           }
         }
       }
