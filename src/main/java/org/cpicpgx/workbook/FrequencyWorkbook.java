@@ -147,7 +147,7 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     currentPopSummaryAlleleCol += 1;
   }
 
-  private static final String TITLE_TEMPLATE = "Frequencies of %s alleles in major race/ethnic groups";
+  private static final String TITLE_TEMPLATE = "Frequencies of %s alleles in biogeographical groups";
   private static final String GENE_CELL_TEMPLATE = "%s allele";
 
   /**
@@ -183,7 +183,7 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     }
   }
 
-  private static final String TITLE_DIPLO_TEMPLATE = "Frequencies of %s diplotypes in major race/ethnic groups";
+  private static final String TITLE_DIPLO_TEMPLATE = "Frequencies of %s diplotypes in biogeographical groups";
   /**
    * Write header for the diplotype sheet
    */
@@ -212,7 +212,7 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     }
   }
 
-  private static final String TITLE_PHENO_TEMPLATE = "Frequencies of %s phenotypes in major race/ethnic groups";
+  private static final String TITLE_PHENO_TEMPLATE = "Frequencies of %s phenotypes in biogeographical groups";
   /**
    * Write header for the phenotype sheet
    */
