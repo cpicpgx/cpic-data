@@ -143,19 +143,16 @@ public class FrequencyExporter extends BaseExporter {
             workbook.writePhenotypeFrequencyHeader(phenoPops);
             Map<String, HashMap<String,Double>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol, lookupMethod);
 
-            for (String phenotype : phenotypeMap.keySet()) {
+            phenotypeMap.forEach((phenotype, popMap) -> {
               Double[] frequencies = new Double[phenoPops.size()];
-              Map<String,Double> popMap = phenotypeMap.get(phenotype);
-              if (popMap != null) {
-                for (String pop : phenoPops) {
-                  int idx = phenoPops.indexOf(pop);
-                  if (idx > -1) {
-                    frequencies[idx] = popMap.get(pop);
-                  }
+              for (String pop : phenoPops) {
+                int idx = phenoPops.indexOf(pop);
+                if (idx > -1) {
+                  frequencies[idx] = popMap.get(pop);
                 }
               }
               workbook.writePhenotypeFrequency(phenotype, frequencies);
-            }
+            });
           }
           // end the Phenotype Frequency sheet
 
