@@ -103,10 +103,10 @@ public class FrequencyGenerator {
                 }
               }
             }
-            int rez = dataHarness.writeAlleleFrequency(alleleMap.get(alleleName), alleleFrequencyJson);
-            if (rez == 0) {
-              throw new RuntimeException("Missed write of allele frequency for " + alleleName);
-            }
+          }
+          int rez = dataHarness.writeAlleleFrequency(alleleMap.get(alleleName), alleleFrequencyJson);
+          if (rez == 0) {
+            throw new RuntimeException("Missed write of allele frequency for " + alleleName);
           }
         }
       }
@@ -155,10 +155,20 @@ public class FrequencyGenerator {
       findAlleleFrequency = conn.prepareStatement("select frequency -> ? from allele where genesymbol=? and name=?");
     }
 
+    /**
+     * Gets the reference allele ID for this gene.
+     * NOTE: this will look for alleles flagged as "reference" BUT will ignore any non-star allele reference allele,
+     * especially for genes that only use single positions for calling alleles.
+     * @return the ID for the "allele" data object of this gene if it uses star alleles, null if no reference star
+     * allele exists
+     * @throws SQLException can occur from DB query
+     */
     Integer lookupRefAlleleId() throws SQLException {
+      if (geneSymbol.startsWith("HLA")) return m_referenceAlleleId;
+
       PreparedStatement refAlleleStmt = conn.prepareStatement(
           "select a.id, a.name from allele a join allele_definition ad on a.definitionId=ad.id " +
-              "where a.genesymbol=? and ad.reference = true and ad.name=a.name");
+              "where a.genesymbol=? and ad.reference = true and ad.name=a.name and a.name ~ '^\\*'");
       refAlleleStmt.setString(1, this.geneSymbol);
       try (ResultSet rs = refAlleleStmt.executeQuery()) {
         boolean foundOne = false;
@@ -219,7 +229,8 @@ public class FrequencyGenerator {
     }
 
     SortedMap<String,Integer> lookupAlleles() throws SQLException {
-      PreparedStatement stmt = conn.prepareStatement("select id,name from allele a where a.genesymbol=?");
+      PreparedStatement stmt = conn.prepareStatement("select id,name from allele a " +
+          "where a.genesymbol=? and (a.clinicalfunctionalstatus is not null or a.genesymbol~'HLA' or a.genesymbol~'VKORC1') and a.name != 'Reference'");
       stmt.setString(1, geneSymbol);
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {

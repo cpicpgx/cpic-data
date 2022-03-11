@@ -51,7 +51,7 @@ public class FrequencyExporter extends BaseExporter {
       try (
           FrequencyDbHarness dbHarness = new FrequencyDbHarness();
           PreparedStatement stmt = conn.prepareStatement(
-              "select distinct a.name, a.id, ad.reference from allele_frequency f join allele a on f.alleleid = a.id join allele_definition ad on a.definitionid = ad.id where a.genesymbol=? order by 1");
+              "select distinct a.name, a.id, ad.reference from allele_frequency f join allele a on f.alleleid = a.id join allele_definition ad on a.definitionid = ad.id where a.genesymbol=? and a.name != 'Reference' order by 1");
           PreparedStatement popsStmt = conn.prepareStatement(
               "select distinct coalesce(p2.pmid, p2.url, p2.pmcid, p2.doi), p.ethnicity, p.population, p.populationinfo, p.subjecttype, p2.authors, p2.year, p.id, p.subjectcount\n" +
               "from allele_frequency f join population p on f.population = p.id join allele a on f.alleleid = a.id\n" +
@@ -71,7 +71,7 @@ public class FrequencyExporter extends BaseExporter {
                   "order by 1");
           ResultSet geneResults = geneStmt.executeQuery();
           PreparedStatement refAlleleStmt = conn.prepareStatement(
-              "select name from allele_definition where reference is true and genesymbol=?")
+              "select name from allele_definition where reference is true and genesymbol=? and name != 'Reference'")
       ) {
         // gene loop
         while (geneResults.next()) {
@@ -91,6 +91,9 @@ public class FrequencyExporter extends BaseExporter {
           // start the Allele Frequency sheet
           List<String> ethnicities = dbHarness.getEthnicities(geneSymbol);
           Set<String> alleleNames = dbHarness.getAllelesWithFrequencies(geneSymbol);
+          if (alleleNames.size() == 0) {
+            throw new RuntimeException("No alleles found");
+          }
 
           if (ethnicities.size() > 0) {
             workbook.writeAlleleFrequencyHeader(ethnicities);
@@ -311,7 +314,7 @@ public class FrequencyExporter extends BaseExporter {
       //language=PostgreSQL
       activityDataStmt = prepare("select activityscore,frequency from gene_result where genesymbol=? and frequency is not null");
       //language=PostgreSQL
-      alleleNameStmt = prepare("select distinct name from allele where genesymbol=?");
+      alleleNameStmt = prepare("select distinct name from allele where genesymbol=? and frequency is not null");
     }
 
     Set<String> getAllelesWithFrequencies(String gene) throws SQLException {
