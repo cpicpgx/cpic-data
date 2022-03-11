@@ -34,6 +34,12 @@ import java.util.*;
  */
 public class FrequencyGenerator {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String[] ALLOW_ALLELES = new String[]{
+      "CYP4F2",
+      "HLA-A",
+      "HLA-B",
+      "VKORC1"
+  };
   private final String f_gene;
 
   public static void main(String[] args) {
@@ -230,8 +236,9 @@ public class FrequencyGenerator {
 
     SortedMap<String,Integer> lookupAlleles() throws SQLException {
       PreparedStatement stmt = conn.prepareStatement("select id,name from allele a " +
-          "where a.genesymbol=? and (a.clinicalfunctionalstatus is not null or a.genesymbol~'HLA' or a.genesymbol~'VKORC1') and a.name != 'Reference'");
+          "where a.genesymbol=? and (a.clinicalfunctionalstatus is not null or array[a.genesymbol] <@ ?) and a.name != 'Reference'");
       stmt.setString(1, geneSymbol);
+      stmt.setArray(2, conn.createArrayOf("VARCHAR", ALLOW_ALLELES));
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
           alleleMap.put(rs.getString(2), rs.getInt(1));
