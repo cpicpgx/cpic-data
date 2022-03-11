@@ -199,24 +199,6 @@ public class FrequencyGenerator {
       return ethnicitySet;
     }
 
-    Integer lookupRefFreqCount(int alleleId) throws SQLException {
-      PreparedStatement stmt = conn.prepareStatement(
-          "select count(*) from allele_frequency where alleleid=? and frequency is not null");
-      stmt.setInt(1, alleleId);
-      int freqCount = 0;
-      try (ResultSet rs = stmt.executeQuery()) {
-        boolean foundOne = false;
-        while (rs.next()) {
-          if (foundOne) {
-            throw new RuntimeException("More than one reference allele found");
-          }
-          freqCount = rs.getInt(1);
-          foundOne = true;
-        }
-      }
-      return freqCount;
-    }
-
     Set<Integer> lookupPopulations() throws SQLException {
       PreparedStatement stmt = conn.prepareStatement("select distinct f.population, p.ethnicity\n" +
           "from allele_frequency f\n" +
