@@ -68,7 +68,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
         AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, seqChr, seqPro, seqGen, seqMrna, pvCount, namingNote);
 
         try (PreparedStatement seqLocStmt = conn.prepareStatement(
-            "select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?"
+            "select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=? order by position"
         )) {
           seqLocStmt.setString(1, symbol);
           try (ResultSet rs = seqLocStmt.executeQuery()) {
