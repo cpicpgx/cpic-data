@@ -43,7 +43,7 @@ public class AlleleDefinitionWorkbook extends AbstractWorkbook {
    * Constructor. Sets up the Apache POI objects needed to write the values to the file.
    * @param gene an HGNC gene symbol
    */
-  public AlleleDefinitionWorkbook(String gene, String seqChr, String seqPro, String seqGen, String seqMrna, Long pvCount) {
+  public AlleleDefinitionWorkbook(String gene, String seqChr, String seqPro, String seqGen, String seqMrna, Long pvCount, String namingNote) {
     super();
     if (StringUtils.stripToNull(gene) == null) {
       throw new IllegalArgumentException("Gene must be specified");
@@ -82,6 +82,8 @@ public class AlleleDefinitionWorkbook extends AbstractWorkbook {
 
     if (pvCount > 0) {
       writeStringCell(nameRow, 0, "Nucleotide change per gene from https://www.pharmvar.org", wrapStyle);
+    } else if (StringUtils.isNotBlank(namingNote)) {
+      writeStringCell(nameRow, 0, namingNote, wrapStyle);
     } else if (StringUtils.isNotBlank(seqMrna)) {
       writeStringCell(nameRow, 0, String.format("Nucleotide change on cDNA (%s)", seqMrna), wrapStyle);
     } else {

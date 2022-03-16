@@ -46,12 +46,12 @@ public class AlleleDefinitionExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement(
-             "select distinct g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, " +
+             "select distinct g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, g.notesonallelenaming, " +
                  "sum(case when ad.pharmvarid is null then 0 else 1 end) pvIds, " +
                  "sum(case when ad.structuralvariation is true then 1 else 0 end) as svs " +
                  "from gene g join allele_definition ad on g.symbol = ad.genesymbol " +
                  "where symbol not in ('HLA-A', 'HLA-B') " +
-                 "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid " +
+                 "group by g.symbol, g.chromosequenceid, g.proteinsequenceid, g.genesequenceid, g.mrnasequenceid, g.notesonallelenaming " +
                  "order by 1");
          ResultSet grs = geneStmt.executeQuery()
     ) {
@@ -61,10 +61,11 @@ public class AlleleDefinitionExporter extends BaseExporter {
         String seqPro = grs.getString(3);
         String seqGen = grs.getString(4);
         String seqMrna = grs.getString(5);
-        Long pvCount = grs.getLong(6);
-        boolean hasStructuralVariation = grs.getLong(7) > 0;
+        String namingNote = grs.getString(6);
+        Long pvCount = grs.getLong(7);
+        boolean hasStructuralVariation = grs.getLong(8) > 0;
 
-        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, seqChr, seqPro, seqGen, seqMrna, pvCount);
+        AlleleDefinitionWorkbook workbook = new AlleleDefinitionWorkbook(symbol, seqChr, seqPro, seqGen, seqMrna, pvCount, namingNote);
 
         try (PreparedStatement seqLocStmt = conn.prepareStatement(
             "select name, proteinlocation, chromosomelocation, genelocation, dbsnpid, id from sequence_location where geneSymbol=?"

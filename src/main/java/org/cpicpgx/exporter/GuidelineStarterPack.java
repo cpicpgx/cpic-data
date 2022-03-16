@@ -125,7 +125,7 @@ public class GuidelineStarterPack {
         queryHandler.lookupFile(gene, FileType.ALLELE_DEFINITION).ifPresentOrElse(
             (url) -> urlMap.put(FileType.ALLELE_DEFINITION, url),
             () -> {
-              AlleleDefinitionWorkbook alleleDefinitionWorkbook = new AlleleDefinitionWorkbook(gene, "NC_#######", "NP_#######", "NG_#######", "NM_#######", 0L);
+              AlleleDefinitionWorkbook alleleDefinitionWorkbook = new AlleleDefinitionWorkbook(gene, "NC_#######", "NP_#######", "NG_#######", "NM_#######", 0L, null);
               alleleDefinitionWorkbook.writeAllele("ALLELE NAME HERE");
               alleleDefinitionWorkbook.writeVariant("VARIANT HERE", "X###X", "g.#####", "g.#####", "rs#####", 1L);
               urlMap.put(FileType.ALLELE_DEFINITION, uploadHandler.upload(alleleDefinitionWorkbook));

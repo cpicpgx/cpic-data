@@ -53,6 +53,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private Map<String,Map<Integer,String>> m_alleles;
   private Map<String,String> m_svTextMap;
   private int m_svColIdx = -1;
+  private String m_legacyNamesNote = null;
 
   public static void main(String[] args) {
     rebuild(new AlleleDefinitionImporter(), args);
@@ -101,7 +102,9 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     m_legacyNames = new String[row.getLastCellNum()];
     m_svColIdx = -1;
 
-    findSeqId(row.getNullableText(0));
+    if (!findSeqId(row.getNullableText(0))) {
+      m_legacyNamesNote = row.getNullableText(0);
+    }
 
     for (int i=sf_variantColStart; i < row.getLastCellNum(); i++) {
       String cellContents = row.getNullableText(i);
@@ -169,8 +172,13 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     }
   }
 
-  private void findSeqId(String cellContent) {
-    if (StringUtils.isBlank(cellContent)) return;
+  /**
+   * Finds the sequence ID in given string and then assigns it to the right property for the sequency type
+   * @param cellContent text content of a cell
+   * @return true if a sequence ID was found, false otherwise
+   */
+  private boolean findSeqId(String cellContent) {
+    if (StringUtils.isBlank(cellContent)) return false;
 
     Matcher m = sf_seqIdPattern.matcher(cellContent);
     if (m.find()) {
@@ -183,7 +191,12 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
         m_chromoSeqId = seqId;
       } else if (seqId.startsWith("NP_")) {
         m_proteinSeqId = seqId;
+      } else {
+        return false;
       }
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -299,12 +312,17 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
           "delete from allele_location_value where alleledefinitionid=?");
 
       PreparedStatement geneUpdate = conn.prepareStatement(
-          "update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,mrnaSequenceId=? where symbol=?");
+          "update gene set genesequenceid=?,proteinsequenceid=?,chromosequenceid=?,mrnaSequenceId=?, notesonallelenaming=? where symbol=?");
       geneUpdate.setString(1, m_geneSeqId);
       geneUpdate.setString(2, m_proteinSeqId);
       geneUpdate.setString(3, m_chromoSeqId);
       geneUpdate.setString(4, m_mrnaSeqId);
-      geneUpdate.setString(5, m_gene);
+      if (m_legacyNamesNote != null) {
+        geneUpdate.setString(5, m_legacyNamesNote);
+      } else {
+        geneUpdate.setNull(5, Types.VARCHAR);
+      }
+      geneUpdate.setString(6, m_gene);
       geneUpdate.executeUpdate();
 
       PreparedStatement seqLocInsert = conn.prepareStatement(
