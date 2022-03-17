@@ -84,6 +84,10 @@ public abstract class DbHarness implements AutoCloseable {
     }
   }
 
+  public Collection<String> getDrugIds() {
+    return drugLookupCache.values();
+  }
+
   /**
    * Check whether a gene is already in the system, cache any found genes for faster lookup
    * @param geneSymbol the Gene to find as an HGNC symbol

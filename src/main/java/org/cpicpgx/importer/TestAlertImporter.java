@@ -208,7 +208,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
   private static class TestDbHarness extends DbHarness {
     private final PreparedStatement insert;
     private final PreparedStatement findLookup;
-    private final Map<String, String> nameToIdMap = new HashMap<>();
     private final Map<String,LookupMethod> geneMap = new HashMap<>();
     private final Gson gson = new Gson();
 
@@ -231,7 +230,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
     }
 
     private void writeHistory(Date date, String note) throws SQLException {
-      for (String drugId : nameToIdMap.values()) {
+      for (String drugId : getDrugIds()) {
         writeChangeLog(drugId, date, note);
       }
     }
@@ -278,10 +277,6 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       insert.setString(8, gson.toJson(alleleMap));
       insert.setString(9, gson.toJson(lookupKey));
       insert.executeUpdate();
-    }
-
-    private Collection<String> getDrugIds() {
-      return nameToIdMap.values();
     }
 
     @Nullable
