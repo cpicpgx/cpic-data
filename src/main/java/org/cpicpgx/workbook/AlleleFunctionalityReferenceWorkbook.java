@@ -11,7 +11,7 @@ import org.apache.poi.ss.usermodel.Row;
  */
 public class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
   private static final String FUNCTION_SHEET_NAME = "Allele Function";
-  private static final String CELL_PATTERN_GENE = "Gene: %s";
+  private static final String CELL_PATTERN_GENE = "GENE: %s";
   private static final String FILE_NAME_PATTERN = "%s_allele_functionality_reference.xlsx";
   private final String geneSymbol;
   private final SheetWrapper sheet;
