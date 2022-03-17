@@ -17,6 +17,7 @@ public class FunctionReferenceImporterTest {
     assertEquals("*2", FunctionReferenceImporter.parseAlleleDefinitionName("*2xN"));
     assertEquals("*2", FunctionReferenceImporter.parseAlleleDefinitionName("*2x3"));
     assertEquals("*2", FunctionReferenceImporter.parseAlleleDefinitionName("*2≥2"));
+    assertEquals("*1", FunctionReferenceImporter.parseAlleleDefinitionName("*1x≥3"));
     assertEquals("c.61G>T", FunctionReferenceImporter.parseAlleleDefinitionName("c.61G>T"));
     assertEquals("c.61G>T", FunctionReferenceImporter.parseAlleleDefinitionName("c.61G>Tx2"));
     assertEquals("c.61G>T", FunctionReferenceImporter.parseAlleleDefinitionName("c.61G>T   x2"));

@@ -35,7 +35,7 @@ import static org.cpicpgx.util.Constants.isUnspecified;
 public class FunctionReferenceImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_geneLabelPattern = Pattern.compile("GENE:\\s([\\w-]+)");
-  private static final Pattern sf_alleleNamePattern = Pattern.compile("^(.+?)([x≥](\\d+|N))?$");
+  private static final Pattern sf_alleleNamePattern = Pattern.compile("^(.+?)([x≥]+(\\d+|N))?$");
   private static final Pattern sf_pmidPattern = Pattern.compile("^\\d+$");
   private static final int COL_IDX_ALLELE = 0;
   private static final int COL_IDX_ACTIVITY = 1;
