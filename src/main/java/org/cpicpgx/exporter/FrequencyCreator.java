@@ -228,6 +228,7 @@ public class FrequencyCreator {
                   () -> freqsForAllelesList.add("")
               );
         }
+        int subjectCount = f_alleleDistributions.get(0).getSize(population);
 
         workbook.writePopulation(
             dummyAuthors,
@@ -237,7 +238,7 @@ public class FrequencyCreator {
             population.getVersionedName(),
             "",
             "",
-            null,
+            subjectCount,
             freqsForAllelesList
         );
 
