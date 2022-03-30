@@ -44,15 +44,17 @@ public class PairsExporter extends BaseExporter {
       "order by p.cpiclevel, d.name, p.genesymbol";
   private static final String sf_changeLogQuery = "select date, note from change_log where type=?";
   private static final String sf_currentPairQuery = "select\n" +
-      "       genesymbol as \"Gene\",\n" +
-      "       drugname as \"Drug\",\n" +
-      "       guidelineurl as \"Guideline\",\n" +
-      "       cpiclevel as \"CPIC Level\",\n" +
-      "       case when provisional is true then 'Provisional' else 'Final' end \"CPIC Level Status\",\n" +
-      "       pgkbcalevel as \"PharmGKB Level of Evidence\",\n" +
-      "       pgxtesting as \"PGx on FDA Label\",\n" +
-      "       array_to_string(pmids, ';') as \"CPIC Publications (PMID)\"\n" +
-      "from pair_view\n" +
+      "       v.genesymbol as \"Gene\",\n" +
+      "       v.drugname as \"Drug\",\n" +
+      "       d.rxnormid as \"Drug RxNorm ID\", " +
+      "       array_to_string(d.atcid, ', ') as \"Drug ATC IDs\", " +
+      "       v.guidelineurl as \"Guideline\",\n" +
+      "       v.cpiclevel as \"CPIC Level\",\n" +
+      "       case when v.provisional is true then 'Provisional' else 'Final' end \"CPIC Level Status\",\n" +
+      "       v.pgkbcalevel as \"PharmGKB Level of Evidence\",\n" +
+      "       v.pgxtesting as \"PGx on FDA Label\",\n" +
+      "       array_to_string(v.pmids, ';') as \"CPIC Publications (PMID)\"\n" +
+      "from pair_view v join drug d on d.drugid=v.drugid\n" +
       "order by cpiclevel, drugname, genesymbol";
 
   public static void main(String[] args) {
