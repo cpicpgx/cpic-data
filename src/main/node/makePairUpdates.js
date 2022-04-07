@@ -41,14 +41,14 @@ const requestUpdates = async (body) => {
 };
 
 const processChanges = async (changes) => {
-    await Promise.all(changes.filter(c => !!c.pairid && !!c.pgkbcalevel).map(({pgkbcalevel, pairid}) => {
+    await Promise.all(changes.filter(c => !!c.pairid && c.hasOwnProperty('pgkbcalevel')).map(({pgkbcalevel, pairid}) => {
         console.log(`Updating ${pairid} to CA ${pgkbcalevel}`);
         return db.none(`update pair
                         set pgkbcalevel=$(pgkbcalevel)
                         where pairid = $(pairid)`, {pgkbcalevel, pairid});
     }));
 
-    await Promise.all(changes.filter(c => !!c.pairid && !!c.pgxtesting).map(({pgxtesting, pairid}) => {
+    await Promise.all(changes.filter(c => !!c.pairid && c.hasOwnProperty('pgxtesting')).map(({pgxtesting, pairid}) => {
         console.log(`Updating ${pairid} to PGx ${pgxtesting}`);
         return db.none(`update pair
                         set pgxtesting=$(pgxtesting)
