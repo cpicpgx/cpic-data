@@ -5,7 +5,7 @@
             <pattern>%-5level %logger{36} - %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
+            <level>DEBUG</level>
         </filter>
     </appender>
 
@@ -24,7 +24,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.cpicpgx.exporter.FrequencyCreator" level="INFO" />
+    <logger name="org.cpicpgx" level="INFO" />
 
     <root level="info">
         <appender-ref ref="STDOUT" />
