@@ -1,6 +1,7 @@
 package org.cpicpgx.importer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.util.CellAddress;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
@@ -124,6 +125,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     findSeqId(row.getNullableText(0));
 
     for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
+      checkLocation(row.getNullableText(i), row.getAddress(i));
       m_proteinEffects[i] = row.getNullableText(i);
     }
   }
@@ -137,6 +139,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     findSeqId(description);
 
     for (int i=sf_variantColStart; i <= m_variantColEnd; i++) {
+      checkLocation(row.getNullableText(i), row.getAddress(i));
       m_chromoPositions[i] = row.getNullableText(i);
       m_chromoStartPositions[i] = checkPosition(m_chromoPositions[i]);
     }
@@ -149,6 +152,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     findSeqId(row.getNullableText(0));
 
     for (int i=sf_variantColStart; i <=m_variantColEnd; i++) {
+      checkLocation(row.getNullableText(i), row.getAddress(i));
       m_genoPositions[i] = row.getNullableText(i);
     }
   }
@@ -219,6 +223,12 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       return Integer.valueOf(m.group(2));
     } else {
       throw new RuntimeException("No position found for [" + cellContent + "]");
+    }
+  }
+
+  void checkLocation(String location, CellAddress cellAddress) {
+    if (StringUtils.isNotBlank(location) && location.contains("/")) {
+      throw new RuntimeException("Found an illegal '/' in cell " + cellAddress + ": " + location);
     }
   }
 
