@@ -69,6 +69,7 @@ public class DataImport {
     importers.add(new GenePhenotypeImporter().setDirectory(m_directory, null));
     importers.add(new GeneCdsImporter().setDirectory(m_directory, null));
     importers.add(new AlleleFrequencyImporter().setDirectory(m_directory, null));
+    importers.add(new PairImporter().setDirectory(m_directory, null));
     importers.add(new RecommendationImporter().setDirectory(m_directory, null));
     importers.add(new TestAlertImporter().setDirectory(m_directory, null));
     
