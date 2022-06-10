@@ -15,7 +15,7 @@ public class TextUtils {
    */
   public static String normalize(String text) {
     if (text != null) {
-      text = text.replaceAll("[“”]", "\"");            // Office-style slanted quotes
+      text = text.replaceAll("[\u201C\u201D]", "\"");            // Office-style slanted quotes
       text = text.replaceAll("\\h+"," "); // non-breaking spaces
       text = StringUtils.stripToNull(text);         // trim whitespace and default to null
     }
