@@ -20,18 +20,29 @@ import java.util.List;
  */
 public class DataImport {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
+  private static final Options sf_options = new Options();
   private final Path m_directory;
 
   public static void main(String[] args) {
     try {
-      Options options = new Options();
-      options.addOption("d", true,"directory that has sub-folders with excel data files (*.xlsx)");
+      sf_options.addOption(Option.builder("d")
+              .desc("directory that has sub-folders with excel data files (*.xlsx)")
+              .hasArg()
+              .numberOfArgs(1)
+              .argName("dir")
+              .required()
+              .build());
       CommandLineParser clParser = new DefaultParser();
-      CommandLine cli = clParser.parse(options, args);
+      CommandLine cli = clParser.parse(sf_options, args);
 
       DataImport processor = new DataImport(cli.getOptionValue("d"));
       processor.execute();
+
+    } catch (MissingOptionException ex) {
+      System.out.println(ex.getMessage());
+      System.out.println();
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp(DataImport.class.getSimpleName(), sf_options);
     } catch (ParseException e) {
       sf_logger.error("Couldn't parse command", e);
       System.exit(1);
