@@ -1,15 +1,26 @@
+# IntelliJ files
+/.idea/$CACHE_FILE$
+/.idea/csv-plugin.xml
+/.idea/dataSources.xml
+/.idea/dataSources.*.xml
+/.idea/dataSources/
+/.idea/dictionaries/
+/.idea/gradle.xml
+/.idea/httpRequests/
+/.idea/libraries/Gradle__*.xml
+/.idea/markdown*
+/.idea/modules/
+/.idea/sassLintPlugin.xml
+/.idea/scssLintPlugin.xml
+/.idea/shelf/
+/.idea/sshConfigs.xml
+/.idea/workspace.xml
+/.idea/watcherTasks.xml
+
 .DS_Store
 ._.DS_Store
 
 /.gradle
-/.idea/dataSources*
-/.idea/dictionaries*
-/.idea/encodings.xml
-/.idea/markdown-navigator*
-/.idea/shelf/
-/.idea/cpic-data.iml
-/.idea/modules.xml
-/.idea/workspace.xml
 /build
 /cpic-data.wiki
 /logs
