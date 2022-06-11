@@ -17,13 +17,29 @@
 /.idea/workspace.xml
 /.idea/watcherTasks.xml
 
+# External tools
+.gradle/
+.pnp.*
+.yarn/*
+**/.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+/.vagrant/
+/bin/swagger-codegen-cli*.jar
+node_modules/
+yarn-error.log
+pgkb-tools/bin/node_modules/
+
+/cpic-data.wiki
+/cpic-support-files/
+/src/main/resources/cpicData.properties
+
+# Temporary files
 .DS_Store
 ._.DS_Store
-
-/.gradle
 /build
-/cpic-data.wiki
 /logs
 /out
-/src/main/node/node_modules
-/src/main/resources/cpicData.properties
