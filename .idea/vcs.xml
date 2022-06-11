@@ -9,5 +9,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cpic-data.wiki" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cpic-support-files" vcs="Git" />
   </component>
 </project>

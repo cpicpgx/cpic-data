@@ -2,6 +2,22 @@ ARCHIVE_NAME = cpic_db_dump
 TAG_NAME = $(ARCHIVE_NAME)-$(shell git describe --tags).sql
 INSERTS_NAME = $(ARCHIVE_NAME)-$(shell git describe --tags)_inserts.sql
 
+ifeq ($(OS),Windows_NT)
+	YARN_CMD := cmd /c yarn --silent
+	GRADLE_CMD := cmd /c gradlew.bat
+else
+	YARN_CMD := yarn --silent
+	GRADLE_CMD := ./gradlew
+endif
+
+
+.PHONY: dev-init      # initializes dev environment
+dev-init:
+	@if [ ! -d "cpic-data.wiki" ];     then echo "Cloning wiki...";            git clone git@github.com:cpicpgx/cpic-data.wiki.git     cpic-data.wiki;     fi
+	@if [ ! -d "cpic-support-files" ]; then echo "Cloning cpic-support-files"; git clone git@github.com:cpicpgx/cpic-support-files.git cpic-support-files; fi
+	@${YARN_CMD}
+
+
 .PHONY: dump
 dump:
 	mkdir -p out
@@ -22,14 +38,22 @@ archive: dump upload
 update-wiki-toc:
 	markdown-toc -i cpic-data.wiki/Home.md
 
+.PHONY: db-bootstrap
+db-bootstrap:
+	@node src/main/node/db/bootstrap.mjs
+
 .PHONY: db-refresh
 db-refresh:
 	dropdb cpic && createdb cpic
 	gzip -cd out/cpic_prod_db.sql.gz | psql cpic
 
+db-init: dev-init db-bootstrap db-migrate
+	java -jar build/libs/CpicData.jar -d cpic-support-files
+
+
 .PHONY: compile
 compile:
-	./gradlew jar
+	${GRADLE_CMD} jar
 
 .PHONY: db-migrate
 db-migrate: compile
@@ -38,3 +62,9 @@ db-migrate: compile
 .PHONY: api
 api:
 	postgrest
+
+
+.PHONY: clean
+clean:
+	${GRADLE_CMD} --quiet clean
+	rm -rf out build logs
