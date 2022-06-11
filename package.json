@@ -8,9 +8,10 @@
   },
   "license": "CC0-1.0",
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.109.0",
     "@semantic-release/changelog": "6.0.1",
     "@semantic-release/git": "10.0.1",
-    "aws-sdk": "2.1152.0",
+    "aws-sdk": "2.1153.0",
     "axios": "0.26.1",
     "commander": "9.3.0",
     "conventional-changelog-conventionalcommits": "5.0.0",
@@ -21,7 +22,8 @@
     "loglevel-plugin-prefix": "0.8.4",
     "papaparse": "5.3.2",
     "pg-promise": "10.11.1",
-    "semantic-release": "19.0.3"
+    "semantic-release": "19.0.3",
+    "yargs": "17.5.1"
   },
   "release": {
     "branches": [

@@ -3,38 +3,70 @@ name: Build project
 on:
   push:
     branches:
-      - "*"
+      - "development"
+
+env:
+  POSTGRES_HOST: postgres
+  POSTGRES_PASSWORD: postgres
+  CPIC_HOST: postgres
+  CPIC_PASS: ghtest
 
 jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
 
+    container:
+      image: pgkb/base:latest
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
+      # from https://github.com/actions/checkout/issues/760
+      - name: work around permission issue
+        run: git config --global --add safe.directory /__w/cpic-data/cpic-data
+
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 14
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v2
+      - name: Setup node
+        uses: actions/setup-node@v3
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          node-version: 16
+          cache: 'yarn'
 
-      - name: Build with Gradle
+      - name: Build and test
         run: ./gradlew test
 
-      - name: Cleanup Gradle Cache
-        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
-        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
-        run: |
-          rm -f ~/.gradle/caches/modules-2/modules-2.lock
-          rm -f ~/.gradle/caches/modules-2/gc.properties
+      - name: Install yarn dependencies
+        run: yarn install --immutable
+
+      # checking out default branch, which should be staging!
+      - name: Checkout cpic-support-files
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: cpicpgx/cpic-support-files
+          path: './cpic-support-files'
+
+      - name: Initialize dev env
+        run: make db-init
