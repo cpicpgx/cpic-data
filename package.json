@@ -4,7 +4,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/cpicpgx/cpic-data.git"
+    "url": "https://github.com/cpicpgx/test-repo.git"
   },
   "license": "CC0-1.0",
   "devDependencies": {

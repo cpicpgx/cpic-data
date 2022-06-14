@@ -31,10 +31,6 @@ jobs:
           --health-retries 5
 
     steps:
-      # from https://github.com/actions/checkout/issues/760
-      - name: work around permission issue
-        run: git config --global --add safe.directory /__w/cpic-data/cpic-data
-
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -86,7 +82,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
           tag: ${{ github.ref }}
-          file: out/cpic_db_dump-${{env.DATA_VERSION}}.sql
+          file: out/cpic_db_dump-test-${{env.DATA_VERSION}}.sql
           overwrite: true
 
       - name: Upload inserts file to release
@@ -94,7 +90,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
           tag: ${{ github.ref }}
-          file: out/cpic_db_dump-${{env.DATA_VERSION}}_inserts.sql
+          file: out/cpic_db_dump-test-${{env.DATA_VERSION}}_inserts.sql
           overwrite: true
 
       - name: Send Slack notification on failure
