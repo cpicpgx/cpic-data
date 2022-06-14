@@ -1,3 +1,10 @@
+## [1.18.5](https://github.com/cpicpgx/test-repo/compare/v1.18.4...v1.18.5) (2022-06-14)
+
+
+### Bug Fixes
+
+* test 5 ([0e97c02](https://github.com/cpicpgx/test-repo/commit/0e97c02f95b3df1e38b3bf2aa0bf0d111e5e780a))
+
 ## [1.18.4](https://github.com/cpicpgx/test-repo/compare/v1.18.3...v1.18.4) (2022-06-14)
 
 
