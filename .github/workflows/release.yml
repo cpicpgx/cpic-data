@@ -81,12 +81,16 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - run: ls out/
+      - run: ls out/cpic_db_dump-test-${{env.DATA_VERSION}}.sql
+
       - name: Upload dump file to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
           tag: ${{ github.ref }}
-          file: out/cpic_db_dump-test-${{env.DATA_VERSION}}.sql
+          file:   out/cpic_db_dump-test-${{env.DATA_VERSION}}.sql
+          asset_name: cpic_db_dump-test-${{env.DATA_VERSION}}.sql
           overwrite: true
 
       - name: Upload inserts file to release
@@ -94,7 +98,8 @@ jobs:
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
           tag: ${{ github.ref }}
-          file: out/cpic_db_dump-test-${{env.DATA_VERSION}}_inserts.sql
+          file:   out/cpic_db_dump-test-${{env.DATA_VERSION}}_inserts.sql
+          asset_name: cpic_db_dump-test-${{env.DATA_VERSION}}_inserts.sql
           overwrite: true
 
       - name: Send Slack notification on failure
