@@ -29,6 +29,7 @@ let version = fullVersion.trim();
 if (argv.b) {
     version = /^(v\d+\.\d+\.\d+).*/.exec(fullVersion)[1];
 }
+version = `test-${version}`;
 
 console.log(`Version ${version}`);
 

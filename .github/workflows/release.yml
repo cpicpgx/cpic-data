@@ -1,0 +1,108 @@
+name: Build project
+
+on:
+  release:
+    types: [published]
+
+env:
+  POSTGRES_HOST: postgres
+  POSTGRES_PASSWORD: postgres
+  CPIC_HOST: postgres
+  CPIC_PASS: ghtest
+
+jobs:
+  build:
+    name: Build project
+    runs-on: ubuntu-latest
+
+    container:
+      image: pgkb/base:latest
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # from https://github.com/actions/checkout/issues/760
+      - name: work around permission issue
+        run: git config --global --add safe.directory /__w/cpic-data/cpic-data
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        run: echo "DATA_VERSION=$(git describe --tags)" >> $GITHUB_ENV
+
+      - run: echo "Version = ${{env.DATA_VERSION}}"
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Build and test
+        run: ./gradlew test
+
+      - name: Install yarn dependencies
+        run: yarn install --immutable
+
+      # checking out default branch, which should be staging!
+      - name: Checkout cpic-support-files
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: cpicpgx/cpic-support-files
+          path: './cpic-support-files'
+
+      - name: Initialize dev env
+        run: make db-init
+
+      - name: dump data
+        run: node src/main/node/db/dump.mjs -h ${POSTGRES_HOST} -z -u
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Upload dump file to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ github.ref }}
+          file: out/cpic_db_dump-${{env.DATA_VERSION}}.sql
+          overwrite: true
+
+      - name: Upload inserts file to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ github.ref }}
+          file: out/cpic_db_dump-${{env.DATA_VERSION}}_inserts.sql
+          overwrite: true
+
+      - name: Send Slack notification on failure
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_NOTIFICATIONS_BOT_TOKEN }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: dev
+          status: FAILED
+          color: danger
