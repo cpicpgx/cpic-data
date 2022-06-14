@@ -84,8 +84,8 @@ jobs:
       - run: ls out/
       - run: ls out/cpic_db_dump-test-${{env.DATA_VERSION}}.sql.gz
       - run: |
-          echo "DATA_FILE=cpic_db_dump-test-${DATA_VERSION}.sql.gz" > $GITHUB_ENV
-          echo "INSERTS_FILE=cpic_db_dump-test-${DATA_VERSION}_inserts.sql.gz" > $GITHUB_ENV
+          echo "DATA_FILE=cpic_db_dump-test-${DATA_VERSION}.sql.gz" >> $GITHUB_ENV
+          echo "INSERTS_FILE=cpic_db_dump-test-${DATA_VERSION}_inserts.sql.gz" >> $GITHUB_ENV
       - run: ls out/${{env.DATA_FILE}}
 
       - name: Upload dump file to release
