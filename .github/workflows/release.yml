@@ -1,4 +1,4 @@
-name: Build project
+name: Release data
 
 on:
   release:
@@ -11,8 +11,8 @@ env:
   CPIC_PASS: ghtest
 
 jobs:
-  build:
-    name: Build project
+  release:
+    name: Release data
     runs-on: ubuntu-latest
 
     container:
@@ -31,6 +31,10 @@ jobs:
           --health-retries 5
 
     steps:
+      # from https://github.com/actions/checkout/issues/760
+      - name: work around permission issue
+        run: git config --global --add safe.directory *
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
