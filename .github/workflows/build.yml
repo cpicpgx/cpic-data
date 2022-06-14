@@ -34,7 +34,7 @@ jobs:
     steps:
       # from https://github.com/actions/checkout/issues/760
       - name: work around permission issue
-        run: git config --global --add safe.directory /__w/cpic-data/cpic-data
+        run: git config --global --add safe.directory *
 
       - name: Checkout code
         uses: actions/checkout@v3

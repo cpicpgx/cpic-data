@@ -1,0 +1,136 @@
+name: Release data
+
+on:
+  release:
+    types: [published]
+
+env:
+  POSTGRES_HOST: postgres
+  POSTGRES_PASSWORD: postgres
+  CPIC_HOST: postgres
+  CPIC_PASS: ghtest
+
+jobs:
+  release:
+    name: Release data
+    runs-on: ubuntu-latest
+
+    container:
+      image: pgkb/base:latest
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # from https://github.com/actions/checkout/issues/760
+      - name: work around permission issue
+        run: git config --global --add safe.directory *
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        run: echo "DATA_VERSION=$(git describe --tags)" >> $GITHUB_ENV
+
+      - run: echo "Version = ${{env.DATA_VERSION}}"
+
+
+      - name: Save current release description to file
+        run: echo "${{ github.event.release.body }}" > current_description
+
+#      - name: Update release description
+#        run: echo "DATA CHANGES HERE" >> current_description
+#
+#      - name: Save updated release description to environment variable
+#        run: |
+#          echo "REL_DESC<<EOF" >> $GITHUB_ENV
+#          cat current_description >> $GITHUB_ENV
+#          echo "EOF" >> $GITHUB_ENV
+#
+#      - name: Update release description
+#        id: update_release
+#        uses: tubone24/update_release@v1.0
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#        with:
+#          body: ${{ env.REL_DESC }}
+
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Build and test
+        run: ./gradlew test
+
+      - name: Install yarn dependencies
+        run: yarn install --immutable
+
+      # checking out default branch, which should be staging!
+      - name: Checkout cpic-support-files
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: cpicpgx/cpic-support-files
+          path: './cpic-support-files'
+
+      - name: Initialize dev env
+        run: make db-init
+
+      - name: dump data
+        run: node src/main/node/db/dump.mjs -h ${POSTGRES_HOST} -z -u
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - run: |
+          echo "DATA_FILE=cpic_db_dump-test-${DATA_VERSION}.sql.gz" >> $GITHUB_ENV
+          echo "INSERTS_FILE=cpic_db_dump-test-${DATA_VERSION}_inserts.sql.gz" >> $GITHUB_ENV
+
+      - name: Upload dump file to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ github.ref }}
+          file:   out/${{env.DATA_FILE}}
+          asset_name: ${{env.DATA_FILE}}
+          overwrite: true
+
+      - name: Upload inserts file to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ github.ref }}
+          file:   out/${{ env.INSERTS_FILE }}
+          asset_name: ${{ env.INSERTS_FILE }}
+          overwrite: true
+
+      - name: Send Slack notification on failure
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_NOTIFICATIONS_BOT_TOKEN }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: dev
+          status: FAILED
+          color: danger
