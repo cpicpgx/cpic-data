@@ -1,3 +1,12 @@
+## [1.18.1](https://github.com/cpicpgx/cpic-data/compare/v1.18.0...v1.18.1) (2022-06-14)
+
+
+### Bug Fixes
+
+* add db bootstrap script and db-init make task ([6db458d](https://github.com/cpicpgx/cpic-data/commit/6db458d3f74dba39289c8220ad08c7c96fcbaed2))
+* fix gradle permissions on unix ([a643fe8](https://github.com/cpicpgx/cpic-data/commit/a643fe86fc008c93b117a79c0d94cfbbc7916c81))
+* test 1 ([abae07c](https://github.com/cpicpgx/cpic-data/commit/abae07c39a296d8d78f7a9530cbb3d1478f2606a))
+
 ## [1.18.0](https://github.com/cpicpgx/cpic-data/compare/v1.17.0...v1.18.0) (2022-06-10)
 
 
