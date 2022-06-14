@@ -44,14 +44,18 @@ update-wiki-toc:
 db-bootstrap:
 	@node src/main/node/db/bootstrap.mjs
 
+.PHONY: api-bootstrap
+api-bootstrap:
+	@node src/main/node/db/bootstrap_api.mjs
+
 .PHONY: db-init
 db-init: db-bootstrap db-migrate
 	java -jar build/libs/CpicData.jar -d cpic-support-files
 
 .PHONY: db-refresh
 db-refresh:
-	dropdb cpic && createdb cpic
-	gzip -cd out/cpic_prod_db.sql.gz | psql cpic
+	dropdb cpic -h localhost -U postgres && createdb cpic -h localhost -U postgres
+	gzip -cd out/cpic_prod_db.sql.gz | psql -d cpic -h localhost -U postgres
 
 
 .PHONY: compile
@@ -71,3 +75,7 @@ api:
 clean:
 	${GRADLE_CMD} --quiet clean
 	rm -rf out build logs
+
+.PHONY: db-clean
+db-clean:
+	echo "drop database cpic; drop role web_anon; drop role cpic_api; drop role auth; drop role cpic;" | psql -h localhost -U postgres

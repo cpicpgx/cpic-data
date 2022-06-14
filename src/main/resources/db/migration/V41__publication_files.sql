@@ -24,9 +24,6 @@ COMMENT ON COLUMN publication_supplement.description IS 'An optional free text d
 COMMENT ON COLUMN publication_supplement.url IS 'The publicly-accessible URL to the supplemental file';
 COMMENT ON COLUMN publication_supplement.version IS 'The version number, iterates on modification';
 
-grant select,insert,update,delete on cpic.publication_supplement to cpic_api;
-grant select on cpic.publication_supplement to web_anon;
-
 update publication set fulltextfile='https://files.cpicpgx.org/data/guideline/publication/NSAID/2020/32189324.pdf' where pmid='32189324';
 update publication set fulltextfile='https://files.cpicpgx.org/data/guideline/publication/SSRI/2015/25974703.pdf' where pmid='25974703';
 update publication set fulltextfile='https://files.cpicpgx.org/data/guideline/publication/TCA/2013/23486447.pdf' where pmid='23486447';
