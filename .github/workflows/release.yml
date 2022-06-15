@@ -85,8 +85,6 @@ jobs:
           echo "DATA_FILE=cpic_db_dump-test-${DATA_VERSION}.sql.gz" >> $GITHUB_ENV
           echo "INSERTS_FILE=cpic_db_dump-test-${DATA_VERSION}_inserts.sql.gz" >> $GITHUB_ENV
 
-      - run: echo ${{ github.event.release.body }}
-
       - name: Upload dump file to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -104,6 +102,22 @@ jobs:
           file:   out/${{ env.INSERTS_FILE }}
           asset_name: ${{ env.INSERTS_FILE }}
           overwrite: true
+
+      - run: echo ${{ github.event.release.body }} > current_description
+
+      - run: more current_description
+
+      - run: echo "HELLO WORLD" >> current_description
+
+      - run: echo "REL_DESC=$(cat current_description)" >> $GITHUB_ENV
+
+      - name: Update release description
+          id: update_release
+          uses: tubone24/update_release@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          with:
+            body: ${{ env.REL_DESC }}
 
       - name: Send Slack notification on failure
         if: failure()
