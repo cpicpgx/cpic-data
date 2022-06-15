@@ -1,3 +1,10 @@
+## [1.18.18](https://github.com/cpicpgx/test-repo/compare/v1.18.17...v1.18.18) (2022-06-15)
+
+
+### Bug Fixes
+
+* test 18 ([a6c2e4f](https://github.com/cpicpgx/test-repo/commit/a6c2e4f64f61966aace0dc763ef08dd9b084c1e0))
+
 ## [1.18.17](https://github.com/cpicpgx/test-repo/compare/v1.18.16...v1.18.17) (2022-06-15)
 
 
