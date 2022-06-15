@@ -17,6 +17,7 @@ public class FlywayMigrate {
   public static void main(String[] args) {
     Options options = new Options();
     options.addOption("r", false, "flag to reset (clean) the DB before migration");
+    options.addOption("p", "repair", false, "flag to repair the migration hashes");
     CommandLineParser clParser = new DefaultParser();
 
     try {
@@ -27,6 +28,11 @@ public class FlywayMigrate {
           ConnectionFactory.getUser(),
           ConnectionFactory.getPass()
       ).schemas(ConnectionFactory.getSchema()).load();
+
+      if (cli.hasOption("r")) {
+        sf_logger.info("Repairing migration hashes");
+        flyway.repair();
+      }
 
       if (cli.hasOption("r")) {
         sf_logger.info("Cleaning DB, as requested");
