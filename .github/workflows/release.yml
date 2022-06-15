@@ -88,35 +88,23 @@ jobs:
       - run: ls out/
       - run: ls out/${{env.DATA_FILE}}
 
-      - name: Install Go
-        uses: actions/setup-go@v3
+      - name: Upload dump file to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          go-version: '^1.18.3'
-
-      - name: Install github-release
-        run: go install github.com/github-release/github-release@latest
-
-      - name: Upload data file to release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          github-release upload --security-token ${{ secrets.GH_TOKEN }} \
-             --user cpicpgx \
-             --repo test-repo \
-             --tag ${{ env.DATA_VERSION }} \
-             --name     ${{ env.DATA_FILE }} \
-             --file out/${{ env.DATA_FILE }}
+          repo_token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ github.ref }}
+          file:   out/${{env.DATA_FILE}}
+          asset_name: ${{env.DATA_FILE}}
+          overwrite: true
 
       - name: Upload inserts file to release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          github-release upload --security-token ${{ secrets.GH_TOKEN }} \
-             --user cpicpgx \
-             --repo test-repo \
-             --tag ${{ env.DATA_VERSION }} \
-             --name     ${{ env.INSERTS_FILE }} \
-             --file out/${{ env.INSERTS_FILE }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ github.ref }}
+          file:   out/${{ env.INSERTS_FILE }}
+          asset_name: ${{ env.INSERTS_FILE }}
+          overwrite: true
 
       - name: Send Slack notification on failure
         if: failure()
