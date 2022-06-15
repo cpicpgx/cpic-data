@@ -52,6 +52,7 @@ jobs:
 #      - name: Update release description
 #        run: echo "DATA CHANGES HERE" >> current_description
 #
+#      # reference: https://trstringer.com/github-actions-multiline-strings/
 #      - name: Save updated release description to environment variable
 #        run: |
 #          echo "REL_DESC<<EOF" >> $GITHUB_ENV
