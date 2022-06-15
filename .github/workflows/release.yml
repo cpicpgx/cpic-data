@@ -81,30 +81,43 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - run: ls out/
-      - run: ls out/cpic_db_dump-test-${{env.DATA_VERSION}}.sql.gz
       - run: |
           echo "DATA_FILE=cpic_db_dump-test-${DATA_VERSION}.sql.gz" >> $GITHUB_ENV
           echo "INSERTS_FILE=cpic_db_dump-test-${DATA_VERSION}_inserts.sql.gz" >> $GITHUB_ENV
+
+      - run: ls out/
       - run: ls out/${{env.DATA_FILE}}
 
-      - name: Upload dump file to release
-        uses: svenstaro/upload-release-action@v2
+      - name: Install Go
+        uses: actions/setup-go@v3
         with:
-          repo_token: ${{ secrets.GH_TOKEN }}
-          tag: ${{ github.ref }}
-          file:   out/${{env.DATA_FILE}}
-          asset_name: ${{env.DATA_FILE}}
-          overwrite: true
+          go-version: '18'
+          cache: true
+
+      - name: Install github-release
+        run: go install github.com/github-release/github-release@latest
+
+      - name: Upload data file to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          github-release upload \
+             --user cpicpgx \
+             --repo test-repo \
+             --tag ${{ env.DATA_VERSION }} \
+             --name     ${{ env.DATA_FILE }} \
+             --file out/${{ env.DATA_FILE }}
 
       - name: Upload inserts file to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GH_TOKEN }}
-          tag: ${{ github.ref }}
-          file:   out/${{ env.INSERTS_FILE }}
-          asset_name: ${{ env.INSERTS_FILE }}
-          overwrite: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          github-release upload \
+             --user cpicpgx \
+             --repo test-repo \
+             --tag ${{ env.DATA_VERSION }} \
+             --name     ${{ env.INSERTS_FILE }} \
+             --file out/${{ env.INSERTS_FILE }}
 
       - name: Send Slack notification on failure
         if: failure()
