@@ -29,7 +29,7 @@ public class FlywayMigrate {
           ConnectionFactory.getPass()
       ).schemas(ConnectionFactory.getSchema()).load();
 
-      if (cli.hasOption("r")) {
+      if (cli.hasOption("p")) {
         sf_logger.info("Repairing migration hashes");
         flyway.repair();
       }
