@@ -85,8 +85,7 @@ jobs:
           echo "DATA_FILE=cpic_db_dump-test-${DATA_VERSION}.sql.gz" >> $GITHUB_ENV
           echo "INSERTS_FILE=cpic_db_dump-test-${DATA_VERSION}_inserts.sql.gz" >> $GITHUB_ENV
 
-      - run: ls out/
-      - run: ls out/${{env.DATA_FILE}}
+      - run: echo ${{ github.event.release.body }}
 
       - name: Upload dump file to release
         uses: svenstaro/upload-release-action@v2
