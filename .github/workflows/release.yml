@@ -107,7 +107,7 @@ jobs:
 
       - run: more current_description
 
-      - run: echo "HELLO WORLD" >> current_description
+      - run: echo "HELLO WORLD2" >> current_description
 
       - run: echo "REL_DESC=$(cat current_description)" >> $GITHUB_ENV
 
