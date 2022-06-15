@@ -100,7 +100,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          github-release upload \
+          github-release upload --security-token ${{ secrets.GH_TOKEN }} \
              --user cpicpgx \
              --repo test-repo \
              --tag ${{ env.DATA_VERSION }} \
@@ -111,7 +111,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          github-release upload \
+          github-release upload --security-token ${{ secrets.GH_TOKEN }} \
              --user cpicpgx \
              --repo test-repo \
              --tag ${{ env.DATA_VERSION }} \
