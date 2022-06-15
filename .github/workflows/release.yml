@@ -103,22 +103,6 @@ jobs:
           asset_name: ${{ env.INSERTS_FILE }}
           overwrite: true
 
-      - run: echo ${{ github.event.release.body }} > current_description
-
-      - run: more current_description
-
-      - run: echo "HELLO WORLD2" >> current_description
-
-      - run: echo "REL_DESC=$(cat current_description)" >> $GITHUB_ENV
-
-      - name: Update release description
-          id: update_release
-          uses: tubone24/update_release@v1.3.1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          with:
-            body: ${{ env.REL_DESC }}
-
       - name: Send Slack notification on failure
         if: failure()
         env:
