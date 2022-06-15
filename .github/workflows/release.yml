@@ -43,6 +43,26 @@ jobs:
       - name: Get version
         run: echo "DATA_VERSION=$(git describe --tags)" >> $GITHUB_ENV
 
+      - run: echo "${{ github.event.release.body }}" > current_description
+
+      - run: cat current_description
+
+      - run: echo "HELLO WORLD2" >> current_description
+
+      - run: cat current_description
+
+
+      - name: Update release description
+        id: update_release
+        uses: tubone24/update_release@v1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          body: ${{ env.REL_DESC }}
+
+
+
+
       - run: echo "Version = ${{env.DATA_VERSION}}"
 
       - name: Set up JDK
@@ -102,25 +122,6 @@ jobs:
           file:   out/${{ env.INSERTS_FILE }}
           asset_name: ${{ env.INSERTS_FILE }}
           overwrite: true
-
-      - run: echo ${{ github.event.release.body }} > current_description
-
-      - run: cat current_description
-
-      - run: echo "HELLO WORLD2" >> current_description
-
-      - run: cat current_description
-
-      - run: echo "REL_DESC=$(cat current_description)" >> $GITHUB_ENV
-
-      - name: Update release description
-        id: update_release
-        uses: tubone24/update_release@v1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          body: ${{ env.REL_DESC }}
-
 
       - name: Send Slack notification on failure
         if: failure()
