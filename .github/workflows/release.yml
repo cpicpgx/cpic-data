@@ -103,6 +103,14 @@ jobs:
           asset_name: ${{ env.INSERTS_FILE }}
           overwrite: true
 
+      - run: echo ${{ github.event.release.body }} > current_description
+
+      - run: more current_description
+
+      - run: echo "HELLO WORLD2" >> current_description
+
+      - run: echo "REL_DESC=$(cat current_description)" >> $GITHUB_ENV
+
       - name: Send Slack notification on failure
         if: failure()
         env:
