@@ -180,6 +180,17 @@ const lookupAlleleFunctions = async (gene) => {
   }
 }
 
+const lookupActivity = async (gene) => {
+  try {
+    const rez = await db.many('select name, activityvalue from allele where genesymbol=$(gene) and allele.activityvalue is not null order by 1', {gene});
+    const payload = {};
+    rez.forEach((r) => payload[r.name] = r.activityvalue);
+    return payload;
+  } catch (err) {
+    zeroResultHandler(err, 'Problem querying allele activity');
+  }
+}
+
 const listDiplotypeData = async (gene) => {
   try {
     return await db.many(`
@@ -270,12 +281,14 @@ const writeGenePhenotypes = async (dirPath, cpicVersion) => {
   for (let i = 0; i < genes.length; i++) {
     const gene = genes[i];
     const haplotypes = await lookupAlleleFunctions(gene.genesymbol);
+    const activityValues = await lookupActivity(gene.genesymbol);
 
     if (_.size(haplotypes) > 0) {
       payload.push({
         gene: gene.genesymbol,
         cpicVersion,
         haplotypes,
+        activityValues,
         diplotypes: await listDiplotypeData(gene.genesymbol),
       });
     }
