@@ -4,6 +4,8 @@ const log = require('./log');
 const db = require('./db');
 const _ = require('lodash');
 
+require('dotenv').config();
+
 /**
  * This script will take current pair data from the CPIC DB, submit it to the PharmGKB API, and apply any found changes
  * back to the CPIC DB. This can be safely be run multiple times since any changes will only be applied once and
@@ -14,7 +16,6 @@ const _ = require('lodash');
  * 1. PGKBAPI = the domain (and possible port) to use for PharmGKB, default is "localhost.pharmgkb.org:8543"
  * 2. PGHOST = the host of the CPIC DB, default is "localhost"
  * 3. PGPASS = the password for the "cpic" DB account, default is blank
- * 4. PGKBAPI = the hostname of the PharmGKB API to use, will default to localhost
  */
 
 const pgkbApi = process.env.PGKBAPI || 'localhost.pharmgkb.org:8543';

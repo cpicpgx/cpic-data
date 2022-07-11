@@ -33,6 +33,7 @@ node_modules/
 yarn-error.log
 pgkb-tools/bin/node_modules/
 
+**/.env
 /cpic-data.wiki
 /cpic-support-files/
 /src/main/resources/cpicData.properties

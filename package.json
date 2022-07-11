@@ -17,6 +17,7 @@
     "conventional-changelog-conventionalcommits": "5.0.0",
     "csv-generate": "4.1.0",
     "dayjs": "1.11.3",
+    "dotenv": "^16.0.1",
     "lodash": "4.17.21",
     "loglevel": "1.8.0",
     "loglevel-plugin-prefix": "0.8.4",

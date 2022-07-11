@@ -2358,6 +2358,7 @@ __metadata:
     conventional-changelog-conventionalcommits: 5.0.0
     csv-generate: 4.1.0
     dayjs: 1.11.3
+    dotenv: ^16.0.1
     lodash: 4.17.21
     loglevel: 1.8.0
     loglevel-plugin-prefix: 0.8.4
@@ -2528,6 +2529,13 @@ __metadata:
   dependencies:
     is-obj: ^2.0.0
   checksum: d5775790093c234ef4bfd5fbe40884ff7e6c87573e5339432870616331189f7f5d86575c5b5af2dcf0f61172990f4f734d07844b1f23482fff09e3c4bead05ea
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.0.1":
+  version: 16.0.1
+  resolution: "dotenv@npm:16.0.1"
+  checksum: f459ffce07b977b7f15d8cc4ee69cdff77d4dd8c5dc8c85d2d485ee84655352c2415f9dd09d42b5b5985ced3be186130871b34e2f3e2569ebc72fbc2e8096792
   languageName: node
   linkType: hard
 
