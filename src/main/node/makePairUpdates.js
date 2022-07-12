@@ -1,10 +1,9 @@
 #!/bin/node
+require('dotenv').config();
 const axios = require('axios');
 const log = require('./log');
 const db = require('./db');
 const _ = require('lodash');
-
-require('dotenv').config();
 
 /**
  * This script will take current pair data from the CPIC DB, submit it to the PharmGKB API, and apply any found changes
