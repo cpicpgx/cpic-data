@@ -64,7 +64,7 @@ public class GuidelineStarterPack {
     System.exit(0);
   }
 
-  private void parseArgs(String[] args) throws ParseException {
+  private void parseArgs(String[] args) throws IOException, ParseException {
     Options options = new Options()
         .addOption("o", true, "output directory, required")
         .addOption("p", true, "drug-gene pair, pipe-delimited between entities, required")
@@ -77,7 +77,10 @@ public class GuidelineStarterPack {
       throw new ParseException("Must specify an output path");
     } else {
       m_path = Paths.get(cli.getOptionValue("o"));
-      if (!m_path.toFile().exists() || !m_path.toFile().isDirectory()) {
+      if (!Files.exists(m_path)) {
+        Files.createDirectories(m_path);
+      }
+      if (!m_path.toFile().isDirectory()) {
         throw new ParseException("Output directory must be an existing directory");
       }
     }
@@ -319,9 +322,13 @@ public class GuidelineStarterPack {
           throw new RuntimeException("More than one record found for " + symbol);
         }
       }
-      LookupMethod lookupMethodEnum = LookupMethod.valueOf(lookupMethod);
-
-      return Optional.of(lookupMethodEnum);
+      if (StringUtils.isBlank(lookupMethod)) {
+        return Optional.empty();
+      }
+      else {
+        LookupMethod lookupMethodEnum = LookupMethod.valueOf(lookupMethod);
+        return Optional.of(lookupMethodEnum);
+      }
     }
 
     Optional<String> lookupFile(String entityId, FileType fileType) throws SQLException {

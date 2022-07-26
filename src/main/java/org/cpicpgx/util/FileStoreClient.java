@@ -1,5 +1,6 @@
 package org.cpicpgx.util;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.cpicpgx.db.FileHistoryWriter;
@@ -40,7 +41,9 @@ public class FileStoreClient implements AutoCloseable {
   private FileHistoryWriter fileHistoryWriter;
   
   public FileStoreClient() {
-    s3 = AmazonS3ClientBuilder.defaultClient();
+    s3 = AmazonS3ClientBuilder.standard()
+            .withRegion(Regions.US_WEST_2)
+            .build();
     try {
       fileHistoryWriter = new FileHistoryWriter(null);
     } catch (SQLException e) {
