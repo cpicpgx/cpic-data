@@ -40,13 +40,20 @@ archive: dump upload
 update-wiki-toc:
 	markdown-toc -i cpic-data.wiki/Home.md
 
+
+.PHONY: compile
+compile:
+	${GRADLE_CMD} jar
+
+
 .PHONY: db-bootstrap
 db-bootstrap:
 	@node src/main/node/db/bootstrap.mjs
 
-.PHONY: api-bootstrap
-api-bootstrap:
-	@node src/main/node/db/bootstrap_api.mjs
+.PHONY: db-teardown
+db-teardown:
+	dropdb cpic -h localhost -U postgres
+	psql -X -q  -h localhost -U postgres -c "drop user cpic"
 
 .PHONY: db-init
 db-init: db-bootstrap db-migrate
@@ -57,14 +64,14 @@ db-refresh:
 	dropdb cpic -h localhost -U postgres && createdb cpic -h localhost -U postgres
 	gzip -cd out/cpic_prod_db.sql.gz | psql -d cpic -h localhost -U postgres
 
-
-.PHONY: compile
-compile:
-	${GRADLE_CMD} jar
-
 .PHONY: db-migrate
 db-migrate: compile
 	java -cp build/libs/CpicData.jar org.cpicpgx.db.FlywayMigrate
+
+
+.PHONY: api-bootstrap
+api-bootstrap:
+	@node src/main/node/db/bootstrap_api.mjs
 
 .PHONY: api
 api:
