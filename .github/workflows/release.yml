@@ -105,8 +105,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - run: |
-          echo "DATA_FILE=cpic_db_dump-test-${DATA_VERSION}.sql.gz" >> $GITHUB_ENV
-          echo "INSERTS_FILE=cpic_db_dump-test-${DATA_VERSION}_inserts.sql.gz" >> $GITHUB_ENV
+          echo "DATA_FILE=cpic_db_dump-${DATA_VERSION}.sql.gz" >> $GITHUB_ENV
+          echo "INSERTS_FILE=cpic_db_dump-${DATA_VERSION}_inserts.sql.gz" >> $GITHUB_ENV
 
       - name: Upload dump file to release
         uses: svenstaro/upload-release-action@v2
