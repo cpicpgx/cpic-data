@@ -1,3 +1,20 @@
+## [1.19.0](https://github.com/cpicpgx/cpic-data/compare/v1.18.0...v1.19.0) (2022-08-16)
+
+
+### Features
+
+* add activity values to phenotype PharmCAT output ([83fdafe](https://github.com/cpicpgx/cpic-data/commit/83fdafedfd633c8fa55d674b6d292424fff17327))
+* add statistics gathering code and database table ([0ff01d2](https://github.com/cpicpgx/cpic-data/commit/0ff01d2403662348df2368cfbb4dbff31f9abbdf))
+
+
+### Bug Fixes
+
+* add db bootstrap script and db-init make task ([6db458d](https://github.com/cpicpgx/cpic-data/commit/6db458d3f74dba39289c8220ad08c7c96fcbaed2))
+* change node to load environment data from env file ([4ce7bdf](https://github.com/cpicpgx/cpic-data/commit/4ce7bdf5700d66958bdff1794d1f263d4a1b8343))
+* fix gradle permissions on unix ([a643fe8](https://github.com/cpicpgx/cpic-data/commit/a643fe86fc008c93b117a79c0d94cfbbc7916c81))
+* fix startup problems ([e2b0f8a](https://github.com/cpicpgx/cpic-data/commit/e2b0f8af9c35040ca90f3bb3f34f0d296c99eead))
+* move node env config so it loads properly ([71d205c](https://github.com/cpicpgx/cpic-data/commit/71d205c89c27b7102a2417e2d3abb378564c78ca))
+
 ## [1.18.0](https://github.com/cpicpgx/cpic-data/compare/v1.17.0...v1.18.0) (2022-06-10)
 
 
