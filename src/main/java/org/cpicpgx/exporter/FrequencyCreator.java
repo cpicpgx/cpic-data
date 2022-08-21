@@ -53,7 +53,16 @@ public class FrequencyCreator {
       }
 
       FrequencyCreator frequencyCreator = new FrequencyCreator(geneSymbol);
-      frequencyCreator.write(Paths.get("out"));
+      Path dir;
+      if (cli.hasOption("d")) {
+        dir = Paths.get(cli.getOptionValue("d"));
+        if (!Files.exists(dir)) {
+          Files.createDirectories(dir);
+        }
+      } else {
+        dir = Paths.get("out");
+      }
+      frequencyCreator.write(dir);
 
       System.exit(0);
     } catch (IOException|ParseException e) {
@@ -144,7 +153,7 @@ public class FrequencyCreator {
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
       sf_logger.debug("Requesting frequencies from PharmGKB for: {}", rsid);
-      response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadGenome"));
+      response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadExome"));
     } catch (NotFoundException e) {
       // safe to ignore, just means no frequency data available
     } catch (Exception e) {
