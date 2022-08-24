@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -178,11 +179,11 @@ public class FrequencyCreator {
       String populationString = populationObject.get("population").getAsString();
       GnomadPopulation population = GnomadPopulation.valueOf(populationString);
 
-      double freq = 0d;
+      BigDecimal freq = BigDecimal.ZERO;
       for (JsonElement alleleElement : populationObject.getAsJsonArray("bases")) {
         JsonObject alleleObject = alleleElement.getAsJsonObject();
         if (f_alleleMap.get(alleleName).equals(alleleObject.get("base").getAsString())) {
-          freq = alleleObject.get("freq").getAsDouble();
+          freq = alleleObject.get("freq").getAsBigDecimal();
         }
         if (alleleObject.has("size")) {
           alleleDistribution.addSize(population, alleleObject.get("size").getAsInt());
@@ -206,14 +207,14 @@ public class FrequencyCreator {
           .findFirst()
           .ifPresentOrElse(
               (d) -> {
-                Double[] popFreq = new Double[groupNames.size()];
+                BigDecimal[] popFreq = new BigDecimal[groupNames.size()];
                 for (int i = 0; i < groupNames.size(); i++) {
                   popFreq[i] = d.getAvgFreqForGroup(groupNames.get(i));
                 }
                 workbook.writeAlleleFrequency(alleleName, popFreq);
               },
               () -> {
-                Double[] popFreq = new Double[groupNames.size()];
+                BigDecimal[] popFreq = new BigDecimal[groupNames.size()];
                 workbook.writeAlleleFrequency(alleleName, popFreq);
               }
           );
@@ -257,12 +258,12 @@ public class FrequencyCreator {
         f_alleleDistributions.stream().filter(d -> d.getAlleleName().equals(alleleName)).findFirst()
             .ifPresentOrElse(
                 (d) -> {
-                  double avg = d.getAvgFreqForGroup(groupName);
-                  double max = d.getMaxFreqForGroup(groupName);
-                  double min = d.getMinFreqForGroup(groupName);
+                  BigDecimal avg = d.getAvgFreqForGroup(groupName);
+                  BigDecimal max = d.getMaxFreqForGroup(groupName);
+                  BigDecimal min = d.getMinFreqForGroup(groupName);
                   workbook.writePopulationSummary(min, avg, max);
                 },
-                () -> workbook.writePopulationSummary(0f, 0f, 0f)
+                () -> workbook.writePopulationSummary(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
             );
       }
     }

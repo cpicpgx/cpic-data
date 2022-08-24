@@ -18,11 +18,12 @@ import se.sawano.java.text.AlphanumericComparator;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
 /**
- * Exports a frequency excel sheet for every gene in the database that has frequency data
+ * Exports a frequency Excel sheet for every gene in the database that has frequency data.
  *
  * @author Ryan Whaley
  */
@@ -100,7 +101,7 @@ public class FrequencyExporter extends BaseExporter {
 
             // infer reference allele values based on other alleles
             if (refAlleleName != null && !alleleNames.contains(refAlleleName)) {
-              Double[] frequencies = new Double[ethnicities.size()];
+              BigDecimal[] frequencies = new BigDecimal[ethnicities.size()];
               for (String pop : ethnicities) {
                 frequencies[ethnicities.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, refAlleleName, pop);
               }
@@ -108,7 +109,7 @@ public class FrequencyExporter extends BaseExporter {
             }
 
             for (String allele : alleleNames) {
-              Double[] frequencies = new Double[ethnicities.size()];
+              BigDecimal[] frequencies = new BigDecimal[ethnicities.size()];
               for (String pop : ethnicities) {
                 frequencies[ethnicities.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, allele, pop);
               }
@@ -123,11 +124,11 @@ public class FrequencyExporter extends BaseExporter {
             List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
             if (dipPops.size() > 0) {
               workbook.writeDiplotypeFrequencyHeader(dipPops);
-              Map<String, HashMap<String, Double>> diplotypeMap = dbHarness.getDiplotypeData(geneSymbol);
+              Map<String, HashMap<String, BigDecimal>> diplotypeMap = dbHarness.getDiplotypeData(geneSymbol);
 
               for (String diplotype : diplotypeMap.keySet()) {
-                Double[] frequencies = new Double[dipPops.size()];
-                Map<String, Double> popMap = diplotypeMap.get(diplotype);
+                BigDecimal[] frequencies = new BigDecimal[dipPops.size()];
+                Map<String, BigDecimal> popMap = diplotypeMap.get(diplotype);
                 if (popMap != null) {
                   for (String pop : dipPops) {
                     int idx = dipPops.indexOf(pop);
@@ -148,10 +149,10 @@ public class FrequencyExporter extends BaseExporter {
             List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
             if (phenoPops.size() > 0) {
               workbook.writePhenotypeFrequencyHeader(phenoPops);
-              Map<String, HashMap<String, Double>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol, lookupMethod);
+              Map<String, HashMap<String, BigDecimal>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol, lookupMethod);
 
               phenotypeMap.forEach((phenotype, popMap) -> {
-                Double[] frequencies = new Double[phenoPops.size()];
+                BigDecimal[] frequencies = new BigDecimal[phenoPops.size()];
                 for (String pop : phenoPops) {
                   int idx = phenoPops.indexOf(pop);
                   if (idx > -1) {
@@ -207,9 +208,9 @@ public class FrequencyExporter extends BaseExporter {
                   try (ResultSet afrs = afStmt.executeQuery()) {
                     while (afrs.next()) {
                       String label = afrs.getString(1);
-                      double freq = afrs.getDouble(2);
-                      if (freq != 0) {
-                        frequencies[i] = String.format("%.4f", freq);
+                      BigDecimal freq = afrs.getBigDecimal(2);
+                      if (freq.compareTo(BigDecimal.ZERO) != 0) {
+                        frequencies[i] = freq.toString();
                       } else {
                         frequencies[i] = label;
                       }
@@ -231,11 +232,13 @@ public class FrequencyExporter extends BaseExporter {
               }
             }
 
-            Double refAlleleFrequency = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, refAlleleName, ethnicity)).orElse(0d);
+            BigDecimal refAlleleFrequency = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, refAlleleName, ethnicity))
+                    .orElse(BigDecimal.ZERO);
 
             workbook.startPopulationSummary();
             for (String allele : alleles.keySet()) {
-              double refFreq = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, allele, ethnicity)).orElse(0d);
+              BigDecimal refFreq = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, allele, ethnicity))
+                      .orElse(BigDecimal.ZERO);
 
               ethAlleleStmt.setString(1, allele);
               ethAlleleStmt.setString(2, ethnicity);
@@ -243,7 +246,7 @@ public class FrequencyExporter extends BaseExporter {
               try (ResultSet rsEth = ethAlleleStmt.executeQuery()) {
                 boolean wroteSummary = false;
                 while (rsEth.next()) {
-                  workbook.writePopulationSummary(rsEth.getDouble(3), refFreq, rsEth.getDouble(2));
+                  workbook.writePopulationSummary(rsEth.getBigDecimal(3), refFreq, rsEth.getBigDecimal(2));
                   wroteSummary = true;
                 }
                 if (!wroteSummary) {
@@ -285,8 +288,7 @@ public class FrequencyExporter extends BaseExporter {
 
   private static class FrequencyDbHarness extends DbHarness {
     final Gson gson = new Gson();
-    @SuppressWarnings("UnstableApiUsage")
-    final Type doubleMapType = new TypeToken<HashMap<String, Double>>(){}.getType();
+    final Type bigDecimalMapType = new TypeToken<HashMap<String, BigDecimal>>(){}.getType();
     PreparedStatement ethnicitiesStmt;
     PreparedStatement allelePopulationStmt;
     PreparedStatement diplotypePopStmt;
@@ -328,13 +330,13 @@ public class FrequencyExporter extends BaseExporter {
       return alleleNames;
     }
 
-    Double getFrequency(String gene, String alleleName, String ethnicity) throws SQLException {
+    BigDecimal getFrequency(String gene, String alleleName, String ethnicity) throws SQLException {
       this.allelePopulationStmt.setString(2, gene);
       this.allelePopulationStmt.setString(3, alleleName);
       this.allelePopulationStmt.setString(1, ethnicity);
       try (ResultSet rs = this.allelePopulationStmt.executeQuery()) {
         if (rs.next()) {
-          return rs.getDouble(1);
+          return rs.getBigDecimal(1);
         } else {
           return null;
         }
@@ -369,30 +371,30 @@ public class FrequencyExporter extends BaseExporter {
       return result;
     }
 
-    Map<String, HashMap<String,Double>> getDiplotypeData(String gene) throws SQLException {
-      Map<String, HashMap<String,Double>> result = new TreeMap<>(HaplotypeNameComparator.getComparator());
+    Map<String, HashMap<String,BigDecimal>> getDiplotypeData(String gene) throws SQLException {
+      Map<String, HashMap<String,BigDecimal>> result = new TreeMap<>(HaplotypeNameComparator.getComparator());
       if (StringUtils.isNotBlank(gene)) {
         this.diplotypeDataStmt.clearParameters();
         this.diplotypeDataStmt.setString(1, gene);
         try (ResultSet rs = this.diplotypeDataStmt.executeQuery()) {
           while (rs.next()) {
-            result.put(rs.getString(1), gson.fromJson(rs.getString(2), doubleMapType));
+            result.put(rs.getString(1), gson.fromJson(rs.getString(2), bigDecimalMapType));
           }
         }
       }
       return result;
     }
 
-    Map<String, HashMap<String,Double>> getPhenotypeData(String gene, LookupMethod lookupMethod) throws SQLException {
+    Map<String, HashMap<String,BigDecimal>> getPhenotypeData(String gene, LookupMethod lookupMethod) throws SQLException {
       Comparator<String> comparator = lookupMethod == LookupMethod.ACTIVITY_SCORE ? ActivityScoreComparator.getComparator() : Comparator.reverseOrder();
       PreparedStatement query = lookupMethod == LookupMethod.ACTIVITY_SCORE ? this.activityDataStmt : phenotypeDataStmt;
-      Map<String, HashMap<String,Double>> result = new TreeMap<>(comparator);
+      Map<String, HashMap<String,BigDecimal>> result = new TreeMap<>(comparator);
       if (StringUtils.isNotBlank(gene)) {
         query.clearParameters();
         query.setString(1, gene);
         try (ResultSet rs = query.executeQuery()) {
           while (rs.next()) {
-            result.put(rs.getString(1), gson.fromJson(rs.getString(2), doubleMapType));
+            result.put(rs.getString(1), gson.fromJson(rs.getString(2), bigDecimalMapType));
           }
         }
       }

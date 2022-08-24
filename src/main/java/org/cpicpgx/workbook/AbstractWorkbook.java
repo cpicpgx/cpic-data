@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -216,13 +217,15 @@ public abstract class AbstractWorkbook {
     cell.setCellStyle(this.rightNumberStyle);
   }
 
-  void writeDoubleCell(Row row, int colIdx, Double value) {
+  private static final BigDecimal sf_exponentThreshold = new BigDecimal("0.0001");
+
+  void write(Row row, int colIdx, BigDecimal value) {
     if (value != null) {
       Cell cell = row.createCell(colIdx);
-      cell.setCellValue(value);
-      if (value == 0d) {
+      cell.setCellValue(value.toString());
+      if (value.equals(BigDecimal.ZERO)) {
         cell.setCellStyle(this.zeroNumberStyle);
-      } else if (value < 0.0001d) {
+      } else if (value.compareTo(sf_exponentThreshold) < 0) {
         cell.setCellStyle(this.expoNumberStyle);
       } else {
         cell.setCellStyle(this.decimalNumberStyle);
@@ -234,10 +237,10 @@ public abstract class AbstractWorkbook {
     writeStringCell(row, colIdx, value, this.highlightStyle);
   }
 
-  void writeHighlightCell(Row row, int colIdx, Double value) {
+  void writeHighlightCell(Row row, int colIdx, BigDecimal value) {
     if (value != null) {
       Cell cell = row.createCell(colIdx);
-      cell.setCellValue(value);
+      cell.setCellValue(value.toString());
       cell.setCellStyle(this.highlightDoubleStyle);
     }
   }

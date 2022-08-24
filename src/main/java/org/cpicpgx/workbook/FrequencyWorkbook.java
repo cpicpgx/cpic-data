@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.cpicpgx.db.LookupMethod;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -126,7 +127,7 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     writeHighlightCell(currentMaxFreqRow, REFERENCE_POP_HEADER_COL_COUNT-1, "Max");
   }
 
-  public void writePopulationSummary(double minFreq, double freq, double maxFreq) {
+  public void writePopulationSummary(BigDecimal minFreq, BigDecimal freq, BigDecimal maxFreq) {
     writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq);
     writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
     writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq);
@@ -140,7 +141,7 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     currentPopSummaryAlleleCol += 1;
   }
 
-  public void writeReferencePopulationSummary(Double freq) {
+  public void writeReferencePopulationSummary(BigDecimal freq) {
     writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
     writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, "");
     writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, "");
@@ -174,12 +175,12 @@ public class FrequencyWorkbook extends AbstractWorkbook {
    * @param allele the gene allele
    * @param frequencies an array of frequency data
    */
-  public void writeAlleleFrequency(String allele, Double[] frequencies) {
+  public void writeAlleleFrequency(String allele, BigDecimal[] frequencies) {
     Row row = sheetAllele.nextRow();
     writeStringCell(row, 0, allele, false);
 
     for (int i = 0; i < frequencies.length; i++) {
-      writeDoubleCell(row, 1+i, frequencies[i]);
+      write(row, 1+i, frequencies[i]);
     }
   }
 
@@ -203,12 +204,12 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     sheetDiplotype.setColCount(col);
   }
 
-  public void writeDiplotypeFrequency(String diplotype, Double[] frequencies) {
+  public void writeDiplotypeFrequency(String diplotype, BigDecimal[] frequencies) {
     Row row = sheetDiplotype.nextRow();
     writeStringCell(row, 0, diplotype, false);
 
     for (int i = 0; i < frequencies.length; i++) {
-      writeDoubleCell(row, 1+i, frequencies[i]);
+      write(row, 1+i, frequencies[i]);
     }
   }
 
@@ -232,12 +233,12 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     sheetPhenotype.setColCount(col);
   }
 
-  public void writePhenotypeFrequency(String phenoOrScore, Double[] frequencies) {
+  public void writePhenotypeFrequency(String phenoOrScore, BigDecimal[] frequencies) {
     Row row = sheetPhenotype.nextRow();
     writeStringCell(row, 0, phenoOrScore, false);
 
     for (int i = 0; i < frequencies.length; i++) {
-      writeDoubleCell(row, 1+i, frequencies[i]);
+      write(row, 1+i, frequencies[i]);
     }
   }
 
