@@ -1,3 +1,11 @@
+## [1.19.1](https://github.com/cpicpgx/cpic-data/compare/v1.19.0...v1.19.1) (2022-08-25)
+
+
+### Bug Fixes
+
+* clear out old dump directory before creating new dump ([4d7d85a](https://github.com/cpicpgx/cpic-data/commit/4d7d85ac1a29e5f9d5c20a6540d03f1385b03213))
+* create directory if it doesn't already exist ([3bf8e15](https://github.com/cpicpgx/cpic-data/commit/3bf8e158fd342ee86be3f36dcafa0a1d4f0fd29f))
+
 ## [1.19.0](https://github.com/cpicpgx/cpic-data/compare/v1.18.0...v1.19.0) (2022-08-16)
 
 
