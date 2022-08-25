@@ -362,6 +362,10 @@ const getGitUser = async function getGitVersion () {
 };
 
 try {
+  if (!fs.existsSync(options.outputPath)) {
+    fs.mkdirSync(options.outputPath);
+  }
+
   getGitUser().then((version) => {
     writeAlleleDefinitions(options.outputPath, version).then(() => console.log('done with allele definitions'));
     writeGenePhenotypes(options.outputPath, version).then(() => console.log('done with gene phenotypes'));
