@@ -5,8 +5,9 @@ import org.cpicpgx.exporter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.geom.IllegalPathStateException;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
  * This class represents an archive of data file artifacts generated from the CPIC database. This will write to a 
  * specified directory with subdirectories for the different types of data. This relies on {@link BaseExporter} classes 
  * that will write out batches of files.
- * 
+ * <p>
  * This will write to a directory with a pre-determined name that uses the current date in the name.
  *
  * @author Ryan Whaley
@@ -49,14 +50,14 @@ public class DataArtifactArchive {
     upload = cli.hasOption("u");
   }
   
-  private void write() {
+  private void write() throws IOException {
     if (m_baseDirectory == null) {
       throw new IllegalStateException("No path to directory specified");
     }
-    if (!m_baseDirectory.toFile().exists() || !m_baseDirectory.toFile().isDirectory()) {
-      throw new IllegalPathStateException("Not a directory: " + m_baseDirectory);
+    if (!Files.exists(m_baseDirectory)) {
+      Files.createDirectories(m_baseDirectory);
     }
-    
+
     List<BaseExporter> exporters = new ArrayList<>();
     exporters.add(new AlleleDefinitionExporter());
     exporters.add(new AlleleFunctionalityReferenceExporter());
