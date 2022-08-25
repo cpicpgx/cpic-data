@@ -22,14 +22,17 @@ dev-init:
 
 .PHONY: dump
 dump:
-	mkdir -p out
-	pg_dump cpic -f out/${TAG_NAME} --no-privileges --schema=cpic --no-owner
-	pg_dump cpic -f out/${INSERTS_NAME} --data-only --column-inserts --schema=cpic --no-owner
+	rm -rf out/db
+	mkdir -p out/db
+	rm -f out/db/${TAG_NAME}
+	rm -f out/db/${INSERTS_NAME}
+	pg_dump cpic -f out/db/${TAG_NAME} --no-privileges --schema=cpic --no-owner
+	pg_dump cpic -f out/db/${INSERTS_NAME} --data-only --column-inserts --schema=cpic --no-owner
 
 .PHONY: upload
 upload:
-	gzip out/${TAG_NAME}
-	gzip out/${INSERTS_NAME}
+	gzip out/db/${TAG_NAME}
+	gzip out/db/${INSERTS_NAME}
 	aws s3 cp out/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 	aws s3 cp out/${INSERTS_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 
