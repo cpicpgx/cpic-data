@@ -33,8 +33,8 @@ dump:
 upload:
 	gzip out/db/${TAG_NAME}
 	gzip out/db/${INSERTS_NAME}
-	aws s3 cp out/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
-	aws s3 cp out/${INSERTS_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
+	aws s3 cp out/db/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
+	aws s3 cp out/db/${INSERTS_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 
 .PHONY: archive
 archive: dump upload
@@ -65,7 +65,7 @@ db-init: db-bootstrap db-migrate
 .PHONY: db-refresh
 db-refresh:
 	dropdb cpic -h localhost -U postgres && createdb cpic -h localhost -U postgres
-	gzip -cd out/cpic_prod_db.sql.gz | psql -d cpic -h localhost -U postgres
+	gzip -cd out/db/cpic_prod_db.sql.gz | psql -d cpic -h localhost -U postgres
 
 .PHONY: db-migrate
 db-migrate: compile
