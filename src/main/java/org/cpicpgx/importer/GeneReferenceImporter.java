@@ -44,8 +44,9 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
       String hgncId = null;
       String ncbiId = null;
       String ensemblId = null;
+      String pharmgkbId = null;
 
-      for (int i = 1; i < workbook.currentSheet.getLastRowNum(); i++) {
+      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
         String idType = row.getNullableText(2);
         String idValue = row.getNullableText(3, true);
@@ -62,13 +63,16 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
             case "Ensembl ID":
               ensemblId = idValue;
               break;
+            case "PharmGKB ID":
+              pharmgkbId = idValue;
+              break;
             default:
               // fall out
           }
         }
       }
 
-      dbHarness.upsert(geneSymbol, hgncId, ncbiId, ensemblId);
+      dbHarness.upsert(geneSymbol, hgncId, ncbiId, ensemblId, pharmgkbId);
     }
   }
 
@@ -78,17 +82,18 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
     GeneDbHarness() throws SQLException {
       super(FileType.GENE_RESOURCE);
       //language=PostgreSQL
-      upsertGene = prepare("insert into gene(symbol, hgncid, ncbiid, ensemblid) values (?,?,?,?) " +
+      upsertGene = prepare("insert into gene(symbol, hgncid, ncbiid, ensemblid, pharmgkbid) values (?,?,?,?,?) " +
           "on conflict (symbol) do update " +
-          "set hgncId=excluded.hgncid, ncbiId=excluded.ncbiid, ensemblId=excluded.ensemblid");
+          "set hgncId=excluded.hgncid, ncbiId=excluded.ncbiid, ensemblId=excluded.ensemblid, pharmgkbId=excluded.pharmgkbid");
     }
 
-    private void upsert(String geneSymbol, String hgncId, String ncbiId, String ensemblId) throws SQLException {
+    private void upsert(String geneSymbol, String hgncId, String ncbiId, String ensemblId, String pharmgkbId) throws SQLException {
       this.upsertGene.clearParameters();
       this.upsertGene.setString(1, geneSymbol);
       setNullableString(this.upsertGene, 2, hgncId);
       setNullableString(this.upsertGene, 3, ncbiId);
       setNullableString(this.upsertGene, 4, ensemblId);
+      setNullableString(this.upsertGene, 5, pharmgkbId);
       this.upsertGene.executeUpdate();
     }
   }
