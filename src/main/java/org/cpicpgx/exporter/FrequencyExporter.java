@@ -209,7 +209,7 @@ public class FrequencyExporter extends BaseExporter {
                     while (afrs.next()) {
                       String label = afrs.getString(1);
                       BigDecimal freq = afrs.getBigDecimal(2);
-                      if (freq.compareTo(BigDecimal.ZERO) != 0) {
+                      if (freq != null && freq.compareTo(BigDecimal.ZERO) != 0) {
                         frequencies[i] = freq.toString();
                       } else {
                         frequencies[i] = label;
