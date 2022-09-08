@@ -173,8 +173,8 @@ public class FrequencyGenerator {
       if (geneSymbol.startsWith("HLA")) return m_referenceAlleleId;
 
       PreparedStatement refAlleleStmt = conn.prepareStatement(
-          "select a.id, a.name from allele a join allele_definition ad on a.definitionId=ad.id " +
-              "where a.genesymbol=? and ad.reference = true and ad.name=a.name and a.name ~ '^\\*'");
+          "select a.id, a.name from allele a " +
+              "where a.genesymbol=? and a.inferredfrequency = true and a.name ~ '^\\*'");
       refAlleleStmt.setString(1, this.geneSymbol);
       try (ResultSet rs = refAlleleStmt.executeQuery()) {
         boolean foundOne = false;
@@ -230,12 +230,11 @@ public class FrequencyGenerator {
     }
 
     Float lookupNonreferenceFrequency(Integer popId) throws SQLException {
-      PreparedStatement stmt = conn.prepareStatement("select sum(f.frequency)\n" +
-          "from allele_frequency f\n" +
-          "         join allele a on f.alleleid = a.id\n" +
-          "join allele_definition ad on a.definitionid = ad.id\n" +
-          "         join population p on f.population = p.id\n" +
-          "where a.genesymbol=? and f.population=? and ad.reference=false");
+      PreparedStatement stmt = conn.prepareStatement("select sum(f.frequency) " +
+          "from allele_frequency f " +
+          "         join allele a on f.alleleid = a.id " +
+          "         join population p on f.population = p.id " +
+          "where a.genesymbol=? and f.population=? and a.inferredfrequency=false");
       stmt.setString(1, geneSymbol);
       stmt.setInt(2, popId);
       Float freq = null;

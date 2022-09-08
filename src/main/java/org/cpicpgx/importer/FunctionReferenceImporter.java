@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 import static org.cpicpgx.util.Constants.isUnspecified;
 
 /**
- * Class to parse references for functional assignments from a directory of excel files.
+ * Class to parse references for functional assignments from a directory of XLSX files.
  *
  * @author Ryan Whaley
  */
@@ -226,6 +226,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private final PreparedStatement updateMethodsStmt;
     private final String gene;
     private final LookupMethod geneLookupMethod;
+    private boolean referenceAllele = true;
 
     FunctionDbHarness(String gene) throws SQLException {
       super(FileType.ALLELE_FUNCTION_REFERENCE);
@@ -257,15 +258,21 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       //language=PostgreSQL
       insertAlleleStmt = prepare(
           "insert into allele(geneSymbol, name, definitionId, functionalStatus, activityvalue, " +
-              "clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments) " +
-              "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, name) " +
+              "clinicalfunctionalstatus, clinicalFunctionalSubstrate, citations, strength, findings, functioncomments, inferredfrequency) " +
+              "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, name) " +
               "do update set functionalStatus=excluded.functionalStatus,activityvalue=excluded.activityvalue," +
               "clinicalfunctionalstatus=excluded.clinicalfunctionalstatus," +
               "clinicalFunctionalSubstrate=excluded.clinicalFunctionalSubstrate,citations=excluded.citations," +
-              "strength=excluded.strength,findings=excluded.findings,functioncomments=excluded.functioncomments"
+              "strength=excluded.strength,findings=excluded.findings,functioncomments=excluded.functioncomments, inferredfrequency=excluded.inferredfrequency"
       );
 
       updateMethodsStmt = prepare("update gene set functionmethods=? where symbol=?");
+
+      // clear the inferredfrequency flag for all alleles for this gene, it will get set properly in insertAlleleStmt
+      try (PreparedStatement clearReference = prepare("update allele set inferredfrequency=false where genesymbol=?")) {
+        clearReference.setString(1, gene);
+        clearReference.executeUpdate();
+      }
     }
 
     private Long lookupAlleleDefinitionId(String alleleName) {
@@ -305,10 +312,13 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       setNullableString(this.insertAlleleStmt, 9, strength);
       setNullableString(this.insertAlleleStmt, 10, findings);
       setNullableString(this.insertAlleleStmt, 11, comments);
+      this.insertAlleleStmt.setBoolean(12, referenceAllele);
       int inserted = this.insertAlleleStmt.executeUpdate();
       if (inserted == 0) {
         throw new RuntimeException("No allele inserted");
       }
+      // only the first allele should be the "reference" so setting this to false after each subsequent insert does that
+      referenceAllele = false;
     }
 
     void updateMethods(String methods) throws SQLException {

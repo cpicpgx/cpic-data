@@ -371,11 +371,11 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
       sf_logger.debug("created {} new locations", newLocations);
 
       PreparedStatement alleleDefInsert = conn.prepareStatement(
-          "insert into allele_definition(geneSymbol, name, reference, structuralvariation) values (?,?,?,?) " +
-              "on conflict (genesymbol,name) do update set reference=excluded.reference, structuralvariation=excluded.structuralvariation, pharmvarid=excluded.pharmvarid " +
+          "insert into allele_definition(geneSymbol, name, matchesreferencesequence, structuralvariation) values (?,?,?,?) " +
+              "on conflict (genesymbol,name) do update set matchesreferencesequence=excluded.matchesreferencesequence, structuralvariation=excluded.structuralvariation, pharmvarid=excluded.pharmvarid " +
               "returning (id)");
       PreparedStatement alleleInsert = conn.prepareStatement(
-          "insert into allele(genesymbol, name, definitionId) values (?,?,?) on conflict do nothing");
+          "insert into allele(genesymbol, name, definitionId, inferredfrequency) values (?,?,?,?) on conflict (genesymbol,name) do update set inferredfrequency=excluded.inferredfrequency");
       boolean isReference = true;
       for (String alleleName : m_alleles.keySet()) {
         alleleDefInsert.setString(1, m_gene);
@@ -390,6 +390,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
         alleleInsert.setString(1, m_gene);
         alleleInsert.setString(2, alleleName);
         alleleInsert.setInt(3, alleleId);
+        alleleInsert.setBoolean(4, isReference);
         alleleInsert.executeUpdate();
 
         joinTableDelete.setInt(1, alleleId);

@@ -97,7 +97,7 @@ public class FrequencyCreator {
           "with x as (\n" +
               "    select alv.alleledefinitionid, alv.locationid, ad.name, alv.variantallele from allele_location_value alv\n" +
               "        join allele_definition ad on alv.alleledefinitionid = ad.id\n" +
-              "    where ad.reference is false and ad.genesymbol=? and alv.variantallele !~ '[KMRSWY]'\n" +
+              "    where ad.matchesreferencesequence is false and ad.genesymbol=? and alv.variantallele !~ '[KMRSWY]'\n" +
               ")\n" +
               "select x1.alleledefinitionid, x1.locationid, x1.name, l.dbsnpid, x1.variantallele from x x1 join sequence_location l on (x1.locationid=l.id)\n" +
               "where not exists (select 1 from x x2 where x1.alleledefinitionid!=x2.alleledefinitionid and x1.locationid =x2.locationid)\n" +
@@ -118,7 +118,7 @@ public class FrequencyCreator {
         }
       }
 
-      stmt = conn.prepareStatement("select name, reference from allele_definition where genesymbol=?");
+      stmt = conn.prepareStatement("select name, matchesreferencesequence from allele_definition where genesymbol=?");
       stmt.setString(1, f_gene);
       try (ResultSet results = stmt.executeQuery()) {
         while (results.next()) {

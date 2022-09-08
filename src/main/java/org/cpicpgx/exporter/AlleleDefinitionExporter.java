@@ -90,7 +90,7 @@ public class AlleleDefinitionExporter extends BaseExporter {
         }
       
         try (
-            PreparedStatement alleleStmt = conn.prepareStatement("select name, id, reference, structuralvariation, pharmvarid from allele_definition where geneSymbol=?");
+            PreparedStatement alleleStmt = conn.prepareStatement("select name, id, matchesreferencesequence, structuralvariation, pharmvarid from allele_definition where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleledefinitionid=?")
         ) {
           alleleStmt.setString(1, symbol);
