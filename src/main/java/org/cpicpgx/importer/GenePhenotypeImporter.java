@@ -24,7 +24,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses gene phenotype data from workbooks meant to mirror Table 1 information from guidelines
+ * <p>Parses gene phenotype data from workbooks meant to mirror Table 1 information from guidelines.</p>
+ *
+ * <p><em>NOTE:</em> This is also the place where all possible diplotypes for a gene are generated.</p>
  *
  * @author Ryan Whaley
  */
