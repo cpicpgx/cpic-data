@@ -9,6 +9,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -306,6 +308,14 @@ public abstract class AbstractWorkbook {
       Row row = historySheet.nextRow();
       writeDateCell(row, 0, (Date)changeLogEvent[0]);
       writeStringCell(row, 1, (String)changeLogEvent[1], false);
+    }
+  }
+
+  public void writeHeader(SheetWrapper sheet, ResultSetMetaData metadata) throws SQLException {
+    sheet.setColCount(metadata.getColumnCount());
+    Row headerRow = sheet.nextRow();
+    for (int colIdx = 0; colIdx < metadata.getColumnCount(); colIdx++) {
+      writeHeaderCell(headerRow, colIdx, metadata.getColumnName(colIdx+1));
     }
   }
 }

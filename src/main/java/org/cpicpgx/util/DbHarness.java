@@ -202,6 +202,14 @@ public abstract class DbHarness implements AutoCloseable {
     }
   }
 
+  public void setString(@Nonnull PreparedStatement stmt, int parameterIndex, @Nonnull String value) throws SQLException {
+    if (value.equalsIgnoreCase(Constants.NA)) {
+      stmt.setString(parameterIndex, Constants.NA);
+    } else {
+      stmt.setString(parameterIndex, value);
+    }
+  }
+
   public void setNullableDate(@Nonnull PreparedStatement stmt, int parameterIndex, @Nullable Date value) throws SQLException {
     if (value == null) {
       stmt.setNull(parameterIndex, Types.DATE);

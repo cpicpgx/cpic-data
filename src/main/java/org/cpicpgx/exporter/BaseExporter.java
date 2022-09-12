@@ -175,6 +175,21 @@ public abstract class BaseExporter {
     return changeLog;
   }
 
+  List<Object[]> queryChangeLog(Connection conn, FileType type) throws SQLException {
+    List<Object[]> changeLog = new ArrayList<>();
+    try (
+        PreparedStatement logStmt = conn.prepareStatement("select date, note from change_log where type=? order by date desc")
+        ) {
+      logStmt.setString(1, type.name());
+      try (ResultSet rs = logStmt.executeQuery()) {
+        while (rs.next()) {
+          changeLog.add(new Object[]{rs.getDate(1), rs.getString(2)});
+        }
+      }
+    }
+    return changeLog;
+  }
+
   void addFileExportHistory(String fileName, String[] entityIds) throws Exception {
     try (FileHistoryWriter historyWriter = new FileHistoryWriter(getFileType())) {
       historyWriter.writeExport(fileName, entityIds);

@@ -1,6 +1,7 @@
 package org.cpicpgx;
 
 import org.apache.commons.cli.*;
+import org.apache.poi.sl.draw.geom.Guide;
 import org.cpicpgx.importer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,7 @@ public class DataImport {
     List<BaseDirectoryImporter> importers = new ArrayList<>();
     importers.add(new GeneReferenceImporter().setDirectory(m_directory, null));
     importers.add(new DrugImporter().setDirectory(m_directory, null));
+    importers.add(new GuidelineImporter().setDirectory(m_directory, null));
     importers.add(new AlleleDefinitionImporter().setDirectory(m_directory, null));
     importers.add(new FunctionReferenceImporter().setDirectory(m_directory, null));
     importers.add(new GenePhenotypeImporter().setDirectory(m_directory, null));
