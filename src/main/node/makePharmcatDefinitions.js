@@ -69,7 +69,7 @@ const lookupVariants = async (gene) => {
                join allele_location_value alv on a.id = alv.alleledefinitionid
                join sequence_location sl on alv.locationid = sl.id
                join gene g on a.genesymbol = g.symbol
-      where a.genesymbol=$(gene) and reference is true
+      where a.genesymbol=$(gene) and a.matchesreferencesequence is true
       order by sl.position
   `, {gene});
   const payload = [];
@@ -90,7 +90,7 @@ const lookupVariants = async (gene) => {
 }
 
 /**
- * Queries the DB for genes that have allele definitions. This limits to genes that have a "reference" allele in order
+ * Queries the DB for genes that have allele definitions. This limits to genes that have a "matchesreferencesequence" allele in order
  * to avoid non-standard allele sets like the HLA's. This also explictly ignores G6PD since it is not
  * supported by PharmCAT at this time.
  * @returns {Promise<Object[]>} an array of gene objects
@@ -99,7 +99,7 @@ const lookupGenes = async () => {
   return await db.many(`
       select distinct a.genesymbol, g.chr, g.genesequenceid, g.chromosequenceid, g.proteinsequenceid
       from allele_definition a join gene g on a.genesymbol = g.symbol
-      where a.reference is true and g.symbol not in ('G6PD')
+      where a.matchesreferencesequence is true and g.symbol not in ('G6PD')
       order by 1
     `);
 };
@@ -158,11 +158,11 @@ const lookupVariantAlleles = async (sequenceLocationId) => {
 const lookupNamedAlleles = async (gene) => {
   try {
     return await db.many(`
-        select a.name, a.id::text as id, array_agg(v.variantallele order by sl.position) as "cpicAlleles", a.reference 
+        select a.name, a.id::text as id, array_agg(v.variantallele order by sl.position) as "cpicAlleles", a.matchesreferencesequence 
         from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol 
             left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid)
         where a.genesymbol=$(gene) and a.structuralvariation is false and sl.id in (select locationid from allele_location_value)
-        group by a.reference, a.name, a.id::text order by a.reference desc, a.name
+        group by a.matchesreferencesequence, a.name, a.id::text order by a.matchesreferencesequence desc, a.name
         `, {gene});
   } catch (err) {
     zeroResultHandler(err, 'Problem querying possible alleles');
