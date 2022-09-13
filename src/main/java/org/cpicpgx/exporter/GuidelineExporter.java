@@ -37,11 +37,14 @@ public class GuidelineExporter extends BaseExporter {
     try (
         Connection conn = ConnectionFactory.newConnection();
         PreparedStatement changeStmt = conn.prepareStatement(
-            "select g.name \"Name\", g.url \"URL\",\n" +
-                "       g.pharmgkbid \"PharmGKB Annotation IDs\",\n" +
-                "       g.genes \"Genes\", g.notesonusage as \"Notes on Usage\",\n" +
-                "       array_agg(distinct p.pmid order by p.pmid) as \"PMIDs\",\n" +
-                "       array_agg(distinct d.name order by d.name) as \"Drugs\"\n" +
+            "select " +
+                "g.name \"Name\", " +
+                "g.url \"URL\",\n" +
+                "g.genes \"Genes\", " +
+                "array_agg(distinct d.name order by d.name) as \"Drugs\",\n" +
+                "array_agg(distinct p.pmid order by p.pmid) as \"PMIDs\",\n" +
+                "g.pharmgkbid \"PharmGKB Annotation IDs\",\n" +
+                "g.notesonusage as \"Notes on Usage\"\n" +
                 "from guideline g\n" +
                 "    left join publication p on g.id = p.guidelineid\n" +
                 "    left join drug d on g.id = d.guidelineid\n" +
@@ -56,11 +59,11 @@ public class GuidelineExporter extends BaseExporter {
           workbook.write(
               rs.getString(1), // name
               rs.getString(2), // url
-              rs.getArray(3),  // pharmgkb annotation ids
-              rs.getArray(4),  // gene symbols
-              rs.getString(5), // notes on usage
-              rs.getArray(6),  // PMIDs
-              rs.getArray(7)   // drug names
+              rs.getArray(6),  // pharmgkb annotation ids
+              rs.getArray(3),  // gene symbols
+              rs.getString(7), // notes on usage
+              rs.getArray(5),  // PMIDs
+              rs.getArray(4)   // drug names
           );
         }
 
