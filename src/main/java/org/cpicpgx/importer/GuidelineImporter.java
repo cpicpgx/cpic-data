@@ -91,7 +91,7 @@ public class GuidelineImporter extends BaseDirectoryImporter {
     public GuidelineDbHarness() throws SQLException {
       super(FileType.GUIDELINE);
       upsert = prepare("insert into guideline(name, url, pharmgkbid, genes, notesonusage) values (?, ?, ?, ?, ?) on conflict (url) do update set name=excluded.name, pharmgkbid=excluded.pharmgkbid, genes=excluded.genes, notesonusage=excluded.notesonusage");
-      updateDrug = prepare("update drug set guidelineid=(select id from guideline where url=?) where name=?");
+      updateDrug = prepare("update drug set guidelineid=(select id from guideline where url=?) where lower(name)=lower(?)");
       updateLit = prepare("update publication set guidelineid=(select id from guideline where url=?) where pmid=?");
 
       try (
@@ -118,7 +118,11 @@ public class GuidelineImporter extends BaseDirectoryImporter {
     void updateDrug(String url, String drugName) throws SQLException {
       updateDrug.setString(1, url);
       updateDrug.setString(2, drugName);
-      updateDrug.executeUpdate();
+      int changed = updateDrug.executeUpdate();
+
+      if (changed == 0) {
+        throw new RuntimeException("Could not find drug record to update for: " + drugName);
+      }
     }
 
     void updateDrugs(String url, String[] drugNames) throws SQLException {

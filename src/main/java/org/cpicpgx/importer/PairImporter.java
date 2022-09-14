@@ -128,6 +128,11 @@ public class PairImporter extends BaseDirectoryImporter {
 
       Integer guidelineId = lookupCachedGuideline(guidelineUrl);
 
+      boolean removedBool = StringUtils.strip(removed).equalsIgnoreCase("yes");
+      if (removedBool && (removedDate == null || removedReason == null)) {
+        throw new RuntimeException("Pair marked as removed but no other data given: " + gene + " + " + drugName);
+      }
+
       upsertPair.clearParameters();
       setNullableString(upsertPair, 1, StringUtils.stripToNull(gene));
       setNullableString(upsertPair, 2, drugId);
