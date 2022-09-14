@@ -286,7 +286,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
 
       //language=PostgreSQL
-      PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where name=? and guidelineid is not null");
+      PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where regexp_replace(name, '[ /-_]+','')=regexp_replace(?, '[ /-_]+','') and guidelineid is not null");
       drugLookupStmt.setString(1, drugName);
       ResultSet rs = drugLookupStmt.executeQuery();
       if (rs.next()) {
@@ -300,7 +300,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       }
 
       //language=PostgreSQL
-      PreparedStatement stmt = prepare("select genesymbol, g.lookupmethod from pair p join drug d on p.drugid = d.drugid join gene g on p.genesymbol = g.symbol where d.name=? and p.usedForRecommendation = true");
+      PreparedStatement stmt = prepare("select genesymbol, g.lookupmethod from pair p join drug d on p.drugid = d.drugid join gene g on p.genesymbol = g.symbol where  regexp_replace(d.name, '[ /-_]+','')=regexp_replace(?, '[ /-_]+','') and p.usedForRecommendation = true");
       stmt.setString(1, drugName);
       try (ResultSet stmtRs = stmt.executeQuery()) {
         while (stmtRs.next()) {
