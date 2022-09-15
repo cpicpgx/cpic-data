@@ -1,3 +1,29 @@
+## [1.20.0](https://github.com/cpicpgx/cpic-data/compare/v1.19.1...v1.20.0) (2022-09-15)
+
+
+### Features
+
+* add import and export for a guideline data ([c9f2be2](https://github.com/cpicpgx/cpic-data/commit/c9f2be2205fd4eb8fde356786b96ba18edacd108))
+* change reference prop for allele_definition and add inferredFrequency prop for allele ([b98ccba](https://github.com/cpicpgx/cpic-data/commit/b98ccbad0b412324d7db35cb921c598135950926))
+
+
+### Bug Fixes
+
+* base the imported drug name off of PharmGKB ([e417eea](https://github.com/cpicpgx/cpic-data/commit/e417eea426dae72d89b0d47887d5c72bf029ea2d))
+* create directory if it doesn't already exist ([5059eac](https://github.com/cpicpgx/cpic-data/commit/5059eacea73fd635571142555caff6637ae92823))
+* fix custom directory support ([036c8ae](https://github.com/cpicpgx/cpic-data/commit/036c8ae586eb1d8191461a28423c288cfe11004a))
+* fix directory name ([3f9bdd0](https://github.com/cpicpgx/cpic-data/commit/3f9bdd022f93cd25dc483ee9bb1eb7ff33900406))
+* fix NPE from change to BigDecimal ([faf86ec](https://github.com/cpicpgx/cpic-data/commit/faf86ecd396348f3c92876b333df6f2c34575171))
+* fix ordering of data in guideline export class ([c0daf38](https://github.com/cpicpgx/cpic-data/commit/c0daf38f957cc6dada81e7fb0c6a94887ef70c5f))
+* fix pharmcat files to use new "matchesreferencesequence" field ([17ad5e9](https://github.com/cpicpgx/cpic-data/commit/17ad5e96a85f63293953881f60380ff63fcc9da3))
+* include PharmGKB ID update in gene resource import ([f10a6f3](https://github.com/cpicpgx/cpic-data/commit/f10a6f30ffdd94aa4a663815f6b668ef12e1a614))
+* make recommendation drug lookup more forgiving ([8a99f92](https://github.com/cpicpgx/cpic-data/commit/8a99f92bbaeaae1011b5f234fb2c8f536435488e))
+* more validation when importing guidelines and pairs ([8467442](https://github.com/cpicpgx/cpic-data/commit/8467442549d57f70dd61b472c44d913aead7f0b7))
+* remove bloated, unused description field in pharmcat gene_phenotypes.json file ([b335a7b](https://github.com/cpicpgx/cpic-data/commit/b335a7b1dd6355de7d0d3cbf6bc92c67fafc117b))
+* remove unused and redundant view ([19abe9a](https://github.com/cpicpgx/cpic-data/commit/19abe9aa40c488ca00165bce45e15408fb50c94a))
+* stop including inserts file with CPIC release ([9ab357c](https://github.com/cpicpgx/cpic-data/commit/9ab357c00ad9033613063b7ddb198aadeb15ea0f))
+* use BigDecimal to avoid precision loss ([5dfc6af](https://github.com/cpicpgx/cpic-data/commit/5dfc6affda427fa2845f003d2b1517620000a3e9))
+
 ## [1.19.1](https://github.com/cpicpgx/cpic-data/compare/v1.19.0...v1.19.1) (2022-08-25)
 
 
