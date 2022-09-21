@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
  */
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+\\.?\\d*$");
+  private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+(\\.?\\d*)$");
   private static final Pattern sf_noResultPattern = Pattern.compile("^No (.*)Result$");
 
   private Path directory;
@@ -249,7 +249,7 @@ public abstract class BaseDirectoryImporter {
 
   /**
    * Normalize activity score Strings before they can be inserted into the DB. Null values are allowed since not all
-   * genes use activity scores. Normalize the strings to strip trailing ".0" so all sources will agree. Also, blank
+   * genes use activity scores. Normalize the strings to add trailing ".0" so all sources will agree. Also, blank
    * Strings will return as null.
    *
    * @param score an optionally null score string
@@ -260,12 +260,16 @@ public abstract class BaseDirectoryImporter {
     if (StringUtils.isBlank(score)) {
       return null;
     } else {
-      if (score.toLowerCase().equals(Constants.NA)) {
+      Matcher m = sf_activityScorePattern.matcher(score);
+      if (score.equalsIgnoreCase(Constants.NA)) {
         return Constants.NA;
       } else if (Constants.isNoResult(score)) {
         return Constants.NO_RESULT;
-      } else if (sf_activityScorePattern.matcher(score).matches()) {
-        return score.replaceAll("\\.0$", "");
+      } else if (m.matches()) {
+        if (StringUtils.isBlank(m.group(1))) {
+          return score + ".0";
+        }
+        return score;
       } else {
         throw new RuntimeException("Activity score not in expected format: " + score);
       }

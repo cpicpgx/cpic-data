@@ -226,7 +226,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 implication.put(gene, dataRow.getText(implIdxMap.get(gene)));
               }
               for (String gene : asIdxMap.keySet()) {
-                activityScore.put(gene, dataRow.getText(asIdxMap.get(gene)));
+                activityScore.put(gene, normalizeScore(dataRow.getText(asIdxMap.get(gene))));
               }
               for (String gene : alleleIdxMap.keySet()) {
                 alleleStatus.put(gene, dataRow.getText(alleleIdxMap.get(gene)));
