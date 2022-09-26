@@ -36,6 +36,10 @@ upload:
 	aws s3 cp out/db/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 	aws s3 cp out/db/${INSERTS_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 
+.PHONY: upload-flow-charts
+upload-flow-charts:
+	aws s3 sync cpic-support-files/images/flow_chart s3://files.cpicpgx.org/images/flow_chart --profile cpic
+
 .PHONY: archive
 archive: dump upload
 
