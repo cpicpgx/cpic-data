@@ -91,15 +91,14 @@ const lookupVariants = async (gene) => {
 
 /**
  * Queries the DB for genes that have allele definitions. This limits to genes that have a "matchesreferencesequence" allele in order
- * to avoid non-standard allele sets like the HLA's. This also explictly ignores G6PD since it is not
- * supported by PharmCAT at this time.
+ * to avoid non-standard allele sets like the HLA's.
  * @returns {Promise<Object[]>} an array of gene objects
  */
 const lookupGenes = async () => {
   return await db.many(`
       select distinct a.genesymbol, g.chr, g.genesequenceid, g.chromosequenceid, g.proteinsequenceid
       from allele_definition a join gene g on a.genesymbol = g.symbol
-      where a.matchesreferencesequence is true and g.symbol not in ('G6PD')
+      where a.matchesreferencesequence is true
       order by 1
     `);
 };
