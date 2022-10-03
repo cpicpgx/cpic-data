@@ -70,7 +70,7 @@ const lookupVariants = async (gene) => {
                join sequence_location sl on alv.locationid = sl.id
                join gene g on a.genesymbol = g.symbol
       where a.genesymbol=$(gene) and a.matchesreferencesequence is true
-      order by sl.position
+      order by sl.position, sl.chromosomeLocation
   `, {gene});
   const payload = [];
   for (let i = 0; i < rez.length; i++) {
@@ -157,7 +157,7 @@ const lookupVariantAlleles = async (sequenceLocationId) => {
 const lookupNamedAlleles = async (gene) => {
   try {
     return await db.many(`
-        select a.name, a.id::text as id, array_agg(v.variantallele order by sl.position) as "cpicAlleles", a.matchesreferencesequence 
+        select a.name, a.id::text as id, array_agg(v.variantallele order by sl.position, sl.chromosomelocation) as "cpicAlleles", a.matchesreferencesequence 
         from allele_definition a join sequence_location sl on a.genesymbol = sl.genesymbol 
             left join allele_location_value v on (a.id=v.alleledefinitionid and sl.id=v.locationid)
         where a.genesymbol=$(gene) and a.structuralvariation is false and sl.id in (select locationid from allele_location_value)
