@@ -1,3 +1,17 @@
+## [1.21.0](https://github.com/cpicpgx/cpic-data/compare/v1.20.0...v1.21.0) (2022-10-04)
+
+
+### Features
+
+* add drug flowcharts for G6PD drugs ([42c750f](https://github.com/cpicpgx/cpic-data/commit/42c750fbb124249994f0ec199ac4d85f56b3d4ee))
+
+
+### Bug Fixes
+
+* add pointer to fosphenytoin flow chart ([f395963](https://github.com/cpicpgx/cpic-data/commit/f395963a486f5dfadd8276bc7dbe11a48a29afc3))
+* fix ordering bug for variants in PharmCAT export ([795cafa](https://github.com/cpicpgx/cpic-data/commit/795cafa2846d692d034cb5d09133d69efe3853ea))
+* standardize activity values and scores to always use decimal format ([4e458f4](https://github.com/cpicpgx/cpic-data/commit/4e458f49c42d8eb602e39e0cf7d3536c136d8746))
+
 ## [1.20.0](https://github.com/cpicpgx/cpic-data/compare/v1.19.1...v1.20.0) (2022-09-15)
 
 
