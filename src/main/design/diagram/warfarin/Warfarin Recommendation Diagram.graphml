@@ -116,7 +116,7 @@ calculated dose by 15-30%&lt;sup&gt;g&lt;/sup&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Geometry height="70.0" width="340.0" x="-144.48662420382152" y="881.6522292993632"/>
           <y:Fill color="#F8D022" transparent="false"/>
           <y:BorderStyle color="#F8D022" type="line" width="1.0"/>
-          <y:NodeLabel alignment="left" autoSizePolicy="node_width" fontFamily="Roboto" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="48.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="340.0" x="0.0" xml:space="preserve" y="11.0">&lt;html&gt;Carriers of the &lt;em&gt;CYP4F2&lt;/em&gt; rs2108622 T allele:&lt;br&gt;
+          <y:NodeLabel alignment="left" autoSizePolicy="node_width" fontFamily="Roboto" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="48.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="340.0" x="0.0" xml:space="preserve" y="11.0">&lt;html&gt;Carriers of the &lt;em&gt;CYP4F2 *3&lt;/em&gt; (rs2108622 T) allele:&lt;br&gt;
 Increase dose by 5-10%&lt;/html&gt;</y:NodeLabel>
         </y:GenericNode>
       </data>
@@ -160,7 +160,7 @@ could be considered.&lt;/html&gt;</y:NodeLabel>
           <y:Geometry height="156.46114649681522" width="579.8267515923567" x="318.0828025477707" y="475.89044585987267"/>
           <y:Fill color="#045AA8" transparent="false"/>
           <y:BorderStyle color="#045AA8" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="node_width" fontFamily="Roboto" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="130.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="579.8267515923567" x="0.0" xml:space="preserve" y="13.230573248407552">&lt;html&gt;
+          <y:NodeLabel alignment="center" autoSizePolicy="node_width" fontFamily="Roboto" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="130.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="579.8267515923567" x="0.0" xml:space="preserve" y="13.230573248407609">&lt;html&gt;
 1) &lt;em&gt;VKORC-1639G&gt;A&lt;/em&gt; and &lt;em&gt;CYP2C9*2&lt;/em&gt; and &lt;em&gt;*3&lt;/em&gt;&lt;sup&gt;d,e&lt;/sup&gt;: Calculate dose based on&lt;br&gt;
 validated published pharmacogenetic algorightms.&lt;br&gt;
 &lt;br&gt;
@@ -196,7 +196,7 @@ Decrease calculated dose by 15-30%&lt;sup&gt;g&lt;/sup&gt;
           <y:Geometry height="63.82420382165594" width="214.73121019108305" x="683.1783439490443" y="769.6522292993631"/>
           <y:Fill color="#045AA8" transparent="false"/>
           <y:BorderStyle color="#045AA8" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="node_width" fontFamily="Roboto" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="46.203125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="214.73121019108305" x="0.0" xml:space="preserve" y="8.810539410827914">rs12777823 A carriers:
+          <y:NodeLabel alignment="center" autoSizePolicy="node_width" fontFamily="Roboto" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="46.203125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="214.73121019108305" x="0.0" xml:space="preserve" y="8.810539410828028">rs12777823 A carriers:
 decrease dose by 10-25%</y:NodeLabel>
         </y:GenericNode>
       </data>
@@ -207,7 +207,7 @@ decrease dose by 10-25%</y:NodeLabel>
           <y:Geometry height="99.0" width="42.35159235668789" x="-186.83821656050955" y="475.0"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="2.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Roboto" fontSize="18" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="27.7392578125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" rotationAngle="270.0" textColor="#39B549" verticalTextPosition="bottom" visible="true" width="75.0859375" x="7.306167272093944" xml:space="preserve" y="11.957031249999943">STRONG<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Roboto" fontSize="18" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="27.7392578125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" rotationAngle="270.0" textColor="#39B549" verticalTextPosition="bottom" visible="true" width="75.0859375" x="7.306167272093944" xml:space="preserve" y="11.95703125">STRONG<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
         </y:GenericNode>
       </data>
     </node>
@@ -311,7 +311,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e1" source="n0" target="n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -323,7 +322,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e2" source="n8" target="n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="74.73229933817674" sy="0.0" tx="0.0" ty="0.0">
@@ -337,7 +335,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e3" source="n0" target="n4">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -349,7 +346,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e4" source="n4" target="n5">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -362,7 +358,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e5" source="n5" target="n1">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -373,7 +368,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e6" source="n4" target="n8">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -386,7 +380,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e7" source="n8" target="n9">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -397,7 +390,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e8" source="n9" target="n11">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-94.69554140127389" ty="-0.3248407643312703"/>
@@ -409,7 +401,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e9" source="n11" target="n12">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-98.90191082802562" sy="0.7044585987260916" tx="0.0" ty="0.0"/>
@@ -420,7 +411,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e10" source="n12" target="n13">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -432,7 +422,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e11" source="n12" target="n10">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-98.90191082802562" ty="5.633121019108216"/>
@@ -444,7 +433,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e12" source="n13" target="n14">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -464,7 +452,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e13" source="n2" target="n6">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -484,7 +471,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e14" source="n6" target="n7">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -504,7 +490,6 @@ decrease dose by 10-25%</y:NodeLabel>
       </data>
     </edge>
     <edge id="e15" source="n14" target="n10">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="182.54777070063676" ty="-20.57515923566882"/>
