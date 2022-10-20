@@ -6,10 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.model.FileType;
-import org.cpicpgx.util.Constants;
-import org.cpicpgx.util.DbHarness;
-import org.cpicpgx.util.RowWrapper;
-import org.cpicpgx.util.WorkbookWrapper;
+import org.cpicpgx.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
@@ -155,7 +152,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     }
 
     String validateFunction(String rawFn) throws Exception {
-      String fn = normalizeGeneText(this.geneSymbol, rawFn);
+      String fn = TextUtils.normalizeAlleleFunction(normalizeGeneText(this.geneSymbol, rawFn));
       if (StringUtils.isBlank(fn)) {
         throw new NotFoundException("No function specified");
       }

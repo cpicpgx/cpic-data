@@ -2,7 +2,6 @@ package org.cpicpgx.util;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,10 +32,18 @@ public class TextUtilsTest {
     assertFalse(TextUtils.extractPvid("PVOOOO1").isPresent());
 
     try {
-      Optional<String> result = TextUtils.extractPvid("PV1 PV2");
+      TextUtils.extractPvid("PV1 PV2");
       fail("Did not catch more than one PVID in string");
     } catch (RuntimeException ex) {
       // drop
     }
+  }
+
+  @Test
+  void testNormalizeAlleleFunction() {
+    assertEquals("", TextUtils.normalizeAlleleFunction(""));
+    assertEquals("foo", TextUtils.normalizeAlleleFunction("foo"));
+    assertEquals("foo function", TextUtils.normalizeAlleleFunction("foo function"));
+    assertEquals("foo function", TextUtils.normalizeAlleleFunction("foo Function"));
   }
 }

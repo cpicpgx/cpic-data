@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtils {
+  private static final Pattern sf_badFunction = Pattern.compile(" Function$");
 
   /**
    * Normalize problem characters in Strings that text content
@@ -20,6 +21,24 @@ public class TextUtils {
       text = StringUtils.stripToNull(text);         // trim whitespace and default to null
     }
     return text;
+  }
+
+  /**
+   * Normalize function text coming in from user-generated text. This will standardize the case of the word "function".
+   * @param text a function description
+   * @return a normalized version of the function description
+   */
+  public static String normalizeAlleleFunction(String text) {
+    if (StringUtils.isBlank(text)) {
+      return text;
+    }
+    Matcher m = sf_badFunction.matcher(text);
+    if (m.find()) {
+      return m.replaceAll(" function");
+    }
+    else {
+      return text;
+    }
   }
 
   private static final Pattern PVID_PATTERN = Pattern.compile("PV\\d+");

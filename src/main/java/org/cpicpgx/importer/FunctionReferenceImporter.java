@@ -6,12 +6,9 @@ import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.util.*;
 import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
-import org.cpicpgx.util.Constants;
-import org.cpicpgx.util.DbHarness;
-import org.cpicpgx.util.RowWrapper;
-import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,8 +101,8 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         
         String alleleName = row.getNullableText(COL_IDX_ALLELE);
         String activityValue = normalizeScore(row.getNullableText(COL_IDX_ACTIVITY));
-        String functionStatus = row.getNullableText(COL_IDX_FUNCTION);
-        String clinicalFunction = row.getNullableText(COL_IDX_CLINICAL_FUNCTION);
+        String functionStatus = TextUtils.normalizeAlleleFunction(row.getNullableText(COL_IDX_FUNCTION));
+        String clinicalFunction = TextUtils.normalizeAlleleFunction(row.getNullableText(COL_IDX_CLINICAL_FUNCTION));
         String substrate = row.getNullableText(COL_IDX_CLINICAL_SUBSTRATE);
         String citationClump = row.getNullableText(COL_IDX_PMID, true);
         String strength = row.getNullableText(COL_IDX_STRENGTH);
