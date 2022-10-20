@@ -149,6 +149,7 @@ public class FrequencyGenerator {
     PreparedStatement updateAlleleFrequency;
     PreparedStatement insertAlleleFrequency;
     PreparedStatement findAlleleFrequency;
+    PreparedStatement findChromosome;
 
     DataHarness(String geneSymbol) throws SQLException {
       conn = ConnectionFactory.newConnection();
@@ -159,22 +160,22 @@ public class FrequencyGenerator {
               "on conflict (alleleid, population) do update set frequency=excluded.frequency, label=excluded.label");
       updateAlleleFrequency = conn.prepareStatement("update allele set frequency=?::jsonb where id=?");
       findAlleleFrequency = conn.prepareStatement("select frequency -> ? from allele where genesymbol=? and name=?");
+      findChromosome = conn.prepareStatement("select chr from gene where symbol=?");
     }
 
     /**
      * Gets the reference allele ID for this gene.
-     * NOTE: this will look for alleles flagged as "reference" BUT will ignore any non-star allele reference allele,
-     * especially for genes that only use single positions for calling alleles.
-     * @return the ID for the "allele" data object of this gene if it uses star alleles, null if no reference star
-     * allele exists
+     * NOTE: this will look for alleles flagged as "inferredFrequency" BUT will ignore any non-star allele reference
+     * allele, especially for genes that only use single positions for calling alleles.
+     * @return the ID for the "allele" data object of this gene if it uses star alleles, null if no "inferredReference"
+     * star allele exists
      * @throws SQLException can occur from DB query
      */
     Integer lookupRefAlleleId() throws SQLException {
       if (geneSymbol.startsWith("HLA")) return m_referenceAlleleId;
 
       PreparedStatement refAlleleStmt = conn.prepareStatement(
-          "select a.id, a.name from allele a " +
-              "where a.genesymbol=? and a.inferredfrequency = true and a.name ~ '^\\*'");
+          "select a.id, a.name from allele a where a.genesymbol=? and a.inferredfrequency = true");
       refAlleleStmt.setString(1, this.geneSymbol);
       try (ResultSet rs = refAlleleStmt.executeQuery()) {
         boolean foundOne = false;
@@ -298,6 +299,9 @@ public class FrequencyGenerator {
     }
 
     void updateDiplotypeFrequencies() throws SQLException {
+      // do not calculate frequencies for x-linked genes
+      if (isXLinked()) return;
+
       PreparedStatement stmt = conn.prepareStatement(
           "select grd.id, grd.diplotypekey from gene_result r " +
               "join gene_result_lookup grl on r.id = grl.phenotypeid " +
@@ -352,6 +356,9 @@ public class FrequencyGenerator {
     }
 
     void updatePhenotypeFrequencies() throws SQLException {
+      // do not calculate frequencies for x-linked genes
+      if (isXLinked()) return;
+
       PreparedStatement dipStmt = conn.prepareStatement("select sum(f.value::numeric) " +
           "from gene_result r " +
           "    join gene_result_lookup grl on r.id = grl.phenotypeid " +
@@ -405,6 +412,17 @@ public class FrequencyGenerator {
       updateAlleleFrequency.setString(1, frequency.toString());
       updateAlleleFrequency.setInt(2, alleleId);
       return updateAlleleFrequency.executeUpdate();
+    }
+
+    boolean isXLinked() throws SQLException {
+      findChromosome.setString(1, geneSymbol);
+      String chr = null;
+      try (ResultSet rs = findChromosome.executeQuery()) {
+        while (rs.next()) {
+          chr = rs.getString(1);
+        }
+      }
+      return chr != null && chr.equalsIgnoreCase("chrX");
     }
 
     @Override

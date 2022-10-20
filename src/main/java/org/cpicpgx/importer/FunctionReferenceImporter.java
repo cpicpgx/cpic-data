@@ -223,7 +223,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
     private final PreparedStatement updateMethodsStmt;
     private final String gene;
     private final LookupMethod geneLookupMethod;
-    private boolean referenceAllele = true;
+    private boolean inferredFrequency = true;
 
     FunctionDbHarness(String gene) throws SQLException {
       super(FileType.ALLELE_FUNCTION_REFERENCE);
@@ -297,6 +297,9 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         sf_logger.warn("{} is missing an activity score", allele);
       }
 
+      // use the first listed allele for "star" allele genes and for G6PD
+      inferredFrequency = inferredFrequency && (allele.startsWith("*") || this.gene.equals("G6PD"));
+
       this.insertAlleleStmt.clearParameters();
       this.insertAlleleStmt.setString(1, this.gene);
       this.insertAlleleStmt.setString(2, allele);
@@ -309,13 +312,13 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       setNullableString(this.insertAlleleStmt, 9, strength);
       setNullableString(this.insertAlleleStmt, 10, findings);
       setNullableString(this.insertAlleleStmt, 11, comments);
-      this.insertAlleleStmt.setBoolean(12, referenceAllele);
+      this.insertAlleleStmt.setBoolean(12, inferredFrequency);
       int inserted = this.insertAlleleStmt.executeUpdate();
       if (inserted == 0) {
         throw new RuntimeException("No allele inserted");
       }
-      // only the first allele should be the "reference" so setting this to false after each subsequent insert does that
-      referenceAllele = false;
+      // only the first allele should be the "inferred frequency" so setting this to false after each subsequent insert does that
+      inferredFrequency = false;
     }
 
     void updateMethods(String methods) throws SQLException {
