@@ -1,3 +1,12 @@
+## [1.21.1](https://github.com/cpicpgx/cpic-data/compare/v1.21.0...v1.21.1) (2022-10-20)
+
+
+### Bug Fixes
+
+* do not generate diplotype/phenotype frequencies for x-linked genes ([8f4a7d9](https://github.com/cpicpgx/cpic-data/commit/8f4a7d91f218f53e0898cc84c3f88baad3d0f39e))
+* normalize user-generated function descriptions ([ca8846d](https://github.com/cpicpgx/cpic-data/commit/ca8846d13ad31cfc5050c8d5230abe4a5bc996aa))
+* put CYP4F2 *3 mention in warfarin diagram ([d0f57d4](https://github.com/cpicpgx/cpic-data/commit/d0f57d455f0f8684bdf26f30ef36b47cade1a0db))
+
 ## [1.21.0](https://github.com/cpicpgx/cpic-data/compare/v1.20.0...v1.21.0) (2022-10-04)
 
 
