@@ -52,7 +52,7 @@ public class FrequencyExporter extends BaseExporter {
       try (
           FrequencyDbHarness dbHarness = new FrequencyDbHarness();
           PreparedStatement stmt = conn.prepareStatement(
-              "select distinct a.name, a.id, ad.matchesreferencesequence from allele_frequency f join allele a on f.alleleid = a.id join allele_definition ad on a.definitionid = ad.id where a.genesymbol=? and a.name != 'Reference' order by 1");
+              "select distinct a.name, a.id, a.inferredfrequency from allele_frequency f join allele a on f.alleleid = a.id where a.genesymbol=? and a.name != 'Reference' order by 1");
           PreparedStatement popsStmt = conn.prepareStatement(
               "select distinct coalesce(p2.pmid, p2.url, p2.pmcid, p2.doi), p.ethnicity, p.population, p.populationinfo, p.subjecttype, p2.authors, p2.year, p.id, p.subjectcount\n" +
               "from allele_frequency f join population p on f.population = p.id join allele a on f.alleleid = a.id\n" +
@@ -72,7 +72,7 @@ public class FrequencyExporter extends BaseExporter {
                   "order by 1");
           ResultSet geneResults = geneStmt.executeQuery();
           PreparedStatement refAlleleStmt = conn.prepareStatement(
-              "select name from allele_definition where matchesreferencesequence is true and genesymbol=? and name != 'Reference'")
+              "select name from allele where allele.inferredfrequency is true and genesymbol=?")
       ) {
         // gene loop
         while (geneResults.next()) {
@@ -246,7 +246,7 @@ public class FrequencyExporter extends BaseExporter {
               try (ResultSet rsEth = ethAlleleStmt.executeQuery()) {
                 boolean wroteSummary = false;
                 while (rsEth.next()) {
-                  workbook.writePopulationSummary(rsEth.getBigDecimal(3), refFreq, rsEth.getBigDecimal(2));
+                  workbook.writePopulationSummary(rsEth.getBigDecimal(3), rsEth.getBigDecimal(1), rsEth.getBigDecimal(2));
                   wroteSummary = true;
                 }
                 if (!wroteSummary) {

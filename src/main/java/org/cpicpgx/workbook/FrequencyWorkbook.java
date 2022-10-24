@@ -6,6 +6,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.cpicpgx.db.LookupMethod;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.*;
 
 /**
@@ -25,6 +26,8 @@ public class FrequencyWorkbook extends AbstractWorkbook {
   private static final String[] REFERENCE_COLUMNS = new String[]{
       "Authors", "Year", "PMID", "Population group", "Population", "Add'l population info", "Subject type", "N subjects genotyped"
   };
+
+  private static final MathContext ROUND_TO_THREE = new MathContext(3);
 
   private final String geneSymbol;
   private final boolean byActivityScore;
@@ -128,9 +131,9 @@ public class FrequencyWorkbook extends AbstractWorkbook {
   }
 
   public void writePopulationSummary(BigDecimal minFreq, BigDecimal freq, BigDecimal maxFreq) {
-    writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq);
-    writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq);
-    writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq);
+    writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq.round(ROUND_TO_THREE));
+    writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq.round(ROUND_TO_THREE));
+    writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq.round(ROUND_TO_THREE));
     currentPopSummaryAlleleCol += 1;
   }
 
