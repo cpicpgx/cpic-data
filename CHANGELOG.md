@@ -1,3 +1,10 @@
+## [1.21.2](https://github.com/cpicpgx/cpic-data/compare/v1.21.1...v1.21.2) (2022-10-24)
+
+
+### Bug Fixes
+
+* fix population summary stats on frequency export sheets ([d4c13f8](https://github.com/cpicpgx/cpic-data/commit/d4c13f880579ce05096e8f145d8a04d22b833166))
+
 ## [1.21.1](https://github.com/cpicpgx/cpic-data/compare/v1.21.0...v1.21.1) (2022-10-20)
 
 
