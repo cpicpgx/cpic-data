@@ -1,3 +1,10 @@
+## [1.21.3](https://github.com/cpicpgx/cpic-data/compare/v1.21.2...v1.21.3) (2022-10-31)
+
+
+### Bug Fixes
+
+* remove unneeded data caching scripts ([3cf620d](https://github.com/cpicpgx/cpic-data/commit/3cf620dafd92bc20ed5a4514826504ab870ef3ed))
+
 ## [1.21.2](https://github.com/cpicpgx/cpic-data/compare/v1.21.1...v1.21.2) (2022-10-24)
 
 
