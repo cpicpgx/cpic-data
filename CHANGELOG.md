@@ -1,3 +1,10 @@
+## [1.21.4](https://github.com/cpicpgx/cpic-data/compare/v1.21.3...v1.21.4) (2022-12-20)
+
+
+### Bug Fixes
+
+* update data ([3d23c05](https://github.com/cpicpgx/cpic-data/commit/3d23c055f997f6b02371090997b3901d839c5548))
+
 ## [1.21.3](https://github.com/cpicpgx/cpic-data/compare/v1.21.2...v1.21.3) (2022-10-31)
 
 
