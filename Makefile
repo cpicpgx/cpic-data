@@ -15,8 +15,8 @@ endif
 
 .PHONY: dev-init      # initializes dev environment
 dev-init:
-	@if [ ! -d "cpic-data.wiki" ];     then echo "Cloning wiki...";            git clone git@github.com:cpicpgx/cpic-data.wiki.git     cpic-data.wiki;     fi
-	@if [ ! -d "cpic-support-files" ]; then echo "Cloning cpic-support-files"; git clone ${GIT_CLONE_OPTS} git@github.com:cpicpgx/cpic-support-files.git cpic-support-files; fi
+	@if [ ! -d "cpic-data.wiki" ];     then echo "Cloning wiki...";            git clone                   https://github.com/cpicpgx/cpic-data.wiki.git     cpic-data.wiki;     fi
+	@if [ ! -d "cpic-support-files" ]; then echo "Cloning cpic-support-files"; git clone ${GIT_CLONE_OPTS} https://github.com/cpicpgx/cpic-support-files.git cpic-support-files; fi
 	@${YARN_CMD}
 
 
