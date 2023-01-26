@@ -66,10 +66,18 @@ db-teardown:
 db-init: db-bootstrap db-migrate
 	java -jar build/libs/CpicData.jar -d cpic-support-files
 
+.PHONY: db-download
+db-download:
+	aws s3 cp s3://cpic.backup/db/cpic_prod_db.sql.gz out/cpic_prod_db.sql.gz --profile cpic
+
 .PHONY: db-refresh
 db-refresh:
 	dropdb cpic -h localhost -U postgres && createdb cpic -h localhost -U postgres
-	gzip -cd out/db/cpic_prod_db.sql.gz | psql -d cpic -h localhost -U postgres
+	gzip -cd out/cpic_prod_db.sql.gz | psql -d cpic -h localhost -U postgres
+
+.PHONY: db-copy
+db-copy: db-download db-refresh
+	@echo "Database image copied and refreshed"
 
 .PHONY: db-migrate
 db-migrate: compile
@@ -92,4 +100,4 @@ clean:
 
 .PHONY: db-clean
 db-clean:
-	echo "drop database cpic; drop role web_anon; drop role cpic_api; drop role auth; drop role cpic;" | psql -h localhost -U postgres
+	psql -h localhost -U postgres -c "drop database cpic; drop role web_anon; drop role cpic_api; drop role auth; drop role cpic;"
