@@ -1,3 +1,15 @@
+## [1.22.0](https://github.com/cpicpgx/cpic-data/compare/v1.21.6...v1.22.0) (2023-01-27)
+
+
+### Features
+
+* add new make script for copying the DB ([e9ebb6a](https://github.com/cpicpgx/cpic-data/commit/e9ebb6ae372b7a79cfd8d47ff0a231d3fe4daacc))
+
+
+### Bug Fixes
+
+* data update ([277ceef](https://github.com/cpicpgx/cpic-data/commit/277ceef4778f98f569c43e2aac52d72d25a9a70f))
+
 ## [1.21.6](https://github.com/cpicpgx/cpic-data/compare/v1.21.5...v1.21.6) (2022-12-21)
 
 
