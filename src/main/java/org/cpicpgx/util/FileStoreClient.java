@@ -3,6 +3,7 @@ package org.cpicpgx.util;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.google.common.net.UrlEscapers;
 import org.cpicpgx.db.FileHistoryWriter;
 import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
@@ -50,6 +51,18 @@ public class FileStoreClient implements AutoCloseable {
       sf_logger.error("Could not start DB connection", e);
     }
   }
+
+  /**
+   * Build URL to S3 resource while properly escaping special characters in the URL.
+   * @return a properly escaped URL (e.g. spaces are now "%20")
+   */
+  public static String buildS3Url(String path, String fileName) {
+    return String.format(
+        S3_URL_FORMAT,
+        path,
+        UrlEscapers.urlPathSegmentEscaper().escape(fileName)
+    );
+  }
   
   public void putArtifact(Path filePath, FileType type) {
     String fileName = filePath.getFileName().toString();
@@ -61,7 +74,7 @@ public class FileStoreClient implements AutoCloseable {
     putFile(currentDirPath, fileName, filePath.toFile());
 
     try {
-      fileHistoryWriter.writeUpload(fileName, String.format(S3_URL_FORMAT, datedDirPath, fileName));
+      fileHistoryWriter.writeUpload(fileName, buildS3Url(datedDirPath, fileName));
     } catch (SQLException e) {
       sf_logger.error("Error updating file record in DB " + fileName, e);
     }
@@ -71,7 +84,7 @@ public class FileStoreClient implements AutoCloseable {
     String fileName = filePath.getFileName().toString();
     String prefix = String.format(S3_GUIDELINE_STAGING_FORMAT, timestamp);
     putFile(prefix, fileName, filePath.toFile());
-    return escapeUrl(String.format(S3_URL_FORMAT, prefix, fileName));
+    return escapeUrl(buildS3Url(prefix, fileName));
   }
 
   private void putFile(String directoryPath, String fileName, File file) {
