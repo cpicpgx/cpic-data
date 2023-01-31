@@ -1,3 +1,10 @@
+## [1.22.1](https://github.com/cpicpgx/cpic-data/compare/v1.22.0...v1.22.1) (2023-01-31)
+
+
+### Bug Fixes
+
+* properly encode spaces in filenames uploaded to S3 ([1394d80](https://github.com/cpicpgx/cpic-data/commit/1394d8037cd47f251c4e4cda175b9a5f3ab0d630))
+
 ## [1.22.0](https://github.com/cpicpgx/cpic-data/compare/v1.21.6...v1.22.0) (2023-01-27)
 
 
