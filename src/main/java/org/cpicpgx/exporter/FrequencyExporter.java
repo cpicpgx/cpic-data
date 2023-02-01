@@ -113,7 +113,9 @@ public class FrequencyExporter extends BaseExporter {
               for (String pop : ethnicities) {
                 frequencies[ethnicities.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, allele, pop);
               }
-              workbook.writeAlleleFrequency(allele, frequencies);
+              if (Arrays.stream(frequencies).anyMatch(Objects::nonNull)) {
+                workbook.writeAlleleFrequency(allele, frequencies);
+              }
             }
           }
           // end the Allele Frequency sheet
