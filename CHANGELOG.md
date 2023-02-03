@@ -1,3 +1,10 @@
+## [1.22.2](https://github.com/cpicpgx/cpic-data/compare/v1.22.1...v1.22.2) (2023-02-03)
+
+
+### Bug Fixes
+
+* fix frequency exporter to not show null allele data ([79745ba](https://github.com/cpicpgx/cpic-data/commit/79745babc90d6f6083b17bc4efafbacc03ed2efe))
+
 ## [1.22.1](https://github.com/cpicpgx/cpic-data/compare/v1.22.0...v1.22.1) (2023-01-31)
 
 
