@@ -1,17 +1,18 @@
 package org.cpicpgx.importer;
 
 import com.google.gson.Gson;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,6 +162,14 @@ public class RecommendationImporter extends BaseDirectoryImporter {
             }
           }
 
+          Set<String> observedGenes = new HashSet<>();
+          observedGenes.addAll(phenotypeIdxMap.keySet());
+          observedGenes.addAll(alleleIdxMap.keySet());
+          observedGenes.addAll(asIdxMap.keySet());
+          if (!CollectionUtils.isEqualCollection(observedGenes, dbHarness.getGenes())) {
+            throw new RuntimeException("Observed genes " + String.join(";", phenotypeIdxMap.keySet()) + " does not match expected genes " + String.join(";", dbHarness.getGenes()));
+          }
+
           for (String gene : dbHarness.getGenes()) {
             switch (dbHarness.geneLookupCache.get(gene)) {
               case ACTIVITY_SCORE:
@@ -305,6 +314,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       try (ResultSet stmtRs = stmt.executeQuery()) {
         while (stmtRs.next()) {
           geneLookupCache.put(stmtRs.getString(1), LookupMethod.valueOf(stmtRs.getString(2)));
+          sf_logger.debug("Expecting gene data for: " + String.join(", ", geneLookupCache.keySet()));
         }
       }
       if (geneLookupCache.size() == 0) {
