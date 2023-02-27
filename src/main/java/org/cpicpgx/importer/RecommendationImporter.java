@@ -120,6 +120,9 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           int idxRecommendation = -1;
           int idxClassification = -1;
           int idxComments = -1;
+          int idxAltDrug = -1;
+          int idxDosingInfo = -1;
+          int idxOtherPrescribing = -1;
 
           for (int j = 0; j < headerRow.getLastCellNum(); j++) {
             String cellText = headerRow.getNullableText(j);
@@ -157,6 +160,12 @@ public class RecommendationImporter extends BaseDirectoryImporter {
               idxClassification = j;
             } else if (cellText.toLowerCase().contains("comments")) {
               idxComments = j;
+            } else if (cellText.toLowerCase().contains("dosing information?")) {
+              idxDosingInfo = j;
+            } else if (cellText.toLowerCase().contains("alternate drug?")) {
+              idxAltDrug = j;
+            } else if (cellText.toLowerCase().contains("other prescribing info?")) {
+              idxOtherPrescribing = j;
             } else {
               throw new RuntimeException("Unrecognized column: " + cellText);
             }
@@ -253,6 +262,10 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 sf_logger.warn("Single-gene recommendations should not use 'No Result'");
               }
 
+              boolean altDrug = idxAltDrug >= 0 && dataRow.getNullableText(idxAltDrug) != null && dataRow.getNullableText(idxAltDrug).equals("yes");
+              boolean dosingInfo = idxDosingInfo >= 0 && dataRow.getNullableText(idxDosingInfo) != null && dataRow.getNullableText(idxDosingInfo).equals("yes");
+              boolean otherPrescribing = idxOtherPrescribing >= 0 && dataRow.getNullableText(idxOtherPrescribing) != null && dataRow.getNullableText(idxOtherPrescribing).equals("yes");
+
               dbHarness.insert(
                   phenotype,
                   implication,
@@ -262,7 +275,10 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                   activityScore,
                   populationName,
                   lookupKey,
-                  alleleStatus
+                  alleleStatus,
+                  altDrug,
+                  dosingInfo,
+                  otherPrescribing
               );
             } catch (RuntimeException ex) {
               throw new RuntimeException("Error reading row " + (k + 1), ex);
@@ -292,7 +308,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
     RecDbHarness(String drugName) throws Exception {
       super(FileType.RECOMMENDATION);
       //language=PostgreSQL
-      this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb)");
+      this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus, dosinginformation, alternatedrugavailable, otherprescribingguidance) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb, ?, ?, ?)");
 
       //language=PostgreSQL
       PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where regexp_replace(name, '[ /-_]+','')=regexp_replace(?, '[ /-_]+','') and guidelineid is not null");
@@ -328,7 +344,11 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       return new ArrayList<>(geneLookupCache.keySet());
     }
 
-    void insert(Map<String,String> phenotype, Map<String,String> implication, String recommendation, String classification, String comments, Map<String,String> activityScore, String population, Map<String,String> lookupKey, Map<String,String> alleleStatus) {
+    void insert(Map<String,String> phenotype, Map<String,String> implication, String recommendation,
+                String classification, String comments, Map<String,String> activityScore, String population,
+                Map<String,String> lookupKey, Map<String,String> alleleStatus, boolean dosingInfo, boolean altDrug,
+                boolean otherPrescribing
+    ) {
       try {
         this.insertStmt.clearParameters();
 
@@ -367,7 +387,11 @@ public class RecommendationImporter extends BaseDirectoryImporter {
         this.insertStmt.setString(9, population);
         this.insertStmt.setString(10, gson.toJson(lookupKey));
         this.insertStmt.setString(11, gson.toJson(alleleStatus));
-        
+
+        this.insertStmt.setBoolean(12, dosingInfo);
+        this.insertStmt.setBoolean(13, altDrug);
+        this.insertStmt.setBoolean(14, otherPrescribing);
+
         this.insertStmt.executeUpdate();
         
       } catch (Exception e) {

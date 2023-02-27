@@ -41,7 +41,6 @@ public class RecommendationExporter extends BaseExporter {
 
   public void export() throws Exception {
     Gson gson = new Gson();
-    //noinspection UnstableApiUsage
     Type stringMapType = new TypeToken<TreeMap<String, String>>(){}.getType();
 
     try (
@@ -93,9 +92,7 @@ public class RecommendationExporter extends BaseExporter {
             try (ResultSet rrs = recStmt.executeQuery()) {
               while (rrs.next()) {
                 String phenotypes = rrs.getString(1);
-                String recommendation = rrs.getString(2);
                 String implication = rrs.getString(3);
-                String classification = rrs.getString(4);
                 String activityScore = rrs.getString(5);
                 String comments = rrs.getString(6);
                 String alleleStatus = rrs.getString(7);
@@ -105,8 +102,8 @@ public class RecommendationExporter extends BaseExporter {
                     gson.fromJson(activityScore, stringMapType),
                     gson.fromJson(implication, stringMapType),
                     gson.fromJson(alleleStatus, stringMapType),
-                    recommendation,
-                    classification,
+                    rrs.getString(2),
+                    rrs.getString(4),
                     comments
                 );
               }
