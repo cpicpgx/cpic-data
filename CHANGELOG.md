@@ -1,3 +1,15 @@
+## [1.23.0](https://github.com/cpicpgx/cpic-data/compare/v1.22.2...v1.23.0) (2023-02-28)
+
+
+### Features
+
+* add dosing info, alt drug, and other prescribing tags to recommendations ([88c10de](https://github.com/cpicpgx/cpic-data/commit/88c10deb113969fd21a7585931b90e27e908b697))
+
+
+### Bug Fixes
+
+* add a check for expected genes in recommendation files ([f307e2d](https://github.com/cpicpgx/cpic-data/commit/f307e2d8aa62e5ee11c33d50bab3e40decdefa2f))
+
 ## [1.22.2](https://github.com/cpicpgx/cpic-data/compare/v1.22.1...v1.22.2) (2023-02-03)
 
 
