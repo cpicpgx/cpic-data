@@ -1,3 +1,10 @@
+## [1.23.1](https://github.com/cpicpgx/cpic-data/compare/v1.23.0...v1.23.1) (2023-03-10)
+
+
+### Bug Fixes
+
+* add parser for notes sheet in test alert file ([d0749e7](https://github.com/cpicpgx/cpic-data/commit/d0749e74ac8912dcf29e94efe1e258f2ad329981))
+
 ## [1.23.0](https://github.com/cpicpgx/cpic-data/compare/v1.22.2...v1.23.0) (2023-02-28)
 
 
