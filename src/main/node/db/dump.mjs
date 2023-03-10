@@ -34,7 +34,7 @@ console.log(`Version ${version}`);
 
 
 const pgdumpArgs = [
-    'cpic -U cpic --schema=cpic -no-owner ',
+    'cpic -U cpic --schema=cpic --no-owner ',
 ];
 const env = {...process.env};
 
