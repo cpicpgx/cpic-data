@@ -35,6 +35,7 @@ upload:
 	gzip out/db/${INSERTS_NAME}
 	aws s3 cp out/db/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 	aws s3 cp out/db/${INSERTS_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
+	@ echo "DB dump published to https://files.cpicpgx.org/data/database/${TAG_NAME}.gz"
 
 .PHONY: upload-flow-charts
 upload-flow-charts:
