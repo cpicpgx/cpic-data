@@ -72,6 +72,9 @@ public class TestAlertImporter extends BaseDirectoryImporter {
         if (AbstractWorkbook.HISTORY_SHEET_NAME.equalsIgnoreCase(sheet.getSheetName())) {
           processHistory(workbook, dbHarness);
         }
+        else if (AbstractWorkbook.NOTES_SHEET_NAME.equalsIgnoreCase(sheet.getSheetName())) {
+          f_notes.addAll(workbook.getNotes());
+        }
         else if (!sheet.getSheetName().equalsIgnoreCase("flow chart")) {
           String population = sheet.getSheetName().replaceFirst("population ", "");
           processTestAlertSheet(workbook, dbHarness, population);
