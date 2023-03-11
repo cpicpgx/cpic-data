@@ -1,16 +1,15 @@
 package org.cpicpgx.exporter;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.util.Constants;
-import org.cpicpgx.workbook.FrequencyWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.ActivityScoreComparator;
+import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;
+import org.cpicpgx.workbook.FrequencyWorkbook;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +28,6 @@ import java.util.*;
  */
 public class FrequencyExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-  // genes that should not display diplotype or phenotype data
-  private static final List<String> BLOCKLIST = ImmutableList.of(
-      "CACNA1S", "CYP4F2", "DPYD", "G6PD", "HLA-A", "HLA-B", "MT-RNR1", "RYR1", "UGT1A1", "VKORC1"
-  );
 
   public static void main(String[] args) {
     FrequencyExporter exporter = new FrequencyExporter();
@@ -70,7 +64,7 @@ public class FrequencyExporter extends BaseExporter {
               "select frequencyMethods from gene where symbol=?"
           );
           PreparedStatement geneStmt = conn.prepareStatement(
-              "select distinct a.genesymbol, g.lookupmethod, g.chr from allele_frequency f join allele a on a.id = f.alleleid\n" +
+              "select distinct a.genesymbol, g.lookupmethod, g.chr, g.includephenotypefrequencies, g.includediplotypefrequencies from allele_frequency f join allele a on a.id = f.alleleid\n" +
                   "    join gene g on a.genesymbol = g.symbol\n" +
                   "order by 1");
           ResultSet geneResults = geneStmt.executeQuery();
@@ -82,6 +76,8 @@ public class FrequencyExporter extends BaseExporter {
           String geneSymbol = geneResults.getString(1);
           LookupMethod lookupMethod = LookupMethod.valueOf(geneResults.getString(2));
           String chr = geneResults.getString(3);
+          boolean includePheno = geneResults.getBoolean(4);
+          boolean includeDiplo = geneResults.getBoolean(5);
           FrequencyWorkbook workbook = new FrequencyWorkbook(geneSymbol, lookupMethod);
 
           // look up the ref allele name
@@ -125,7 +121,7 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // start the Diplotype Frequency sheet
-          if (!Constants.isSinglePloidy(chr) && !BLOCKLIST.contains(geneSymbol)) {
+          if (!Constants.isSinglePloidy(chr) && includeDiplo) {
             List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
             if (dipPops.size() > 0) {
               workbook.writeDiplotypeFrequencyHeader(dipPops);
@@ -150,7 +146,7 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // start the Phenotype Frequency sheet
-          if (!BLOCKLIST.contains(geneSymbol)) {
+          if (includePheno) {
             List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
             if (phenoPops.size() > 0) {
               workbook.writePhenotypeFrequencyHeader(phenoPops);

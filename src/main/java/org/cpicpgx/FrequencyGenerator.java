@@ -306,7 +306,8 @@ public class FrequencyGenerator {
           "select grd.id, grd.diplotypekey from gene_result r " +
               "join gene_result_lookup grl on r.id = grl.phenotypeid " +
               "join gene_result_diplotype grd on grl.id = grd.functionphenotypeid " +
-              "where r.genesymbol=?");
+              "join gene g on r.genesymbol=g.symbol " +
+              "where r.genesymbol=? and g.includediplotypefrequencies is true");
       stmt.setString(1, geneSymbol);
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
@@ -366,7 +367,7 @@ public class FrequencyGenerator {
           "     jsonb_each(grd.frequency) f " +
           "where f.key=? and r.id=? and f.value::text!='null'");
       PreparedStatement updateStmt = conn.prepareStatement("update gene_result set frequency=?::jsonb where id=?");
-      PreparedStatement stmt = conn.prepareStatement("select id from gene_result where genesymbol=?");
+      PreparedStatement stmt = conn.prepareStatement("select r.id from gene_result r join gene g on r.genesymbol=g.symbol where genesymbol=? and g.includephenotypefrequencies is true");
       stmt.setString(1, geneSymbol);
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
