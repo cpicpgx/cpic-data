@@ -29,8 +29,11 @@ import java.util.*;
  */
 public class FrequencyExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final List<String> BLOCKLIST_DIPLO = ImmutableList.of("CACNA1S", "RYR1", "HLA-A", "HLA-B");
-  private static final List<String> BLOCKLIST_PHENO = ImmutableList.of("CACNA1S", "RYR1", "HLA-A", "HLA-B", "MT-RNR1", "VKORC1", "CYP4F2");
+
+  // genes that should not display diplotype or phenotype data
+  private static final List<String> BLOCKLIST = ImmutableList.of(
+      "CACNA1S", "CYP4F2", "DPYD", "G6PD", "HLA-A", "HLA-B", "MT-RNR1", "RYR1", "UGT1A1", "VKORC1"
+  );
 
   public static void main(String[] args) {
     FrequencyExporter exporter = new FrequencyExporter();
@@ -122,7 +125,7 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // start the Diplotype Frequency sheet
-          if (!Constants.isSinglePloidy(chr) && !BLOCKLIST_DIPLO.contains(geneSymbol)) {
+          if (!Constants.isSinglePloidy(chr) && !BLOCKLIST.contains(geneSymbol)) {
             List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
             if (dipPops.size() > 0) {
               workbook.writeDiplotypeFrequencyHeader(dipPops);
@@ -147,7 +150,7 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // start the Phenotype Frequency sheet
-          if (!BLOCKLIST_PHENO.contains(geneSymbol)) {
+          if (!BLOCKLIST.contains(geneSymbol)) {
             List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
             if (phenoPops.size() > 0) {
               workbook.writePhenotypeFrequencyHeader(phenoPops);
@@ -239,9 +242,6 @@ public class FrequencyExporter extends BaseExporter {
 
             workbook.startPopulationSummary();
             for (String allele : alleles.keySet()) {
-              BigDecimal refFreq = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, allele, ethnicity))
-                      .orElse(BigDecimal.ZERO);
-
               ethAlleleStmt.setString(1, allele);
               ethAlleleStmt.setString(2, ethnicity);
               ethAlleleStmt.setString(3, geneSymbol);
