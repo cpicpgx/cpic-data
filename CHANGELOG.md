@@ -1,3 +1,17 @@
+## [1.24.0](https://github.com/cpicpgx/cpic-data/compare/v1.23.1...v1.24.0) (2023-03-23)
+
+
+### Features
+
+* flag for diplotype/phenotype frequencies in gene table ([87fb407](https://github.com/cpicpgx/cpic-data/commit/87fb4078171138f9ab0eaaa0c3edb978bb375756))
+
+
+### Bug Fixes
+
+* expand the list of genes to not display diplotype/phenotype frequencies for ([3361c17](https://github.com/cpicpgx/cpic-data/commit/3361c172ed157bd33fdbea4e61e967b87a837570))
+* fix bad pg_dump arg in dump script ([3af3eee](https://github.com/cpicpgx/cpic-data/commit/3af3eee2a459c217f51697a316f3d61755aab8f3)), closes [#22](https://github.com/cpicpgx/cpic-data/issues/22)
+* remove usage of non-existent script ([503d4ef](https://github.com/cpicpgx/cpic-data/commit/503d4ef9715c939a92fd20335ad5d160c185b098))
+
 ## [1.23.1](https://github.com/cpicpgx/cpic-data/compare/v1.23.0...v1.23.1) (2023-03-10)
 
 
