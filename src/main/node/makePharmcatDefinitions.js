@@ -314,7 +314,7 @@ const lookupDrugs = async () => {
                g.pharmgkbid as guidelinePharmgkbIds,
                coalesce(x.genes, g.genes) genes,
                json_agg(distinct p) as citations,
-               g.notesonusage
+               g.notesonusage, d.rxnormid
         from
             guideline g
                 join pair on g.id=pair.guidelineid
@@ -322,7 +322,7 @@ const lookupDrugs = async () => {
                 left join publication p on g.id = p.guidelineid
                 left join x on pair.drugid = x.drugid
         where pair.usedforrecommendation is true and pair.removed is false
-        group by pair.drugid,d.name,g.name,g.url,g.pharmgkbid,coalesce(x.genes, g.genes),g.notesonusage
+        group by pair.drugid,d.name,g.name,g.url,g.pharmgkbid,coalesce(x.genes, g.genes),g.notesonusage, d.rxnormid
         order by d.name
     `);
   } catch (err) {
