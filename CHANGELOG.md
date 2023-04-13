@@ -1,3 +1,12 @@
+## [1.25.0](https://github.com/cpicpgx/cpic-data/compare/v1.24.0...v1.25.0) (2023-04-13)
+
+
+### Features
+
+* add a warning when recommendation drugs do not have RxNorm coverage ([1901a53](https://github.com/cpicpgx/cpic-data/commit/1901a5355965f6ebc18d8f35cc7c3d0cd50b5dfd))
+* add information for SSRI/SNRI guideline ([3f3e735](https://github.com/cpicpgx/cpic-data/commit/3f3e735ac3c0bcb7693eaae5bfe9494a03ccc977))
+* include RxNorm CUI as explicit field in PharmCAT drug data ([49d0e4a](https://github.com/cpicpgx/cpic-data/commit/49d0e4ac39c6fe05366b8d51765b46c780aa60cf))
+
 ## [1.24.0](https://github.com/cpicpgx/cpic-data/compare/v1.23.1...v1.24.0) (2023-03-23)
 
 
