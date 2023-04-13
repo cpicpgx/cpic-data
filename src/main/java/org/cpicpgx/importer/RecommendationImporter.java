@@ -311,12 +311,17 @@ public class RecommendationImporter extends BaseDirectoryImporter {
       this.insertStmt = prepare("insert into recommendation(guidelineid, drugid, implications, drugRecommendation, classification, phenotypes, comments, activityScore, population, lookupKey, alleleStatus, dosinginformation, alternatedrugavailable, otherprescribingguidance) values (?, ?, ?::jsonb, ?, ? , ?::jsonb, ?, ?::jsonb, ?, ?::jsonb, ?::jsonb, ?, ?, ?)");
 
       //language=PostgreSQL
-      PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid from drug where regexp_replace(name, '[ /-_]+','')=regexp_replace(?, '[ /-_]+','') and guidelineid is not null");
+      PreparedStatement drugLookupStmt = prepare("select drugid, guidelineid, rxnormid from drug where regexp_replace(name, '[ /-_]+','')=regexp_replace(?, '[ /-_]+','') and guidelineid is not null");
       drugLookupStmt.setString(1, drugName);
       ResultSet rs = drugLookupStmt.executeQuery();
       if (rs.next()) {
         drugId = rs.getString(1);
         guidelineId = rs.getLong(2);
+        String rxnormId = rs.getString(3);
+
+        if (StringUtils.isBlank(rxnormId)) {
+          sf_logger.warn(drugName + " has no RxNorm CUI assigned");
+        }
       } else {
         throw new NotFoundException("Couldn't find drug with guideline for: " + drugName);
       }
