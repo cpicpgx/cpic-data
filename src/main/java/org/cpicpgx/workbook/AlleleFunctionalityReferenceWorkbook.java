@@ -29,12 +29,12 @@ public class AlleleFunctionalityReferenceWorkbook extends AbstractWorkbook {
     Row headerRow = sheet.nextRow();
     writeHeaderCell(headerRow, 0, "Allele/cDNA/rsID");
     writeHeaderCell(headerRow, 1, "Activity Value (Optional)");
-    writeHeaderCell(headerRow, 2, "Allele Functional Status (Optional)");
+    writeHeaderCell(headerRow, 2, "Allele Biochemical Functional Status (Optional)");
     writeHeaderCell(headerRow, 3, "Allele Clinical Functional Status (Required)");
     writeHeaderCell(headerRow, 4, "Allele Clinical Function Substrate Specificity (Optional)");
-    writeHeaderCell(headerRow, 5, "PMID (Optional)");
-    writeHeaderCell(headerRow, 6, "Strength of Evidence (Optional)");
-    writeHeaderCell(headerRow, 7, "Findings (Optional)");
+    writeHeaderCell(headerRow, 5, "References (Required)");
+    writeHeaderCell(headerRow, 6, "Strength of Evidence (Required)");
+    writeHeaderCell(headerRow, 7, "Summary of Findings (Required)");
     writeHeaderCell(headerRow, 8, "Comments");
     sheet.setColCount(9);
     
