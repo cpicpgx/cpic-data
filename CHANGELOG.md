@@ -1,3 +1,10 @@
+## [1.26.0](https://github.com/cpicpgx/cpic-data/compare/v1.25.0...v1.26.0) (2023-06-06)
+
+
+### Features
+
+* fix column headers in exported allele function file ([b0eedcd](https://github.com/cpicpgx/cpic-data/commit/b0eedcd5051c7f397e0d649effd35425c9855527))
+
 ## [1.25.0](https://github.com/cpicpgx/cpic-data/compare/v1.24.0...v1.25.0) (2023-04-13)
 
 
