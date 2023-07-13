@@ -1,3 +1,10 @@
+## [1.27.0](https://github.com/cpicpgx/cpic-data/compare/v1.26.0...v1.27.0) (2023-07-13)
+
+
+### Features
+
+* update data - citalopram test alert file ([ed0fc5b](https://github.com/cpicpgx/cpic-data/commit/ed0fc5b9eaaddc41aaae70c1b08eb9070d18b5c5))
+
 ## [1.26.0](https://github.com/cpicpgx/cpic-data/compare/v1.25.0...v1.26.0) (2023-06-06)
 
 
