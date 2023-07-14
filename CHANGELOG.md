@@ -1,3 +1,10 @@
+## [1.28.0](https://github.com/cpicpgx/cpic-data/compare/v1.27.0...v1.28.0) (2023-07-14)
+
+
+### Features
+
+* RYR1 allele function update ([f4902d7](https://github.com/cpicpgx/cpic-data/commit/f4902d77e1e6d2d1f6b6e3b9fa99b8a33bb98e31))
+
 ## [1.27.0](https://github.com/cpicpgx/cpic-data/compare/v1.26.0...v1.27.0) (2023-07-13)
 
 
