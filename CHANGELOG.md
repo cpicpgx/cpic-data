@@ -1,3 +1,12 @@
+## [1.29.0](https://github.com/cpicpgx/cpic-data/compare/v1.28.0...v1.29.0) (2023-08-01)
+
+
+### Features
+
+* add script to dump file change log to data repo ([bf2b3a9](https://github.com/cpicpgx/cpic-data/commit/bf2b3a9a3556e6f16f778eaa172bd35e7672baf3))
+* add script to write data changelog to TSV ([c00bd00](https://github.com/cpicpgx/cpic-data/commit/c00bd00462303797eb03ee05ee62b1e4c57ae8d8))
+* data update ([ffe9f2c](https://github.com/cpicpgx/cpic-data/commit/ffe9f2c600ba5b1ddf4fcf79bb21b2ec13bb32ec))
+
 ## [1.28.0](https://github.com/cpicpgx/cpic-data/compare/v1.27.0...v1.28.0) (2023-07-14)
 
 
