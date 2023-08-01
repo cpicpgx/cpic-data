@@ -17,7 +17,7 @@ try {
     content += line.join('\t') + '\n';
   }
 
-  await fs.writeFile('../../../data.txt', content);
+  await fs.writeFile('data.tsv', content);
   process.exit(0);
 } catch (err) {
   console.error(err);

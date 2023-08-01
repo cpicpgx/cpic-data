@@ -54,6 +54,10 @@ compile:
 	${GRADLE_CMD} jar
 
 
+.PHONY: data-changelog
+data-changelog:
+	@node src/main/node/writeChangelog.mjs
+
 .PHONY: db-bootstrap
 db-bootstrap:
 	@node src/main/node/db/bootstrap.mjs
