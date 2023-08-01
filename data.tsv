@@ -1,0 +1,642 @@
+Date of Change	Type of Data	Subject	Note of Change
+2023-08-01	TEST_ALERT	citalopram	fixed typo
+2023-08-01	TEST_ALERT	escitalopram	fixed typo
+2023-07-17	TEST_ALERT	simvastatin	fixed typo: "<<=20 mg/kg" to ""<20 mg/kg"
+2023-07-12	ALLELE_FUNCTION_REFERENCE	RYR1	Based on the ClinGen’s RYR1/MH variant curation expert panel (VCEP) re-evaluation for variant classification R530H (c.1589G>A) is now classified as LP (malignant hyperthermia associated) and R4861H (c.14582G>A) is now classified as VUS (uncertain function). Both variants are updated in this file.
+2023-06-04	ALLELE_DEFINITION	CYP2D6	added *172
+2023-06-04	ALLELE_DEFINITION	CYP4F2	added CYP4F2*8 -*16
+2023-05-10	TEST_ALERT	amitriptyline	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	atomoxetine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	clomipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	codeine	added rows for CYP2D6 AS: ≥6, ≥5, ≥3.75, ≥4, ≥3.5, ≥3.25, ≥3, 4, 2.75, 3, 2.5
+2023-05-10	TEST_ALERT	desipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	doxepin	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	hydrocodone	added rows for CYP2D6 AS: ≥6, ≥5, ≥3.75, ≥4, ≥3.5, ≥3.25, ≥3, 4, 2.75, 3, 2.5
+2023-05-10	TEST_ALERT	imipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	nortriptyline	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	ondansetron	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	tamoxifen	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	tramadol	added rows for CYP2D6 AS: ≥6, ≥5, ≥3.75, ≥4, ≥3.5, ≥3.25, ≥3, 4, 2.75, 3, 2.5
+2023-05-10	TEST_ALERT	trimipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	TEST_ALERT	tropisetron	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-04-28	ALLELE_DEFINITION	UGT1A1	Updated the notes tab to (1) remove a dead link, (2) remove reference to *60 which is not included in this file and (3) explain the count of TA repeats in several alleles
+2023-04-20	ALLELE_DEFINITION	CYP2D6	change of position for rs72549346 (*42) based on PharmVar update; new PharmVar ID
+2023-04-20	PAIR		[atorvastatin-CYP3A4] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[atorvastatin-CYP3A5] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[atorvastatin-HMGCR] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[capecitabine-DPYD] PGx testing level changed from Actionable PGx to Testing recommended
+2023-04-20	PAIR		[dibekacin-MT-RNR1] PharmGKB level changed from 1A to none
+2023-04-20	PAIR		[fluvastatin-CYP3A4] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[fluvastatin-HMGCR] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[lovastatin-CYP3A5] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[lovastatin-HMGCR] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[mivacurium-BCHE] PGx testing level changed from none to Actionable PGx
+2023-04-20	PAIR		[neomycin-MT-RNR1] PharmGKB level changed from 1A to 3
+2023-04-20	PAIR		[netilmicin-MT-RNR1] PharmGKB level changed from 1A to none
+2023-04-20	PAIR		[ribostamycin-MT-RNR1] PharmGKB level changed from 1A to none
+2023-04-20	PAIR		[rosuvastatin-CYP3A5] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[simvastatin-CYP3A4] PharmGKB level changed from none to 3
+2023-04-20	PAIR		[simvastatin-CYP3A5] PharmGKB level changed from none to 4
+2023-04-20	PAIR		[tacrolimus-CYP3A4] PharmGKB level changed from 1B to 2A
+2023-04-20	PAIR		[tacrolimus-CYP3A5] PGx testing level changed from none to Informative PGx
+2023-04-20	PAIR		[tolazamide-G6PD] PGx testing level changed from none to Actionable PGx
+2023-04-20	PAIR		[tolbutamide-G6PD] PGx testing level changed from none to Actionable PGx
+2023-04-20	PAIR		[trametinib-G6PD] PGx testing level changed from none to Informative PGx
+2023-04-18	RECOMMENDATION	fluvoxamine	changed AS ≥4.5 to 3.75 and AS 3.5 to 2.75 because of the CYP2D6 functionailty assignment changes
+2023-04-18	RECOMMENDATION	paroxetine	changed AS ≥4.5 to 3.75 and AS 3.5 to 2.75 because of the CYP2D6 functionailty assignment changes
+2023-04-18	RECOMMENDATION	venlafaxine	changed AS ≥4.5 to 3.75 and AS 3.5 to 2.75 because of the CYP2D6 functionailty assignment changes
+2023-04-18	RECOMMENDATION	vortioxetine	changed AS ≥4.5 to 3.75 and AS 3.5 to 2.75 because of the CYP2D6 functionailty assignment changes
+2023-04-14	ALLELE_DEFINITION	CYP2D6	change of position for rs72549346 (*42) based on PharmVar update; new PharmVar ID
+2023-04-13	ALLELE_DEFINITION	CYP2B6	added protein change update to rs3745274
+2023-04-11	PAIR		added PMID for SSRI/SNRI guideline
+2023-04-10	PAIR		updated SSRI/SNRI guideline pairs
+2023-03-20	ALLELE_FUNCTION_REFERENCE	CYP2D6	Changes from 11/08/2022 were released in the CPIC db in March 2023
+2023-03-02	ALLELE_DEFINITION	CYP2B6	added *39-*49
+2023-02-02	ALLELE_FUNCTION_REFERENCE	G6PD	Update function assignment for Tokyo and Farroupilha to standardize with CPIC G6PD function terms based on work from Geck, et al. 2023
+2023-01-06	FREQUENCY	CYP2D6	added *140 - *163 (excluding *150, *151)
+2022-12-20	PAIR		updated G6PD/moxifloxacin and statin pairs with no recommendation
+2022-12-19	PAIR		updated G6PD pairs
+2022-12-09	ALLELE_DEFINITION	CYP2D6	added p.E211fs for *150 and p.L231del for *166; PVID for *150 was updated
+2022-11-11	ALLELE_DEFINITION	CYP4F2	PharmVar IDs updated
+2022-11-08	ALLELE_FUNCTION_REFERENCE	CYP2D6	Added *140 to *163 (except *150, *151- were pending at the time)
+2022-11-08	ALLELE_FUNCTION_REFERENCE	CYP2D6	Added strength of evidence and added and updated summaries to all alleles
+2022-11-08	ALLELE_FUNCTION_REFERENCE	CYP2D6	Changed function assignment for *9, *32, *41, *52, *91, *109, *119, *132,
+2022-10-28	ALLELE_DEFINITION	CYP2D6	*19: 1662G>C, 2851C>T (R296C), 4181G>C (S486T) set to wobbles S, R, and S due to *19.002 suballele addition to PharmVar
+2022-10-28	ALLELE_DEFINITION	CYP2D6	added *150, *151, *164-*171
+2022-10-28	ALLELE_DEFINITION	CYP2D6	changed PVID for *152 and *153
+2022-10-03	ALLELE_DEFINITION	CYP2C19	added g.94842866A>G to *5, *7, *8
+2022-10-03	ALLELE_DEFINITION	CYP2C19	replaced PharmVAR IDs for *38, *5, *7, *8, *16, *30, *34
+2022-09-22	RECOMMENDATION	paroxetine	updated recommendation to guideline update
+2022-09-20	RECOMMENDATION	fluvoxamine	updated content based on the SSRI-SNRI guideline update
+2022-09-20	RECOMMENDATION	venlafaxine	created
+2022-09-20	RECOMMENDATION	vortioxetine	created
+2022-08-14	ALLELE_DEFINITION	CYP2D6	added *152-*163
+2022-06-03	ALLELE_DEFINITION	CYP2D6	update of *147 variant single insertion of AAAGGGGCG and PharmVar ID
+2022-05-04	ALLELE_DEFINITION	CYP2C9	mapping of *74 changed at PharmVar PV01740Replaced by PV01803 (corresponds to change from 8757G>T to 9257G>T both listed as Q214H)
+2022-04-26	PAIR		[amikacin-MT-RNR1] PharmGKB level changed from 3 to 1A
+2022-04-26	PAIR		[kanamycin-MT-RNR1] PharmGKB level changed from 3 to 1A
+2022-04-26	PAIR		[pimozide-CYP2D6] PharmGKB level changed from 3 to none
+2022-04-26	PAIR		[tobramycin-MT-RNR1] PharmGKB level changed from 3 to 1A
+2022-04-19	ALLELE_DEFINITION	CYP2C9	added *76-*85
+2022-04-19	ALLELE_DEFINITION	CYP2D6	protein header at Z3 ('p.Y107I; p.T107N' (in column Z) to 'p.T107N; p.T107I')
+2022-04-04	FREQUENCY	G6PD	updated to include frequency for "Cairo" found in gnomAD v3.1.2
+2022-03-24	ALLELE_DEFINITION	CYP2C19	added p.expression in NP field for -806C>T
+2022-03-23	FREQUENCY	CYP4F2	Added *2, *3 frequency using gnomad data
+2022-03-17	TEST_ALERT	rosuvastatin	remvoe ABCG2 indeterminate rows
+2022-03-12	FREQUENCY	CYP2D6	added "x" infront of "≥"
+2022-03-12	FREQUENCY	CYP2D6	split *4≥2 into *4x2 and *4x≥3 to be in sync with PharmVar
+2022-03-11	FREQUENCY	ABCG2	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	CYP2B6	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	CYP2C19	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	CYP2C9	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	CYP2D6	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	CYP3A5	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	NUDT15	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	SLCO1B1	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	TPMT	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-11	FREQUENCY	UGT1A1	fixed diplotpye/phenotype calculations and made layouts consistent
+2022-03-08	ALLELE_FUNCTION_REFERENCE	CYP2D6	Update structural variants to agree with PharmVar nomenclature
+2022-02-22	RECOMMENDATION	carbamazepine	Fix the format of the "No Result" Allele Status values
+2022-02-15	ALLELE_FUNCTION_REFERENCE	CYP3A5	Removed *2, *4, *5 rows based on the CYP3A5 allele definition update (all had unknown function assigned)
+2022-02-13	ALLELE_DEFINITION	CYP2D6	added 1979C>T to represent updated *20 core allele variants to 1979C>T+1980T>C (L213S) instead of 1980T>C (L213P); this introduces an R at position 1979 for *1 and *124 since some but not all suballeles include the 1979C>T variant
+2022-02-13	ALLELE_DEFINITION	CYP2D6	updated *20 PharmVar ID
+2022-02-09	FREQUENCY	ABCG2	frequency file created.
+2022-02-04	ALLELE_DEFINITION	CYP2D6	added *148
+2022-02-03	FREQUENCY	CYP2C9	Fixed population group values to match standard
+2022-02-01	ALLELE_DEFINITION	CYP3A5	*2, *4, *5 retired by PharmVar - removed "wobbles" from *3 at the *2, *4, *5 positions that documented the overlap with *3 suballeles
+2022-02-01	ALLELE_DEFINITION	CYP3A5	*3.011 retired by PharmVar - removed "wobble" from *3 at the *9 position that documented the overlap with *3.011 allele
+2022-02-01	ALLELE_DEFINITION	CYP3A5	removed Note: "In addition, variants that present in the core allele for one star allele but also present in some but not allsuballeles of another star allele are included in the other star allele as ambiguous changes using the IUPAC nucleotide code (https://www.bioinformatics.org/sms/iupac.html), e.g. the *3 consensus allele includes a "Y" being either C or T at the 14660A>G position since this variant is part of the *4 core allele but is not part of the *3 core allele at PharmVar since it is not present in all *3 suballeles (only in *3.009). These positions are represented in grey in the Comparative Allele ViewEr (CAVE) tool at PharmVar."
+2022-02-01	RECOMMENDATION	simvastatin	updated recommendation based on CPIC statin guideline included simvastatin update
+2022-01-25	ALLELE_DEFINITION	CYP4F2	added CYP4F2*4, *5, *6 and *7
+2022-01-24	ALLELE_FUNCTION_REFERENCE	CYP2C9	Added *62 to *75; other alleles (*1-*61 were not updated at this time)
+2022-01-15	FREQUENCY	CYP2C9	Added new alleles *62-75 based on PharmVar update. Allele frequency from gnomAD was also added for alleles that contain single unique variant.
+2022-01-04	ALLELE_DEFINITION	CYP2C9	added *72-*75
+2021-12-02	ALLELE_DEFINITION	CYP2D6	updated PharmVar ID for *149
+2021-12-02	PAIR		added ACYP2 and cisplatin at level D
+2021-12-01	ALLELE_DEFINITION	SLCO1B1	Added new alleles *48-*49
+2021-11-16	ALLELE_FUNCTION_REFERENCE	G6PD	Added finding statements and strength of evidence for all variants
+2021-11-16	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Added *48 and *49
+2021-11-10	FREQUENCY	SLCO1B1	Added new alleles *48, *49
+2021-10-22	ALLELE_DEFINITION	CYP2D6	added new alleles *146, *147, *149
+2021-10-22	ALLELE_DEFINITION	CYP2D6	added wobbles (W and M) into *36 due to release of *36.004 which includes amino acid changes that are core allele variants in *49 and *53
+2021-10-22	ALLELE_FUNCTION_REFERENCE	RYR1	Based on the ClinGen’s variant curation expert panel (VCEP) recommendations for RYR1 pathogenicity classification in malignant hyperthermia susceptibility (PMID 33767344) two variants have been changed from "malignant hyperthermia associated" to "uncertain function"
+2021-10-13	ALLELE_DEFINITION	DPYD	added note about variant source
+2021-10-13	ALLELE_DEFINITION	NUDT15	added link to the PharmVar NUDT15 page on Notes tab
+2021-10-05	GENE_CDS	ABCG2	created
+2021-10-01	ALLELE_DEFINITION	CYP2D6	added rs1931013246
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 137_138insT to 137dup and g.42130655_42130656insA to g.42130655dup and g.5156_5157insT to g.5156dup; reference cell from del to A and variant cell from insA to AA
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 1864_1865insTTTCGCCCC; 1856_1857insTTTCGCCCCTTTCGCCCC to 1864_1865TTTCGCCCC[3]; 1856_1857dup; 1856_1864dup and g.42128936_42128937insGGGGCGAAA; g.42128936_42128937insGGGGCGAAAGGGGCGAAA to g.42128934AAAGGGGCG[3]; g.42128934_42128942dup and g.6883_6884insTTTCGCCCC; g.6883_6884insTTTCGCCCCTTTCGCCCC to g.6875_6883dup, g.6875TTTCGCCCC[3] and refrence cell from del to AAAGGGGCG and *30, *58, *145 variant cell from insGGGGCGAAA to AAAGGGGCGAAAGGGGCG; *40 variant cell from insGGGGCGAAAGGGGCGAAA to AAAGGGGCG(3)
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 1977_1978insG to 1977dup and g.42128817_42128818insC to g.42128817dup and g.6996_6997insG to g.6996dup and refernec cell dec to C and varinat cell insC to CC
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 2540delAACT to 2540_2543del and g.42128249delAGTT to g.42128251_42128254del and g.7559delAACT to g.7559_7562del and reference cell from AGTT to TTAG and variant cells from delAGTT to delTTAG
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 2580_2581insC to 2580dup and g.42128218_42128219insG to g.42128218dup and g.7599_7600insC to g.7599dup and reference cell from del to G and variant cell from insG to GG
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 2588delGACT to 2586CTGA[1] and g.42128201delAGTC to g.42128199TCAG[1] and g.7607delGACT to g.7605CTGA[1] and reference cell from AGTC to TCAG(2) and variant cell from delAGTC to TCAG(1)
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 2616delAAG to 2616_2618del and g.42128174delCTT to g.42128176_42128178del and g.7635delAAG to g.7635_7637del and reference cell from CTT to TCT and variant cell from delCTT to delTCT
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 2928delGATCCTACATCCGGATGTG to 2928_2936del and g.42127846delCACATCCGGATGTAGGATC to g.42127846_42127864del and g.7947delGATCCTACATCCGGATGTG to g.7947_7965del
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed 3810delTC to 3810_3811del and g.42126981delGA to g.42126982_42126983del and g.8829delTC to g.8829_8830del and reference cell from GA to AG and variant cell from del GA to delAG
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed g.42130728delG to g.42130729del per PharmVar API content; removed C in other headers for that variant
+2021-10-01	ALLELE_DEFINITION	CYP2D6	changed g.9153_9154insGTGCCCACT to g.9146_9154dup and 4134_4135insGTGCCCACT to 4127_4135dup and g.42126657_42126658insAGTGGGCAC to g.42126658_42126666dup and reference cell from del to AGTGGGCAC and variant cell from insAGTGGGCAC to AGTGGGCACAGTGGGCAC
+2021-10-01	ALLELE_DEFINITION	CYP2D6	removed letter after del in header positions for 1708delT
+2021-10-01	ALLELE_DEFINITION	CYP2D6	removed letter after del in header positions for 1996delC
+2021-10-01	ALLELE_DEFINITION	CYP2D6	removed letter after del in header positions for 2550delA
+2021-10-01	ALLELE_DEFINITION	CYP2D6	removed letter after del in header positions for 2829delC
+2021-10-01	FREQUENCY	G6PD	created version 1
+2021-09-29	ALLELE_DEFINITION	TPMT	updated link to Nomenclature website and added note
+2021-09-24	ALLELE_DEFINITION	UGT1A1	changed representation for *36, *27, *28 from g.233760233 to g.233760235TA[6]; g.233760235TA[7]; g.233760235TA[8]; g.233760235TA[9] and from g.175490 to g.175492TA[6]; g.175492TA[7]; g.175492TA[8]; g.175492TA[9]
+2021-09-21	FREQUENCY	SLCO1B1	Updated allele table based on PharmVar SLCO1B1 release
+2021-09-17	ALLELE_FUNCTION_REFERENCE	CYP2C19	*39 added
+2021-09-17	FREQUENCY	CYP2C19	added *39 in the allele frequency and references tab
+2021-09-08	TEST_ALERT	aminosalicylic acid	created
+2021-09-08	TEST_ALERT	aspirin	created
+2021-09-08	TEST_ALERT	chloramphenicol	created
+2021-09-08	TEST_ALERT	chloroquine	created
+2021-09-08	TEST_ALERT	ciprofloxacin	created
+2021-09-08	TEST_ALERT	dapsone	created
+2021-09-08	TEST_ALERT	dimercaprol	created
+2021-09-08	TEST_ALERT	doxorubicin	created
+2021-09-08	TEST_ALERT	furazolidone	created
+2021-09-08	TEST_ALERT	glyburide	created
+2021-09-08	TEST_ALERT	hydroxychloroquine	created
+2021-09-08	TEST_ALERT	mafenide	created
+2021-09-08	TEST_ALERT	methylene blue	created
+2021-09-08	TEST_ALERT	nalidixic acid	created
+2021-09-08	TEST_ALERT	nitrofurantoin	created
+2021-09-08	TEST_ALERT	norfloxacin	created
+2021-09-08	TEST_ALERT	ofloxacin	created
+2021-09-08	TEST_ALERT	pegloticase	created
+2021-09-08	TEST_ALERT	phenazopyridine	created
+2021-09-08	TEST_ALERT	primaquine	created
+2021-09-08	TEST_ALERT	quinine	created
+2021-09-08	TEST_ALERT	rasburicase	created
+2021-09-08	TEST_ALERT	sulfadiazine	created
+2021-09-08	TEST_ALERT	sulfadimidine	created
+2021-09-08	TEST_ALERT	sulfamethoxazole / trimethoprim	created
+2021-09-08	TEST_ALERT	sulfanilamide	created
+2021-09-08	TEST_ALERT	sulfasalazine	created
+2021-09-08	TEST_ALERT	sulfisoxazole	created
+2021-09-08	TEST_ALERT	tafenoquine	created
+2021-09-08	TEST_ALERT	tolbutamide	created
+2021-09-08	TEST_ALERT	toluidine blue	created
+2021-09-08	TEST_ALERT	vitamin c	created
+2021-09-08	TEST_ALERT	vitamin k	created
+2021-09-03	ALLELE_DEFINITION	NUDT15	PharmVar introduced core allele definitions for NUDT15, 502G>A was removed from *20
+2021-09-03	ALLELE_DEFINITION	NUDT15	added p. in front of amino acid change
+2021-09-03	ALLELE_DEFINITION	NUDT15	based on the PharmVar API content columns for 50delGAGTCG and 55_56insGAGTCG are combined for rs746071566 and the variant representation changed, content starting D11 to the right
+2021-09-03	ALLELE_DEFINITION	NUDT15	based on the PharmVar API content for rs761191455 the following was changed: 342_343insG, E115Frameshift, g.48041103_48041104insG, g.8537_8538insG, reference cell: del, variant cell: insG to 343dup, p.E115fs, g.48041104dup, g.8538dup, reference cell: G, variant cell: GG
+2021-09-03	ALLELE_DEFINITION	NUDT15	removed nucleotide A from headers in row 2, 4, 5 for rs1457579126
+2021-09-02	ALLELE_DEFINITION	CYP2C9	changed column headers for rs1304490498 from 3531delAGAAATGGAA, p.118fs, g.94942213delAGAAATGGAA, g.9056delAGAAATGGAA to 3531_3540del, p.K118fs, g.94942213_94942222del, g.9056_9065del based on PharmVar API content
+2021-09-02	ALLELE_DEFINITION	CYP2C9	removed A from column headers in row 2, 4, 5 for rs9332131 based on PharmVar API content
+2021-09-02	ALLELE_DEFINITION	CYP3A5	based on PharmVar API content replaced for rs41303343 27126_27127insT, p.346fs, g.99652770_99652771insA, g.32228_32229insT, reference cell: del, allele cell: insA to 27126dup p.T346fs, g.99652771dup, g.32228dup, reference cell: A, allele cell: AA
+2021-09-02	ALLELE_DEFINITION	DPYD	changed representation for rs72549309 from c.295_298delTCAT, p.F100Sfs, g.97740411_97740414delATGA, g.185642_185645delTCAT, reference cell: ATGA, allele cell: delATGA to c.299_302del, g.97740411ATGA[1], g.185642TCAT[1], reference cell: ATGA(2), allele cell: ATGA(1) to match the PharmVar API content
+2021-09-02	ALLELE_DEFINITION	DPYD	removed base from row 2, 4, 5 for c.1898del
+2021-08-19	ALLELE_DEFINITION	CYP2D6	changed S to G at position g.42129130 for all allele in which all suballeles have the variant alleles, see notes for further detail
+2021-08-16	ALLELE_DEFINITION	MT-RNR1	Combined columns for 807 variants
+2021-08-03	TEST_ALERT	clopidogrel	created
+2021-08-02	TEST_ALERT	fluvastatin	created
+2021-08-02	TEST_ALERT	rosuvastatin	created
+2021-07-30	TEST_ALERT	atorvastatin	Deleted possible phenotypes and increased function; updated CDS alerts text to reflect recommendations in 2021 guideline
+2021-07-30	TEST_ALERT	lovastatin	Deleted possible phenotypes and increased function; updated CDS alerts text to reflect recommendations in 2021 guideline
+2021-07-30	TEST_ALERT	pitavastatin	Deleted possible phenotypes and increased function; updated CDS alerts text to reflect recommendations in 2021 guideline
+2021-07-30	TEST_ALERT	pravastatin	Deleted possible phenotypes and increased function; updated CDS alerts text to reflect recommendations in 2021 guideline
+2021-07-30	TEST_ALERT	simvastatin	Deleted possible phenotypes and increased function; updated CDS alerts text to reflect recommendations in 2021 guideline
+2021-07-12	ALLELE_DEFINITION	SLCO1B1	Added new alleles *43-*47
+2021-07-09	ALLELE_DEFINITION	NUDT15	update the deletion bases for *9
+2021-07-08	ALLELE_FUNCTION_REFERENCE	ABCG2	Created
+2021-07-08	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Authors updated allele function, PMIDs, and Findings and added additional alleles based on PharmVar
+2021-06-28	RECOMMENDATION	fosphenytoin	Fix typo for HLA-B "No Result" value
+2021-06-28	RECOMMENDATION	phenytoin	Fix typo for HLA-B "No Result" value
+2021-06-23	GENE_CDS	SLCO1B1	Deleted recommendation specific to simvastatin for decreased and poor function and added information for all statins; removed "possible" phenotypes
+2021-06-22	RECOMMENDATION	clopidogrel	created
+2021-06-11	ALLELE_DEFINITION	CYP2C9	changed R144H to R144C for 3608C>T
+2021-06-09	ALLELE_DEFINITION	MT-RNR1	Added variants with no rsID
+2021-05-24	ALLELE_DEFINITION	CYP2D6	changed p.H478N to p.H478Y
+2021-05-18	ALLELE_DEFINITION	CYP2D6	added p. infront of amino acid change
+2021-05-18	ALLELE_DEFINITION	CYP2D6	replaced rs200965026 with rs369177208
+2021-05-07	ALLELE_DEFINITION	CYP2D6	added 1662G>C; This is a synonymous variant that is present in most alleles but in *29 and *70 this variant together with 1660G>A results in an amino acid change from V136I instead of the V136M of 1660G>A by itself
+2021-05-07	ALLELE_DEFINITION	CYP2D6	changed 3260_3261insGT to 3261_3262insGT and g.42127533_42127534insAC to g.42127530_42127531insAC
+2021-05-07	ALLELE_DEFINITION	CYP2D6	changed A431G to A482G
+2021-05-07	ALLELE_DEFINITION	CYP2D6	changed Frameshift to 'amino acid position' fs for the frameshift causing variants
+2021-05-07	ALLELE_DEFINITION	CYP2D6	changed rsID for 4073G>A to rs200965026
+2021-05-07	ALLELE_DEFINITION	CYP2D6	deleted T variant at position 2989G>A in *132
+2021-05-07	ALLELE_DEFINITION	CYP2D6	took out delGene from *5, gene deletion is reflected through PVID
+2021-05-07	ALLELE_DEFINITION	CYP2D6	update to NG_008376.4 in row 5 which moves all positions compared to NG_008376.3
+2021-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 17625515, 32857933, 29325448, 29136336, 31649299, 20083681 to PMID for *17 and changed level of evidence from strong to definitive
+2021-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 19164093 to PMID for *22
+2021-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 21692664 to PMID for *5, *8, *9, *10, *11, *19
+2021-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 29098786 *29, *30, *31, *32, *33
+2021-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 29325448, 33237321 to PMID for *1
+2021-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 31713493 to PMID for *22, *23, *24
+2021-05-06	ALLELE_DEFINITION	CYP2C19	Moved *38 as reference as this allele matches the human genome CYP2C19 Reference sequence LRG_584 / NG_008384.3.
+2021-05-06	ALLELE_DEFINITION	CYP2C19	added *39
+2021-05-04	ALLELE_DEFINITION	CYP2C9	Changed file to use RefSeq NG_008385.2 positions, updated allele definitions and added new allele *71 from PharmVar
+2021-04-29	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Based on PharVar assessments of SLCO1B1 allele defintion, *1A renamed *1, *1B renamed as *37, *1C reassigned as *38, added new alleles *39, *40, *41, *42, merged *17 with *15, merged *18 with *14, *21 with *20, *22 with *1, and *35 with *20.
+2021-04-28	ALLELE_DEFINITION	CYP2C19	romoved "delgene" text from *36
+2021-04-26	ALLELE_FUNCTION_REFERENCE	CYP2C9	Added PMID 15637526 to PMID column for *2
+2021-04-23	ALLELE_DEFINITION	CYP2B6	update cell Z2 from 21034T>C to 21034C>T
+2021-04-22	ALLELE_FUNCTION_REFERENCE	CYP2C19	*1: Added PMIDs: 32602114, 22027650 to reflect well established normal function (PharmGKB and PharmVar CYP2C19 review articles) |Removed PMIDs: 12464799, 17455109, 18312490, 21325430, 25001882, 20712527, 26244421, 7484048 becuase well established alleles do not require primary literature review
+2021-04-22	ALLELE_FUNCTION_REFERENCE	CYP2C19	*25: Added PMID 19636337. In sillico data. Article cited on PharmVar and likely evaluated by authors
+2021-04-22	ALLELE_FUNCTION_REFERENCE	CYP2C19	*28: Added PMID 20712527. In sillico data. Article cited on PharmVar and likely evaluated by authors
+2021-04-22	ALLELE_FUNCTION_REFERENCE	CYP2C19	*2: Added PMID 22027651 to reflect well established no function (PharmGKB CYP2C19 review article) | Removed PMIDS 9732415, 19661214, 9103550 becuase well established alleles do not require primary literature review
+2021-04-22	ALLELE_FUNCTION_REFERENCE	CYP2C19	*38: Added PMID 32602114. PharmVar article which details the change in star allele designation
+2021-04-22	ALLELE_FUNCTION_REFERENCE	CYP2C19	*3: Added PMID 22027651 to reflect well established no function (PharmGKB CYP2C19 review article)
+2021-04-15	ALLELE_FUNCTION_REFERENCE	CYP2C9	Edited evidence summary column to comply with revised allele function SOP
+2021-04-14	ALLELE_DEFINITION	CYP2D6	corrected nucleotides for *114 to C in reference row and T in *144 row to align with GRCh38 nucleotides
+2021-04-11	ALLELE_DEFINITION	SLCO1B1	updated alleles based on PharmVar update: Update of alleles:
+			• *18, remove 578T>G (L193R) 
+			• *21: add L643F (1929 A>C, rs34671512)
+			• Rename *1A to *1
+			New rows (new alleles):
+			• Add row *37: *1B re-assigned as *37
+			• Add row: *38 (old *1c), 
+			• Add *39, *40, *41, *42 (*39-*42 from new sequence submissions)
+			New columns (core alleles from new submission):
+			• Add column: for R152L for *38 (no rsID yet, the one at the chr location show as G>C instead of G>A https://www.ncbi.nlm.nih.gov/snp/rs145144129)
+			• Add column: Splice donor for core alleles from *41 from new submissions
+			• Add column: Y173C for core alleles from *42 from new submissions
+			• Add column: R253X for core allele from *39
+			Remove rows (merges):
+			• *1B: reassigned as *37
+			• *17: merged *17 with *15 (-910G>A removed)
+			• *18: Merge *18 with *14 (L191=, F199=, S137= removed from core allele definition)
+			• *21: Merge *21 with *20 (-910G>A removed)
+			• *22: Merge *22 with *19 (L191= removed)
+			• *35: Merge *35 with *20 (F199= removed, no information for F199=)
+			Remove columns:
+			• Remove column: rs4149015 (-910G>A) from allele definition table (pass 500 upstream of exon 1)
+			• Remove column: 578T>G (L193R), since *18 no longer have this
+			• Remove column: L191= (rs4149057) from core allele definition, synonymous change
+			• Remove column: F199= (rs2291075) from core allele definition, synonymous change
+			• Remove column: S137= (rs11045818) from core allele definition, synonymous change
+2021-04-01	ALLELE_DEFINITION	UGT1A1	deleted column for -3275T>G, *60 was removed as row but position was still included
+2021-03-30	ALLELE_DEFINITION	CYP2B6	*16 has been removed from PharmVar as a core allele and now is a suballele of *18, meaning that *18 may have an A or G at position 18053
+2021-03-03	FREQUENCY	MT-RNR1	File created
+2021-02-25	ALLELE_DEFINITION	G6PD	Removed the Hektoen variant which has no mapping information. Approved by G6PD guideline authors.
+2021-02-25	ALLELE_FUNCTION_REFERENCE	G6PD	Removed the Hektoen variant, which has no mapping information
+2021-02-17	ALLELE_DEFINITION	CYP2D6	combined the two 1721 columns into one column
+2021-02-11	ALLELE_DEFINITION	MT-RNR1	Created file
+2021-01-31	RECOMMENDATION	atomoxetine	AS >=3.25 corrected phenotype from NM to UM in pediatrics
+2021-01-31	RECOMMENDATION	atomoxetine	changed text for NM and IM AS 1 from "Initiate with a dose of 0.5 mg/kg and increase to 1.2 mg/kg/day after 3 days." to "Initiate with a dose of 0.5 mg/kg/day and increase to 1.2 mg/kg/day after 3 days." to have 0.5mg/kg/day
+2021-01-21	ALLELE_DEFINITION	CYP2C9	CPIC file still uses CYP2C9 RefSeqGene - NG_008385.1; PharmVar uses CYP2C9 RefSeqGene (LRG_1195) - NG_008385.2, which has different position numbers due to the different lengths of the NG sequences
+2021-01-21	ALLELE_DEFINITION	CYP2C9	added *63-*70
+2021-01-21	ALLELE_DEFINITION	CYP2D6	*128 changed variant allele from G to C (GRCH38)
+2021-01-21	ALLELE_DEFINITION	CYP2D6	added *142 to *145
+2021-01-21	ALLELE_DEFINITION	CYP2D6	changed variant for *124 from 3810_3811insTC to 3810delTC (as per PharmVar website 1/21/21 -Corrected in v4.1.9 3810ins TC was corrected to 3810_3811delTC)
+2021-01-21	ALLELE_DEFINITION	CYP2D6	variant in *18, position moved from 4133_4134insGTGCCCACT to 4134_4135insGTGCCCACT and 42126666_42126667insAGTGGGCAC to g.42126657_42126658insAGTGGGCAC (per PharmVar Corrected in v.4.2.3 4133_4134insGTGCCCACT was corrected to 4134_4135insGTGCCCACT)
+2021-01-12	ALLELE_DEFINITION	G6PD	Updated the names to remove "G6PD" for Nice, A- 680T_376G and A- 968C_376G for consistency
+2021-01-12	ALLELE_FUNCTION_REFERENCE	G6PD	Updated the names to remove "G6PD" for Nice, A- 680T_376G and A- 968C_376G for consistency
+2020-12-30	FREQUENCY	CYP2C19	corrected frequency for *35 for PMID: 26021325 for the Sub-Saharan African Luhya in Webuye (LWK) and Esan (ESN) entry, which changes the allele frequency for *35 from 0.0915 to 0.0321
+2020-12-09	RECOMMENDATION	codeine	updated text in the implications field in PM row
+2020-12-08	ALLELE_DEFINITION	NUDT15	Fixed chromosomal location value for rs746071566 to use "g." prefix
+2020-12-06	ALLELE_DEFINITION	CYP2B6	Combined colums for g.41016810C>T and g.41016810C>A
+2020-10-19	FREQUENCY	CYP2D6	changed reference 26423923 to 26423926
+2020-10-14	FREQUENCY	CYP2C9	Updated phenotype frequencies to AS frequencies to be consistent with other CYP2C9 information
+2020-10-14	FREQUENCY	CYP2D6	Updated phenotype frequencies to AS frequencies to be consistent with other CYP2D6 information
+2020-10-14	PAIR		updated PharmGKB levels and PGx testing values
+2020-10-09	ALLELE_DEFINITION	RYR1	changed c.7039_7041delGAG or c.7042_7044delGAG name to c.7042_7044delGAG to reflect naming as on the EMHG list and used mapping data that correspond with the rsID in dbSNP
+2020-10-09	ALLELE_FUNCTION_REFERENCE	RYR1	changed c.7039_7041delGAG or c.7042_7044delGAG name to c.7042_7044delGAG to reflect naming as on the EMHG list and used mapping data that correspond with the rsID in dbSNP
+2020-10-09	FREQUENCY	RYR1	changed c.7039_7041delGAG or c.7042_7044delGAG name to c.7042_7044delGAG to reflect naming as on the EMHG list and used mapping data that correspond with the rsID in dbSNP
+2020-10-08	ALLELE_DEFINITION	CYP2D6	*140 and *141
+2020-09-26	ALLELE_DEFINITION	CYP2C19	removed core allele only tab; added comment in notes
+2020-09-26	ALLELE_DEFINITION	CYP2D6	Removed core allele only tab, added comment to Notes
+2020-09-22	ALLELE_DEFINITION	RYR1	changed ambiguous nucleotides in headers to two sequences, e.g. NC_000019.10:g.38446710G>M to g.38446710G>C; g.38446710G>A
+2020-09-22	ALLELE_DEFINITION	RYR1	chromosomal and Ref sequence change for R163L - changed G>A to G>T; ref sequence for R614L entered as g.28847G>T
+2020-09-18	PAIR		changed PharmGKB level to 1A for desipramine, imipramine and CYP2D6 and for imipramine, trimipramine, clomipramine, doxepin for CYP2C19
+2020-09-18	PAIR		changed PharmGKB level to 3 for tegafur
+2020-09-15	PAIR		added PMID for PPI drugs (omeprazole, lansoprazole, dexlansoprazole, pantoprazole, esomeprazole, rabeprazole) rows 43, 42, 45, 109, 260, 313 column G
+2020-09-15	PAIR		added URL link for esomeprazole, rabeprazole rows 260, 313 column C
+2020-09-15	PAIR		changed "used for recommendation" (column H) from n/a to No for rows 260, 313 and from Yes to No for rows 227, 234, 253, 275, 280, 292, 295, 324
+2020-09-15	PAIR		removed guideline URL and PMID from row 281
+2020-09-15	PAIR		removed links to a CPIC guideline from column C and changed No to n/a for the following rows 99,135,156,172,186,, 217, 230, 235, 237, 238, 243, 244, 245, 268, 319, 321, 323, , 334, 342, 363,364, 365, 375, 377, 378, 407-10, 448, 449, 457, 476-479
+2020-09-14	ALLELE_DEFINITION	CYP2B6	Removed columns for the different structural variants and consolidated it in one column at the end of the table that lists PharmVar's description for the structural variants
+2020-09-14	ALLELE_DEFINITION	CYP2C19	Renamed column header for *37, which represents a partial gene deletion, and replaced it with 'structural variation' and list the PharmVar IDs for the structural variants
+2020-09-14	ALLELE_DEFINITION	CYP2D6	Removed columns for the different strutural variant changes in CYP2D6 and replaced it with one column that lists the PharmVar IDs for the structural variants
+2020-08-26	ALLELE_DEFINITION	NUDT15	changed ref to del for *1 of insertion variants to match insertaton representation in other genes
+2020-08-17	ALLELE_DEFINITION	DPYD	added del into g.97740411_97740414ATGA cell F4
+2020-08-17	ALLELE_DEFINITION	NUDT15	Added *20
+2020-08-11	RECOMMENDATION	codeine	File created
+2020-08-11	RECOMMENDATION	hydrocodone	File created
+2020-08-11	RECOMMENDATION	tramadol	File created
+2020-08-10	ALLELE_DEFINITION	CYP3A5	created second tab for core alleles+overlap (see notes)
+2020-08-10	ALLELE_DEFINITION	CYP3A5	updated to PharmVar numbering in row 2
+2020-08-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	added missing PMID for *1 in PMIDs column
+2020-08-07	ALLELE_FUNCTION_REFERENCE	CYP2C9	Fixed typo in Findings column for *1
+2020-08-07	ALLELE_FUNCTION_REFERENCE	CYP2D6	Fixed PMID field for *2 and *10 (added missing PMIDs)
+2020-08-05	ALLELE_FUNCTION_REFERENCE	MT-RNR1	File created
+2020-07-21	TEST_ALERT	desflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-21	TEST_ALERT	enflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-21	TEST_ALERT	halothane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-21	TEST_ALERT	isoflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-21	TEST_ALERT	methoxyflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-21	TEST_ALERT	sevoflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-21	TEST_ALERT	succinylcholine	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-20	RECOMMENDATION	desflurane	created log
+2020-07-20	RECOMMENDATION	enflurane	created log
+2020-07-20	RECOMMENDATION	halothane	created log
+2020-07-20	RECOMMENDATION	isoflurane	created log
+2020-07-20	RECOMMENDATION	methoxyflurane	created log
+2020-07-20	RECOMMENDATION	sevoflurane	created log
+2020-07-20	RECOMMENDATION	succinylcholine	created log
+2020-07-20	TEST_ALERT	amitriptyline	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	atomoxetine	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	clomipramine	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	desipramine	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	doxepin	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	imipramine	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	nortriptyline	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	ondansetron	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	tamoxifen	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	trimipramine	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-20	TEST_ALERT	tropisetron	added rows for CYP2D6 AS: ≥6, ≥5, ≥4.5, ≥4, ≥3.5, ≥3.25, ≥3, 4, 3.5, 3, 2.5
+2020-07-17	ALLELE_FUNCTION_REFERENCE	CYP2C19	fixed typo in change dates on this tab
+2020-07-17	RECOMMENDATION	atazanavir	Fixed a typo for "interrmediate metabolizer"
+2020-07-15	GENE_CDS	SLCO1B1	added EHR Priority Result Notation none and consultation text for Indeterminate
+2020-07-15	GENE_CDS	SLCO1B1	changed EHR Priority Result Notation from Normal/Routine/Low Risk to none for Possible Increased Function based on Consultation text
+2020-07-15	RECOMMENDATION	simvastatin	added SLCO1B1 possible increased function row
+2020-07-15	TEST_ALERT	atorvastatin	added row for possible increased function
+2020-07-15	TEST_ALERT	lovastatin	added row for possible increased function
+2020-07-15	TEST_ALERT	pitavastatin	added row for possible increased function
+2020-07-15	TEST_ALERT	pravastatin	added row for possible increased function
+2020-07-15	TEST_ALERT	simvastatin	added row for possible increased function
+2020-07-14	RECOMMENDATION	amitriptyline	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	atomoxetine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	azathioprine	log created
+2020-07-14	RECOMMENDATION	clomipramine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	desipramine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	doxepin	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	fluvoxamine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	imipramine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	mercaptopurine	log created
+2020-07-14	RECOMMENDATION	nortriptyline	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	ondansetron	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	paroxetine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	tamoxifen	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	thioguanine	log created
+2020-07-14	RECOMMENDATION	trimipramine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-14	RECOMMENDATION	tropisetron	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
+2020-07-07	ALLELE_FUNCTION_REFERENCE	CACNA1S	Changed column B header to "Activity Value"
+2020-07-07	ALLELE_FUNCTION_REFERENCE	CYP2C9	Changed column B header to "Activity Value"
+2020-07-07	ALLELE_FUNCTION_REFERENCE	G6PD	Updated allele function with CPIC terms
+2020-07-07	ALLELE_FUNCTION_REFERENCE	NUDT15	Changed column B header to "Activity Value"
+2020-07-07	ALLELE_FUNCTION_REFERENCE	RYR1	Changed column B header to "Activity Value"
+2020-07-07	ALLELE_FUNCTION_REFERENCE	TPMT	Changed column B header to "Activity Value"
+2020-07-07	ALLELE_FUNCTION_REFERENCE	UGT1A1	Changed column B header to "Activity Value"
+2020-07-06	ALLELE_DEFINITION	CYP2C9	added 'g.' to BF5 location
+2020-07-06	ALLELE_DEFINITION	CYP2C9	changed g.15625delA to g.15626delA according to PharmVar and dbSNP
+2020-07-06	ALLELE_DEFINITION	CYP2C9	corrected 395G>A* to g.8598G>A in V5
+2020-06-30	FREQUENCY	CYP2D6	Added alleles *115-*139 to file.
+2020-06-29	ALLELE_DEFINITION	CYP2C19	added *38
+2020-06-29	ALLELE_FUNCTION_REFERENCE	CYP2C19	added *38
+2020-06-29	FREQUENCY	CYP2C19	added *38
+2020-06-24	ALLELE_DEFINITION	NUDT15	Updated *13, *15, *17 and *18 variant cDNA position to match PharmVar
+2020-06-23	ALLELE_DEFINITION	TPMT	Added *42, *43 and *44
+2020-06-22	ALLELE_DEFINITION	NUDT15	Updated the *9 variant allele and position and the *2/*6 variant rsID to reflect the PharmVar definitions
+2020-06-16	ALLELE_DEFINITION	TPMT	Updated the alleles on the NC and NG sequence for *36
+2020-06-11	ALLELE_FUNCTION_REFERENCE	CACNA1S	Added reference row and normal function
+2020-06-11	ALLELE_FUNCTION_REFERENCE	RYR1	Added reference row and assigned normal function
+2020-06-08	ALLELE_DEFINITION	CYP2C9	Added *62
+2020-05-30	ALLELE_DEFINITION	CYP2D6	CNVs taken out since those will be handeled through the db
+2020-05-26	ALLELE_DEFINITION	CFTR	replaced reference with "ivacaftor non-responsive CFTR sequence"
+2020-05-26	ALLELE_FUNCTION_REFERENCE	CFTR	replaced reference with "ivacaftor non-responsive CFTR sequence"
+2020-05-22	ALLELE_DEFINITION	CFTR	removed F508del variant
+2020-05-22	ALLELE_FUNCTION_REFERENCE	CFTR	removed F508del variant
+2020-04-29	ALLELE_FUNCTION_REFERENCE	CYP2C9	Fixed separator in PMIDs field for *27
+2020-04-28	ALLELE_FUNCTION_REFERENCE	CYP2C9	Fixed separator syntax in finding field
+2020-04-28	ALLELE_FUNCTION_REFERENCE	DPYD	Removed comments from c.3067C>A.
+2020-04-22	FREQUENCY	CYP2C19	Added PMID: 27849442 PMID: 28873029 PMID: 19069365 PMID: 30143732; transferred changes to Allele frequency tab
+2020-04-10	ALLELE_FUNCTION_REFERENCE	CYP2D6	*84 changed to uncertain function after discussion with 2D6 guideline authors
+2020-04-02	FREQUENCY	CYP2D6	Alleles *16, *66, *67, *79 and *80 removed from file (retired alleles). Added PMID 29327975 to references and added additional frequencies from PMID 31368850
+2020-03-30	ALLELE_FUNCTION_REFERENCE	CYP2B6	*16 has been removed from PharmVar as a core allele and now is a suballele of *18, so the *16 reference not already included in the *18 evidence (PMID: 16495778) has been moved to *18
+2020-03-30	FREQUENCY	CYP2B6	*16 has been removed from PharmVar as a core allele and now is a suballele of *18, so *16 has been removed leading to a slight frequency increase in the *1 allele in the Sub-Saharan African group
+2020-03-25	ALLELE_FUNCTION_REFERENCE	CYP2C19	changed red text color to black for *36 and *37 rows
+2020-03-24	FREQUENCY	CYP2C9	Updated diplotype and phenotype frequencies
+2020-03-16	FREQUENCY	CYP2D6	Corrected typo for PMID 17301689, removed duplicate rows for PMIDs 25937793 and 23619115, moved *34 frequencies from PMID 29674966 to *35, updated text in methods section, added new references
+2020-03-10	ALLELE_FUNCTION_REFERENCE	CYP2D6	Function updated for *72, *81, *120, *124, and *129
+2020-03-09	ALLELE_DEFINITION	CFTR	added column for G1244E back
+2020-03-09	ALLELE_DEFINITION	CFTR	changed C>T to C>A for g.70172C>A in D110E
+2020-03-09	ALLELE_DEFINITION	CFTR	exchanged g.4609A>G with g.150772A>G for 3272-26A->G in NG sequence field
+2020-03-09	ALLELE_DEFINITION	CFTR	removed "T" in column R117H/ Class: IV and row E831X
+2020-03-09	ALLELE_DEFINITION	CFTR	removed 711+1G->T/ Class: I and added 711+3A->G
+2020-03-09	ALLELE_FUNCTION_REFERENCE	CFTR	Added comment for F508del variants
+2020-03-09	ALLELE_FUNCTION_REFERENCE	CFTR	Removed ivacaftor non-responsive function from reference
+2020-03-09	ALLELE_FUNCTION_REFERENCE	CFTR	removed 711+1G->T/ Class: I and added 711+3A->G as later is on the ivacaftor drug label
+2020-03-04	ALLELE_DEFINITION	CFTR	removed G85E and added back g.117559591_117559593delTCT
+2020-03-04	ALLELE_DEFINITION	CYP2D6	took out R at g.42130692G>A in *56 in the "core alleles" tab since this tab reflects the core allele defintion as presented on PharmVar
+2020-03-04	ALLELE_FUNCTION_REFERENCE	CFTR	Added F508del(TCT)
+2020-03-04	ALLELE_FUNCTION_REFERENCE	CFTR	Took out G85E since not part of recommendations, was included in the incidential finding table in the guideline supplement
+2020-03-02	ALLELE_DEFINITION	CYP2D6	added Y into *4 at position g.42127526C>T
+2020-02-28	FREQUENCY	CYP2B6	Added diplotype and phenotype frequencies. Up dated information on biogeographical groups in methods tab.
+2020-02-28	FREQUENCY	CYP2C19	Added diplotype and phenotype frequencies. Updated information on Methods tab
+2020-02-27	FREQUENCY	CACNA1S	Updated information about biogeogrpahical groups on methods tab
+2020-02-27	FREQUENCY	CYP3A5	Updated information in methods tab
+2020-02-27	FREQUENCY	HLA-A	Added PMID 30127801 to references, updated information on biogeographical groups on methods tab
+2020-02-27	FREQUENCY	HLA-B	Added PMID 30127801 to references. Updated information about biogeographical groups on methods tab
+2020-02-26	ALLELE_DEFINITION	DPYD	Removed intronic normal function variants: c.1129-15T>C, c.763-118A>G, c.1740+39C>T, c.1740+40A>G, c.850+41T>C, c.958+134T>G, c.1340-106T>A, c.2300-39G>A, c.234-123G>C, c.850+91C>T, c.1129-28G>T, c.681-8C>T
+2020-02-26	ALLELE_FUNCTION_REFERENCE	DPYD	Removed intronic normal function variants: c.1129-15T>C, c.763-118A>G, c.1740+39C>T, c.1740+40A>G, c.850+41T>C, c.958+134T>G, c.1340-106T>A, c.2300-39G>A, c.234-123G>C, c.850+91C>T, c.1129-28G>T, c.681-8C>T
+2020-02-26	FREQUENCY	DPYD	Removed intronic normal function variants: c.1129-15T>C, c.763-118A>G, c.1740+39C>T, c.1740+40A>G, c.850+41T>C, c.958+134T>G, c.1340-106T>A, c.2300-39G>A, c.234-123G>C, c.850+91C>T, c.1129-28G>T, c.681-8C>T
+2020-02-24	ALLELE_DEFINITION	DPYD	Removed c.151-69G>A; variant was originally assigned decreased function because of its LD with rs115232898 (Y186C), which has decreased function, but a functional impact of c.151-69G>A by itself is uncertain. Original comment: This variant was found to be in linkage disequilibrium (D'=1) with the decreased function variant rs115232898 (Y186C); the decreased function associated with this variant is likely due to this linkage.
+2020-02-24	ALLELE_DEFINITION	DPYD	Removed c.680+139G>A; variant was originally assigned decreased function because of its possible connection with the Hap3B haplotype, which has decreased function, but a functional impact of c.680+139G>A by itself is uncertain. Original comment: Incomplete association with HapB3 (SNP not exclusive to HapB3 and therefore not a suitable proxy).
+2020-02-24	ALLELE_FUNCTION_REFERENCE	DPYD	Removed c.151-69G>A; variant was originally assigned decreased function because of its LD with rs115232898 (Y186C), which has decreased function, but a functional impact of c.151-69G>A by itself is uncertain. Original comment: This variant was found to be in linkage disequilibrium (D'=1) with the decreased function variant rs115232898 (Y186C); the decreased function associated with this variant is likely due to this linkage.
+2020-02-24	ALLELE_FUNCTION_REFERENCE	DPYD	Removed c.680+139G>A; variant was originally assigned decreased function because of its possible connection with the Hap3B haplotype, which has decreased function, but a functional impact of c.680+139G>A by itself is uncertain. Original comment: Incomplete association with HapB3 (SNP not exclusive to HapB3 and therefore not a suitable proxy).
+2020-02-24	FREQUENCY	DPYD	Removed c.151-69G>A; variant was originally assigned decreased function because of its LD with rs115232898 (Y186C), which has decreased function, but a functional impact of c.151-69G>A by itself is uncertain. Original comment: This variant was found to be in linkage disequilibrium (D'=1) with the decreased function variant rs115232898 (Y186C); the decreased function associated with this variant is likely due to this linkage.
+2020-02-24	FREQUENCY	DPYD	Removed c.680+139G>A; variant was originally assigned decreased function because of its possible connection with the Hap3B haplotype, which has decreased function, but a functional impact of c.680+139G>A by itself is uncertain. Original comment: Incomplete association with HapB3 (SNP not exclusive to HapB3 and therefore not a suitable proxy).
+2020-02-13	ALLELE_DEFINITION	NUDT15	Updated the chromosome number
+2020-01-09	FREQUENCY	CYP2D6	Added *99 allele to allele frequency and references sheets. Removed column for undefined duplications from references sheet
+2020-01-08	FREQUENCY	UGT1A1	Corrected typo on Allele frequency sheet
+2019-12-09	FREQUENCY	CACNA1S	Removed rsID and protein change columns from Allele frequency sheet. Changed rsIDs on Reference sheet to equivalent nucleotide changes
+2019-12-09	FREQUENCY	RYR1	Removed rsID and protein change columns from Allele frequency sheet. Changed rsIDs on Reference sheet to equivalent nucleotide changes
+2019-12-06	ALLELE_DEFINITION	DPYD	Removed intronic and non-synonymous uncertain function variants: c.233+112G>T, c.234-93C>T, c.274C>G, c.484-145T>A, c.910T>C, c.1054C>G, c.1525-28A>G, c.1974+75A>G, c.2060A>C, c.2678A>G, c.2948C>T
+2019-12-06	ALLELE_FUNCTION_REFERENCE	DPYD	Removed intronic and non-synonymous uncertain function variants: c.233+112G>T, c.234-93C>T, c.274C>G, c.484-145T>A, c.910T>C, c.1054C>G, c.1525-28A>G, c.1974+75A>G, c.2060A>C, c.2678A>G, c.2948C>T
+2019-12-06	FREQUENCY	DPYD	Removed intronic and non-synonymous uncertain function variants: c.233+112G>T, c.234-93C>T, c.274C>G, c.484-145T>A, c.910T>C, c.1054C>G, c.1525-28A>G, c.1974+75A>G, c.2060A>C, c.2678A>G, c.2948C>T
+2019-12-05	ALLELE_FUNCTION_REFERENCE	CYP2C9	Added "N/A" to cells in the Activity Score column for unknown or uncertain function alleles.
+2019-12-05	ALLELE_FUNCTION_REFERENCE	CYP2D6	Altered CNV alleles to align with PharmVar; added PMIDs from PharmVar structural document; added "N/A" as activity score for unknown or uncertain function alleles
+2019-12-05	FREQUENCY	CYP2D6	Altered CNV alleles to align with PharmVar and added explanation to Methods tab. Removed duplicate row for PMID 12152006 and corrected typos for PMID 16537246.
+2019-12-04	ALLELE_FUNCTION_REFERENCE	CYP2C19	changed Required to Optional for Comments
+2019-12-04	ALLELE_FUNCTION_REFERENCE	CYP2C19	changed Required to Optional for PMID
+2019-12-04	ALLELE_FUNCTION_REFERENCE	CYP2C19	moved reviewer comments into the comment section
+2019-12-02	ALLELE_DEFINITION	DPYD	changed nucleotides in the grid to reflect nucleotide change on the positive strand
+2019-12-02	ALLELE_DEFINITION	DPYD	sorted variants to follow sequence
+2019-11-19	ALLELE_FUNCTION_REFERENCE	DPYD	added AS of N/A to uncertain function alleles
+2019-11-19	FREQUENCY	CYP2D6	Removed PMIDs 22111604, 8873218 and 18797858 because they don't contain exact frequencies. Converted references sheet from percentage to decimal format and calculated average frequencies using weighted averages. Removed columns for structural rearrangements and alleles which are not PharmVar core alleles. Moved footnotes to methods tab.
+2019-10-30	ALLELE_FUNCTION_REFERENCE	DPYD	added activity score and clinical allele function status for variants in row 28 to 99
+2019-10-30	ALLELE_FUNCTION_REFERENCE	DPYD	changed Strength of evidence level from "In vitro data only and/or limited clinical/ex vivo data" to "Limited" and "uncertain" to "Inadequate"
+2019-10-30	ALLELE_FUNCTION_REFERENCE	DPYD	changed c.1129-5923C>G (HapB3) to c.1129-5923C>G, c.1236G>A (HapB3) and added note
+2019-10-30	ALLELE_FUNCTION_REFERENCE	DPYD	changed rs1801265 (*9A) to c.85T>C (*9A)
+2019-10-30	FREQUENCY	DPYD	Updated to new standardized format and weighted average allele frequencies. Combined information in ExAC allele number tab and previous references tab into new references tab. Converted to biogeographical groups
+2019-10-29	FREQUENCY	SLCO1B1	Updated document to new standardized format and weighted average allele frequencies. Added all alleles from Allele Definition file and converted to biogeographical groups.
+2019-10-29	FREQUENCY	TPMT	Updated to standardized format and weighted average allele frequencies. Converted to biogeographical groups.
+2019-10-29	FREQUENCY	UGT1A1	Updated document to new standardized format and weighted average allele frequencies. Added Methods tab and converted to biogeographical groups.
+2019-10-28	ALLELE_DEFINITION	CYP2D6	removed rsID from 3278T>C variant in *26
+2019-10-28	FREQUENCY	RYR1	Converted to PharmGKB biogeographical groups, added References, Methods and Change Log sheets. Average allele frequencies now calculated using weighted averages.
+2019-10-28	FREQUENCY	VKORC1	Updated to new standardized format and weighted average allele frequencies. Converted to biogeographical groups. Removed references with no information on rs9923231
+2019-10-25	ALLELE_DEFINITION	DPYD	changed c.1129-5923C>G (HapB3) to c.1129-5923C>G, c.1236G>A (HapB3) and deleted c.483+18G>A column
+2019-10-25	ALLELE_DEFINITION	DPYD	changed c.2657G>A (*9B) to c.85T>C, c.2657G>A (*9B)
+2019-10-25	ALLELE_DEFINITION	DPYD	changed rs1801265 (*9A) to c.85T>C (*9A)
+2019-10-25	FREQUENCY	CYP4F2	Allele frequencies now in decimal format. Converted to biogeographical groups and weighted average allele frequencies, added Methods sheet and updated document to new standardized format
+2019-10-25	FREQUENCY	NUDT15	Converted to biogeographical groups and weighted allele frequencies. Updated document to new standardized format
+2019-10-24	FREQUENCY	CYP2C19	Changed average allele frequency calculations to weighted averages. Removed *4A, *4B, *20, *21 and *27 from References sheet as these are not PharmVar core alleles.
+2019-10-24	FREQUENCY	CYP3A5	Converted to PharmGKB biogeographical groups. Updated document to new standardized format and to use weighted average allele frequencies
+2019-10-22	FREQUENCY	CACNA1S	Converted to PharmGKB biogeographical groups, added References, Methods and Change Log sheets. Average allele frequencies now calculated using weighted averages.
+2019-10-22	FREQUENCY	CYP2B6	Converted table to use PharmGKB biogeographical groups and updated to new standardized format. Average allele frequencies now calculated using weighted averages
+2019-10-18	FREQUENCY	CYP4F2	updated the allele name to match with the allele definition table
+2019-10-18	FREQUENCY	NUDT15	updated allele names on References tab to match Allele frequency by race tab
+2019-10-18	FREQUENCY	UGT1A1	updated allele names to match names in allele defintion file, and removed extraneous variant not found in definition and function files
+2019-10-18	FREQUENCY	VKORC1	updated allele name to match allele defintion table
+2019-10-11	ALLELE_FUNCTION_REFERENCE	CACNA1S	Updated table notes
+2019-10-11	ALLELE_FUNCTION_REFERENCE	CFTR	Updated table notes
+2019-10-11	ALLELE_FUNCTION_REFERENCE	CYP2B6	Updated table notes format
+2019-10-11	ALLELE_FUNCTION_REFERENCE	CYP2C9	Updated table notes format
+2019-10-11	ALLELE_FUNCTION_REFERENCE	G6PD	Updated table notes
+2019-10-11	ALLELE_FUNCTION_REFERENCE	RYR1	Updated table notes; updated allele name to "c.7039_7041delGAG or c.7042_7044delGAG"
+2019-10-10	ALLELE_FUNCTION_REFERENCE	CFTR	Updated format
+2019-10-10	ALLELE_FUNCTION_REFERENCE	G6PD	Table created
+2019-10-10	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Update table to new format, the functions for "*4, *7, *8, *11, *12, *13, *16, *18, *19, *20, *21, *22, *24, *25, *26, *27, *28, *29, *30, *32, *33, *34, *36" were left blank. They were grouped under "Unknown/unclear/contradictory evidence" in table S2
+2019-10-10	FREQUENCY	CYP2C19	deleted EN column from References tab
+2019-10-09	ALLELE_DEFINITION	CFTR	Updated table format and added additional alleles from label
+2019-10-09	ALLELE_FUNCTION_REFERENCE	CACNA1S	Updated to new format.
+2019-10-09	ALLELE_FUNCTION_REFERENCE	CYP3A5	Updated to new format. Added new alleles from PharmVar
+2019-10-09	ALLELE_FUNCTION_REFERENCE	NUDT15	Updated format
+2019-10-09	ALLELE_FUNCTION_REFERENCE	RYR1	Updated to new format.
+2019-10-09	ALLELE_FUNCTION_REFERENCE	TPMT	Updated format
+2019-10-09	ALLELE_FUNCTION_REFERENCE	UGT1A1	Updated to new format
+2019-10-08	ALLELE_DEFINITION	CACNA1S	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	CYP3A5	Updated format, remove function column
+2019-10-08	ALLELE_DEFINITION	CYP4F2	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	G6PD	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	IFNL3	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	NUDT15	Updated table format and added alleles to be consistent with PharmVar
+2019-10-08	ALLELE_DEFINITION	RYR1	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	SLCO1B1	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	TPMT	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	UGT1A1	Updated format, removed function column
+2019-10-08	ALLELE_DEFINITION	VKORC1	Updated format, removed function column
+2019-10-02	ALLELE_DEFINITION	DPYD	Update format
+2019-10-02	ALLELE_FUNCTION_REFERENCE	CYP2B6	Updated table to new format
+2019-10-02	ALLELE_FUNCTION_REFERENCE	DPYD	Update format
+2019-10-01	ALLELE_FUNCTION_REFERENCE	CYP2C9	Added references for *9 and *10
+2019-10-01	FREQUENCY	CYP2D6	Phenotype frequecies calculated based on phenotype groupings proposed in PMID 31647186
+2019-09-19	ALLELE_DEFINITION	CYP2B6	The table represents the PharmVar core alleles (https://www.pharmvar.org/gene/CYP2B6) Version 4.1 Last Updated Sep 19 2019. Format change, function information removed.
+2019-09-19	ALLELE_DEFINITION	CYP2C19	*36 and *37 added
+2019-09-19	ALLELE_DEFINITION	CYP2C19	allele function column removed
+2019-09-19	ALLELE_DEFINITION	CYP2C19	change log created
+2019-09-19	ALLELE_DEFINITION	CYP2D6	added alleles up to *139
+2019-09-19	ALLELE_DEFINITION	CYP2D6	created change log
+2019-09-19	ALLELE_DEFINITION	CYP2D6	removed allele function column and function related notes
+2019-09-19	FREQUENCY	HLA-A	version 1 created from existing data in former HLA allele frequency table, new references added, duplicate references removed, frequencies calculated using weighted averages and PharmGKB biogeographical groups applied
+2019-09-19	FREQUENCY	HLA-B	Removed HLA-A*31:01 to create HLA-B frequency table. Added new references, removed duplicate references, calculated weighted average frequencies and applied PharmGKB biogeographical groups.
+2019-09-13	FREQUENCY	CYP2C19	added *36 and *37 to allele frequency by race
+2019-09-11	ALLELE_FUNCTION_REFERENCE	CYP2D6	Updated sheet to new format, added alleles with unknown function and new alleles from PharmVar (*115 to *139), added activity scores and new references
+2019-09-05	ALLELE_DEFINITION	CYP2C9	The table represents the PharmVar core alleles (https://www.pharmvar.org/gene/CYP2C9) Version 4.0 Last Updated May 7 2019. Format change, function information removed.
+2019-09-05	ALLELE_FUNCTION_REFERENCE	CYP2C9	Updated table to new format, added new alleles from PharmVar and new references. Made changes to functional assignments.
+2019-08-30	ALLELE_FUNCTION_REFERENCE	CYP2C19	added *36 and *37 alleles
+2019-08-30	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 24945780 to PMID cell for *10
+2019-08-30	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 27578295 to PMID cell for *23
+2019-08-30	ALLELE_FUNCTION_REFERENCE	CYP2C19	added 30464555 to PMID cell for *23, *29, 30, *31, *32, *33
+2019-08-23	ALLELE_DEFINITION	IFNL3	Added change log tab
+2019-08-23	ALLELE_DEFINITION	VKORC1	Added change log tab
+2019-08-21	FREQUENCY	CYP2C9	Changed allele frequency averages to weighted averages, altered average, MIN and MAX functions to return a blank cell if selected range is blank
+2019-08-19	FREQUENCY	CYP2C9	Converted percentage values to decimals
+2019-08-15	ALLELE_DEFINITION	RYR1	Added change log tab
+2019-07-24	FREQUENCY	CYP2C9	Added new * allele, updated references and updated text descriptions to reflect use of biogeographical groups
+2019-07-17	FREQUENCY	CYP2C19	Changed ethnicities to updated PharmGKB Biographical groups, and moved studies into new ethinicity categories as appropriate
+2019-07-17	FREQUENCY	CYP2C19	Removed studies PMID 23130019, 23249123 and 20712527 because these studies appeared to contain individuals of mixed ethnicities
+2019-07-17	FREQUENCY	CYP2C19	Removed studies containing mixed populations (rows 485-495 in original Excel file) since they do not fall under any of the ethnicity categories
+2019-05-10	ALLELE_DEFINITION	CFTR	added 3272-26A>G, E831X as per table 3 ivacaftor label accessed May 2019
+2019-05-10	ALLELE_DEFINITION	CFTR	removed G542, R553X, 1717-1G>A, 621+1G>T, R1162X, 3120+1G>A, 1898+1G>A, 3659delC, 2184delA. Variants have no recommendation but are part of the variants recommended by the American College of Medical Genetics (ACMG) Cystic Fibrosis Carrier Screening Working Group that should be tested to determine carrier status as a part of population screening programs PMID 15371902.
+2019-05-10	ALLELE_DEFINITION	CFTR	removed G85E, N1303K, W1282X, I507del, R347P, R560T, R334W ivacaftor label states"... mutations in the CFTR gene do not meet the threshold of change in CFTR mediated chloride transport of at least 10% of normal over baseline" However, variants are part of the variants recommended by the American College of Medical Genetics (ACMG) Cystic Fibrosis Carrier Screening Working Group that should be tested to determine carrier status as a part of population screening programs PMID 15371902.
+2019-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	combined *4A and *4B into *4 (PharmVar core allele release)
+2019-05-07	ALLELE_FUNCTION_REFERENCE	CYP2C19	removed *27, added *27 references into the *1 PMID cell (PharmVar re-assigned *27 as *1 suballele)
+2019-04-19	ALLELE_FUNCTION_REFERENCE	CFTR	Added change log tab
+2019-03-05	FREQUENCY	NUDT15	updated phenotype frequencies with change for *9 from unknown function to no function
+2019-02-08	FREQUENCY	CYP2D6	removed He et al 2016 (PMID 27228982); rs28371703 does not tag *48; rs769157652 not exclusive to *27; not clear how alleles were called as SNP frequencies (Tab1) are not consistent with allele frequencies in Tab2
+2019-01-25	FREQUENCY	NUDT15	updated phenotype frequencies
+2019-01-23	ALLELE_FUNCTION_REFERENCE	NUDT15	Added change log tab
+2019-01-18	ALLELE_DEFINITION	DPYD	Added guideline variants
+2019-01-12	FREQUENCY	NUDT15	updated diplotype and phenotype frequencies
+2019-01-08	FREQUENCY	CYP2D6	reclassified ethnicity groupings according to new standardized biogeographic grouping (Huddart et al PMID 30506572)
+2018-12-19	FREQUENCY	CYP2B6	Added PMID: 21886015 for columbian population
+2018-12-15	FREQUENCY	CYP2D6	calcutaed frequencies seperately for American and Latino
+2018-12-14	FREQUENCY	CYP2D6	removed all studies with mixed and/or unknown popualtion information from groupings; these are now listed in the bottom section
+2018-12-12	FREQUENCY	CYP2D6	added a total of 28 papers (EN 199-227) resulting in the addition of 50 discrete entries (highlighted in red)
+2018-12-12	FREQUENCY	CYP2D6	added coumn for *114; added note to *14 reading 'formerly *14B'
+2018-12-06	FREQUENCY	CYP2D6	added column for *3xN
+2018-12-06	FREQUENCY	CYP2D6	changed *36+*10x2 to *36+*10xN and *36x2+*10 to *36xN+*10; removed column for *36x3+*10
+2018-09-26	ALLELE_DEFINITION	G6PD	Added change log tab
+2018-09-17	ALLELE_DEFINITION	CACNA1S	Added change log tab
+2018-07-06	FREQUENCY	CYP2C9	Added new references and * alleles, edited allele frequency and reference sheets to be consistent with new PharmGKB biogeographical groups.
+2018-07-03	FREQUENCY	CYP2B6	Removed columns for snps found in multiple * alleles, and the corresponding references, added * alleles for which we have no information
+2018-06-18	FREQUENCY	NUDT15	updated frequency of *3 allele for African from Moriyama
+2018-06-13	FREQUENCY	CYP2B6	Version 1 created
+2018-06-13	FREQUENCY	NUDT15	updated some wording on methods tab
+2018-06-13	FREQUENCY	TPMT	updated some wording on methods tab & URL in footnote on Allele Frequency by Race tab
+2018-04-27	FREQUENCY	NUDT15	removed *3 and *6 frequencies from references where *2 was not calculated
+2018-04-26	FREQUENCY	TPMT	keeping refs with frequencies with *3A calculated for *3A, *3B, *3C
+2018-04-25	ALLELE_DEFINITION	TPMT	released
+2018-04-25	FREQUENCY	TPMT	updated *41 and *22 frequencies; corrected typo in footnote
+2018-04-23	ALLELE_DEFINITION	SLCO1B1	Added change log tab
+2018-04-20	FREQUENCY	NUDT15	updated frequencies and sources
+2018-04-20	FREQUENCY	TPMT	updated frequencies and sources
+2018-01-29	FREQUENCY	TPMT	Version 1 created
+2018-01-20	FREQUENCY	NUDT15	Version 1 created
+2017-11-03	ALLELE_DEFINITION	UGT1A1	Added change log tab
+2017-11-03	FREQUENCY	CYP2C19	updated diplotype frequencies
+2017-08-11	FREQUENCY	HLA-B	update 57:01 and 58:01 frequencies
+2017-06-28	FREQUENCY	DPYD	Added note about HapB3 and 1129-5923C>G
+2017-06-19	FREQUENCY	DPYD	Added nucleotide and protein changes
+2017-02-22	FREQUENCY	CYP4F2	updated allele with * nomenclature
+2017-02-21	FREQUENCY	CYP2C9	updated footnotes
+2017-02-13	FREQUENCY	CYP2C19	updated the footnotes on the "Allele frequency by race" tab
+2017-02-13	FREQUENCY	CYP2C9	updated footnotes
+2017-02-13	FREQUENCY	CYP3A5	updated footnotes
+2017-02-13	FREQUENCY	CYP4F2	updated footnotes
+2017-02-13	FREQUENCY	SLCO1B1	updated footnotes
+2017-02-13	FREQUENCY	VKORC1	updated footnotes
+2017-02-08	FREQUENCY	UGT1A1	Alie Fohner created v 1
+2017-01-15	FREQUENCY	HLA-B	version 1
+2016-11-08	ALLELE_DEFINITION	CYP4F2	Added change log tab
+2016-11-08	FREQUENCY	CYP2C9	Link added for CYP2C9 Allele definition Table on Allele frequency by race tab
+2016-11-04	FREQUENCY	CYP2C9	St Jude added tabs for Diplotype frequency by race, Phenotype frequency by race, Methods
+2016-09-27	ALLELE_DEFINITION	CYP3A5	Added change log tab
+2016-09-08	FREQUENCY	CYP2C9	PharmGKB created version 1
+2016-09-08	FREQUENCY	CYP4F2	created version 1
+2016-09-08	FREQUENCY	VKORC1	Li Gong created version 1
+2016-07-15	FREQUENCY	CYP2D6	all sections were sorted by columns E-B-A (ethnicity-year-author)
+2016-07-14	FREQUENCY	CYP2D6	added 30 papers
+2016-05-31	FREQUENCY	CYP2D6	added column for *1+*83 and approximate frequency
+2016-05-31	FREQUENCY	CYP2D6	added columns for *107, *108 and *109 and added ethnicity of subject in which respective allele was detected
+2016-05-31	FREQUENCY	CYP2D6	added one column for *87-*98 and annotated as 'detected'
+2016-05-30	FREQUENCY	CYP2C19	added 3 papers
+2016-05-27	FREQUENCY	CYP2C19	4 studies on Chinese were in Central/South Asian category - moved to East Asia
+2016-05-27	FREQUENCY	CYP2C19	added 25 papers
+2016-05-11	FREQUENCY	CYP2C19	added 16 papers
+2016-05-11	FREQUENCY	CYP2C19	changed *27 annotation for Hu et al from 0 to not tested (sequencing does not include the upstream *27 tag SNP); frequency changes to n/a
+2016-05-11	FREQUENCY	CYP2C19	corrected ethnicity for Larssen et al (line 333) to Europe
+2016-02-09	FREQUENCY	SLCO1B1	Created version 1
+2015-08-25	FREQUENCY	CYP2C19	added 8 papers
+2015-01-02	FREQUENCY	CYP2D6	added 1 paper
+2014-12-08	FREQUENCY	CYP2D6	studies used for *1 calculations are highlighted in blue
+2014-11-14	FREQUENCY	CYP2D6	added 1 paper
+2014-11-03	FREQUENCY	CYP2D6	Flagged studies (blue) to be included into *1 calculations
+2014-11-03	FREQUENCY	CYP2D6	included column to calculate sum of variants for studies and the sume of the averages of variants
+2014-10-30	FREQUENCY	CYP2D6	Moved Ashkenazi Jews from Europe to other (consistent with 2C19 frequency table)
+2014-10-30	FREQUENCY	CYP2D6	added column for *75
+2014-10-30	FREQUENCY	CYP2D6	papers added for R2 changed from red to black; new papers added for R3 changed to red
+2014-10-30	FREQUENCY	CYP2D6	sorted by columns E-B-A (ethnicity-year-author)
+2014-10-28	FREQUENCY	CYP2D6	added 9 papers
+2013-09-09	FREQUENCY	CYP2D6	Added data for *1, *2 and *35 received from Ana Santander for PMID 23922954
+2013-08-30	FREQUENCY	CYP2D6	have not heard back from Zafra-Ceres to confirm allele freq
+2013-08-29	FREQUENCY	CYP2D6	correponded with Antunes; mistake in paper re some freq;
+2013-08-28	FREQUENCY	CYP2D6	excluded Zihlif et al. *10 incorrectly called; corresponded with author revealing this mishap
+2013-08-17	FREQUENCY	CYP2D6	corrected *76+*2 to *76+*1
+2013-08-16	FREQUENCY	CYP2D6	added 1 paper with 'unspecified' ethnicity and approximate frequency
+2013-08-16	FREQUENCY	CYP2D6	added 1 paper with approxomate frequency
+2013-08-16	FREQUENCY	CYP2D6	added 2 papers (2 line entries) for Africa
+2013-08-16	FREQUENCY	CYP2D6	added 4 papers (6 line entires) for Americas
+2013-08-16	FREQUENCY	CYP2D6	added 5 papers (5 line entries( for Europe
+2013-08-16	FREQUENCY	CYP2D6	added 5 papers (6 line entires) for East Asia
+2013-08-16	FREQUENCY	CYP2D6	added columns for *61, *62, *84, *85, *86, *100, *101, *36x3+*10 and *1x2+*83
+2013-08-16	FREQUENCY	CYP2D6	added number of subjects for Ebisawa et al.
+2013-08-16	FREQUENCY	CYP2D6	added number of subjects for Yin et al. and updated year of publication
+2013-08-16	FREQUENCY	CYP2D6	corrected entries for *13 'revised' for all ethnicities (0 was incorrect for most)
+2013-08-16	FREQUENCY	CYP2D6	revised/updated ethnicities and populations for Americas
+2013-08-16	FREQUENCY	CYP2D6	sorted ethnicities by 1) major ethnicity, 2) population, 3) year and 4) author
+2013-08-13	FREQUENCY	CYP2D6	corrected spelling of von Ahsen
+2010-10-09	ALLELE_DEFINITION	CYP3A5	removed core allele tab
