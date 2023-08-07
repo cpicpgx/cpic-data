@@ -92,7 +92,8 @@ public class FrequencyExporter extends BaseExporter {
           List<String> ethnicities = dbHarness.getEthnicities(geneSymbol);
           Set<String> alleleNames = dbHarness.getAllelesWithFrequencies(geneSymbol);
           if (alleleNames.size() == 0) {
-            throw new RuntimeException("No alleles found");
+            sf_logger.warn("No alleles found for " + geneSymbol);
+            continue;
           }
 
           if (ethnicities.size() > 0) {
