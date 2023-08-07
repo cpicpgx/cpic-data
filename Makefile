@@ -114,7 +114,7 @@ db-clean:
 
 .PHONY: import
 import:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.DataImport -d cpic-support-files
+	java -cp build/libs/CpicData.jar org.cpicpgx.DataImport -d cpic-support-files
 
 .PHONY: import-alleles
 import-alleles:
