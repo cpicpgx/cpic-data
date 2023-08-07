@@ -1,3 +1,10 @@
+## [1.30.0](https://github.com/cpicpgx/cpic-data/compare/v1.29.0...v1.30.0) (2023-08-07)
+
+
+### Features
+
+* data update ([ec7b514](https://github.com/cpicpgx/cpic-data/commit/ec7b5144645424a1077f4f98fec4fca5b4c3f95f))
+
 ## [1.29.0](https://github.com/cpicpgx/cpic-data/compare/v1.28.0...v1.29.0) (2023-08-01)
 
 
