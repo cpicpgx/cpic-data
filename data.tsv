@@ -1,10 +1,46 @@
 Date of Change	Type of Data	Subject	Note of Change
+2023-08-03	GENE_CDS	CYP2D6	updated description due to *41 activity value change
 2023-08-01	TEST_ALERT	citalopram	fixed typo
 2023-08-01	TEST_ALERT	escitalopram	fixed typo
 2023-07-17	TEST_ALERT	simvastatin	fixed typo: "<<=20 mg/kg" to ""<20 mg/kg"
+2023-07-13	PAIR		[atorvastatin-CYP3A4] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[atorvastatin-CYP3A5] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[atorvastatin-HMGCR] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[capecitabine-DPYD] PGx testing level changed from Actionable PGx to Testing recommended
+2023-07-13	PAIR		[dibekacin-MT-RNR1] PharmGKB level changed from 1A to none
+2023-07-13	PAIR		[fluvastatin-CYP3A4] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[fluvastatin-HMGCR] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[lovastatin-CYP3A5] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[lovastatin-HMGCR] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[mivacurium-BCHE] PGx testing level changed from none to Actionable PGx
+2023-07-13	PAIR		[neomycin-MT-RNR1] PharmGKB level changed from 1A to 3
+2023-07-13	PAIR		[netilmicin-MT-RNR1] PharmGKB level changed from 1A to none
+2023-07-13	PAIR		[ribostamycin-MT-RNR1] PharmGKB level changed from 1A to none
+2023-07-13	PAIR		[rosuvastatin-CYP3A5] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[simvastatin-CYP3A4] PharmGKB level changed from none to 3
+2023-07-13	PAIR		[simvastatin-CYP3A5] PharmGKB level changed from none to 4
+2023-07-13	PAIR		[tacrolimus-CYP3A4] PharmGKB level changed from 1B to 2A
+2023-07-13	PAIR		[tacrolimus-CYP3A5] PGx testing level changed from none to Informative PGx
+2023-07-13	PAIR		[tolazamide-G6PD] PGx testing level changed from none to Actionable PGx
+2023-07-13	PAIR		[tolbutamide-G6PD] PGx testing level changed from none to Actionable PGx
+2023-07-13	PAIR		[trametinib-G6PD] PGx testing level changed from none to Informative PGx
 2023-07-12	ALLELE_FUNCTION_REFERENCE	RYR1	Based on the ClinGen’s RYR1/MH variant curation expert panel (VCEP) re-evaluation for variant classification R530H (c.1589G>A) is now classified as LP (malignant hyperthermia associated) and R4861H (c.14582G>A) is now classified as VUS (uncertain function). Both variants are updated in this file.
 2023-06-04	ALLELE_DEFINITION	CYP2D6	added *172
 2023-06-04	ALLELE_DEFINITION	CYP4F2	added CYP4F2*8 -*16
+2023-05-10	RECOMMENDATION	amitriptyline	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	atomoxetine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	clomipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	codeine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	desipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	doxepin	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	hydrocodone	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	imipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	nortriptyline	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	ondansetron	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	tamoxifen	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	tramadol	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	trimipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
+2023-05-10	RECOMMENDATION	tropisetron	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	TEST_ALERT	amitriptyline	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	TEST_ALERT	atomoxetine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	TEST_ALERT	clomipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
@@ -21,27 +57,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2023-05-10	TEST_ALERT	tropisetron	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-04-28	ALLELE_DEFINITION	UGT1A1	Updated the notes tab to (1) remove a dead link, (2) remove reference to *60 which is not included in this file and (3) explain the count of TA repeats in several alleles
 2023-04-20	ALLELE_DEFINITION	CYP2D6	change of position for rs72549346 (*42) based on PharmVar update; new PharmVar ID
-2023-04-20	PAIR		[atorvastatin-CYP3A4] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[atorvastatin-CYP3A5] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[atorvastatin-HMGCR] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[capecitabine-DPYD] PGx testing level changed from Actionable PGx to Testing recommended
-2023-04-20	PAIR		[dibekacin-MT-RNR1] PharmGKB level changed from 1A to none
-2023-04-20	PAIR		[fluvastatin-CYP3A4] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[fluvastatin-HMGCR] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[lovastatin-CYP3A5] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[lovastatin-HMGCR] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[mivacurium-BCHE] PGx testing level changed from none to Actionable PGx
-2023-04-20	PAIR		[neomycin-MT-RNR1] PharmGKB level changed from 1A to 3
-2023-04-20	PAIR		[netilmicin-MT-RNR1] PharmGKB level changed from 1A to none
-2023-04-20	PAIR		[ribostamycin-MT-RNR1] PharmGKB level changed from 1A to none
-2023-04-20	PAIR		[rosuvastatin-CYP3A5] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[simvastatin-CYP3A4] PharmGKB level changed from none to 3
-2023-04-20	PAIR		[simvastatin-CYP3A5] PharmGKB level changed from none to 4
-2023-04-20	PAIR		[tacrolimus-CYP3A4] PharmGKB level changed from 1B to 2A
-2023-04-20	PAIR		[tacrolimus-CYP3A5] PGx testing level changed from none to Informative PGx
-2023-04-20	PAIR		[tolazamide-G6PD] PGx testing level changed from none to Actionable PGx
-2023-04-20	PAIR		[tolbutamide-G6PD] PGx testing level changed from none to Actionable PGx
-2023-04-20	PAIR		[trametinib-G6PD] PGx testing level changed from none to Informative PGx
 2023-04-18	RECOMMENDATION	fluvoxamine	changed AS ≥4.5 to 3.75 and AS 3.5 to 2.75 because of the CYP2D6 functionailty assignment changes
 2023-04-18	RECOMMENDATION	paroxetine	changed AS ≥4.5 to 3.75 and AS 3.5 to 2.75 because of the CYP2D6 functionailty assignment changes
 2023-04-18	RECOMMENDATION	venlafaxine	changed AS ≥4.5 to 3.75 and AS 3.5 to 2.75 because of the CYP2D6 functionailty assignment changes
