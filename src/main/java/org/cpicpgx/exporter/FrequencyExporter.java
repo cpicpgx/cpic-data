@@ -168,18 +168,30 @@ public class FrequencyExporter extends BaseExporter {
           // end the Phenotype Frequency sheet
 
 
-          // write the header row
           Map<String, Integer> alleles = new TreeMap<>(HaplotypeNameComparator.getComparator());
           String refAllele = "";
           stmt.setString(1, geneSymbol);
           try (ResultSet r = stmt.executeQuery()) {
             while (r.next()) {
-              alleles.put(r.getString(1), r.getInt(2));
-              if (r.getBoolean(3)) {
-                refAllele = r.getString(1);
+              String alleleName    = r.getString(1);
+              Integer alleleId     = r.getInt(2);
+              boolean inferredFreq = r.getBoolean(3);
+
+              // Curators have decided to explicitly skip UGT1A1*1 from frequency due to 1) there are many alleles for
+              // UGT1A1 2) we only catalogue a small subset 3) those alleles are single position alleles. The reference
+              // allele cannot be simply inferred
+              if (geneSymbol.equals("UGT1A1") && alleleName.equals("*1")) {
+                continue;
+              }
+
+              alleles.put(alleleName, alleleId);
+              if (inferredFreq) {
+                refAllele = alleleName;
               }
             }
           }
+
+          // write the header row
           workbook.writeReferenceHeader(alleles.keySet());
           
           // population loop (rows)
