@@ -91,12 +91,12 @@ public class FrequencyExporter extends BaseExporter {
           // start the Allele Frequency sheet
           List<String> ethnicities = dbHarness.getEthnicities(geneSymbol);
           Set<String> alleleNames = dbHarness.getAllelesWithFrequencies(geneSymbol);
-          if (alleleNames.size() == 0) {
+          if (alleleNames.isEmpty()) {
             sf_logger.warn("No alleles found for " + geneSymbol);
             continue;
           }
 
-          if (ethnicities.size() > 0) {
+          if (!ethnicities.isEmpty()) {
             workbook.writeAlleleFrequencyHeader(ethnicities);
 
             // infer reference allele values based on other alleles
@@ -124,7 +124,7 @@ public class FrequencyExporter extends BaseExporter {
           // start the Diplotype Frequency sheet
           if (!Constants.isSinglePloidy(chr) && includeDiplo) {
             List<String> dipPops = dbHarness.getDiplotypePopulations(geneSymbol);
-            if (dipPops.size() > 0) {
+            if (!dipPops.isEmpty()) {
               workbook.writeDiplotypeFrequencyHeader(dipPops);
               Map<String, HashMap<String, BigDecimal>> diplotypeMap = dbHarness.getDiplotypeData(geneSymbol);
 
@@ -149,7 +149,7 @@ public class FrequencyExporter extends BaseExporter {
           // start the Phenotype Frequency sheet
           if (includePheno) {
             List<String> phenoPops = dbHarness.getDiplotypePopulations(geneSymbol);
-            if (phenoPops.size() > 0) {
+            if (!phenoPops.isEmpty()) {
               workbook.writePhenotypeFrequencyHeader(phenoPops);
               Map<String, HashMap<String, BigDecimal>> phenotypeMap = dbHarness.getPhenotypeData(geneSymbol, lookupMethod);
 
