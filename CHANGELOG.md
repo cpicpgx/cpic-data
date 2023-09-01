@@ -1,3 +1,16 @@
+## [1.31.0](https://github.com/cpicpgx/cpic-data/compare/v1.30.0...v1.31.0) (2023-09-01)
+
+
+### Features
+
+* data update ([8fa3542](https://github.com/cpicpgx/cpic-data/commit/8fa35420a86c238ee3bf4e78563a92a69ebf1fb8))
+
+
+### Bug Fixes
+
+* fix div by 0 error in frequency view ([f67ad17](https://github.com/cpicpgx/cpic-data/commit/f67ad17a8e21a709249e4e4401edc8a1c8471181))
+* remove UGT1A1 *1 explicitly from frequency export ([f73ed0d](https://github.com/cpicpgx/cpic-data/commit/f73ed0dd1f04407c8588cd7b6b978b5e9c2f609a))
+
 ## [1.30.0](https://github.com/cpicpgx/cpic-data/compare/v1.29.0...v1.30.0) (2023-08-07)
 
 
