@@ -1,4 +1,6 @@
 Date of Change	Type of Data	Subject	Note of Change
+2023-08-31	ALLELE_DEFINITION	CYP2D6	*57 removed; *57 was re-assigned to CYP2D6*36.005 by PharmVar
+2023-08-31	ALLELE_FUNCTION_REFERENCE	CYP2D6	*57 removed, *57 was re-assigned to CYP2D6*36.005 by PharmVar
 2023-08-03	GENE_CDS	CYP2D6	updated description due to *41 activity value change
 2023-08-01	TEST_ALERT	citalopram	fixed typo
 2023-08-01	TEST_ALERT	escitalopram	fixed typo
