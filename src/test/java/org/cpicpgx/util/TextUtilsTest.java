@@ -46,4 +46,32 @@ public class TextUtilsTest {
     assertEquals("foo function", TextUtils.normalizeAlleleFunction("foo function"));
     assertEquals("foo function", TextUtils.normalizeAlleleFunction("foo Function"));
   }
+
+  @Test
+  void testIsValidAlleleName() {
+    // don't allow blank allele names
+    assertFalse(TextUtils.isValidAlleleName(null));
+    assertFalse(TextUtils.isValidAlleleName("   "));
+
+    // don't allow slashes in allele names
+    assertFalse(TextUtils.isValidAlleleName("foo/bar"));
+    assertFalse(TextUtils.isValidAlleleName("/"));
+    assertFalse(TextUtils.isValidAlleleName("/fooo"));
+    assertFalse(TextUtils.isValidAlleleName("oooof/"));
+
+    // disallow space-plus-space
+    assertFalse(TextUtils.isValidAlleleName("Foo + Bar"));
+    // all other uses of plus is ok
+    assertTrue(TextUtils.isValidAlleleName("Foo+Bar"));
+    assertTrue(TextUtils.isValidAlleleName("Foo+"));
+    assertTrue(TextUtils.isValidAlleleName("+Bar"));
+    assertTrue(TextUtils.isValidAlleleName("Foo +Bar"));
+
+    // all other stuff should be fine
+    assertTrue(TextUtils.isValidAlleleName("foo"));
+    assertTrue(TextUtils.isValidAlleleName("*10"));
+    assertTrue(TextUtils.isValidAlleleName("Foo-Bar"));
+    assertTrue(TextUtils.isValidAlleleName("Foo…Bar"));
+    assertTrue(TextUtils.isValidAlleleName("------"));
+  }
 }

@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 public class TextUtils {
   private static final Pattern sf_badFunction = Pattern.compile(" Function$");
+  private static final Pattern sf_badAlleleNamePattern = Pattern.compile("( \\+ |/)");
 
   /**
    * Normalize problem characters in Strings that text content
@@ -16,11 +17,16 @@ public class TextUtils {
    */
   public static String normalize(String text) {
     if (text != null) {
-      text = text.replaceAll("[\u201C\u201D]", "\"");            // Office-style slanted quotes
-      text = text.replaceAll("\\h+"," "); // non-breaking spaces
-      text = StringUtils.stripToNull(text);         // trim whitespace and default to null
+      text = text.replaceAll("[\u2018\u2019\u201B]", "'"); // Office-style slanted single quotes
+      text = text.replaceAll("[\u201C\u201D]", "\"");      // Office-style slanted quotes
+      text = text.replaceAll("\\h+"," ");                  // non-breaking spaces
+      text = StringUtils.stripToNull(text);                                  // trim whitespace and default to null
     }
     return text;
+  }
+
+  public static boolean isValidAlleleName(String text) {
+    return StringUtils.isNotBlank(text) && !sf_badAlleleNamePattern.matcher(text).find();
   }
 
   /**

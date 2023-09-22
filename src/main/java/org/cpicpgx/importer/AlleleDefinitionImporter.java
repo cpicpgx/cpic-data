@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.util.CellAddress;
 import org.cpicpgx.db.ConnectionFactory;
+import org.cpicpgx.util.TextUtils;
 import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
@@ -235,6 +236,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
   private void readAlleles(WorkbookWrapper workbook) {
     m_alleles = new LinkedHashMap<>();
     m_svTextMap = new HashMap<>();
+    SortedSet<String> badAlleleNames = new TreeSet<>();
     for (int i=sf_alleleRowStart; i <= workbook.currentSheet.getLastRowNum(); i++) {
       try {
         RowWrapper row = workbook.getRow(i);
@@ -249,6 +251,10 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
 
         if (alleleName.toLowerCase().startsWith("notes")) {
           throw new RuntimeException("Notes exist in the allele definition sheet, move to a separate tab");
+        }
+
+        if (!TextUtils.isValidAlleleName(alleleName)) {
+          badAlleleNames.add(alleleName);
         }
 
         if (m_svColIdx >=0) {
@@ -270,6 +276,9 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
         sf_logger.error("Error parsing row {}", i+1);
         throw e;
       }
+    }
+    if (!badAlleleNames.isEmpty()) {
+      throw new RuntimeException("Bad allele names: [" + String.join("; ", badAlleleNames) + "]");
     }
   }
 
