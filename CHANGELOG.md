@@ -1,3 +1,11 @@
+## [1.31.1](https://github.com/cpicpgx/cpic-data/compare/v1.31.0...v1.31.1) (2023-09-26)
+
+
+### Bug Fixes
+
+* data update ([fe47db0](https://github.com/cpicpgx/cpic-data/commit/fe47db01227056a029eb4c18ac78f4561aad6883))
+* test for bad allele names on import ([6c70343](https://github.com/cpicpgx/cpic-data/commit/6c703439b79112fcf830a905fecd5e62e278745b))
+
 ## [1.31.0](https://github.com/cpicpgx/cpic-data/compare/v1.30.0...v1.31.0) (2023-09-01)
 
 
