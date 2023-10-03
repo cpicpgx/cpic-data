@@ -1,4 +1,7 @@
 Date of Change	Type of Data	Subject	Note of Change
+2023-10-01	ALLELE_DEFINITION	CYP2B6	change in the hybrid name for *29 and *30
+2023-10-01	ALLELE_DEFINITION	CYP2D6	change in name convention for hybrid alleles (*13, *61, *63, *68)
+2023-09-27	ALLELE_DEFINITION	CYP2D6	changed order of content entry in CR table headers
 2023-09-22	ALLELE_DEFINITION	G6PD	Change "Telti/Kobe" to "Telti, Kobe" to avoid collision with diplotype syntax
 2023-09-22	ALLELE_FUNCTION_REFERENCE	G6PD	Change "Telti/Kobe" to "Telti, Kobe" to avoid collision with diplotype syntax
 2023-09-22	FREQUENCY	G6PD	Change "Telti/Kobe" to "Telti, Kobe" to avoid collision with diplotype syntax
