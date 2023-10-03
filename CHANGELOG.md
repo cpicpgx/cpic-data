@@ -1,3 +1,15 @@
+## [1.32.0](https://github.com/cpicpgx/cpic-data/compare/v1.31.1...v1.32.0) (2023-10-03)
+
+
+### Features
+
+* data update ([a8b3919](https://github.com/cpicpgx/cpic-data/commit/a8b39190933783e2b2b36a23d37669b215caa62a))
+
+
+### Bug Fixes
+
+* make DB name a variable in make script ([7ab056a](https://github.com/cpicpgx/cpic-data/commit/7ab056a7f30575737dc1a741bbe78cbe8edb2cfd))
+
 ## [1.31.1](https://github.com/cpicpgx/cpic-data/compare/v1.31.0...v1.31.1) (2023-09-26)
 
 
