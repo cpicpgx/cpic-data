@@ -1,3 +1,15 @@
+## [1.33.0](https://github.com/cpicpgx/cpic-data/compare/v1.32.0...v1.33.0) (2023-10-24)
+
+
+### Features
+
+* data update ([bcff6b5](https://github.com/cpicpgx/cpic-data/commit/bcff6b5869918e29d16dcd98d86a5829285315f9))
+
+
+### Bug Fixes
+
+* import change log messages from PairDiffImporter ([2e63a7f](https://github.com/cpicpgx/cpic-data/commit/2e63a7f6167e9660d06f6c5e4586794ba5e17101))
+
 ## [1.32.0](https://github.com/cpicpgx/cpic-data/compare/v1.31.1...v1.32.0) (2023-10-03)
 
 
