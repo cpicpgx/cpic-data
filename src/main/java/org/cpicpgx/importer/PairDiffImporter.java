@@ -65,6 +65,7 @@ public class PairDiffImporter extends BaseDirectoryImporter {
           if (pairDiff.pairId != null) {
             Arrays.stream(pairDiff.messages).forEach(sf_logger::info);
             int changes = dbHarness.update(pairDiff.pairId, pairDiff.pgkbCaLevel, pairDiff.pgxTesting);
+            dbHarness.addChangeLog(pairDiff.messages);
             sf_logger.info("{} changes applied to {}", changes, pairDiff.name);
           }
         }
@@ -89,6 +90,7 @@ public class PairDiffImporter extends BaseDirectoryImporter {
     private final List<AutoCloseable> closeables = new ArrayList<>();
     private final PreparedStatement updateLevelStmt;
     private final PreparedStatement updateTestingStmt;
+    private final PreparedStatement insertLogStmt;
 
     DbHarness() throws SQLException {
       Connection conn = ConnectionFactory.newConnection();
@@ -98,6 +100,7 @@ public class PairDiffImporter extends BaseDirectoryImporter {
       closeables.add(updateLevelStmt);
       updateTestingStmt = conn.prepareStatement("update pair set pgxTesting=? where pairid=?");
       closeables.add(updateTestingStmt);
+      insertLogStmt = conn.prepareStatement("insert into change_log(date, type, note) values (current_date, 'PAIR', ?)");
     }
 
     private int update(Long pairId, String level, String testing) throws SQLException {
@@ -131,6 +134,13 @@ public class PairDiffImporter extends BaseDirectoryImporter {
         changes += updateCount;
       }
       return changes;
+    }
+
+    private void addChangeLog(String[] messages) throws SQLException {
+      for (String message : messages) {
+        insertLogStmt.setString(1, message);
+        insertLogStmt.executeUpdate();
+      }
     }
 
     @Override
