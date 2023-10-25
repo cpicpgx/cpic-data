@@ -2,11 +2,12 @@ package org.cpicpgx.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import java.util.regex.Pattern;
 
 public class Constants {
   public static final String INDETERMINATE = "Indeterminate";
-  public static final Pattern INDETERMINATE_PATTERN = Pattern.compile("[Ii]determinate]");
+  public static final Pattern INDETERMINATE_PATTERN = Pattern.compile("[Ii]ndeterminate");
   public static final String NA = "n/a";
   public static final Pattern NA_PATTERN = Pattern.compile("[Nn]/[Aa]");
   public static final String NO_RESULT = "No Result";
@@ -20,8 +21,8 @@ public class Constants {
    * @param text text to test
    * @return true if text is "No Result" or close equivalent
    */
-  public static boolean isNoResult(String text) {
-    return NO_RESULT_PATTERN.matcher(text).matches();
+  public static boolean isNoResult(@Nullable String text) {
+    return text != null && NO_RESULT_PATTERN.matcher(text).matches();
   }
 
   /**
