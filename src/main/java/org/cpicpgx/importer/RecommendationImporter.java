@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 /**
  * Importer class for recommendation Excel workbooks.
  * 
- * This expects the workbook to follow these rules
+ * <p>This expects the workbook to follow these rules:</p>
  * 
  * <ol>
  *   <li>The name of the file must start with the drug name followed by a space then "recommendation""</li>
@@ -224,10 +224,16 @@ public class RecommendationImporter extends BaseDirectoryImporter {
                 phenotype.put(gene, validPhenotype);
               }
 
+              for (String gene : asIdxMap.keySet()) {
+                String validScore = dbHarness.validActivityScore(gene,
+                    normalizeScore(dataRow.getText(asIdxMap.get(gene))));
+                activityScore.put(gene, validScore);
+              }
+
               for (String gene : dbHarness.getGenes()) {
                 switch (dbHarness.geneLookupCache.get(gene)) {
                   case ACTIVITY_SCORE:
-                    lookupKey.put(gene, normalizeScore(normalizeGeneText(gene, dataRow.getText(asIdxMap.get(gene)))));
+                    lookupKey.put(gene, activityScore.get(gene));
                     break;
                   case ALLELE_STATUS:
                     lookupKey.put(gene, normalizeGeneText(gene, dataRow.getText(alleleIdxMap.get(gene))));
@@ -242,9 +248,6 @@ public class RecommendationImporter extends BaseDirectoryImporter {
 
               for (String gene : implIdxMap.keySet()) {
                 implication.put(gene, dataRow.getText(implIdxMap.get(gene)));
-              }
-              for (String gene : asIdxMap.keySet()) {
-                activityScore.put(gene, normalizeScore(dataRow.getText(asIdxMap.get(gene))));
               }
               for (String gene : alleleIdxMap.keySet()) {
                 alleleStatus.put(gene, dataRow.getText(alleleIdxMap.get(gene)));
@@ -362,7 +365,7 @@ public class RecommendationImporter extends BaseDirectoryImporter {
           LookupMethod lookupMethod = geneLookupCache.get(gene);
           if (lookupMethod == LookupMethod.ACTIVITY_SCORE && activityScore.get(gene).equals(Constants.NA)) {
             String genePhenotype = phenotype.get(gene);
-            if (!genePhenotype.equals("Indeterminate") && !genePhenotype.equals(Constants.NO_RESULT)) {
+            if (!Constants.isIndeterminate(genePhenotype) && !Constants.isUnspecified(genePhenotype)) {
               sf_logger.warn("{} is an activity gene but has a missing activity value for {} {}", gene, population, gson.toJson(phenotype));
             }
           }

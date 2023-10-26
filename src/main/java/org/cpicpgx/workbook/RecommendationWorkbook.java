@@ -68,7 +68,7 @@ public class RecommendationWorkbook extends AbstractWorkbook {
         case ACTIVITY_SCORE:
           writeStringCell(row, colIdx++, activityMap.get(gene), this.wrapStyle);
         case PHENOTYPE:
-          writeStringCell(row, colIdx++, phenotypeMap.get(gene), this.wrapStyle);
+          writeStringCell(row, colIdx++, gene + " " + phenotypeMap.get(gene), this.wrapStyle);
           break;
         case ALLELE_STATUS:
           writeStringCell(row, colIdx++, alleleStatusMap.get(gene), this.wrapStyle);

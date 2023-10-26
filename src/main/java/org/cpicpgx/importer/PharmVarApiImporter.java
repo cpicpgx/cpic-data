@@ -42,7 +42,6 @@ public class PharmVarApiImporter {
     OkHttpClient client = new OkHttpClient().newBuilder()
         .build();
     Gson gson = new Gson();
-    Connection conn = ConnectionFactory.newConnection();
 
     String geneResponse = apiRequest(client, sf_pharmVarApi + "/genes/list");
     if (geneResponse == null) {
@@ -51,6 +50,7 @@ public class PharmVarApiImporter {
     String[] geneList = gson.fromJson(geneResponse, String[].class);
 
     try (
+        Connection conn = ConnectionFactory.newConnection();
         PreparedStatement geneListStmt = conn.prepareStatement("select a.genesymbol, a.name, a.id from allele_definition a where a.pharmvarId is null and a.genesymbol = any (?) order by a.genesymbol, a.name");
         PreparedStatement updateAllele = conn.prepareStatement("update allele_definition a set pharmvarId=? where id=?")
     ) {
@@ -87,7 +87,7 @@ public class PharmVarApiImporter {
           }
         }
       }
-      if (updatedGenes.size() > 0) {
+      if (!updatedGenes.isEmpty()) {
         sf_logger.info("Processed {}", String.join("; ", updatedGenes));
       }
     }

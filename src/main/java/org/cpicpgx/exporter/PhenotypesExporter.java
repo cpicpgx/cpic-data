@@ -66,7 +66,7 @@ public class PhenotypesExporter extends BaseExporter {
                 ObjectUtils.defaultIfNull(pRs.getString(3), ""),
                 ObjectUtils.defaultIfNull(pRs.getString(4), ""),
                 ObjectUtils.defaultIfNull(pRs.getString(5), ""),
-                ObjectUtils.defaultIfNull(pRs.getString(6), ""),
+                ObjectUtils.defaultIfNull(gene + " " + pRs.getString(6), ""),
                 ObjectUtils.defaultIfNull(pRs.getString(7), "")
             ));
           }

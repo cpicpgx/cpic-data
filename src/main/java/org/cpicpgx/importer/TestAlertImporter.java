@@ -129,7 +129,7 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       }
     }
 
-    if (idxPhenotypeByGene.size() == 0 && idxActivityByGene.size() == 0 && idxAlleleByGene.size() == 0) {
+    if (idxPhenotypeByGene.isEmpty() && idxActivityByGene.isEmpty() && idxAlleleByGene.isEmpty()) {
       throw new RuntimeException("No lookup columns found");
     }
     if (idxContext == -1) {
@@ -168,10 +168,10 @@ public class TestAlertImporter extends BaseDirectoryImporter {
       Map<String, String> activityJson = new HashMap<>();
       for (String gene : idxActivityByGene.keySet()) {
         String pheno = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
-        if (pheno != null && Constants.isNoResult(pheno)) {
-          activityJson.put(gene, pheno);
+        if (Constants.isNoResult(pheno)) {
+          activityJson.put(gene, Constants.NO_RESULT);
         } else {
-          activityJson.put(gene, normalizeScore(normalizeGeneText(gene, row.getText(idxActivityByGene.get(gene)))));
+          activityJson.put(gene, normalizeScore(row.getText(idxActivityByGene.get(gene))));
         }
       }
       Map<String,String> phenotypeJson = new HashMap<>();

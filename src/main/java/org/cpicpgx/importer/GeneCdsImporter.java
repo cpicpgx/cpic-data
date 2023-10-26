@@ -101,7 +101,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         String priority = dataRow.getText(COL_EHR_PRIORITY);
         String consultation = dataRow.getText(COL_CONSULTATION);
 
-        dbHarness.insert(pheno, activity, priority, consultation);
+        dbHarness.insert(normalizeGeneText(geneSymbol, pheno), activity, priority, consultation);
       }
 
       List<String> notes = new ArrayList<>();
@@ -182,7 +182,7 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
     }
 
     void insert(String phenotype, String activity, String ehr, String consultation) throws Exception {
-      String normalizedPhenotype = phenotype.replaceAll("^" + this.gene + "\\s*", "");
+      String normalizedPhenotype = normalizeGeneText(gene, phenotype);
 
       if (!phenotypesExist) {
         insertStmt.clearParameters();

@@ -37,16 +37,15 @@ import java.util.regex.Pattern;
  * Abstract class for classes that want to crawl all files in a directory and do something with them. This should be 
  * extensible enough for any file type but it's mostly used for parsing Excel files and CSVs.
  * 
- * For an Excel parser example, check out {@link DiplotypePhenotypeImporter}.
+ * <p>For an Excel parser example, check out {@link DiplotypePhenotypeImporter}.</p>
  * 
- * For a CSV example, check out {@link RecommendationImporter}
+ * <p>For a CSV example, check out {@link RecommendationImporter}</p>
  *
  * @author Ryan Whaley
  */
 public abstract class BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Pattern sf_activityScorePattern = Pattern.compile("^[≥>]?\\d+(\\.?\\d*)$");
-  private static final Pattern sf_noResultPattern = Pattern.compile("^No (.*)Result$");
 
   private Path directory;
 
@@ -82,6 +81,7 @@ public abstract class BaseDirectoryImporter {
     try (Connection conn = ConnectionFactory.newConnection()) {
       int delCount = 0;
       for (String deleteStmt : getDeleteStatements()) {
+        //noinspection SqlSourceToSinkFlow
         try (PreparedStatement stmt = conn.prepareStatement(deleteStmt)) {
           delCount += stmt.executeUpdate();
         }
@@ -230,7 +230,7 @@ public abstract class BaseDirectoryImporter {
    * @throws SQLException can occur from DB inserts
    */
   void writeNotes(String entityId, List<String> notes) throws SQLException {
-    if (notes == null || notes.size() == 0) return;
+    if (notes == null || notes.isEmpty()) return;
 
     try (Connection conn = ConnectionFactory.newConnection()) {
       PreparedStatement noteInsert = conn.prepareStatement("insert into file_note(entityId, note, type, ordinal) values (?, ?, ?, ?)");
@@ -261,7 +261,7 @@ public abstract class BaseDirectoryImporter {
       return null;
     } else {
       Matcher m = sf_activityScorePattern.matcher(score);
-      if (score.equalsIgnoreCase(Constants.NA)) {
+      if (Constants.isUnspecified(score)) {
         return Constants.NA;
       } else if (Constants.isNoResult(score)) {
         return Constants.NO_RESULT;
@@ -288,34 +288,16 @@ public abstract class BaseDirectoryImporter {
     String strippedText = StringUtils.stripToNull(text);
     if (strippedText == null) {
       return null;
-    } else if (strippedText.equalsIgnoreCase(Constants.NA)) {
-      return Constants.NA;
-    } else {
-      String normalName = strippedText.replaceAll(gene + "\\s*", "");
-
-      Matcher m = sf_noResultPattern.matcher(normalName);
-      if (m.matches()) {
-        if (StringUtils.isNotBlank(m.group(1))) {
-          throw new RuntimeException("No Result value [" + text + "] should not include text [" + m.group(1) + "]");
-        }
-      }
-
-      return normalName;
     }
-  }
-
-  /**
-   * Normalize text for activity score, will replace nulls and blanks with "n/a"
-   *
-   * @param rawText raw text to describe an activity score
-   * @return a normalized score or "n/a" if no value specified
-   */
-  static String normalizeActivityScore(@Nullable String rawText) {
-    String text = StringUtils.stripToNull(rawText);
-    if (text == null || Constants.isUnspecified(text)) {
+    String ungenedText = strippedText.replaceAll(gene + "\\s*", "");
+    if (Constants.isUnspecified(ungenedText)) {
       return Constants.NA;
+    } else if (Constants.isNoResult(ungenedText)) {
+      return Constants.NO_RESULT;
+    } else if (Constants.isIndeterminate(ungenedText)) {
+      return Constants.INDETERMINATE;
     } else {
-      return text.replaceAll(">=", "≥").replaceAll("\\.0$", "");
+      return ungenedText;
     }
   }
 

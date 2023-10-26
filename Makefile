@@ -88,6 +88,13 @@ db-refresh:
 db-copy: db-download db-refresh
 	@echo "Database image copied and refreshed"
 
+.PHONY: db-copy-staging
+db-copy-staging:
+	@echo "Database image copied and refreshed"
+	dropdb cpic-staging -h localhost -U postgres
+	createdb cpic-staging -h localhost -U postgres
+	pg_dump cpic | psql cpic-staging
+
 .PHONY: db-migrate
 db-migrate: compile
 	java -cp build/libs/CpicData.jar org.cpicpgx.db.FlywayMigrate

@@ -152,7 +152,7 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
     }
 
     String validateFunction(String rawFn) throws Exception {
-      String fn = TextUtils.normalizeAlleleFunction(normalizeGeneText(this.geneSymbol, rawFn));
+      String fn = TextUtils.normalizeAlleleFunction(rawFn);
       if (StringUtils.isBlank(fn)) {
         throw new NotFoundException("No function specified");
       }

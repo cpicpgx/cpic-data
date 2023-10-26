@@ -16,7 +16,7 @@ import java.util.*;
  * Helper class to interact with the database. Handles connection creation and closing any generated SQL
  * statements. Also include some caching for common queries like looking up drug IDs or guideline IDs.
  *
- * Extend this class in your own class and add your own write statements to it.
+ * <p>Extend this class in your own class and add your own write statements to it.</p>
  */
 public abstract class DbHarness implements AutoCloseable {
   private final List<AutoCloseable> closables = new ArrayList<>();
@@ -60,6 +60,7 @@ public abstract class DbHarness implements AutoCloseable {
   }
 
   public PreparedStatement prepare(@Nonnull String sql) throws SQLException {
+    //noinspection SqlSourceToSinkFlow
     PreparedStatement pstmt = f_conn.prepareStatement(sql);
     closables.add(pstmt);
     return pstmt;
@@ -136,20 +137,17 @@ public abstract class DbHarness implements AutoCloseable {
    * @throws SQLException can occur when querying the DB for phenotype names
    */
   public String validPhenotype(String gene, String phenotype) throws SQLException, NotFoundException {
-    if (Constants.isNoResult(phenotype)) return Constants.NO_RESULT;
-    if (Constants.isIndeterminate(phenotype)) return Constants.INDETERMINATE;
+    if (Constants.isNoResult(phenotype) || Constants.isIndeterminate(phenotype)) return phenotype;
 
-    String key = gene + phenotype;
-
-    if (phenotypeLookupCache.containsKey(key)) {
-      return phenotypeLookupCache.get(key);
+    if (phenotypeLookupCache.containsKey(phenotype)) {
+      return phenotypeLookupCache.get(phenotype);
     } else {
       phenotypeLookup.setString(1, gene);
       phenotypeLookup.setString(2, phenotype);
       try (ResultSet rs = phenotypeLookup.executeQuery()) {
         if (rs.next()) {
           String validPhenotype = rs.getString(1);
-          phenotypeLookupCache.put(key, validPhenotype);
+          phenotypeLookupCache.put(phenotype, validPhenotype);
           return validPhenotype;
         } else {
           throw new NotFoundException("Phenotype not found in allele table for " + gene + ": [" + phenotype + "]");

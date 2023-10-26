@@ -60,7 +60,7 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
             String phenotype = rs.getString(2);
             String ehr = rs.getString(3);
             String activity = rs.getString(4);
-            dipMap.put(diplotype, new String[]{diplotype, phenotype, ehr, activity});
+            dipMap.put(diplotype, new String[]{diplotype, gene + " " + phenotype, ehr, activity});
           }
         }
         for (String key : dipMap.keySet()) {

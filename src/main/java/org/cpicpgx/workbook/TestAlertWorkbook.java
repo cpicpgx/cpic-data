@@ -58,7 +58,7 @@ public class TestAlertWorkbook extends AbstractWorkbook {
     for (String gene : genes.keySet()) {
       switch (genes.get(gene)) {
         case PHENOTYPE:
-          writeStringCell(row, colIdx++, phenotype.get(gene), false);
+          writeStringCell(row, colIdx++, gene + " " + phenotype.get(gene), false);
           break;
         case ACTIVITY_SCORE:
           writeStringCell(row, colIdx++, activity.get(gene), false);
