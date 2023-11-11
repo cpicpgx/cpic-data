@@ -11,6 +11,7 @@ public enum GnomadPopulation {
   ASJ("Ashkenazi Jewish", "Near Eastern"),
   EAS("East Asian", "East Asian"),
   FIN("Finnish", "European"),
+  MID("Middle Eastern", "Near Eastern"),
   NFE("Non-Finnish European", "European"),
   SAS("South Asian", "Central/South Asian"),
   OTH("Other", null);

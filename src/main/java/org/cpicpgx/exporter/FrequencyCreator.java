@@ -67,7 +67,7 @@ public class FrequencyCreator {
 
       System.exit(0);
     } catch (IOException|ParseException e) {
-      e.printStackTrace();
+      sf_logger.error("Failed to create frequencies", e);
       System.exit(1);
     }
   }
@@ -141,7 +141,7 @@ public class FrequencyCreator {
         }
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      sf_logger.error("Error loading alleles", e);
     }
   }
 
@@ -154,7 +154,7 @@ public class FrequencyCreator {
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
       sf_logger.debug("Requesting frequencies from PharmGKB for: {}", rsid);
-      response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadExome"));
+      response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadGenome"));
     } catch (NotFoundException e) {
       // safe to ignore, just means no frequency data available
     } catch (Exception e) {
