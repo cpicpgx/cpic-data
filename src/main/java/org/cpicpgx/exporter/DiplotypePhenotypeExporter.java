@@ -68,6 +68,8 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
           workbook.writeDiplotype(fields[0], fields[1], fields[2], fields[3]);
         }
 
+        workbook.writeNotes(queryNotes(conn, gene, FileType.DIPLOTYPE_PHENOTYPE));
+
         workbook.writeChangeLog(Collections.emptyList());
 
         writeWorkbook(workbook);
