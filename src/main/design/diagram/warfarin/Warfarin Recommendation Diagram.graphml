@@ -277,7 +277,7 @@ decrease dose by 10-25%</y:NodeLabel>
           <y:Geometry height="30.0" width="1042.396178343949" x="-144.48662420382152" y="981.6522292993632"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="2.0"/>
-          <y:NodeLabel alignment="left" autoSizePolicy="content" fontFamily="Roboto" fontSize="16" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="22.75" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="l" textColor="#000000" verticalTextPosition="bottom" visible="true" width="802.6171875" x="4.0" xml:space="preserve" y="3.625">FIGURE 2: DOSING RECOMMENDATIONS FOR WARFARIN DOSING BSED ON GENOTYPE FOR ADULT PATIENTS</y:NodeLabel>
+          <y:NodeLabel alignment="left" autoSizePolicy="content" fontFamily="Roboto" fontSize="16" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="22.75" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="l" textColor="#000000" verticalTextPosition="bottom" visible="true" width="813.3828125" x="4.0" xml:space="preserve" y="3.625">FIGURE 2: DOSING RECOMMENDATIONS FOR WARFARIN DOSING BASED ON GENOTYPE FOR ADULT PATIENTS</y:NodeLabel>
         </y:GenericNode>
       </data>
     </node>
@@ -292,7 +292,7 @@ decrease dose by 10-25%</y:NodeLabel>
 (b) Data strongest for European and East Asian ancestry populations and consistent in other populations.&lt;br&gt;
 (c) 45-50% of individuals with self-reported African ancestry carry CYP2C9*5,*6,*8,*11, or rs12777823. IF CYP2C9*5, *6, *8, and *11 WERE NOT &lt;br&gt;TESTED, DOSE WARFARIN CLINICALLY. Note: these data derive primarily from African Americans, who are largely from West Africa. It is unknown if &lt;br&gt;the same associations are present for those from other parts of Africa.&lt;br&gt;
 (d) Most algorithms are developed for the target INR 2-3.&lt;br&gt;
-(e) Consider an alternative agent in individuals with genotypes associated with CYP2C9 poor metabolism (e.g., CYP2C9*3/*3, *2/*3, *3/*3) or both &lt;br&gt;increased sensitivity (VKORC1 A/G or A/A) and CYP2C9 poor metabolism.&lt;br&gt;
+(e) Consider an alternative agent in individuals with genotypes associated with CYP2C9 poor metabolism (e.g., CYP2C9 *2/*3, *3/*3) or both &lt;br&gt;increased sensitivity (VKORC1 A/G or A/A) and CYP2C9 poor metabolism.&lt;br&gt;
 (f) See the EU-PACT trial for pharmacogenetics-based warfarin initiation (loading) dose algorithm (33) with the caveat that the loading dose PG &lt;br&gt;algorithm has not been specifically tested or validated in populations of African ancestry.&lt;br&gt;
 (g) Larger dose reduction might be needed in variant homozygotes (i.e. 20-40%).&lt;br&gt;
 (h) African American refers to individuals mainly originating from West Africa.
