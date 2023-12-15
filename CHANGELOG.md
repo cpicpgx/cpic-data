@@ -1,3 +1,22 @@
+## [1.34.0](https://github.com/cpicpgx/cpic-data/compare/v1.33.0...v1.34.0) (2023-12-15)
+
+
+### Features
+
+* add pediatric warfarin diagram ([926a4ff](https://github.com/cpicpgx/cpic-data/commit/926a4ffccd2be7719a033f81f7d1103f55a404e8))
+* data update ([a5b08bf](https://github.com/cpicpgx/cpic-data/commit/a5b08bff0bb0837b7ede963aa311086c16a864d1))
+* write notes tab to diplotype-phenotype file ([2b68dc7](https://github.com/cpicpgx/cpic-data/commit/2b68dc7bad1844ebf2f1f06fd5ee4cace4e08b2e))
+
+
+### Bug Fixes
+
+* change to use gnomad genome instead of exome ([a76438e](https://github.com/cpicpgx/cpic-data/commit/a76438e0a6b19e216a3ba7ca9ffd583963d1fa5a))
+* export gene names with phenotype values in excel files ([443f3ef](https://github.com/cpicpgx/cpic-data/commit/443f3ef9fd6a654575a66cfc1a8eeaab06e4acca))
+* fix bad pattern for "Indeterminate" detection ([a49d208](https://github.com/cpicpgx/cpic-data/commit/a49d208a21083e669b4cbd719007919f3a2e3020))
+* fix import of clinvar submission data ([2a66ee0](https://github.com/cpicpgx/cpic-data/commit/2a66ee097bb72062faccefe771a24be06ce9ed79))
+* fix typo in warfarin diagram ([60c7f6c](https://github.com/cpicpgx/cpic-data/commit/60c7f6c3bf768b98054f703ced9a043329450cfb))
+* fix warfarin diagram ([7bda6db](https://github.com/cpicpgx/cpic-data/commit/7bda6db219b31825ea6db0b12b07173a1df1755a)), closes [PharmGKB/PharmCAT#164](https://github.com/PharmGKB/PharmCAT/issues/164)
+
 ## [1.33.0](https://github.com/cpicpgx/cpic-data/compare/v1.32.0...v1.33.0) (2023-10-24)
 
 
