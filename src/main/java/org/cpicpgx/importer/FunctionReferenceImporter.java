@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
+import java.security.InvalidParameterException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -151,14 +152,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         }
       }
 
-      List<String> notes = new ArrayList<>();
-      for (; rowIdx <= workbook.currentSheet.getLastRowNum(); rowIdx++) {
-        row = workbook.getRow(rowIdx);
-        if (!row.hasNoText(0) && !row.getNullableText(0).toLowerCase().startsWith("note")) {
-          notes.add(row.getText(0));
-        }
-      }
-      writeNotes(geneSymbol, notes);
+      writeNotes(geneSymbol, workbook.getNotes());
 
       dbHarness.updateMethods(processMethods(workbook));
 
