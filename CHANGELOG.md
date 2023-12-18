@@ -1,3 +1,15 @@
+## [1.35.0](https://github.com/cpicpgx/cpic-data/compare/v1.34.0...v1.35.0) (2023-12-18)
+
+
+### Features
+
+* data update ([040a58a](https://github.com/cpicpgx/cpic-data/commit/040a58a7003834f4c912e43556caddf2360d951b))
+
+
+### Bug Fixes
+
+* fix importing of notes in the allele function files ([b019f78](https://github.com/cpicpgx/cpic-data/commit/b019f78c3d6e26ef5caa943db0dc83167071b442))
+
 ## [1.34.0](https://github.com/cpicpgx/cpic-data/compare/v1.33.0...v1.34.0) (2023-12-15)
 
 
