@@ -11,7 +11,7 @@ else
 	GRADLE_CMD := ./gradlew
 	GIT_CLONE_OPTS :=
 endif
-
+ª
 
 .PHONY: dev-init      # initializes dev environment
 dev-init:
@@ -26,8 +26,8 @@ dump:
 	mkdir -p out/db
 	rm -f out/db/${TAG_NAME}
 	rm -f out/db/${INSERTS_NAME}
-	pg_dump cpic -f out/db/${TAG_NAME} --no-privileges --schema=cpic --no-owner
-	pg_dump cpic -f out/db/${INSERTS_NAME} --data-only --column-inserts --schema=cpic --no-owner
+	pg_dump cpic -U cpic -f out/db/${TAG_NAME} --no-privileges --schema=cpic --no-owner
+	pg_dump cpic -U cpic -f out/db/${INSERTS_NAME} --data-only --column-inserts --schema=cpic --no-owner
 
 .PHONY: upload
 upload:
