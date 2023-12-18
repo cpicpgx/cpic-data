@@ -11,7 +11,7 @@ else
 	GRADLE_CMD := ./gradlew
 	GIT_CLONE_OPTS :=
 endif
-ª
+
 
 .PHONY: dev-init      # initializes dev environment
 dev-init:
