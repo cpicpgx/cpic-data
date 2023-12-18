@@ -1,7 +1,7 @@
 Date of Change	Type of Data	Subject	Note of Change
+2023-12-15	ALLELE_DEFINITION	CYP2D6	Modified: protein header 'p.E402L' to 'p.V402L'); NEW POSITION: Position 4125G>C/g.42126667C>G/g.9144G>C/rs1135832; Position 4134T>C/g.42126658A>G/g.9153T>C/rs1135836; Position 4167T>C/g.42126625A>G/g.9186T>C; Position 4170T>C/g.42126622A>G/g.9189T>C/rs747998333; Position 4173C>T/g.42126619G>A/g.9192C>T/rs28371736; Modified: *36 'PVID:PV00460' to 'PVID:PV02379'; *83 'PVID:PV00500' to 'PVID:PV02385'; *141'PVID:PV01593' to 'PVID:PV02389'
 2023-12-05	ALLELE_DEFINITION	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Notes tab)
 2023-12-05	ALLELE_FUNCTION_REFERENCE	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Notes tab); variant classification updated based on VCEP disusssion - see Notes tab
-2023-12-05	FREQUENCY	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Methods tab)
 2023-12-05	RECOMMENDATION	desflurane	uploaded to CPIC db
 2023-12-05	RECOMMENDATION	enflurane	uploaded to CPIC db
 2023-12-05	RECOMMENDATION	halothane	uploaded to CPIC db
@@ -154,9 +154,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2022-03-11	FREQUENCY	CYP2D6	fixed diplotpye/phenotype calculations and made layouts consistent
 2022-03-11	FREQUENCY	CYP3A5	fixed diplotpye/phenotype calculations and made layouts consistent
 2022-03-11	FREQUENCY	NUDT15	fixed diplotpye/phenotype calculations and made layouts consistent
-2022-03-11	FREQUENCY	SLCO1B1	fixed diplotpye/phenotype calculations and made layouts consistent
-2022-03-11	FREQUENCY	TPMT	fixed diplotpye/phenotype calculations and made layouts consistent
-2022-03-11	FREQUENCY	UGT1A1	fixed diplotpye/phenotype calculations and made layouts consistent
 2022-03-08	ALLELE_FUNCTION_REFERENCE	CYP2D6	Update structural variants to agree with PharmVar nomenclature
 2022-02-22	RECOMMENDATION	carbamazepine	Fix the format of the "No Result" Allele Status values
 2022-02-15	ALLELE_FUNCTION_REFERENCE	CYP3A5	Removed *2, *4, *5 rows based on the CYP3A5 allele definition update (all had unknown function assigned)
@@ -178,7 +175,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2021-12-01	ALLELE_DEFINITION	SLCO1B1	Added new alleles *48-*49
 2021-11-16	ALLELE_FUNCTION_REFERENCE	G6PD	Added finding statements and strength of evidence for all variants
 2021-11-16	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Added *48 and *49
-2021-11-10	FREQUENCY	SLCO1B1	Added new alleles *48, *49
 2021-10-22	ALLELE_DEFINITION	CYP2D6	added new alleles *146, *147, *149
 2021-10-22	ALLELE_DEFINITION	CYP2D6	added wobbles (W and M) into *36 due to release of *36.004 which includes amino acid changes that are core allele variants in *49 and *53
 2021-10-22	ALLELE_FUNCTION_REFERENCE	RYR1	Based on the ClinGen's variant curation expert panel (VCEP) recommendations for RYR1 pathogenicity classification in malignant hyperthermia susceptibility (PMID 33767344) two variants have been changed from "malignant hyperthermia associated" to "uncertain function"
@@ -204,7 +200,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2021-10-01	FREQUENCY	G6PD	created version 1
 2021-09-29	ALLELE_DEFINITION	TPMT	updated link to Nomenclature website and added note
 2021-09-24	ALLELE_DEFINITION	UGT1A1	changed representation for *36, *27, *28 from g.233760233 to g.233760235TA[6]; g.233760235TA[7]; g.233760235TA[8]; g.233760235TA[9] and from g.175490 to g.175492TA[6]; g.175492TA[7]; g.175492TA[8]; g.175492TA[9]
-2021-09-21	FREQUENCY	SLCO1B1	Updated allele table based on PharmVar SLCO1B1 release
 2021-09-17	ALLELE_FUNCTION_REFERENCE	CYP2C19	*39 added
 2021-09-17	FREQUENCY	CYP2C19	added *39 in the allele frequency and references tab
 2021-09-08	TEST_ALERT	aminosalicylic acid	created
@@ -355,7 +350,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2020-10-14	PAIR		updated PharmGKB levels and PGx testing values
 2020-10-09	ALLELE_DEFINITION	RYR1	changed c.7039_7041delGAG or c.7042_7044delGAG name to c.7042_7044delGAG to reflect naming as on the EMHG list and used mapping data that correspond with the rsID in dbSNP
 2020-10-09	ALLELE_FUNCTION_REFERENCE	RYR1	changed c.7039_7041delGAG or c.7042_7044delGAG name to c.7042_7044delGAG to reflect naming as on the EMHG list and used mapping data that correspond with the rsID in dbSNP
-2020-10-09	FREQUENCY	RYR1	changed c.7039_7041delGAG or c.7042_7044delGAG name to c.7042_7044delGAG to reflect naming as on the EMHG list and used mapping data that correspond with the rsID in dbSNP
 2020-10-08	ALLELE_DEFINITION	CYP2D6	*140 and *141
 2020-09-26	ALLELE_DEFINITION	CYP2C19	removed core allele only tab; added comment in notes
 2020-09-26	ALLELE_DEFINITION	CYP2D6	Removed core allele only tab, added comment to Notes
@@ -502,9 +496,7 @@ Date of Change	Type of Data	Subject	Note of Change
 2020-02-24	FREQUENCY	DPYD	Removed c.680+139G>A; variant was originally assigned decreased function because of its possible connection with the Hap3B haplotype, which has decreased function, but a functional impact of c.680+139G>A by itself is uncertain. Original comment: Incomplete association with HapB3 (SNP not exclusive to HapB3 and therefore not a suitable proxy).
 2020-02-13	ALLELE_DEFINITION	NUDT15	Updated the chromosome number
 2020-01-09	FREQUENCY	CYP2D6	Added *99 allele to allele frequency and references sheets. Removed column for undefined duplications from references sheet
-2020-01-08	FREQUENCY	UGT1A1	Corrected typo on Allele frequency sheet
 2019-12-09	FREQUENCY	CACNA1S	Removed rsID and protein change columns from Allele frequency sheet. Changed rsIDs on Reference sheet to equivalent nucleotide changes
-2019-12-09	FREQUENCY	RYR1	Removed rsID and protein change columns from Allele frequency sheet. Changed rsIDs on Reference sheet to equivalent nucleotide changes
 2019-12-06	ALLELE_DEFINITION	DPYD	Removed intronic and non-synonymous uncertain function variants: c.233+112G>T, c.234-93C>T, c.274C>G, c.484-145T>A, c.910T>C, c.1054C>G, c.1525-28A>G, c.1974+75A>G, c.2060A>C, c.2678A>G, c.2948C>T
 2019-12-06	ALLELE_FUNCTION_REFERENCE	DPYD	Removed intronic and non-synonymous uncertain function variants: c.233+112G>T, c.234-93C>T, c.274C>G, c.484-145T>A, c.910T>C, c.1054C>G, c.1525-28A>G, c.1974+75A>G, c.2060A>C, c.2678A>G, c.2948C>T
 2019-12-06	FREQUENCY	DPYD	Removed intronic and non-synonymous uncertain function variants: c.233+112G>T, c.234-93C>T, c.274C>G, c.484-145T>A, c.910T>C, c.1054C>G, c.1525-28A>G, c.1974+75A>G, c.2060A>C, c.2678A>G, c.2948C>T
@@ -523,12 +515,7 @@ Date of Change	Type of Data	Subject	Note of Change
 2019-10-30	ALLELE_FUNCTION_REFERENCE	DPYD	changed c.1129-5923C>G (HapB3) to c.1129-5923C>G, c.1236G>A (HapB3) and added note
 2019-10-30	ALLELE_FUNCTION_REFERENCE	DPYD	changed rs1801265 (*9A) to c.85T>C (*9A)
 2019-10-30	FREQUENCY	DPYD	Updated to new standardized format and weighted average allele frequencies. Combined information in ExAC allele number tab and previous references tab into new references tab. Converted to biogeographical groups
-2019-10-29	FREQUENCY	SLCO1B1	Updated document to new standardized format and weighted average allele frequencies. Added all alleles from Allele Definition file and converted to biogeographical groups.
-2019-10-29	FREQUENCY	TPMT	Updated to standardized format and weighted average allele frequencies. Converted to biogeographical groups.
-2019-10-29	FREQUENCY	UGT1A1	Updated document to new standardized format and weighted average allele frequencies. Added Methods tab and converted to biogeographical groups.
 2019-10-28	ALLELE_DEFINITION	CYP2D6	removed rsID from 3278T>C variant in *26
-2019-10-28	FREQUENCY	RYR1	Converted to PharmGKB biogeographical groups, added References, Methods and Change Log sheets. Average allele frequencies now calculated using weighted averages.
-2019-10-28	FREQUENCY	VKORC1	Updated to new standardized format and weighted average allele frequencies. Converted to biogeographical groups. Removed references with no information on rs9923231
 2019-10-25	ALLELE_DEFINITION	DPYD	changed c.1129-5923C>G (HapB3) to c.1129-5923C>G, c.1236G>A (HapB3) and deleted c.483+18G>A column
 2019-10-25	ALLELE_DEFINITION	DPYD	changed c.2657G>A (*9B) to c.85T>C, c.2657G>A (*9B)
 2019-10-25	ALLELE_DEFINITION	DPYD	changed rs1801265 (*9A) to c.85T>C (*9A)
@@ -540,8 +527,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2019-10-22	FREQUENCY	CYP2B6	Converted table to use PharmGKB biogeographical groups and updated to new standardized format. Average allele frequencies now calculated using weighted averages
 2019-10-18	FREQUENCY	CYP4F2	updated the allele name to match with the allele definition table
 2019-10-18	FREQUENCY	NUDT15	updated allele names on References tab to match Allele frequency by race tab
-2019-10-18	FREQUENCY	UGT1A1	updated allele names to match names in allele defintion file, and removed extraneous variant not found in definition and function files
-2019-10-18	FREQUENCY	VKORC1	updated allele name to match allele defintion table
 2019-10-11	ALLELE_FUNCTION_REFERENCE	CACNA1S	Updated table notes
 2019-10-11	ALLELE_FUNCTION_REFERENCE	CFTR	Updated table notes
 2019-10-11	ALLELE_FUNCTION_REFERENCE	CYP2B6	Updated table notes format
@@ -628,15 +613,10 @@ Date of Change	Type of Data	Subject	Note of Change
 2018-06-18	FREQUENCY	NUDT15	updated frequency of *3 allele for African from Moriyama
 2018-06-13	FREQUENCY	CYP2B6	Version 1 created
 2018-06-13	FREQUENCY	NUDT15	updated some wording on methods tab
-2018-06-13	FREQUENCY	TPMT	updated some wording on methods tab & URL in footnote on Allele Frequency by Race tab
 2018-04-27	FREQUENCY	NUDT15	removed *3 and *6 frequencies from references where *2 was not calculated
-2018-04-26	FREQUENCY	TPMT	keeping refs with frequencies with *3A calculated for *3A, *3B, *3C
 2018-04-25	ALLELE_DEFINITION	TPMT	released
-2018-04-25	FREQUENCY	TPMT	updated *41 and *22 frequencies; corrected typo in footnote
 2018-04-23	ALLELE_DEFINITION	SLCO1B1	Added change log tab
 2018-04-20	FREQUENCY	NUDT15	updated frequencies and sources
-2018-04-20	FREQUENCY	TPMT	updated frequencies and sources
-2018-01-29	FREQUENCY	TPMT	Version 1 created
 2018-01-20	FREQUENCY	NUDT15	Version 1 created
 2017-11-03	ALLELE_DEFINITION	UGT1A1	Added change log tab
 2017-11-03	FREQUENCY	CYP2C19	updated diplotype frequencies
@@ -649,9 +629,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2017-02-13	FREQUENCY	CYP2C9	updated footnotes
 2017-02-13	FREQUENCY	CYP3A5	updated footnotes
 2017-02-13	FREQUENCY	CYP4F2	updated footnotes
-2017-02-13	FREQUENCY	SLCO1B1	updated footnotes
-2017-02-13	FREQUENCY	VKORC1	updated footnotes
-2017-02-08	FREQUENCY	UGT1A1	Alie Fohner created v 1
 2017-01-15	FREQUENCY	HLA-B	version 1
 2016-11-08	ALLELE_DEFINITION	CYP4F2	Added change log tab
 2016-11-08	FREQUENCY	CYP2C9	Link added for CYP2C9 Allele definition Table on Allele frequency by race tab
@@ -659,7 +636,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2016-09-27	ALLELE_DEFINITION	CYP3A5	Added change log tab
 2016-09-08	FREQUENCY	CYP2C9	PharmGKB created version 1
 2016-09-08	FREQUENCY	CYP4F2	created version 1
-2016-09-08	FREQUENCY	VKORC1	Li Gong created version 1
 2016-07-15	FREQUENCY	CYP2D6	all sections were sorted by columns E-B-A (ethnicity-year-author)
 2016-07-14	FREQUENCY	CYP2D6	added 30 papers
 2016-05-31	FREQUENCY	CYP2D6	added column for *1+*83 and approximate frequency
@@ -671,7 +647,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2016-05-11	FREQUENCY	CYP2C19	added 16 papers
 2016-05-11	FREQUENCY	CYP2C19	changed *27 annotation for Hu et al from 0 to not tested (sequencing does not include the upstream *27 tag SNP); frequency changes to n/a
 2016-05-11	FREQUENCY	CYP2C19	corrected ethnicity for Larssen et al (line 333) to Europe
-2016-02-09	FREQUENCY	SLCO1B1	Created version 1
 2015-08-25	FREQUENCY	CYP2C19	added 8 papers
 2015-01-02	FREQUENCY	CYP2D6	added 1 paper
 2014-12-08	FREQUENCY	CYP2D6	studies used for *1 calculations are highlighted in blue
