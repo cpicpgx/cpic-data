@@ -1,3 +1,16 @@
+## [1.36.0](https://github.com/cpicpgx/cpic-data/compare/v1.35.0...v1.36.0) (2023-12-21)
+
+
+### Features
+
+* data update (MT-RNR1 allele name update) ([f1c62ac](https://github.com/cpicpgx/cpic-data/commit/f1c62ac1443c0f7ea0affa76005e56a189d1f0a2))
+
+
+### Bug Fixes
+
+* remove typo ([f40f6f6](https://github.com/cpicpgx/cpic-data/commit/f40f6f64a1d4071a95cf16cae46b5c093ab9d146))
+* specify DB user for dump script ([0a1fd9c](https://github.com/cpicpgx/cpic-data/commit/0a1fd9cdeb0d37f3a95ed73bbcfb5c0bd5f4f8b2))
+
 ## [1.35.0](https://github.com/cpicpgx/cpic-data/compare/v1.34.0...v1.35.0) (2023-12-18)
 
 
