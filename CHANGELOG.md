@@ -1,3 +1,16 @@
+## [1.37.0](https://github.com/cpicpgx/cpic-data/compare/v1.36.0...v1.37.0) (2024-01-12)
+
+
+### Features
+
+* data update (DPYD allele update) ([5c7f22d](https://github.com/cpicpgx/cpic-data/commit/5c7f22d1f256de0176734f4ae34257cc59b65d54))
+
+
+### Bug Fixes
+
+* change default DB for node connections ([ae55792](https://github.com/cpicpgx/cpic-data/commit/ae55792172d1dc6ad17aca1dc4b8883f1ccfc56a))
+* fix permissions for recommendation DB functions ([f827394](https://github.com/cpicpgx/cpic-data/commit/f8273944927428e168cb75b732e5d11c7635ee67))
+
 ## [1.36.0](https://github.com/cpicpgx/cpic-data/compare/v1.35.0...v1.36.0) (2023-12-21)
 
 
