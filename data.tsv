@@ -1,4 +1,6 @@
 Date of Change	Type of Data	Subject	Note of Change
+2024-01-11	ALLELE_DEFINITION	DPYD	Added c.1129-5923C>G as a single allele in addition to the HapB3 allele; further information in Notes
+2024-01-11	ALLELE_FUNCTION_REFERENCE	DPYD	Added c.1129-5923C>G as a single allele in addition to the HapB3 allele; and PMID plus findings to reference row
 2023-12-20	ALLELE_DEFINITION	MT-RNR1	Added "m." prefix to allele names
 2023-12-20	ALLELE_FUNCTION_REFERENCE	MT-RNR1	Added "m." prefix to allele names
 2023-12-20	FREQUENCY	MT-RNR1	Added "m." prefix to allele names
