@@ -5,6 +5,8 @@ import org.apache.poi.ss.usermodel.Row;
 import java.sql.Array;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Workbook to list all basic CPIC guideline information about names, URLs, and other associated entities
@@ -40,10 +42,22 @@ public class GuidelineWorkbook extends AbstractWorkbook {
     Row row = sheet.nextRow();
     writeStringCell(row, IDX_NAME, name, false);
     writeStringCell(row, IDX_URL, url, false);
-    writeStringCell(row, IDX_GENES, String.join("; ", (String[])genes.getArray()), false);
-    writeStringCell(row, IDX_DRUGS, String.join("; ", (String[])drugs.getArray()), false);
-    writeStringCell(row, IDX_PMIDS, String.join("; ", (String[])pmids.getArray()), false);
-    writeStringCell(row, IDX_ANNOTATIONIDS, String.join("; ", (String[])pharmgkbIds.getArray()), false);
+    writeStringCell(row, IDX_GENES, concatArray(genes), false);
+    writeStringCell(row, IDX_DRUGS, concatArray(drugs), false);
+    writeStringCell(row, IDX_PMIDS, concatArray(pmids), false);
+    writeStringCell(row, IDX_ANNOTATIONIDS, concatArray(pharmgkbIds), false);
     writeStringCell(row, IDX_NOTES, notes, false);
+  }
+
+  private static String concatArray(Array arrayValues) throws SQLException {
+    if (arrayValues != null) {
+      String[] values = (String[])arrayValues.getArray();
+      if (values.length == 0 || Arrays.stream(values).allMatch(Objects::isNull)) {
+        return "";
+      }
+      return String.join("; ", (String[])arrayValues.getArray());
+    } else {
+      return "";
+    }
   }
 }
