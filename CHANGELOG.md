@@ -1,3 +1,15 @@
+## [1.38.0](https://github.com/cpicpgx/cpic-data/compare/v1.37.0...v1.38.0) (2024-02-15)
+
+
+### Features
+
+* data update ([76752d3](https://github.com/cpicpgx/cpic-data/commit/76752d3cb891f6f38f3c002c5399e9f6d1bda75e))
+
+
+### Bug Fixes
+
+* fix handling of null SQL array values ([2a1efa1](https://github.com/cpicpgx/cpic-data/commit/2a1efa1b68512d6f256add962ee42cc1735c894d))
+
 ## [1.37.0](https://github.com/cpicpgx/cpic-data/compare/v1.36.0...v1.37.0) (2024-01-12)
 
 
