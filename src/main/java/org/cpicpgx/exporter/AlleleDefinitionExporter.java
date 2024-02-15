@@ -1,9 +1,12 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.workbook.AlleleDefinitionWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.util.TextUtils;
+import org.cpicpgx.workbook.AlleleDefinitionWorkbook;
+import org.jetbrains.annotations.NotNull;
 import org.pharmgkb.common.comparator.HaplotypeNameComparator;
+import org.pharmgkb.common.util.ComparatorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +14,8 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Write allele definitions out to Excel XLSX files, one per gene.
@@ -93,42 +97,31 @@ public class AlleleDefinitionExporter extends BaseExporter {
             PreparedStatement alleleStmt = conn.prepareStatement("select name, id, matchesreferencesequence, structuralvariation, pharmvarid from allele_definition where geneSymbol=?");
             PreparedStatement locValStmt = conn.prepareStatement("select locationid, variantallele from allele_location_value where alleledefinitionid=?")
         ) {
+          SortedSet<Allele> alleles = new TreeSet<>();
           alleleStmt.setString(1, symbol);
           try (ResultSet rs = alleleStmt.executeQuery()) {
-            
-            // parse to an intermediary map so we can sort the allele names properly
-            SortedMap<String, Long> alleleMap = new TreeMap<>(HaplotypeNameComparator.getComparator());
-            String referenceAllele = null;
-            Map<String,String> strucVarIdMap = new HashMap<>();
             while (rs.next()) {
-              boolean isReference = rs.getBoolean(3);
-              boolean isStrucVar = rs.getBoolean(4);
-              if (isReference) {
-                referenceAllele = rs.getString(1);
-              }
-              if (isStrucVar) {
-                strucVarIdMap.put(rs.getString(1), rs.getString(5));
-              }
-              alleleMap.put(rs.getString(1), rs.getLong(2));
+              Allele allele = new Allele(
+                  TextUtils.normalize(rs.getString(1)),
+                  rs.getLong(2),
+                  rs.getBoolean(3),
+                  rs.getBoolean(4),
+                  rs.getString(5)
+              );
+              alleles.add(allele);
             }
+          }
 
-            // We do this so the reference allele is always listed first and the rest are in natural order
-            List<String> nameOutputOrderList = new ArrayList<>(alleleMap.keySet());
-            nameOutputOrderList.remove(referenceAllele);
-            nameOutputOrderList.add(0, referenceAllele);
-
-            for (String alleleName : nameOutputOrderList) {
-              Long alleleId = alleleMap.get(alleleName);
-              workbook.writeAllele(alleleName);
-              locValStmt.setLong(1, alleleId);
-              try (ResultSet vrs = locValStmt.executeQuery()) {
-                while (vrs.next()) {
-                  workbook.writeAlleleLocationValue(vrs.getLong(1), vrs.getString(2));
-                }
+          for (Allele allele : alleles) {
+            workbook.writeAllele(allele.name);
+            locValStmt.setLong(1, allele.id);
+            try (ResultSet vrs = locValStmt.executeQuery()) {
+              while (vrs.next()) {
+                workbook.writeAlleleLocationValue(vrs.getLong(1), vrs.getString(2));
               }
-              if (strucVarIdMap.containsKey(alleleName)) {
-                workbook.writeStructrualVariantCell(strucVarIdMap.get(alleleName));
-              }
+            }
+            if (allele.structuralVariant) {
+              workbook.writeStructrualVariantCell(allele.pharmVarId);
             }
           }
         }
@@ -141,6 +134,38 @@ public class AlleleDefinitionExporter extends BaseExporter {
         addFileExportHistory(workbook.getFilename(), new String[]{symbol});
       }
       handleFileUpload();
+    }
+  }
+
+  /**
+   * Class for properly storing and sorting allele information from the DB record.
+   */
+  private static class Allele implements Comparable<Allele> {
+    public final String name;
+    public final long id;
+    public final boolean reference;
+    public final boolean structuralVariant;
+    public final String pharmVarId;
+
+    public Allele(String name, long id, boolean reference, boolean structuralVariant, String pharmVarId) {
+      this.name = name;
+      this.id = id;
+      this.reference = reference;
+      this.pharmVarId = pharmVarId;
+      this.structuralVariant = structuralVariant;
+    }
+
+
+    @Override
+    public int compareTo(@NotNull Allele o) {
+      if (this == o) {
+        return 0;
+      }
+      int rez = ComparatorUtils.compare(reference, o.reference) * -1;
+      if (rez != 0) {
+        return rez;
+      }
+      return HaplotypeNameComparator.getComparator().compare(name, o.name);
     }
   }
 }
