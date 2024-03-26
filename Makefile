@@ -1,5 +1,6 @@
 ARCHIVE_NAME = cpic_db_dump
 TAG_NAME = $(ARCHIVE_NAME)-$(shell git describe --tags).sql
+UNTAG_NAME = ${ARCHIVE_NAME}.sql
 INSERTS_NAME = $(ARCHIVE_NAME)-$(shell git describe --tags)_inserts.sql
 
 ifeq ($(OS),Windows_NT)
@@ -34,6 +35,7 @@ upload:
 	gzip out/db/${TAG_NAME}
 	gzip out/db/${INSERTS_NAME}
 	aws s3 cp out/db/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
+	aws s3 cp out/db/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/${UNTAG_NAME}.gz --profile cpic
 	aws s3 cp out/db/${INSERTS_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 	@ echo "DB dump published to https://files.cpicpgx.org/data/database/${TAG_NAME}.gz"
 
