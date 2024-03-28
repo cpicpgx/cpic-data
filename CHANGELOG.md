@@ -1,3 +1,15 @@
+## [1.39.0](https://github.com/cpicpgx/cpic-data/compare/v1.38.0...v1.39.0) (2024-03-28)
+
+
+### Features
+
+* add an "unversioned" DB dump file to S3 on release ([7729a56](https://github.com/cpicpgx/cpic-data/commit/7729a566f33c5561881147722633c57ecef4ec4b))
+
+
+### Bug Fixes
+
+* fix allele definition export ordering ([39f50e7](https://github.com/cpicpgx/cpic-data/commit/39f50e74d861e61bb093fb70efa0eb88c35d407e))
+
 ## [1.38.0](https://github.com/cpicpgx/cpic-data/compare/v1.37.0...v1.38.0) (2024-02-15)
 
 
