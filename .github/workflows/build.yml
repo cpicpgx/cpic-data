@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - "development"
+      - "ci-test"
 
 env:
-  POSTGRES_HOST: postgres
-  POSTGRES_PASSWORD: postgres
+  PGHOST: postgres
+  PGPASSWORD: postgres
   CPIC_HOST: postgres
-  CPIC_PASS: ghtest
+  CPIC_PASS: postgres
 
 jobs:
   build:
@@ -21,7 +22,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:11
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
         # Set health checks to wait until postgres has started
@@ -51,7 +52,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
           cache: 'yarn'
 
       - name: Build and test

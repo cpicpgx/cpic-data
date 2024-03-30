@@ -55,7 +55,7 @@ update-wiki-toc:
 
 .PHONY: compile
 compile:
-	${GRADLE_CMD} jar
+	${GRADLE_CMD} shadowJar
 .PHONY: jar
 jar: compile
 
@@ -74,17 +74,18 @@ db-teardown:
 	psql -X -q  -h localhost -U postgres -c "drop user cpic"
 
 .PHONY: db-init
-db-init: db-bootstrap db-migrate
-	java -jar build/libs/CpicData.jar -d cpic-support-files
+db-init: db-bootstrap db-copy db-migrate
+	java -jar build/libs/CpicData-all.jar -d cpic-support-files
 
 .PHONY: db-download
 db-download:
-	aws s3 cp s3://cpic.backup/db/cpic_prod_db.sql.gz out/cpic_prod_db.sql.gz --profile cpic
+	mkdir out
+	curl https://files.cpicpgx.org/data/database/cpic_db_dump.sql.gz --output out/cpic_db_dump.sql.gz
 
 .PHONY: db-refresh
 db-refresh:
-	dropdb cpic -h localhost -U postgres && createdb cpic -h localhost -U postgres
-	gzip -cd out/cpic_prod_db.sql.gz | psql -d cpic -h localhost -U postgres
+	dropdb cpic -h ${PGHOST} -U postgres && createdb cpic -h ${PGHOST} -U postgres -O cpic
+	gzip -cd out/cpic_db_dump.sql.gz | psql -d cpic -h ${PGHOST} -U cpic
 
 .PHONY: db-copy
 db-copy: db-download db-refresh
@@ -99,7 +100,7 @@ db-copy-staging:
 
 .PHONY: db-migrate
 db-migrate: compile
-	java -cp build/libs/CpicData.jar org.cpicpgx.db.FlywayMigrate
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.db.FlywayMigrate
 
 
 .PHONY: api-bootstrap
@@ -123,57 +124,57 @@ db-clean:
 
 .PHONY: import
 import:
-	java -cp build/libs/CpicData.jar org.cpicpgx.DataImport -d cpic-support-files
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.DataImport -d cpic-support-files
 
 .PHONY: import-alleles
 import-alleles:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.AlleleDefinitionImporter -d cpic-support-files/allele_definition
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.AlleleDefinitionImporter -d cpic-support-files/allele_definition
 
 .PHONY: import-function
 import-function:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.FunctionReferenceImporter -d cpic-support-files/allele_function_reference
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.FunctionReferenceImporter -d cpic-support-files/allele_function_reference
 
 .PHONY: import-drug
 import-drug:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.DrugImporter -d cpic-support-files/drug_resource
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.DrugImporter -d cpic-support-files/drug_resource
 
 .PHONY: import-frequency
 import-frequency:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.AlleleFrequencyImporter -d cpic-support-files/frequency
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.AlleleFrequencyImporter -d cpic-support-files/frequency
 
 .PHONY: import-cds
 import-cds:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.GeneCdsImporter -d cpic-support-files/gene_cds
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.GeneCdsImporter -d cpic-support-files/gene_cds
 
 .PHONY: import-phenotype
 import-phenotype:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.GenePhenotypeImporter -d cpic-support-files/gene_phenotype
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.GenePhenotypeImporter -d cpic-support-files/gene_phenotype
 
 .PHONY: import-gene
 import-gene:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.GeneReferenceImporter -d cpic-support-files/gene_resource
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.GeneReferenceImporter -d cpic-support-files/gene_resource
 
 .PHONY: import-pair
 import-pair:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.PairImporter -d cpic-support-files/pair
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.PairImporter -d cpic-support-files/pair
 
 .PHONY: import-recommendation
 import-recommendation:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.RecommendationImporter -d cpic-support-files/recommendation
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.RecommendationImporter -d cpic-support-files/recommendation
 
 .PHONY: import-test
 import-test:
-	java -cp build/libs/CpicData.jar org.cpicpgx.importer.TestAlertImporter -d cpic-support-files/test_alert
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.importer.TestAlertImporter -d cpic-support-files/test_alert
 
 
 .PHONY: publish-files
 publish-files:
-	java -cp build/libs/CpicData.jar org.cpicpgx.DataArtifactArchive -d out -u
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.DataArtifactArchive -d out -u
 
 .PHONY: publish-diplotypes
 publish-diplotypes:
-	java -cp build/libs/CpicData.jar org.cpicpgx.exporter.DiplotypePhenotypeExporter -d out -u
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.exporter.DiplotypePhenotypeExporter -d out -u
 
 .PHONY: publish-frequency
 publish-frequency:
-	java -cp build/libs/CpicData.jar org.cpicpgx.exporter.FrequencyExporter -d out -u
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.exporter.FrequencyExporter -d out -u

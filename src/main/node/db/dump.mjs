@@ -40,8 +40,8 @@ const env = {...process.env};
 
 if (argv.h) {
     pgdumpArgs.push(`-h ${argv.h}`);
-} else if (process.env.POSTGRES_HOST) {
-    pgdumpArgs.push(`-h ${process.env.POSTGRES_HOST}`);
+} else if (process.env.PGHOST) {
+    pgdumpArgs.push(`-h ${process.env.PGHOST}`);
 }
 
 if (process.env.CPIC_PASS) {

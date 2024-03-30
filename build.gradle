@@ -1,4 +1,5 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
     id 'net.nemerosa.versioning' version '2.8.2'
     id 'org.owasp.dependencycheck' version '8.2.1'
@@ -9,6 +10,17 @@ sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
 group 'org.cpicpgx'
+
+ext {
+    moduleName = 'org.cpicpgx'
+    description = 'CPIC Data'
+    url = 'https://github.com/cpicpgx/cpic-data.git'
+    scm = 'scm:git@github.com:cpicpgx/cpic-data.git'
+    orgName = 'CPIC'
+    orgUrl = 'https://cpicpgx.org'
+    mainClassName = "org.cpicpgx.DataImport"
+    archiveBaseName = "CpicData"
+}
 
 repositories {
     mavenCentral()
@@ -60,6 +72,15 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+shadowJar {
+    manifest {
+        attributes 'Implementation-Title': project.name
+        attributes 'Implementation-Version': project.version
+    }
+    mergeServiceFiles()
+    archiveBaseName = project.ext.archiveBaseName
 }
 
 dependencyCheck {
