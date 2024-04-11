@@ -1,4 +1,8 @@
 set search_path = 'cpic';
+\pset footer off
+
+-- Size of the database on disk
+select pg_database_size('cpic') as "Database Size (in bytes)";
 
 -- Count of tables
 select count(*) as "Table Count" from information_schema.tables where table_schema='cpic' and table_type='BASE TABLE';
