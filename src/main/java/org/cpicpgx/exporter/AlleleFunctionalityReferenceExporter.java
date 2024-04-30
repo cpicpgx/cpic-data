@@ -1,19 +1,21 @@
 package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.workbook.AlleleFunctionalityReferenceWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.workbook.AlleleFunctionalityReferenceWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * This class queries the functional_reference table and then dumps the contents out to excel workbooks
@@ -22,6 +24,7 @@ import java.util.TreeSet;
  */
 public class AlleleFunctionalityReferenceExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String COLUMN_DEFINITIONS = "FunctionColumnDefinitions.tsv";
 
   public static void main(String[] args) {
     AlleleFunctionalityReferenceExporter exporter = new AlleleFunctionalityReferenceExporter();
@@ -84,6 +87,19 @@ public class AlleleFunctionalityReferenceExporter extends BaseExporter {
             }
           }
         }
+
+        Map<String,String> columnDefinitions = new LinkedHashMap<>();
+        try (
+            InputStream is = getClass().getResourceAsStream(COLUMN_DEFINITIONS);
+            BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(is)))
+            ) {
+          while (br.ready()) {
+            String line = br.readLine();
+            String[] fields = line.split("\t");
+            columnDefinitions.put(fields[0], fields[1]);
+          }
+        }
+        workbook.writeColumnDefinitions(columnDefinitions);
         
         workbook.writeNotes(queryNotes(conn, symbol, FileType.ALLELE_FUNCTION_REFERENCE));
 

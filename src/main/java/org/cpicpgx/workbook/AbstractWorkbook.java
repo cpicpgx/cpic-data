@@ -23,6 +23,7 @@ public abstract class AbstractWorkbook {
 
   public static final String HISTORY_SHEET_NAME = "Change log";
   public static final String NOTES_SHEET_NAME = "Notes";
+  public static final String COL_DEF_SHEET_NAME = "Column Definitions";
   public static final String LOG_FILE_CREATED = "File generated and data compiled";
   public static final String METHODS_SHEET_NAME = "Methods";
   public static final Pattern METHODS_SHEET_PATTERN = Pattern.compile("^[Mm]ethods( and [Cc]aveats)?$");
@@ -288,6 +289,23 @@ public abstract class AbstractWorkbook {
     }
 
     sheet.sheet.setColumnWidth(0, 100 * 256);
+  }
+
+  public void writeColumnDefinitions(Map<String,String> definitionMap) {
+    SheetWrapper sheet = findSheet(COL_DEF_SHEET_NAME);
+
+    Row headerRow = sheet.nextRow();
+    writeHeaderCell(headerRow, 0, "Column");
+    writeHeaderCell(headerRow, 1, "Definition");
+
+    for (String colName : definitionMap.keySet()) {
+      Row noteRow = sheet.nextRow();
+      noteRow.setRowStyle(noteStyle);
+      writeStringCell(noteRow, 0, colName, false);
+      writeStringCell(noteRow, 1, definitionMap.get(colName), false);
+      noteRow.setHeight((short)-1);
+    }
+    sheet.sheet.setColumnWidth(0, 50 * 256);
   }
 
   public void writeStarterChangeLogMessage() {
