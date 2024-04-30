@@ -79,7 +79,7 @@ db-init: db-bootstrap db-copy db-migrate
 
 .PHONY: db-download
 db-download:
-	mkdir out
+	mkdir -p out
 	curl https://files.cpicpgx.org/data/database/cpic_db_dump.sql.gz --output out/cpic_db_dump.sql.gz
 
 .PHONY: db-refresh
