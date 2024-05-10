@@ -167,11 +167,11 @@ public class TestAlertImporter extends BaseDirectoryImporter {
 
       Map<String, String> activityJson = new HashMap<>();
       for (String gene : idxActivityByGene.keySet()) {
-        String pheno = normalizeGeneText(gene, row.getText(idxPhenotypeByGene.get(gene)));
-        if (Constants.isNoResult(pheno)) {
+        String activityScore = normalizeScore(row.getText(idxActivityByGene.get(gene)));
+        if (Constants.isNoResult(activityScore)) {
           activityJson.put(gene, Constants.NO_RESULT);
         } else {
-          activityJson.put(gene, normalizeScore(row.getText(idxActivityByGene.get(gene))));
+          activityJson.put(gene, activityScore);
         }
       }
       Map<String,String> phenotypeJson = new HashMap<>();
