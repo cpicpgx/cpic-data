@@ -1,3 +1,18 @@
+## [1.40.0](https://github.com/cpicpgx/cpic-data/compare/v1.39.0...v1.40.0) (2024-05-10)
+
+
+### Features
+
+* add column definition sheet to function files ([4c7cec2](https://github.com/cpicpgx/cpic-data/commit/4c7cec2ebb9c98f46dd840bf0637dacc8d801067))
+* add deployed release tag to change_log table and update view ([7b1d29d](https://github.com/cpicpgx/cpic-data/commit/7b1d29d99c4f50692f0179921c5a486b9c62d5ac))
+* add new CPIC DB size stat ([519514b](https://github.com/cpicpgx/cpic-data/commit/519514b6e2d6fb6110e56d3426c3d261f86fce8b))
+
+
+### Bug Fixes
+
+* fix github actions config ([fbf2a46](https://github.com/cpicpgx/cpic-data/commit/fbf2a4684cb92d6346680e60a1cff12a08ca75b7))
+* fix import of AS genes in test alert files ([d84eb7d](https://github.com/cpicpgx/cpic-data/commit/d84eb7d327c03222b52cb6b78ce25506168d13c5))
+
 ## [1.39.0](https://github.com/cpicpgx/cpic-data/compare/v1.38.0...v1.39.0) (2024-03-28)
 
 
