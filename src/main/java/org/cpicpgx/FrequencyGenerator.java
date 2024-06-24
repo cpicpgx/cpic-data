@@ -88,12 +88,14 @@ public class FrequencyGenerator {
 
       // START Assign allele + diplotype frequency
       JsonObject refAlleleFrequencyJson = new JsonObject();
-      for (String alleleName : alleleMap.keySet()) {
-        boolean isReference = referenceAlleleId != null && referenceAlleleId.equals(alleleMap.get(alleleName));
+      for (Map.Entry<String,Integer> entry : alleleMap.entrySet()) {
+        String alleleName = entry.getKey();
+        Integer alleleId = entry.getValue();
+        boolean isReference = referenceAlleleId != null && referenceAlleleId.equals(alleleId);
         if (!isReference) {
           JsonObject alleleFrequencyJson = new JsonObject();
           for (String ethnicity : dataHarness.getEthnicitySet()) {
-            Float freq = dataHarness.lookupFrequency(ethnicity, alleleMap.get(alleleName));
+            Float freq = dataHarness.lookupFrequency(ethnicity, alleleId);
             alleleFrequencyJson.addProperty(ethnicity, freq);
 
             if (!refAlleleFrequencyJson.has(ethnicity)) {
@@ -110,7 +112,7 @@ public class FrequencyGenerator {
               }
             }
           }
-          int rez = dataHarness.writeAlleleFrequency(alleleMap.get(alleleName), alleleFrequencyJson);
+          int rez = dataHarness.writeAlleleFrequency(alleleId, alleleFrequencyJson);
           if (rez == 0) {
             throw new RuntimeException("Missed write of allele frequency for " + alleleName);
           }
