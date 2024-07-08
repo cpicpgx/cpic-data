@@ -111,21 +111,18 @@ public class DrugResourceCreator {
 
       pharmgkbId = drugJson.get("id").getAsString();
 
-      JsonArray termArray = drugJson.getAsJsonArray("terms");
+      JsonArray termArray = drugJson.getAsJsonArray("linkOuts");
+      if (termArray == null) {
+        throw new RuntimeException("No cross references found for " + name);
+      }
       for (JsonElement termElement : termArray) {
         String resource = termElement.getAsJsonObject().get("resource").getAsString();
         if (resource.equals("RxNorm")) {
-          rxNormId = termElement.getAsJsonObject().get("termId").getAsString();
+          rxNormId = termElement.getAsJsonObject().get("resourceId").getAsString();
         } else if (resource.equals("Anatomical Therapeutic Chemical Classification")) {
-          atcIds.add(termElement.getAsJsonObject().get("termId").getAsString());
-        }
-      }
-
-      JsonArray crossReferenceArray = drugJson.getAsJsonArray("crossReferences");
-      for (JsonElement crossReferenceElement : crossReferenceArray) {
-        String resource = crossReferenceElement.getAsJsonObject().get("resource").getAsString();
-        if (resource.equals("DrugBank")) {
-          drugBankId = crossReferenceElement.getAsJsonObject().get("resourceId").getAsString();
+          atcIds.add(termElement.getAsJsonObject().get("resourceId").getAsString());
+        } else if (resource.equals("DrugBank")) {
+          drugBankId = termElement.getAsJsonObject().get("resourceId").getAsString();
         }
       }
     }
