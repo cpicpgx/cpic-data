@@ -74,7 +74,7 @@ db-teardown:
 	psql -X -q  -h localhost -U postgres -c "drop user cpic"
 
 .PHONY: db-init
-db-init: db-bootstrap db-copy db-migrate
+db-init: db-bootstrap db-update db-migrate
 	java -jar build/libs/CpicData-all.jar -d cpic-support-files
 
 .PHONY: db-download
@@ -87,12 +87,12 @@ db-refresh:
 	dropdb cpic -h ${PGHOST} -U postgres && createdb cpic -h ${PGHOST} -U postgres -O cpic
 	gzip -cd out/cpic_db_dump.sql.gz | psql -d cpic -h ${PGHOST} -U cpic
 
-.PHONY: db-copy
-db-copy: db-download db-refresh
+.PHONY: db-update
+db-update: db-download db-refresh
 	@echo "Database image copied and refreshed"
 
-.PHONY: db-copy-staging
-db-copy-staging:
+.PHONY: db-update-staging
+db-update-staging:
 	@echo "Database image copied and refreshed"
 	dropdb cpic-staging -h localhost -U postgres
 	createdb cpic-staging -h localhost -U postgres
