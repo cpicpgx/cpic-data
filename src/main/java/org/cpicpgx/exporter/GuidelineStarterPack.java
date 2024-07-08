@@ -66,7 +66,7 @@ public class GuidelineStarterPack {
 
   private void parseArgs(String[] args) throws IOException, ParseException {
     Options options = new Options()
-        .addOption("o", true, "output directory, required")
+        .addOption("o", true, "output directory, will create if does not exist, required")
         .addOption("p", true, "drug-gene pair, pipe-delimited between entities, required")
         .addOption("n", true, "no recommendation drug-gene pair")
         .addOption("l", "local storage only");
@@ -121,53 +121,56 @@ public class GuidelineStarterPack {
       GeneResourceCreator geneResourceCreator = new GeneResourceCreator(m_path);
       for (String gene : f_genes) {
         Map<FileType, String> urlMap = new TreeMap<>();
+        boolean hasRec = f_pairs.stream().anyMatch((p) -> p.getGenes().contains(gene) && p.hasRecommendation());
 
         LookupMethod lookupMethod = queryHandler.lookupGeneMethod(gene).orElse(LookupMethod.PHENOTYPE);
         geneLookupMap.put(gene, lookupMethod);
-
-        queryHandler.lookupFile(gene, FileType.ALLELE_DEFINITION).ifPresentOrElse(
-            (url) -> urlMap.put(FileType.ALLELE_DEFINITION, url),
-            () -> {
-              AlleleDefinitionWorkbook alleleDefinitionWorkbook = new AlleleDefinitionWorkbook(gene, "NC_#######", "NP_#######", "NG_#######", "NM_#######", 0L, null);
-              alleleDefinitionWorkbook.writeAllele("ALLELE NAME HERE");
-              alleleDefinitionWorkbook.writeVariant("VARIANT HERE", "X###X", "g.#####", "g.#####", "rs#####", 1L);
-              urlMap.put(FileType.ALLELE_DEFINITION, uploadHandler.upload(alleleDefinitionWorkbook));
-            });
-
-        queryHandler.lookupFile(gene, FileType.ALLELE_FUNCTION_REFERENCE).ifPresentOrElse(
-            (url) -> urlMap.put(FileType.ALLELE_FUNCTION_REFERENCE, url),
-            () -> {
-              AlleleFunctionalityReferenceWorkbook alleleFunctionalityReferenceWorkbook = new AlleleFunctionalityReferenceWorkbook(gene);
-              urlMap.put(FileType.ALLELE_FUNCTION_REFERENCE, uploadHandler.upload(alleleFunctionalityReferenceWorkbook));
-            });
-
-        queryHandler.lookupFile(gene, FileType.FREQUENCY).ifPresentOrElse(
-            (url) -> urlMap.put(FileType.FREQUENCY, url),
-            () -> {
-              FrequencyWorkbook frequencyWorkbook = new FrequencyWorkbook(gene, lookupMethod);
-              frequencyWorkbook.writeReferenceHeader(ImmutableSet.of("ALLELE"));
-              frequencyWorkbook.writeEthnicityHeader("Example Group", 0);
-              urlMap.put(FileType.FREQUENCY, uploadHandler.upload(frequencyWorkbook));
-            });
-
-        queryHandler.lookupFile(gene, FileType.GENE_CDS).ifPresentOrElse(
-            (url) -> urlMap.put(FileType.GENE_CDS, url),
-            () -> {
-              GeneCdsWorkbook geneCdsWorkbook = new GeneCdsWorkbook(gene, lookupMethod);
-              urlMap.put(FileType.GENE_CDS, uploadHandler.upload(geneCdsWorkbook));
-            });
-
-        queryHandler.lookupFile(gene, FileType.GENE_PHENOTYPE).ifPresentOrElse(
-            (url) -> urlMap.put(FileType.GENE_PHENOTYPE, url),
-            () -> {
-              PhenotypesWorkbook phenotypesWorkbook = new PhenotypesWorkbook(gene);
-              urlMap.put(FileType.GENE_PHENOTYPE, uploadHandler.upload(phenotypesWorkbook));
-            });
 
         queryHandler.lookupFile(gene, FileType.GENE_RESOURCE).ifPresentOrElse(
             (url) -> urlMap.put(FileType.GENE_RESOURCE, url),
             () -> urlMap.put(FileType.GENE_RESOURCE, uploadHandler.upload(geneResourceCreator.create(gene)))
         );
+
+        if (hasRec) {
+          queryHandler.lookupFile(gene, FileType.ALLELE_DEFINITION).ifPresentOrElse(
+              (url) -> urlMap.put(FileType.ALLELE_DEFINITION, url),
+              () -> {
+                AlleleDefinitionWorkbook alleleDefinitionWorkbook = new AlleleDefinitionWorkbook(gene, "NC_#######", "NP_#######", "NG_#######", "NM_#######", 0L, null);
+                alleleDefinitionWorkbook.writeAllele("ALLELE NAME HERE");
+                alleleDefinitionWorkbook.writeVariant("VARIANT HERE", "X###X", "g.#####", "g.#####", "rs#####", 1L);
+                urlMap.put(FileType.ALLELE_DEFINITION, uploadHandler.upload(alleleDefinitionWorkbook));
+              });
+
+          queryHandler.lookupFile(gene, FileType.ALLELE_FUNCTION_REFERENCE).ifPresentOrElse(
+              (url) -> urlMap.put(FileType.ALLELE_FUNCTION_REFERENCE, url),
+              () -> {
+                AlleleFunctionalityReferenceWorkbook alleleFunctionalityReferenceWorkbook = new AlleleFunctionalityReferenceWorkbook(gene);
+                urlMap.put(FileType.ALLELE_FUNCTION_REFERENCE, uploadHandler.upload(alleleFunctionalityReferenceWorkbook));
+              });
+
+          queryHandler.lookupFile(gene, FileType.FREQUENCY).ifPresentOrElse(
+              (url) -> urlMap.put(FileType.FREQUENCY, url),
+              () -> {
+                FrequencyWorkbook frequencyWorkbook = new FrequencyWorkbook(gene, lookupMethod);
+                frequencyWorkbook.writeReferenceHeader(ImmutableSet.of("ALLELE"));
+                frequencyWorkbook.writeEthnicityHeader("Example Group", 0);
+                urlMap.put(FileType.FREQUENCY, uploadHandler.upload(frequencyWorkbook));
+              });
+
+          queryHandler.lookupFile(gene, FileType.GENE_CDS).ifPresentOrElse(
+              (url) -> urlMap.put(FileType.GENE_CDS, url),
+              () -> {
+                GeneCdsWorkbook geneCdsWorkbook = new GeneCdsWorkbook(gene, lookupMethod);
+                urlMap.put(FileType.GENE_CDS, uploadHandler.upload(geneCdsWorkbook));
+              });
+
+          queryHandler.lookupFile(gene, FileType.GENE_PHENOTYPE).ifPresentOrElse(
+              (url) -> urlMap.put(FileType.GENE_PHENOTYPE, url),
+              () -> {
+                PhenotypesWorkbook phenotypesWorkbook = new PhenotypesWorkbook(gene);
+                urlMap.put(FileType.GENE_PHENOTYPE, uploadHandler.upload(phenotypesWorkbook));
+              });
+        }
 
         fileMap.put(gene, urlMap);
       }
