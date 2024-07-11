@@ -1,3 +1,12 @@
+## [1.40.1](https://github.com/cpicpgx/cpic-data/compare/v1.40.0...v1.40.1) (2024-07-11)
+
+
+### Bug Fixes
+
+* fix bug when iterating through alleles for frequency import ([e2e2ce5](https://github.com/cpicpgx/cpic-data/commit/e2e2ce5953559583d2978550e3ff9a3779c1ea49))
+* restrict file templates for non-rec genes in GuidelineStarterPack ([e9222f4](https://github.com/cpicpgx/cpic-data/commit/e9222f404fefe0f297ce25c85a0b5ac2f2659868))
+* update JSON props for PharmGKB API ([3db41a4](https://github.com/cpicpgx/cpic-data/commit/3db41a4073b3c85dded20f3821607380e5b174a2))
+
 ## [1.40.0](https://github.com/cpicpgx/cpic-data/compare/v1.39.0...v1.40.0) (2024-05-10)
 
 
