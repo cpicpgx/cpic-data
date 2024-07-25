@@ -1,3 +1,10 @@
+## [1.41.0](https://github.com/cpicpgx/cpic-data/compare/v1.40.1...v1.41.0) (2024-07-25)
+
+
+### Features
+
+* data update for new beta-blocker and methadone guidelines ([fc3d153](https://github.com/cpicpgx/cpic-data/commit/fc3d153d71519eb1c86ed39c2636bc96fea39bb7))
+
 ## [1.40.1](https://github.com/cpicpgx/cpic-data/compare/v1.40.0...v1.40.1) (2024-07-11)
 
 
