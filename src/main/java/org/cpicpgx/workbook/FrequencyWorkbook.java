@@ -131,9 +131,9 @@ public class FrequencyWorkbook extends AbstractWorkbook {
   }
 
   public void writePopulationSummary(BigDecimal minFreq, BigDecimal freq, BigDecimal maxFreq) {
-    writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq.round(ROUND_TO_THREE));
-    writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq.round(ROUND_TO_THREE));
-    writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq.round(ROUND_TO_THREE));
+    writeHighlightCell(currentMinFreqRow, currentPopSummaryAlleleCol, minFreq == null ? null : minFreq.round(ROUND_TO_THREE));
+    writeHighlightCell(currentFreqRow, currentPopSummaryAlleleCol, freq == null ? null : freq.round(ROUND_TO_THREE));
+    writeHighlightCell(currentMaxFreqRow, currentPopSummaryAlleleCol, maxFreq == null ? null : maxFreq.round(ROUND_TO_THREE));
     currentPopSummaryAlleleCol += 1;
   }
 

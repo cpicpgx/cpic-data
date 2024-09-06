@@ -241,10 +241,10 @@ public abstract class AbstractWorkbook {
   }
 
   void writeHighlightCell(Row row, int colIdx, BigDecimal value) {
+    Cell cell = row.createCell(colIdx);
+    cell.setCellStyle(this.highlightDoubleStyle);
     if (value != null) {
-      Cell cell = row.createCell(colIdx);
       cell.setCellValue(value.toString());
-      cell.setCellStyle(this.highlightDoubleStyle);
     }
   }
 
