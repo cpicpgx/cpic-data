@@ -1,3 +1,15 @@
+## [1.42.0](https://github.com/cpicpgx/cpic-data/compare/v1.41.0...v1.42.0) (2024-10-03)
+
+
+### Features
+
+* data update for CYP2D6 PharmVar data ([03ffcf9](https://github.com/cpicpgx/cpic-data/commit/03ffcf91ecb01eb0cb93054af46995400f89e8b1))
+
+
+### Bug Fixes
+
+* make allele-level frequencies consistent between views and export ([cf542df](https://github.com/cpicpgx/cpic-data/commit/cf542dff2ffc151b6fc524cf6e80c0510166af2a))
+
 ## [1.41.0](https://github.com/cpicpgx/cpic-data/compare/v1.40.1...v1.41.0) (2024-07-25)
 
 
