@@ -37,7 +37,7 @@ upload:
 	aws s3 cp out/db/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
 	aws s3 cp out/db/${TAG_NAME}.gz s3://files.cpicpgx.org/data/database/${UNTAG_NAME}.gz --profile cpic
 	aws s3 cp out/db/${INSERTS_NAME}.gz s3://files.cpicpgx.org/data/database/ --profile cpic
-	@ echo "DB dump published to https://files.cpicpgx.org/data/database/${TAG_NAME}.gz"
+	@ echo "Full DB export available: https://files.cpicpgx.org/data/database/${TAG_NAME}.gz"
 
 .PHONY: upload-flow-charts
 upload-flow-charts:
