@@ -1,3 +1,10 @@
+## [1.42.3](https://github.com/cpicpgx/cpic-data/compare/v1.42.2...v1.42.3) (2024-10-18)
+
+
+### Bug Fixes
+
+* data update for CYP2D6 frequency data ([a7fe577](https://github.com/cpicpgx/cpic-data/commit/a7fe577d64a7f0604efd42f0ad481c24214abae7))
+
 ## [1.42.2](https://github.com/cpicpgx/cpic-data/compare/v1.42.1...v1.42.2) (2024-10-16)
 
 
