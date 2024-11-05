@@ -1,3 +1,10 @@
+## [1.43.0](https://github.com/cpicpgx/cpic-data/compare/v1.42.3...v1.43.0) (2024-11-05)
+
+
+### Features
+
+* data update for CYP2D6 PharmVar allele definition data ([4dd3431](https://github.com/cpicpgx/cpic-data/commit/4dd343124cc02d39f6c708409e1e4ad203bc54b9))
+
 ## [1.42.3](https://github.com/cpicpgx/cpic-data/compare/v1.42.2...v1.42.3) (2024-10-18)
 
 
