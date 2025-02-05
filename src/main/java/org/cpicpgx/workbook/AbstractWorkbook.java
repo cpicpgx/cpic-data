@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractWorkbook {
 
   public static final String HISTORY_SHEET_NAME = "Change log";
+  public static final String GENERATED_SHEET_NAME = "Generated";
   public static final String NOTES_SHEET_NAME = "Notes";
   public static final String COL_DEF_SHEET_NAME = "Column Definitions";
   public static final String LOG_FILE_CREATED = "File generated and data compiled";
@@ -327,6 +328,15 @@ public abstract class AbstractWorkbook {
       writeDateCell(row, 0, (Date)changeLogEvent[0]);
       writeStringCell(row, 1, (String)changeLogEvent[1], false);
     }
+  }
+
+  public void writeGenerated() {
+    SheetWrapper genSheet = this.findSheet(GENERATED_SHEET_NAME);
+    genSheet.setWidths(new Integer[]{20*256});
+    genSheet.setColCount(1);
+    Row row = genSheet.nextRow();
+    writeHeaderCell(row, 0, "Generated on");
+    writeDateCell(row, 1, new Date());
   }
 
   public void writeHeader(SheetWrapper sheet, ResultSetMetaData metadata) throws SQLException {

@@ -2,8 +2,8 @@ package org.cpicpgx.exporter;
 
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.db.LookupMethod;
-import org.cpicpgx.workbook.DiplotypeWorkbook;
 import org.cpicpgx.model.FileType;
+import org.cpicpgx.workbook.DiplotypeWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
@@ -12,7 +12,6 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -70,7 +69,7 @@ public class DiplotypePhenotypeExporter extends BaseExporter {
 
         workbook.writeNotes(queryNotes(conn, gene, FileType.DIPLOTYPE_PHENOTYPE));
 
-        workbook.writeChangeLog(Collections.emptyList());
+        workbook.writeGenerated();
 
         writeWorkbook(workbook);
         addFileExportHistory(workbook.getFilename(), new String[]{gene});
