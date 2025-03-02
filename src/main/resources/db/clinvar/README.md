@@ -14,7 +14,7 @@ as `clinvar_result.txt`. Hopefully this step can be automated at some point but 
 
 ### 2. Setup the schema
 
-    psql cpic < clinvar_schema.sql
+    psql cpic -U cpic < clinvar_schema.sql
 
 This will set up a `clinvar` schema and create a few tables that will hold data from the previous step.
 
@@ -22,6 +22,6 @@ This script will delete and recreate the clinvar data if the `clinvar` schema al
 
 ### 3. Load the schema
 
-    psql cpic < clinvar_dataload.sql
+    psql cpic -U cpic < clinvar_dataload.sql
 
 This will actually load the data into the database.
