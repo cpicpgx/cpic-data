@@ -6,16 +6,18 @@ import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.LookupMethod;
 import org.cpicpgx.exception.NotFoundException;
+import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.*;
 import org.cpicpgx.workbook.AbstractWorkbook;
-import org.cpicpgx.model.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandles;
-import java.security.InvalidParameterException;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,7 +131,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
         if (findings instanceof JsonObject) {
           for (String pmid : ((JsonObject)findings).keySet()) {
             if (!citationList.contains(pmid)) {
-              sf_logger.warn("PMID ("+pmid+") used in Findings not in PMID field, row " + readableRow);
+              sf_logger.warn("PMID ({}) used in Findings not in PMID field, row {}", pmid, readableRow);
             }
           }
         }
@@ -160,11 +162,17 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       processChangeLog(dbHarness, workbook, geneSymbol);
     }
 
-    if (noFunctionAlleles.size() > 0) {
+    if (!noFunctionAlleles.isEmpty()) {
       sf_logger.warn("No clinical function assigned to {}", String.join("; ", noFunctionAlleles));
     }
   }
 
+  /**
+   * Parses a standard duplication allele name to get the "base" allele's name, or just returns the given string if no
+   * duplication syntax found. For example "*2" from "*2xN".
+   * @param name a duplication allele name
+   * @return the "base" allele name
+   */
   static String parseAlleleDefinitionName(@Nonnull String name) {
     if (StringUtils.isBlank(name)) {
       return null;
@@ -214,6 +222,7 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
   static class FunctionDbHarness extends DbHarness {
     private final Map<String, Long> alleleNameMap = new HashMap<>();
     private final PreparedStatement insertAlleleStmt;
+    private final PreparedStatement insertAlleleDefStmt;
     private final PreparedStatement updateMethodsStmt;
     private final String gene;
     private final LookupMethod geneLookupMethod;
@@ -223,26 +232,28 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
       super(FileType.ALLELE_FUNCTION_REFERENCE);
       this.gene = gene;
 
-      PreparedStatement pstmt = prepare("select name, id from allele_definition where geneSymbol=?");
-      pstmt.setString(1, gene);
-      try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
-          this.alleleNameMap.put(rs.getString(1), rs.getLong(2));
+      try (PreparedStatement pstmt = prepare("select name, id from allele_definition where geneSymbol=?")) {
+        pstmt.setString(1, gene);
+        try (ResultSet rs = pstmt.executeQuery()) {
+          while (rs.next()) {
+            this.alleleNameMap.put(rs.getString(1), rs.getLong(2));
+          }
         }
       }
 
-      if (this.alleleNameMap.size() == 0) {
+      if (this.alleleNameMap.isEmpty()) {
         throw new RuntimeException("No alleles found for gene: " + gene);
       }
 
-      PreparedStatement lstmt = prepare("select lookupmethod from gene where symbol=?");
-      lstmt.setString(1, gene);
-      try (ResultSet rs = lstmt.executeQuery()) {
-        if (rs.next()) {
-          this.geneLookupMethod = LookupMethod.valueOf(rs.getString(1));
-        } else {
-          sf_logger.warn("Gene lookup method not found for " + gene);
-          this.geneLookupMethod = null;
+      try (PreparedStatement lstmt = prepare("select lookupmethod from gene where symbol=?")) {
+        lstmt.setString(1, gene);
+        try (ResultSet rs = lstmt.executeQuery()) {
+          if (rs.next()) {
+            this.geneLookupMethod = LookupMethod.valueOf(rs.getString(1));
+          } else {
+            sf_logger.warn("Gene lookup method not found for {}", gene);
+            this.geneLookupMethod = null;
+          }
         }
       }
 
@@ -257,18 +268,28 @@ public class FunctionReferenceImporter extends BaseDirectoryImporter {
               "strength=excluded.strength,findings=excluded.findings,functioncomments=excluded.functioncomments, inferredfrequency=excluded.inferredfrequency"
       );
 
+      insertAlleleDefStmt = prepare("insert into allele_definition(genesymbol, name) values (?, ?) returning id");
+
       updateMethodsStmt = prepare("update gene set functionmethods=? where symbol=?");
 
-      // clear the inferredfrequency flag for all alleles for this gene, it will get set properly in insertAlleleStmt
+      // clear the inferredFrequency flag for all alleles for this gene, it will get set properly in insertAlleleStmt
       try (PreparedStatement clearReference = prepare("update allele set inferredfrequency=false where genesymbol=?")) {
         clearReference.setString(1, gene);
         clearReference.executeUpdate();
       }
     }
 
-    private Long lookupAlleleDefinitionId(String alleleName) {
+    private Long lookupAlleleDefinitionId(String alleleName) throws SQLException {
       String alleleDefinitionName = parseAlleleDefinitionName(alleleName);
       if (!this.alleleNameMap.containsKey(alleleDefinitionName)) {
+        insertAlleleDefStmt.setString(1, gene);
+        insertAlleleDefStmt.setString(2, alleleName);
+        ResultSet rs = insertAlleleDefStmt.executeQuery();
+        if (rs.next()) {
+          long id = rs.getLong(1);
+          this.alleleNameMap.put(alleleDefinitionName, id);
+          return id;
+        }
         throw new RuntimeException("Missing allele definition for " + gene + " " + alleleDefinitionName);
       }
       return this.alleleNameMap.get(alleleDefinitionName);
