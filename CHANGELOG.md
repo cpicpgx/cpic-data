@@ -1,3 +1,14 @@
+## 1.44.0 (2025-03-08)
+
+* feat: data update for new NUDT15 allele from PharmVar v6.2.2 ([f7ae753](https://github.com/cpicpgx/cpic-data/commit/f7ae753))
+* chore: dependency updates ([6cf4393](https://github.com/cpicpgx/cpic-data/commit/6cf4393))
+* chore: IDEA config ([6705f89](https://github.com/cpicpgx/cpic-data/commit/6705f89))
+* chore: update logo resources for new app versions ([8909f7c](https://github.com/cpicpgx/cpic-data/commit/8909f7c))
+* fix: change definition of guideline_summary_view ([a846c38](https://github.com/cpicpgx/cpic-data/commit/a846c38))
+* fix: change dip-phen file "change log" tab to "generated" ([2073924](https://github.com/cpicpgx/cpic-data/commit/2073924))
+* fix: fix registering new alleles in function file that are NOT just gene duplications ([4105dd8](https://github.com/cpicpgx/cpic-data/commit/4105dd8))
+* docs: update clinvar docs ([8811b0a](https://github.com/cpicpgx/cpic-data/commit/8811b0a))
+
 ## [1.43.0](https://github.com/cpicpgx/cpic-data/compare/v1.42.3...v1.43.0) (2024-11-05)
 
 
