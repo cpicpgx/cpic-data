@@ -8,25 +8,34 @@ import org.cpicpgx.stats.model.StatisticType;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class that gathers stats from the GitHub API for the cpic-data repo
  */
 public class GitHubStatistics implements AbstractStatistics {
-  private static final String GITHUB_RELEASES = "https://api.github.com/repos/cpicpgx/cpic-data/releases";
+  private static final String GITHUB_RELEASES = "https://api.github.com/repos/cpicpgx/cpic-data/releases?per_page=100&page=";
 
-  private final List<GitHubRelease> f_releases;
+  private final List<GitHubRelease> f_releases = new ArrayList<>();
 
   GitHubStatistics() throws IOException {
     ObjectMapper jsonMapper = new ObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    f_releases = jsonMapper.readValue(
-        new URL(GITHUB_RELEASES),
-        new TypeReference<List<GitHubRelease>>(){});
+    int page = 1;
+    boolean hasMoreData = true;
+    while (hasMoreData) {
+      List<GitHubRelease> releases = jsonMapper.readValue(
+          new URL(GITHUB_RELEASES + page),
+          new TypeReference<List<GitHubRelease>>() {
+          });
+      if (releases.isEmpty()) {
+        hasMoreData = false;
+      }
+      else {
+        f_releases.addAll(releases);
+        page += 1;
+      }
+    }
   }
 
   @Override
