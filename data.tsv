@@ -1,4 +1,6 @@
 Date of Change	Type of Data	Subject	Note of Change
+2025-05-07	ALLELE_DEFINITION	CYP2B6	added *50
+2025-05-01	ALLELE_DEFINITION	CYP2D6	*21 core allele definition changed; added allele *178-*185
 2025-03-06	ALLELE_DEFINITION	NUDT15	*21 added
 2024-10-31	ALLELE_DEFINITION	CYP2D6	added *177; updated *150 allele definition (rs16947 was removed from *150.002 suballele but is included in the *150.001 suballele, therefore A at position rs16947 was changed to R)
 2024-10-17	FREQUENCY	CYP2D6	corrected frequencies for PMIDs 36111505, 36294714
