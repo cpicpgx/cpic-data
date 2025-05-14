@@ -1,3 +1,9 @@
+## 1.45.0 (2025-05-14)
+
+* feat: data update from PharmVar 6.2.5 ([dc1cb47](https://github.com/cpicpgx/cpic-data/commit/dc1cb47))
+* feat: new report for reporting stats ([b1b908b](https://github.com/cpicpgx/cpic-data/commit/b1b908b))
+* fix: fix GitHub stats gathering ([99b4390](https://github.com/cpicpgx/cpic-data/commit/99b4390))
+
 ## 1.44.0 (2025-03-08)
 
 * feat: data update for new NUDT15 allele from PharmVar v6.2.2 ([f7ae753](https://github.com/cpicpgx/cpic-data/commit/f7ae753))
