@@ -1,3 +1,7 @@
+## 1.46.0 (2025-05-30)
+
+* feat: data update from PharmVar 6.2.7 ([41556df](https://github.com/cpicpgx/cpic-data/commit/41556df))
+
 ## 1.45.0 (2025-05-14)
 
 * feat: data update from PharmVar 6.2.5 ([dc1cb47](https://github.com/cpicpgx/cpic-data/commit/dc1cb47))
