@@ -1,4 +1,22 @@
 Date of Change	Type of Data	Subject	Note of Change
+2025-07-23	GENE_CDS	ABCG2	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	CACNA1S	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	CYP2B6	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	CYP2C19	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	CYP2C9	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	CYP2D6	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	CYP3A5	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	DPYD	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	G6PD	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	HLA-A	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	HLA-B	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	MT-RNR1	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	NAT2	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	NUDT15	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	RYR1	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	SLCO1B1	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	TPMT	added gene symbol as a prefix to the phenotype column values
+2025-07-23	GENE_CDS	UGT1A1	added gene symbol as a prefix to the phenotype column values
 2025-06-16	ALLELE_DEFINITION	CYP2C19	added *40, *41
 2025-06-16	ALLELE_DEFINITION	CYP2C9	added *86-*88
 2025-06-16	ALLELE_DEFINITION	CYP4F2	new haplotypes *18-*23 added
@@ -6,9 +24,12 @@ Date of Change	Type of Data	Subject	Note of Change
 2025-05-28	ALLELE_DEFINITION	CYP2B6	added rs2516199080
 2025-05-28	ALLELE_DEFINITION	CYP2C9	rs1216169538'; rs2493006942; rs761033063; rs2492587526; rs2492591692; rs2492634549; rs2492650213'; rs2492662738; rs2492662839
 2025-05-28	ALLELE_DEFINITION	CYP2D6	added rs1135837; rs1555888899; rs566108360; rs150216909; rs993385303; rs538707090; rs774943042; rs1477736084
+2025-05-13	GENE_CDS	NAT2	created
 2025-05-07	ALLELE_DEFINITION	CYP2B6	added *50
 2025-05-01	ALLELE_DEFINITION	CYP2D6	*21 core allele definition changed; added allele *178-*185
+2025-03-06	ALLELE_DEFINITION	NAT2	added*54-*64
 2025-03-06	ALLELE_DEFINITION	NUDT15	*21 added
+2024-11-07	ALLELE_DEFINITION	NAT2	added*51-*53
 2024-10-31	ALLELE_DEFINITION	CYP2D6	added *177; updated *150 allele definition (rs16947 was removed from *150.002 suballele but is included in the *150.001 suballele, therefore A at position rs16947 was changed to R)
 2024-10-17	FREQUENCY	CYP2D6	corrected frequencies for PMIDs 36111505, 36294714
 2024-10-02	ALLELE_DEFINITION	CYP2D6	added *176
@@ -26,6 +47,7 @@ Date of Change	Type of Data	Subject	Note of Change
 2024-03-20	TEST_ALERT	azathioprine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
 2024-03-20	TEST_ALERT	mercaptopurine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
 2024-03-20	TEST_ALERT	thioguanine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
+2024-03-11	ALLELE_DEFINITION	NAT2	Initial NAT2 release in PharmVar
 2024-02-14	FREQUENCY	RYR1	Gnomad v3 frequencies added
 2024-01-30	ALLELE_DEFINITION	CYP4F2	added *17
 2024-01-30	ALLELE_DEFINITION	DPYD	added PharmVar ID for c.1129-5923C>G
