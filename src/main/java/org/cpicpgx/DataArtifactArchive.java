@@ -1,6 +1,7 @@
 package org.cpicpgx;
 
 import org.apache.commons.cli.*;
+import org.checkerframework.checker.units.qual.C;
 import org.cpicpgx.exporter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,7 @@ public class DataArtifactArchive {
     exporters.add(new TestAlertExporter());
     exporters.add(new PairsExporter());
     exporters.add(new AlleleSummaryExporter());
+    exporters.add(new ChangelogExporter());
 
     exporters.forEach(e -> {
       Path dirPath = getDirectoryPath(e.getFileType().name().toLowerCase());
