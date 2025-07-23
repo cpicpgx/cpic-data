@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * This class is a factory for creating new {@link Connection} objects for the Postgres database.
@@ -30,7 +31,11 @@ public class ConnectionFactory {
    */
   public static Connection newConnection() throws SQLException {
     sf_logger.debug("Using JDBC URL: {}", getJdbcUrl());
-    return DriverManager.getConnection(getJdbcUrl(), sf_user, sf_pass);
+    Connection connection = DriverManager.getConnection(getJdbcUrl(), sf_user, sf_pass);
+    try (Statement stmt = connection.createStatement()) {
+      stmt.execute("SET TIME ZONE 'America/Los_Angeles';");
+    }
+    return connection;
   }
   
   static String getJdbcUrl() {
