@@ -178,3 +178,7 @@ publish-diplotypes:
 .PHONY: publish-frequency
 publish-frequency:
 	java -cp build/libs/CpicData-all.jar org.cpicpgx.exporter.FrequencyExporter -d out -u
+
+.PHONY: stats
+stats:
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.stats.StatisticsCollector
