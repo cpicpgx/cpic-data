@@ -84,8 +84,8 @@ db-download:
 
 .PHONY: db-refresh
 db-refresh:
-	dropdb cpic -h ${PGHOST} -U postgres && createdb cpic -h ${PGHOST} -U postgres -O cpic
-	gzip -cd out/cpic_db_dump.sql.gz | psql -d cpic -h ${PGHOST} -U cpic
+	dropdb cpic -h localhost -U postgres && createdb cpic -h localhost -U postgres -O cpic
+	gzip -cd out/cpic_db_dump.sql.gz | psql -d cpic -h localhost -U cpic
 
 .PHONY: db-update
 db-update: db-download db-refresh
