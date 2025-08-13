@@ -1,3 +1,12 @@
+## 1.48.0 (2025-08-13)
+
+* feat: add ClinPGx guideline ID ([7d707d4](https://github.com/cpicpgx/cpic-data/commit/7d707d4))
+* feat: add make task for getting stats ([0e8ad40](https://github.com/cpicpgx/cpic-data/commit/0e8ad40))
+* feat: move data changelog exporter to java from node ([215eb77](https://github.com/cpicpgx/cpic-data/commit/215eb77))
+* fix: add gene symbol prefix to phenotype column in gene CDS files ([27f7a75](https://github.com/cpicpgx/cpic-data/commit/27f7a75))
+* fix: fix db-refresh make task ([e33eb81](https://github.com/cpicpgx/cpic-data/commit/e33eb81))
+* fix: set time zone on DB connection ([bcc7126](https://github.com/cpicpgx/cpic-data/commit/bcc7126))
+
 ## 1.47.0 (2025-06-17)
 
 * feat: data update from PharmVar 6.2.8 ([99bf586](https://github.com/cpicpgx/cpic-data/commit/99bf586))
