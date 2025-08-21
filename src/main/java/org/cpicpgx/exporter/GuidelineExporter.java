@@ -1,6 +1,7 @@
 package org.cpicpgx.exporter;
 
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.compress.utils.Lists;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.workbook.GuidelineWorkbook;
@@ -13,6 +14,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuidelineExporter extends BaseExporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -44,16 +47,18 @@ public class GuidelineExporter extends BaseExporter {
                 "array_agg(distinct d.name order by d.name) as \"Drugs\",\n" +
                 "array_agg(distinct p.pmid order by p.pmid) as \"PMIDs\",\n" +
                 "g.pharmgkbid \"PharmGKB Annotation IDs\",\n" +
-                "g.notesonusage as \"Notes on Usage\"\n" +
+                "g.notesonusage as \"Notes on Usage\",\n" +
+                "g.id::text as \"ID\"\n" +
                 "from guideline g\n" +
                 "    left join publication p on g.id = p.guidelineid\n" +
                 "    left join drug d on g.id = d.guidelineid\n" +
-                "group by g.name, g.url, g.pharmgkbid, g.genes, g.notesonusage\n" +
+                "group by g.name, g.url, g.pharmgkbid, g.genes, g.notesonusage, g.id\n" +
                 "order by g.name")
     ) {
       try (ResultSet rs = changeStmt.executeQuery()) {
         GuidelineWorkbook workbook = new GuidelineWorkbook();
         workbook.writeHeader(rs.getMetaData());
+        List<String> ids = new ArrayList<>();
 
         while (rs.next()) {
           workbook.write(
@@ -65,10 +70,11 @@ public class GuidelineExporter extends BaseExporter {
               rs.getArray(5),  // PMIDs
               rs.getArray(4)   // drug names
           );
+          ids.add(rs.getString(8)); // guideline ID
         }
 
         workbook.writeChangeLog(queryChangeLog(conn, FileType.GUIDELINE));
-        addFileExportHistory(workbook.getFilename(), new String[]{});
+        addFileExportHistory(workbook.getFilename(), ids.toArray(new String[0]));
         writeWorkbook(workbook);
         handleFileUpload();
       }
