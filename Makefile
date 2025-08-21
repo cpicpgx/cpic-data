@@ -70,8 +70,8 @@ db-bootstrap:
 
 .PHONY: db-teardown
 db-teardown:
-	dropdb cpic -h localhost -U postgres
-	psql -X -q  -h localhost -U postgres -c "drop user cpic"
+	dropdb cpic -h ${PGHOST} -U postgres
+	psql -X -q  -h ${PGHOST} -U postgres -c "drop user cpic"
 
 .PHONY: db-init
 db-init: db-bootstrap db-update db-migrate
@@ -84,8 +84,8 @@ db-download:
 
 .PHONY: db-refresh
 db-refresh:
-	dropdb cpic -h localhost -U postgres && createdb cpic -h localhost -U postgres -O cpic
-	gzip -cd out/cpic_db_dump.sql.gz | psql -d cpic -h localhost -U cpic
+	dropdb cpic -h ${PGHOST} -U postgres && createdb cpic -h ${PGHOST} -U postgres -O cpic
+	gzip -cd out/cpic_db_dump.sql.gz | psql -d cpic -h ${PGHOST} -U cpic
 
 .PHONY: db-update
 db-update: db-download db-refresh
@@ -94,8 +94,8 @@ db-update: db-download db-refresh
 .PHONY: db-update-staging
 db-update-staging:
 	@echo "Database image copied and refreshed"
-	dropdb cpic-staging -h localhost -U postgres
-	createdb cpic-staging -h localhost -U postgres
+	dropdb cpic-staging -h ${PGHOST} -U postgres
+	createdb cpic-staging -h ${PGHOST} -U postgres
 	pg_dump cpic | psql cpic-staging
 
 .PHONY: db-migrate
@@ -119,7 +119,7 @@ clean:
 
 .PHONY: db-clean
 db-clean:
-	psql -h localhost -U postgres -c "drop database cpic; drop role web_anon; drop role cpic_api; drop role auth; drop role cpic;"
+	psql -h ${PGHOST} -U postgres -c "drop database cpic; drop role web_anon; drop role cpic_api; drop role auth; drop role cpic;"
 
 
 .PHONY: import
