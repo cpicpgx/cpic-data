@@ -47,9 +47,9 @@ dependencies {
     // https://mvnrepository.com/artifact/se.sawano.java/alphanumeric-comparator
     implementation group: 'se.sawano.java', name: 'alphanumeric-comparator', version: '1.4.1'
     // https://mvnrepository.com/artifact/org.flywaydb/flyway-core
-    implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.4.0'
+    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.11.1'
     // https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql
-    implementation group: 'org.flywaydb', name:'flyway-database-postgresql', version:'10.4.0'
+    implementation group: 'org.flywaydb', name:'flyway-database-postgresql', version:'11.11.1'
     // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation group: 'com.google.guava', name: 'guava', version: '32.1.1-jre'
     // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
