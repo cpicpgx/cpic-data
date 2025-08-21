@@ -1,3 +1,9 @@
+## 1.49.0 (2025-08-21)
+
+* fix: fix problem with CI action ([cb614e0](https://github.com/cpicpgx/cpic-data/commit/cb614e0))
+* fix: remove outdated publication "supplements" ([8b7b7d6](https://github.com/cpicpgx/cpic-data/commit/8b7b7d6))
+* feat: update flyway dependency ([bfb413b](https://github.com/cpicpgx/cpic-data/commit/bfb413b))
+
 ## 1.48.0 (2025-08-13)
 
 * feat: add ClinPGx guideline ID ([7d707d4](https://github.com/cpicpgx/cpic-data/commit/7d707d4))
