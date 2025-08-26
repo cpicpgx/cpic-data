@@ -1,4 +1,16 @@
 Date of Change	Type of Data	Subject	Note of Change
+2025-08-25	ALLELE_DEFINITION	CFTR	added further variants included in ivacaftor label
+2025-08-25	ALLELE_FUNCTION_REFERENCE	CFTR	added further variants included in ivacaftor label
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
 2025-07-23	GENE_CDS	ABCG2	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	CACNA1S	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	CYP2B6	added gene symbol as a prefix to the phenotype column values
@@ -11,7 +23,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2025-07-23	GENE_CDS	HLA-A	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	HLA-B	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	MT-RNR1	added gene symbol as a prefix to the phenotype column values
-2025-07-23	GENE_CDS	NAT2	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	NUDT15	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	RYR1	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	SLCO1B1	added gene symbol as a prefix to the phenotype column values
@@ -24,12 +35,9 @@ Date of Change	Type of Data	Subject	Note of Change
 2025-05-28	ALLELE_DEFINITION	CYP2B6	added rs2516199080
 2025-05-28	ALLELE_DEFINITION	CYP2C9	rs1216169538'; rs2493006942; rs761033063; rs2492587526; rs2492591692; rs2492634549; rs2492650213'; rs2492662738; rs2492662839
 2025-05-28	ALLELE_DEFINITION	CYP2D6	added rs1135837; rs1555888899; rs566108360; rs150216909; rs993385303; rs538707090; rs774943042; rs1477736084
-2025-05-13	GENE_CDS	NAT2	created
 2025-05-07	ALLELE_DEFINITION	CYP2B6	added *50
 2025-05-01	ALLELE_DEFINITION	CYP2D6	*21 core allele definition changed; added allele *178-*185
-2025-03-06	ALLELE_DEFINITION	NAT2	added*54-*64
 2025-03-06	ALLELE_DEFINITION	NUDT15	*21 added
-2024-11-07	ALLELE_DEFINITION	NAT2	added*51-*53
 2024-10-31	ALLELE_DEFINITION	CYP2D6	added *177; updated *150 allele definition (rs16947 was removed from *150.002 suballele but is included in the *150.001 suballele, therefore A at position rs16947 was changed to R)
 2024-10-17	FREQUENCY	CYP2D6	corrected frequencies for PMIDs 36111505, 36294714
 2024-10-02	ALLELE_DEFINITION	CYP2D6	added *176
@@ -47,7 +55,6 @@ Date of Change	Type of Data	Subject	Note of Change
 2024-03-20	TEST_ALERT	azathioprine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
 2024-03-20	TEST_ALERT	mercaptopurine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
 2024-03-20	TEST_ALERT	thioguanine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
-2024-03-11	ALLELE_DEFINITION	NAT2	Initial NAT2 release in PharmVar
 2024-02-14	FREQUENCY	RYR1	Gnomad v3 frequencies added
 2024-01-30	ALLELE_DEFINITION	CYP4F2	added *17
 2024-01-30	ALLELE_DEFINITION	DPYD	added PharmVar ID for c.1129-5923C>G
@@ -363,31 +370,31 @@ Date of Change	Type of Data	Subject	Note of Change
 2021-04-15	ALLELE_FUNCTION_REFERENCE	CYP2C9	Edited evidence summary column to comply with revised allele function SOP
 2021-04-14	ALLELE_DEFINITION	CYP2D6	corrected nucleotides for *114 to C in reference row and T in *144 row to align with GRCh38 nucleotides
 2021-04-11	ALLELE_DEFINITION	SLCO1B1	updated alleles based on PharmVar update: Update of alleles:
-			• *18, remove 578T>G (L193R) 
-			• *21: add L643F (1929 A>C, rs34671512)
-			• Rename *1A to *1
-			New rows (new alleles):
-			• Add row *37: *1B re-assigned as *37
-			• Add row: *38 (old *1c), 
-			• Add *39, *40, *41, *42 (*39-*42 from new sequence submissions)
-			New columns (core alleles from new submission):
-			• Add column: for R152L for *38 (no rsID yet, the one at the chr location show as G>C instead of G>A https://www.ncbi.nlm.nih.gov/snp/rs145144129)
-			• Add column: Splice donor for core alleles from *41 from new submissions
-			• Add column: Y173C for core alleles from *42 from new submissions
-			• Add column: R253X for core allele from *39
-			Remove rows (merges):
-			• *1B: reassigned as *37
-			• *17: merged *17 with *15 (-910G>A removed)
-			• *18: Merge *18 with *14 (L191=, F199=, S137= removed from core allele definition)
-			• *21: Merge *21 with *20 (-910G>A removed)
-			• *22: Merge *22 with *19 (L191= removed)
-			• *35: Merge *35 with *20 (F199= removed, no information for F199=)
-			Remove columns:
-			• Remove column: rs4149015 (-910G>A) from allele definition table (pass 500 upstream of exon 1)
-			• Remove column: 578T>G (L193R), since *18 no longer have this
-			• Remove column: L191= (rs4149057) from core allele definition, synonymous change
-			• Remove column: F199= (rs2291075) from core allele definition, synonymous change
-			• Remove column: S137= (rs11045818) from core allele definition, synonymous change
+• *18, remove 578T>G (L193R) 
+• *21: add L643F (1929 A>C, rs34671512)
+• Rename *1A to *1
+New rows (new alleles):
+• Add row *37: *1B re-assigned as *37
+• Add row: *38 (old *1c), 
+• Add *39, *40, *41, *42 (*39-*42 from new sequence submissions)
+New columns (core alleles from new submission):
+• Add column: for R152L for *38 (no rsID yet, the one at the chr location show as G>C instead of G>A https://www.ncbi.nlm.nih.gov/snp/rs145144129)
+• Add column: Splice donor for core alleles from *41 from new submissions
+• Add column: Y173C for core alleles from *42 from new submissions
+• Add column: R253X for core allele from *39
+Remove rows (merges):
+• *1B: reassigned as *37
+• *17: merged *17 with *15 (-910G>A removed)
+• *18: Merge *18 with *14 (L191=, F199=, S137= removed from core allele definition)
+• *21: Merge *21 with *20 (-910G>A removed)
+• *22: Merge *22 with *19 (L191= removed)
+• *35: Merge *35 with *20 (F199= removed, no information for F199=)
+Remove columns:
+• Remove column: rs4149015 (-910G>A) from allele definition table (pass 500 upstream of exon 1)
+• Remove column: 578T>G (L193R), since *18 no longer have this
+• Remove column: L191= (rs4149057) from core allele definition, synonymous change
+• Remove column: F199= (rs2291075) from core allele definition, synonymous change
+• Remove column: S137= (rs11045818) from core allele definition, synonymous change
 2021-04-01	ALLELE_DEFINITION	UGT1A1	deleted column for -3275T>G, *60 was removed as row but position was still included
 2021-03-30	ALLELE_DEFINITION	CYP2B6	*16 has been removed from PharmVar as a core allele and now is a suballele of *18, meaning that *18 may have an A or G at position 18053
 2021-03-03	FREQUENCY	MT-RNR1	File created
