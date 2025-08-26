@@ -3,6 +3,7 @@ package org.cpicpgx.importer;
 import com.google.gson.JsonObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
 import org.cpicpgx.workbook.AbstractWorkbook;
@@ -25,10 +26,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -313,6 +311,19 @@ public abstract class BaseDirectoryImporter {
       db.writeChangeLog(entityId, date, note);
     }
   }
+
+    List<String> readNotes(WorkbookWrapper workbook) {
+        List<String> notes = new ArrayList<>();
+        for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+            RowWrapper row = workbook.getRow(i);
+            if (row.hasNoText(0)) {
+                continue;
+            }
+
+            notes.add(row.getText(0));
+        }
+        return notes;
+    }
 
   String processMethods(WorkbookWrapper workbook) throws SQLException {
     StringJoiner methodsText = new StringJoiner("\n");

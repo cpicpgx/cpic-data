@@ -29,7 +29,10 @@ import java.util.regex.Pattern;
  */
 public class GeneCdsImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Pattern GENE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
+
+  private static final Pattern GENE_PATTERN = Pattern.compile("Gene:\\s+([\\w-]+)");
+  private static final Pattern PHENOTYPE_PATTERN = Pattern.compile("([\\w-]+)\\s+[Pp]henotype");
+
   //language=PostgreSQL
   private static final String[] sf_deleteStatements = new String[]{
       "delete from gene_result_diplotype where functionphenotypeid in (select l.id from gene_result_lookup l join gene_result gr on l.phenotypeid = gr.id join gene g on gr.genesymbol = g.symbol where lookupmethod='"+LookupMethod.ALLELE_STATUS.name()+"')",
@@ -73,16 +76,21 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
 
     RowWrapper headerRow = workbook.getRow(rowIdx);
     rowIdx += 1;
-    String geneText = headerRow.getNullableText(0);
-    if (geneText == null) {
-      throw new NotFoundException("Couldn't find gene");
-    }
+    String geneText = headerRow.getText(0);
+
+    String geneSymbol;
     Matcher m = GENE_PATTERN.matcher(geneText);
-    if (!m.find()) {
-      sf_logger.warn("No gene found for workbook {}, skipping", workbook.getFileName());
-      return;
+    if (m.matches()) {
+        geneSymbol = m.group(1);
+        rowIdx += 1;
+    } else {
+        m = PHENOTYPE_PATTERN.matcher(geneText);
+        if (!m.find()) {
+            sf_logger.warn("No gene found for workbook {}, skipping", workbook.getFileName());
+            return;
+        }
+        geneSymbol = m.group(1);
     }
-    String geneSymbol = m.group(1);
     sf_logger.debug("loading gene {}", geneSymbol);
 
     try (GeneDbHarness dbHarness = new GeneDbHarness(geneSymbol)) {
@@ -110,6 +118,12 @@ public class GeneCdsImporter extends BaseDirectoryImporter {
         RowWrapper row = workbook.getRow(rowIdx);
         if (row.hasNoText(0)) continue;
         notes.add(row.getText(0));
+      }
+      try {
+          workbook.currentSheetIs(AbstractWorkbook.NOTES_SHEET_NAME);
+          notes.addAll(readNotes(workbook));
+      } catch (InvalidParameterException ex) {
+          // ok to drop this since a dedicated note tab is not available in all sheets
       }
       writeNotes(geneSymbol, notes);
 
