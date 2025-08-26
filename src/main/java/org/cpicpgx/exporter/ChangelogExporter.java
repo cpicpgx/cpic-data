@@ -42,6 +42,9 @@ public class ChangelogExporter extends BaseExporter {
                 ResultSet rs = conn.prepareStatement(SQL_STMT).executeQuery();
                 CSVPrinter printer = CSVFormat.TDF.builder()
                         .setHeader(rs)
+                        .setQuote(null)
+                        .setEscape(null)
+                        .setRecordSeparator("\n")
                         .build().print(fileWriter)
         ) {
             printer.printRecords(rs);
