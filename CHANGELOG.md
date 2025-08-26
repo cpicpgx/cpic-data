@@ -1,3 +1,9 @@
+## 1.50.0 (2025-08-26)
+
+* feat: allow import of CDS files in new format ([7f129a7](https://github.com/cpicpgx/cpic-data/commit/7f129a7))
+* feat: data update ([bca3c14](https://github.com/cpicpgx/cpic-data/commit/bca3c14))
+* fix: fix changelog export format ([2c00c2a](https://github.com/cpicpgx/cpic-data/commit/2c00c2a))
+
 ## 1.49.0 (2025-08-21)
 
 * fix: fix problem with CI action ([cb614e0](https://github.com/cpicpgx/cpic-data/commit/cb614e0))
