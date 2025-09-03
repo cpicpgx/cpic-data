@@ -62,7 +62,12 @@ public class GuidelineImporter extends BaseDirectoryImporter {
         );
 
         db.updateDrugs(url, parseArray(row.getText(GuidelineWorkbook.IDX_DRUGS)));
-        db.updateLits(url, parseArray(row.getText(GuidelineWorkbook.IDX_PMIDS)));
+
+        String pmids = row.getNullableText(GuidelineWorkbook.IDX_PMIDS);
+        if (pmids == null) {
+            sf_logger.warn("No PMID specified for row {}", i + 1);
+        }
+        db.updateLits(url, parseArray(pmids));
       }
       db.cleanup();
     }
@@ -144,7 +149,7 @@ public class GuidelineImporter extends BaseDirectoryImporter {
     }
 
     void cleanup() {
-      if (existingGuidelineMap.size() > 0) {
+      if (!existingGuidelineMap.isEmpty()) {
         for (String key : existingGuidelineMap.keySet()) {
           sf_logger.warn("Existing guideline [{}] not covered in imported file, missing data?", existingGuidelineMap.get(key));
         }
