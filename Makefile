@@ -41,7 +41,11 @@ upload:
 
 .PHONY: upload-flow-charts
 upload-flow-charts:
-	aws s3 sync cpic-support-files/images/flow_chart s3://files.cpicpgx.org/images/flow_chart --profile cpic
+	aws s3 sync cpic-support-files/images/flow_chart s3://files.cpicpgx.org/images/flow_chart --exclude="*.DS_Store" --profile cpic
+
+.PHONY: upload-publications
+upload-publications:
+	aws s3 sync cpic-support-files/publication s3://files.cpicpgx.org/data/guideline/publication --exclude="*.md" --exclude="*.sh" --exclude=".git/*" --exclude=".idea/*" --exclude="*.DS_Store" --exclude=".gitignore" --profile cpic
 
 .PHONY: archive
 archive: dump upload
