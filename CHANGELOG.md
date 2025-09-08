@@ -1,3 +1,9 @@
+## 1.51.0 (2025-09-08)
+
+* feat: add flowchart link to hydralazine ([4c3ad8f](https://github.com/cpicpgx/cpic-data/commit/4c3ad8f))
+* feat: move file deployment utilities and add image listing ([4707e96](https://github.com/cpicpgx/cpic-data/commit/4707e96))
+* fix: allow guideline import without PMID ([ea40fa8](https://github.com/cpicpgx/cpic-data/commit/ea40fa8))
+
 ## 1.50.0 (2025-08-26)
 
 * feat: allow import of CDS files in new format ([7f129a7](https://github.com/cpicpgx/cpic-data/commit/7f129a7))
