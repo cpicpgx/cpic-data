@@ -2,7 +2,7 @@ const axios = require('axios');
 const db = require('./db');
 
 /**
- * This script will take one argument, the PMID of a publication, query the PharmGKB API for Literature data, and then 
+ * This script will take one argument, the PMID of a publication, query the ClinPGx API for Literature data, and then
  * write the information to the publication table.
  */
 const updatePublication = async (pmid) => {
@@ -12,7 +12,7 @@ const updatePublication = async (pmid) => {
   console.log(`writing to DB: ${process.env.PGHOST}`);
 
   const response = await axios.get(
-    'https://api.pharmgkb.org/v1/preview/data/literature/',
+    'https://api.clinpgx.org/v1/preview/data/literature/',
     {params: {view: 'base', "crossReferences.resourceId": pmid, 'crossReferences.resource': 'PubMed'}});
   const lit = response.data.data[0];
   lit.pmid = pmid;

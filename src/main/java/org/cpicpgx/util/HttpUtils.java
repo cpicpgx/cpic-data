@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpUtils {
-  private static final String sf_pharmgkbApi = "https://api.pharmgkb.org/v1/";
+  private static final String sf_clinpgxUrl = "https://api.clinpgx.org/v1/";
   public static final int API_WAIT_TIME = 2100;
 
   @Nullable
@@ -54,7 +54,7 @@ public class HttpUtils {
   }
 
   /**
-   * Builds an API request URL for the PharmGKB API
+   * Builds an API request URL for the ClinPGx API
    * @param path the path of the API URL after the /v1/ (no beginning slash necessary)
    * @param queryParams optional pairs of name-value query parameter strings (values will be properly escaped)
    * @return a full HTTP URL
@@ -66,7 +66,7 @@ public class HttpUtils {
     if (path.startsWith("/")) {
       throw new RuntimeException("Path should not start with slash: " + path);
     }
-    String url = sf_pharmgkbApi.concat(path);
+    String url = sf_clinpgxUrl.concat(path);
     if (queryParams != null && queryParams.length > 0) {
       List<String> params = new ArrayList<>();
       for (int i = 0; i < queryParams.length / 2; i++) {
