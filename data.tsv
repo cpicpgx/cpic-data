@@ -1,4 +1,10 @@
 Date of Change	Type of Data	Subject	Note of Change
+2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Based on PharmVar assessments of SLCO1B1 allele defintion, *46 merged with *45
+2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Function assignment, strength of evidence, PMIDs, and summary of findings updated for *39, *41, and *45 based on PCEP evaluation
+2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Strength of evidence, PMIDs, and summary of findings updated for *9 and *31 based on PCEP evaluation. *9 assigned biochemical functional status of decreased
+2025-09-15	ALLELE_DEFINITION	CFTR	changed semicolon to comma in F508C,S1251N
+2025-09-02	PAIR		updated NAT2-hydralazine pair for guideline release
+2025-09-01	RECOMMENDATION	hydralazine	created
 2025-08-25	ALLELE_DEFINITION	CFTR	added further variants included in ivacaftor label
 2025-08-25	ALLELE_FUNCTION_REFERENCE	CFTR	added further variants included in ivacaftor label
 2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
@@ -35,9 +41,13 @@ Date of Change	Type of Data	Subject	Note of Change
 2025-05-28	ALLELE_DEFINITION	CYP2B6	added rs2516199080
 2025-05-28	ALLELE_DEFINITION	CYP2C9	rs1216169538'; rs2493006942; rs761033063; rs2492587526; rs2492591692; rs2492634549; rs2492650213'; rs2492662738; rs2492662839
 2025-05-28	ALLELE_DEFINITION	CYP2D6	added rs1135837; rs1555888899; rs566108360; rs150216909; rs993385303; rs538707090; rs774943042; rs1477736084
+2025-05-13	GENE_CDS	NAT2	created
+2025-05-13	TEST_ALERT	hydralazine	created
 2025-05-07	ALLELE_DEFINITION	CYP2B6	added *50
 2025-05-01	ALLELE_DEFINITION	CYP2D6	*21 core allele definition changed; added allele *178-*185
+2025-03-06	ALLELE_DEFINITION	NAT2	added*54-*64
 2025-03-06	ALLELE_DEFINITION	NUDT15	*21 added
+2024-11-07	ALLELE_DEFINITION	NAT2	added*51-*53
 2024-10-31	ALLELE_DEFINITION	CYP2D6	added *177; updated *150 allele definition (rs16947 was removed from *150.002 suballele but is included in the *150.001 suballele, therefore A at position rs16947 was changed to R)
 2024-10-17	FREQUENCY	CYP2D6	corrected frequencies for PMIDs 36111505, 36294714
 2024-10-02	ALLELE_DEFINITION	CYP2D6	added *176
@@ -55,6 +65,7 @@ Date of Change	Type of Data	Subject	Note of Change
 2024-03-20	TEST_ALERT	azathioprine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
 2024-03-20	TEST_ALERT	mercaptopurine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
 2024-03-20	TEST_ALERT	thioguanine	Updated for the following phenotypes: TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/NUDT15 Intermediate Metabolizer, Possible TPMT Intermediate Metabolizer/Possible NUDT15 Intermediate Metabolizer
+2024-03-11	ALLELE_DEFINITION	NAT2	Initial NAT2 release in PharmVar
 2024-02-14	FREQUENCY	RYR1	Gnomad v3 frequencies added
 2024-01-30	ALLELE_DEFINITION	CYP4F2	added *17
 2024-01-30	ALLELE_DEFINITION	DPYD	added PharmVar ID for c.1129-5923C>G
@@ -357,7 +368,7 @@ Date of Change	Type of Data	Subject	Note of Change
 2021-05-06	ALLELE_DEFINITION	CYP2C19	Moved *38 as reference as this allele matches the human genome CYP2C19 Reference sequence LRG_584 / NG_008384.3.
 2021-05-06	ALLELE_DEFINITION	CYP2C19	added *39
 2021-05-04	ALLELE_DEFINITION	CYP2C9	Changed file to use RefSeq NG_008385.2 positions, updated allele definitions and added new allele *71 from PharmVar
-2021-04-29	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Based on PharVar assessments of SLCO1B1 allele defintion, *1A renamed *1, *1B renamed as *37, *1C reassigned as *38, added new alleles *39, *40, *41, *42, merged *17 with *15, merged *18 with *14, *21 with *20, *22 with *1, and *35 with *20.
+2021-04-29	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Based on PharmVar assessments of SLCO1B1 allele defintion, *1A renamed *1, *1B renamed as *37, *1C reassigned as *38, added new alleles *39, *40, *41, *42, merged *17 with *15, merged *18 with *14, *21 with *20, *22 with *1, and *35 with *20.
 2021-04-28	ALLELE_DEFINITION	CYP2C19	romoved "delgene" text from *36
 2021-04-26	ALLELE_FUNCTION_REFERENCE	CYP2C9	Added PMID 15637526 to PMID column for *2
 2021-04-23	ALLELE_DEFINITION	CYP2B6	update cell Z2 from 21034T>C to 21034C>T
