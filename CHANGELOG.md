@@ -1,3 +1,8 @@
+## 1.52.0 (2025-09-26)
+
+* feat: data changes for NAT2-hydralazine ([f6311e5](https://github.com/cpicpgx/cpic-data/commit/f6311e5))
+* chore: update PharmGKB API to ClinPGx API ([584329c](https://github.com/cpicpgx/cpic-data/commit/584329c))
+
 ## 1.51.0 (2025-09-08)
 
 * feat: add flowchart link to hydralazine ([4c3ad8f](https://github.com/cpicpgx/cpic-data/commit/4c3ad8f))
