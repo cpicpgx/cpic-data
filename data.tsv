@@ -1,4 +1,7 @@
 Date of Change	Type of Data	Subject	Note of Change
+2025-10-14	ALLELE_DEFINITION	SLCO1B1	DELETED HAPLOTYPE: *3, *7, *12, *13, *38, *46
+ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
+2025-10-14	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Updated to PharmVar 6.2.17 which removed *3, *7, *12, *13, *38, and *46
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Based on PharmVar assessments of SLCO1B1 allele defintion, *46 merged with *45
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Function assignment, strength of evidence, PMIDs, and summary of findings updated for *39, *41, and *45 based on PCEP evaluation
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Strength of evidence, PMIDs, and summary of findings updated for *9 and *31 based on PCEP evaluation. *9 assigned biochemical functional status of decreased
