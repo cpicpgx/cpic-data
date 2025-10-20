@@ -1,3 +1,8 @@
+## 1.53.0 (2025-10-20)
+
+* chore: update dependencies ([c34e679](https://github.com/cpicpgx/cpic-data/commit/c34e679))
+* feat: data update from PharmVar 6.2.17 ([a2f3d34](https://github.com/cpicpgx/cpic-data/commit/a2f3d34))
+
 ## 1.52.0 (2025-09-26)
 
 * feat: data changes for NAT2-hydralazine ([f6311e5](https://github.com/cpicpgx/cpic-data/commit/f6311e5))
