@@ -11,7 +11,7 @@
     "@aws-sdk/client-s3": "3.633.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "axios": "1.8.1",
+    "axios": "1.12.2",
     "conventional-changelog-conventionalcommits": "6.1.0",
     "dayjs": "1.11.13",
     "dotenv": "16.4.7",
