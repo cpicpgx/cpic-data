@@ -1,3 +1,7 @@
+## <small>1.53.1 (2025-10-27)</small>
+
+* fix: corrected c.930 allele in MT-RNR1 from A>G to G>A ([583fd18](https://github.com/cpicpgx/cpic-data/commit/583fd18))
+
 ## 1.53.0 (2025-10-20)
 
 * chore: update dependencies ([c34e679](https://github.com/cpicpgx/cpic-data/commit/c34e679))
