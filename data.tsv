@@ -1,4 +1,7 @@
 Date of Change	Type of Data	Subject	Note of Change
+2025-10-27	ALLELE_DEFINITION	MT-RNR1	Changed m.930A>G to m.930G>A and added rsID; G is the reference allele and A the variant allele; changes made after discussion with guideline authors
+2025-10-27	ALLELE_FUNCTION_REFERENCE	MT-RNR1	Changed m.930A>G to m.930G>A; G is the reference allele and A the variant allele; changes made after discussion with guideline authors
+2025-10-27	FREQUENCY	MT-RNR1	Changed m.930A>G to m.930G>A; G is the reference allele and A the variant allele; changes made after discussion with guideline authors
 2025-10-14	ALLELE_DEFINITION	SLCO1B1	DELETED HAPLOTYPE: *3, *7, *12, *13, *38, *46
 ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2025-10-14	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Updated to PharmVar 6.2.17 which removed *3, *7, *12, *13, *38, and *46
