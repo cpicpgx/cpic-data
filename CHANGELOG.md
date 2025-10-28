@@ -1,3 +1,7 @@
+## <small>1.53.2 (2025-10-28)</small>
+
+* fix: updated to the correct NAT2 allele definition list ([b62dd20](https://github.com/cpicpgx/cpic-data/commit/b62dd20))
+
 ## <small>1.53.1 (2025-10-27)</small>
 
 * fix: corrected c.930 allele in MT-RNR1 from A>G to G>A ([583fd18](https://github.com/cpicpgx/cpic-data/commit/583fd18))
