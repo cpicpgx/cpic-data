@@ -23,6 +23,7 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
 2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
 2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-07-31	ALLELE_DEFINITION	NAT2	added *65-*75
 2025-07-23	GENE_CDS	ABCG2	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	CACNA1S	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	CYP2B6	added gene symbol as a prefix to the phenotype column values
