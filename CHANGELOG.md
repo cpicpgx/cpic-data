@@ -1,3 +1,8 @@
+## 1.54.0 (2026-02-04)
+
+* fix: change command for exporting data change log ([0d0ba19](https://github.com/cpicpgx/cpic-data/commit/0d0ba19))
+* feat: data update ([48c94f7](https://github.com/cpicpgx/cpic-data/commit/48c94f7))
+
 ## <small>1.53.2 (2025-10-28)</small>
 
 * fix: updated to the correct NAT2 allele definition list ([b62dd20](https://github.com/cpicpgx/cpic-data/commit/b62dd20))
