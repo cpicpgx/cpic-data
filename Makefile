@@ -66,7 +66,7 @@ jar: compile
 
 .PHONY: data-changelog
 data-changelog:
-	@node src/main/node/writeChangelog.mjs
+	java -cp build/libs/CpicData-all.jar org.cpicpgx.exporter.ChangelogExporter -d .
 
 .PHONY: db-bootstrap
 db-bootstrap:
