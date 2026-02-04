@@ -1,10 +1,26 @@
 Date of Change	Type of Data	Subject	Note of Change
+2026-02-03	ALLELE_FUNCTION_REFERENCE	NUDT15	*4 and *6 assigned Decreased Allele Biochemical Functional Status
+2026-02-03	ALLELE_FUNCTION_REFERENCE	NUDT15	Allele Clinical Functional Status updated for *4, *5, *6, *7, and *8; removed *2 because it became a sub-allele of *3
+2026-02-03	ALLELE_FUNCTION_REFERENCE	NUDT15	Strength of Evidence added for all alleles
+2026-02-03	ALLELE_FUNCTION_REFERENCE	NUDT15	Summary of Findings added for all alleles
+2026-02-03	ALLELE_FUNCTION_REFERENCE	TPMT	Allele clinical function assignments and PMIDs updated for *5, *6, *7, *8, *10, *13, *16, *17, *18, *20, *21, *22, *25, *26, *27, *28, *31, *33, *34, *37, *38, and *39
+2026-02-03	ALLELE_FUNCTION_REFERENCE	TPMT	Strength of Evidence added for all alleles
+2026-02-03	ALLELE_FUNCTION_REFERENCE	TPMT	Summary of Findings added for all alleles
+2026-02-03	GENE_CDS	NUDT15	updated for guideline update
+2026-02-03	GENE_CDS	TPMT	updated for guideline update
+2026-02-03	RECOMMENDATION	azathioprine	Updated for the guideline update 2025-2026
+2026-02-03	RECOMMENDATION	mercaptopurine	Updated for the guideline update 2025-2026
+2026-02-03	RECOMMENDATION	thioguanine	Updated for the guideline update 2025-2026
+2025-11-03	ALLELE_DEFINITION	CYP4F2	changed protein p.E129L to p.E129K for *12
+2025-11-03	ALLELE_DEFINITION	NUDT15	changed p.L30V to p.L30F in *16
+2025-11-03	ALLELE_FUNCTION_REFERENCE	NAT2	Added entries for 6 new star alleles defined by PharmVar: *70, *71, *72, *73, *74, and *75
 2025-10-27	ALLELE_DEFINITION	MT-RNR1	Changed m.930A>G to m.930G>A and added rsID; G is the reference allele and A the variant allele; changes made after discussion with guideline authors
 2025-10-27	ALLELE_FUNCTION_REFERENCE	MT-RNR1	Changed m.930A>G to m.930G>A; G is the reference allele and A the variant allele; changes made after discussion with guideline authors
 2025-10-27	FREQUENCY	MT-RNR1	Changed m.930A>G to m.930G>A; G is the reference allele and A the variant allele; changes made after discussion with guideline authors
 2025-10-14	ALLELE_DEFINITION	SLCO1B1	DELETED HAPLOTYPE: *3, *7, *12, *13, *38, *46
 ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2025-10-14	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Updated to PharmVar 6.2.17 which removed *3, *7, *12, *13, *38, and *46
+2025-09-24	ALLELE_FUNCTION_REFERENCE	NUDT15	PMIDs updated for all alleles
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Based on PharmVar assessments of SLCO1B1 allele defintion, *46 merged with *45
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Function assignment, strength of evidence, PMIDs, and summary of findings updated for *39, *41, and *45 based on PCEP evaluation
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Strength of evidence, PMIDs, and summary of findings updated for *9 and *31 based on PCEP evaluation. *9 assigned biochemical functional status of decreased
@@ -58,6 +74,8 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2024-10-31	ALLELE_DEFINITION	CYP2D6	added *177; updated *150 allele definition (rs16947 was removed from *150.002 suballele but is included in the *150.001 suballele, therefore A at position rs16947 was changed to R)
 2024-10-17	FREQUENCY	CYP2D6	corrected frequencies for PMIDs 36111505, 36294714
 2024-10-02	ALLELE_DEFINITION	CYP2D6	added *176
+2024-09-10	ALLELE_FUNCTION_REFERENCE	NUDT15	Added entries for 12 new star alleles defined by PharmVar: *10, *11, *12, *13, *14, *15, *16, *17, *18, *19, *20, *21
+2024-09-10	ALLELE_FUNCTION_REFERENCE	TPMT	Added new alleles from TPMT Nomenclature Committee: *42, *43, *44, *45, *46
 2024-07-25	PAIR		updated CYP2B6-methadone pair for guideline release
 2024-07-23	PAIR		updated beta blocker pairs for guideline release
 2024-07-09	ALLELE_DEFINITION	CYP2D6	added *173-*175
