@@ -11,6 +11,7 @@ Date of Change	Type of Data	Subject	Note of Change
 2026-02-03	RECOMMENDATION	azathioprine	Updated for the guideline update 2025-2026
 2026-02-03	RECOMMENDATION	mercaptopurine	Updated for the guideline update 2025-2026
 2026-02-03	RECOMMENDATION	thioguanine	Updated for the guideline update 2025-2026
+2026-01-29	ALLELE_DEFINITION	NUDT15	*2 has become a sub-allele of *3, see Notes tab
 2025-11-03	ALLELE_DEFINITION	CYP4F2	changed protein p.E129L to p.E129K for *12
 2025-11-03	ALLELE_DEFINITION	NUDT15	changed p.L30V to p.L30F in *16
 2025-11-03	ALLELE_FUNCTION_REFERENCE	NAT2	Added entries for 6 new star alleles defined by PharmVar: *70, *71, *72, *73, *74, and *75
