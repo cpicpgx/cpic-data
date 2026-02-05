@@ -1,4 +1,7 @@
 Date of Change	Type of Data	Subject	Note of Change
+2026-02-04	PAIR		added update PMID for thiopurine pairs
+2026-02-04	RECOMMENDATION	azathioprine	Updated for the guideline update 2025-2026
+2026-02-04	RECOMMENDATION	thioguanine	Updated for the guideline update 2025-2026
 2026-02-03	ALLELE_FUNCTION_REFERENCE	NUDT15	*4 and *6 assigned Decreased Allele Biochemical Functional Status
 2026-02-03	ALLELE_FUNCTION_REFERENCE	NUDT15	Allele Clinical Functional Status updated for *4, *5, *6, *7, and *8; removed *2 because it became a sub-allele of *3
 2026-02-03	ALLELE_FUNCTION_REFERENCE	NUDT15	Strength of Evidence added for all alleles
