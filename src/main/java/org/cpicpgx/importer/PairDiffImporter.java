@@ -64,7 +64,7 @@ public class PairDiffImporter extends BaseDirectoryImporter {
         for (PairDiff pairDiff : diffs) {
           if (pairDiff.pairId != null) {
             Arrays.stream(pairDiff.messages).forEach(sf_logger::info);
-            int changes = dbHarness.update(pairDiff.pairId, pairDiff.pgkbCaLevel, pairDiff.pgxTesting);
+            int changes = dbHarness.update(pairDiff.pairId, pairDiff.clinpgxlevel, pairDiff.pgxTesting);
             dbHarness.addChangeLog(pairDiff.messages);
             sf_logger.info("{} changes applied to {}", changes, pairDiff.name);
           }
@@ -80,8 +80,8 @@ public class PairDiffImporter extends BaseDirectoryImporter {
     String name;
     @SerializedName("pairid")
     Long pairId;
-    @SerializedName("pgkbcalevel")
-    String pgkbCaLevel;
+    @SerializedName("clinpgxlevel")
+    String clinpgxlevel;
     @SerializedName("pgxtesting")
     String pgxTesting;
   }
@@ -96,7 +96,7 @@ public class PairDiffImporter extends BaseDirectoryImporter {
       Connection conn = ConnectionFactory.newConnection();
       closeables.add(conn);
 
-      updateLevelStmt = conn.prepareStatement("update pair set pgkbCALevel=? where pairid=?");
+      updateLevelStmt = conn.prepareStatement("update pair set clinpgxlevel=? where pairid=?");
       closeables.add(updateLevelStmt);
       updateTestingStmt = conn.prepareStatement("update pair set pgxTesting=? where pairid=?");
       closeables.add(updateTestingStmt);

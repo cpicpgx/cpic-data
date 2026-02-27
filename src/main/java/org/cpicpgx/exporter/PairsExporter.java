@@ -28,7 +28,7 @@ public class PairsExporter extends BaseExporter {
       "    d.name as \"Drug\", " +
       "    g.url as \"Guideline URL\", " +
       "    p.cpiclevel as \"CPIC Level\", " +
-      "    p.pgkbcalevel as \"PharmGKB Level of Evidence\", " +
+      "    p.clinpgxlevel as \"ClinPGx Level of Evidence\", " +
       "    p.pgxtesting as \"PGx Level of Evidence\", " +
       "    array_to_string(p.citations, ';') as \"CPIC Publications (PMID)\", " +
       "    case " +
@@ -51,7 +51,7 @@ public class PairsExporter extends BaseExporter {
       "       v.guidelineurl as \"Guideline\",\n" +
       "       v.cpiclevel as \"CPIC Level\",\n" +
       "       case when v.provisional is true then 'Provisional' else 'Final' end \"CPIC Level Status\",\n" +
-      "       v.pgkbcalevel as \"PharmGKB Level of Evidence\",\n" +
+      "       v.clinpgxlevel as \"ClinPGx Level of Evidence\",\n" +
       "       v.pgxtesting as \"PGx on FDA Label\",\n" +
       "       array_to_string(v.pmids, ';') as \"CPIC Publications (PMID)\"\n" +
       "from pair_view v join drug d on d.drugid=v.drugid\n" +

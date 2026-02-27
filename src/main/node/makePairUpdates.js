@@ -22,7 +22,7 @@ const pgkbApi = process.env.PGKBAPI || 'localhost.pharmgkb.org:8543';
 const queryCurrentPairs = async () => {
     return await db.many(`
         select json_build_object('drugid', d.drugid, 'name', d.name, 'pharmgkbid', d.pharmgkbid) as drug,p.genesymbol,
-               p.pgkbcalevel, p.pgxtesting, p.pairid
+               p.clinpgxlevel, p.pgxtesting, p.pairid
         from pair p join drug d on p.drugid=d.drugid where p.removed is false
     `);
 };
@@ -41,7 +41,7 @@ const requestUpdates = async (body) => {
     }
 };
 
-const hasCaChange = (change) => change.hasOwnProperty('pairid') && change.hasOwnProperty('pgkbcalevel');
+const hasCaChange = (change) => change.hasOwnProperty('pairid') && change.hasOwnProperty('clinpgxlevel');
 const hasTestingChange = (change) => change.hasOwnProperty('pairid') && change.hasOwnProperty('pgxtesting');
 const mapNoneToNull = (value) => {
     if (!value || _.trim(value) === 'none') {
@@ -60,17 +60,17 @@ const writeChangeNote = async (message) => {
     );
 }
 
-const updateCaLevel = async ({pairid, pgkbcalevel: pgkbcalevelIn, name}) => {
-    const currentPair = await db.one(`select genesymbol, drugname, pgkbcalevel from pair_view where pairid=$(pairid)`, {pairid});
-    const pgkbcalevel = mapNoneToNull(pgkbcalevelIn);
-    if (currentPair.pgkbcalevel !== pgkbcalevel) {
+const updateCaLevel = async ({pairid, clinpgxlevel: clinpgxlevelIn, name}) => {
+    const currentPair = await db.one(`select genesymbol, drugname, clinpgxlevel from pair_view where pairid=$(pairid)`, {pairid});
+    const clinpgxlevel = mapNoneToNull(clinpgxlevelIn);
+    if (currentPair.clinpgxlevel !== clinpgxlevel) {
         await db.none(
             `update pair
-             set pgkbcalevel=$(pgkbcalevel)
+             set clinpgxlevel=$(clinpgxlevel)
              where pairid = $(pairid)`,
-            {pgkbcalevel, pairid},
+            {clinpgxlevel, pairid},
         );
-        return writeChangeNote(`[${currentPair.drugname}-${currentPair.genesymbol}] PharmGKB level changed from ${mapNullToNone(currentPair.pgkbcalevel)} to ${mapNullToNone(pgkbcalevel)}`);
+        return writeChangeNote(`[${currentPair.drugname}-${currentPair.genesymbol}] PharmGKB level changed from ${mapNullToNone(currentPair.clinpgxlevel)} to ${mapNullToNone(clinpgxlevel)}`);
     } else {
         log.debug(`Skipping ${name} since CA level already matches`);
         return Promise.resolve();

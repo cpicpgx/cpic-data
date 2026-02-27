@@ -99,9 +99,9 @@ public class PairImporter extends BaseDirectoryImporter {
     PairDbHarness() throws SQLException {
       super(FileType.PAIR);
       //language=PostgreSQL
-      upsertPair = prepare("insert into pair(genesymbol, drugid, guidelineid, cpiclevel, pgkbcalevel, pgxtesting, citations, usedforrecommendation, removed, removeddate, removedreason) " +
+      upsertPair = prepare("insert into pair(genesymbol, drugid, guidelineid, cpiclevel, clinpgxlevel, pgxtesting, citations, usedforrecommendation, removed, removeddate, removedreason) " +
           "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (genesymbol, drugid) do " +
-          "update set guidelineid=excluded.guidelineid, cpiclevel=excluded.cpiclevel, pgkbcalevel=excluded.pgkbcalevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation, removed=excluded.removed, removeddate=excluded.removeddate, removedreason=excluded.removedreason");
+          "update set guidelineid=excluded.guidelineid, cpiclevel=excluded.cpiclevel, clinpgxlevel=excluded.clinpgxlevel, pgxtesting=excluded.pgxtesting, citations=excluded.citations, usedforrecommendation=excluded.usedforrecommendation, removed=excluded.removed, removeddate=excluded.removeddate, removedreason=excluded.removedreason");
 
       //language=PostgreSQL
       updateDrug = prepare("update drug set guidelineid=? where drugid=?");
@@ -117,7 +117,7 @@ public class PairImporter extends BaseDirectoryImporter {
       }
     }
 
-    void write(String gene, String drugName, String guidelineUrl, String level, String pgkbLevel, String pgxTesting, String[] citations, String used, String removed, Date removedDate, String removedReason) throws SQLException {
+    void write(String gene, String drugName, String guidelineUrl, String level, String clinpgxLevel, String pgxTesting, String[] citations, String used, String removed, Date removedDate, String removedReason) throws SQLException {
       String drugId = findDrug(drugName);
       boolean knownGene = lookupCachedGene(gene);
       if (!knownGene) {
@@ -138,7 +138,7 @@ public class PairImporter extends BaseDirectoryImporter {
       setNullableString(upsertPair, 2, drugId);
       setNullableInteger(upsertPair, 3, guidelineId);
       setNullableString(upsertPair, 4, StringUtils.stripToNull(level));
-      setNullableString(upsertPair, 5, StringUtils.stripToNull(pgkbLevel));
+      setNullableString(upsertPair, 5, StringUtils.stripToNull(clinpgxLevel));
       setNullableString(upsertPair, 6, StringUtils.stripToNull(pgxTesting));
       setNullableArray(upsertPair, 7, citations);
       upsertPair.setBoolean(8, StringUtils.strip(used).equalsIgnoreCase("yes"));
