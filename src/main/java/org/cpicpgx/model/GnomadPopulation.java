@@ -18,11 +18,11 @@ public enum GnomadPopulation {
 
   public static final String GNOMAD_VERSION = "GnomAD v2.1.1";
   private final String f_name;
-  private final String f_pgkbGroup;
+  private final String f_cpgxGroup;
 
-  GnomadPopulation(String name, String pgkbGroup) {
+  GnomadPopulation(String name, String cpgxGroup) {
     f_name = name;
-    f_pgkbGroup = pgkbGroup;
+    f_cpgxGroup = cpgxGroup;
   }
 
   /**
@@ -46,22 +46,22 @@ public enum GnomadPopulation {
     return this != ALL;
   }
 
-  public String getPgkbGroup() {
-    return f_pgkbGroup;
+  public String getCpgxGroup() {
+    return f_cpgxGroup;
   }
 
-  public static List<String> getPgkbGroups() {
+  public static List<String> getCpgxGroups() {
     return Arrays.stream(GnomadPopulation.values())
-        .map(GnomadPopulation::getPgkbGroup)
+        .map(GnomadPopulation::getCpgxGroup)
         .filter(Objects::nonNull)
         .distinct()
         .sorted()
         .collect(Collectors.toList());
   }
 
-  public static List<GnomadPopulation> getGnomadsForPgkb(String pgkbGroup) {
+  public static List<GnomadPopulation> getGnomadsForCpgx(String cpgxGroup) {
     return Arrays.stream(GnomadPopulation.values())
-        .filter(p -> Objects.equals(p.getPgkbGroup(), pgkbGroup))
+        .filter(p -> Objects.equals(p.getCpgxGroup(), cpgxGroup))
         .collect(Collectors.toList());
   }
 }

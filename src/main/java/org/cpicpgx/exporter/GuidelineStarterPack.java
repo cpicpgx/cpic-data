@@ -175,7 +175,7 @@ public class GuidelineStarterPack {
         fileMap.put(gene, urlMap);
       }
       if (geneResourceCreator.getNoGeneFoundSet().size() > 0) {
-        throw new RuntimeException("No genes found in PharmGKB for: " + String.join("; ", geneResourceCreator.getNoGeneFoundSet()));
+        throw new RuntimeException("No genes found in ClinPGx for: " + String.join("; ", geneResourceCreator.getNoGeneFoundSet()));
       }
 
       DrugResourceCreator drugResourceCreator = new DrugResourceCreator(m_path.toString());

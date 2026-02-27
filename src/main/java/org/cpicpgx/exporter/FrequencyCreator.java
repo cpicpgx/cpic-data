@@ -35,7 +35,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.cpicpgx.util.HttpUtils.apiRequest;
-import static org.cpicpgx.util.HttpUtils.buildPgkbUrl;
+import static org.cpicpgx.util.HttpUtils.buildClinpgxUrl;
 
 public class FrequencyCreator {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -153,8 +153,8 @@ public class FrequencyCreator {
     String response = null;
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
-      sf_logger.debug("Requesting frequencies from PharmGKB for: {}", rsid);
-      response = apiRequest(f_httpClient, buildPgkbUrl("report/variantFrequency", "fp", rsid, "source", "gnomadGenome"));
+      sf_logger.debug("Requesting frequencies from ClinPGx for: {}", rsid);
+      response = apiRequest(f_httpClient, buildClinpgxUrl("report/variantFrequency", "fp", rsid, "source", "gnomadGenome"));
     } catch (NotFoundException e) {
       // safe to ignore, just means no frequency data available
     } catch (Exception e) {
@@ -197,7 +197,7 @@ public class FrequencyCreator {
 
   public void write(Path outputDir) throws IOException {
     FrequencyWorkbook workbook = new FrequencyWorkbook(f_gene, m_lookupMethod);
-    List<String> groupNames = GnomadPopulation.getPgkbGroups();
+    List<String> groupNames = GnomadPopulation.getCpgxGroups();
 
     // start allele sheet writing
     workbook.writeAlleleFrequencyHeader(groupNames);
@@ -227,9 +227,9 @@ public class FrequencyCreator {
     // start "Reference" sheet writing
     workbook.writeReferenceHeader(f_allAlleles);
     String[] dummyAuthors = new String[]{""};
-    for (String groupName : GnomadPopulation.getPgkbGroups()) {
+    for (String groupName : GnomadPopulation.getCpgxGroups()) {
       workbook.writeEthnicityHeader(groupName, f_allAlleles.size());
-      for (GnomadPopulation population : GnomadPopulation.getGnomadsForPgkb(groupName)) {
+      for (GnomadPopulation population : GnomadPopulation.getGnomadsForCpgx(groupName)) {
         List<String> freqsForAllelesList = new ArrayList<>();
         for (String alleleName : f_allAlleles) {
           f_alleleDistributions.stream().filter(d -> d.getAlleleName().equals(alleleName)).findFirst()

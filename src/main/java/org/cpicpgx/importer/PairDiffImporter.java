@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * This importer will get data from JSON files supplied by PharmGKB to update genes-drugs pairs data. This will only 
+ * This importer will get data from JSON files supplied by ClinPGx to update genes-drugs pairs data. This will only
  * update existing pairs and won't add or remove pairs.
  *
  * @author Ryan Whaley

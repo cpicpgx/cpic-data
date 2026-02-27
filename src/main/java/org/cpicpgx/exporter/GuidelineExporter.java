@@ -1,7 +1,6 @@
 package org.cpicpgx.exporter;
 
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.compress.utils.Lists;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.workbook.GuidelineWorkbook;
@@ -42,17 +41,16 @@ public class GuidelineExporter extends BaseExporter {
         PreparedStatement changeStmt = conn.prepareStatement(
             "select " +
                 "g.name \"Name\", " +
-                "g.url \"URL\",\n" +
+                "g.clinpgxid \"ClinPGx Id\", " +
                 "g.genes \"Genes\", " +
-                "array_agg(distinct d.name order by d.name) as \"Drugs\",\n" +
-                "array_agg(distinct p.pmid order by p.pmid) as \"PMIDs\",\n" +
-                "g.pharmgkbid \"PharmGKB Annotation IDs\",\n" +
-                "g.notesonusage as \"Notes on Usage\",\n" +
-                "g.id::text as \"ID\"\n" +
-                "from guideline g\n" +
-                "    left join publication p on g.id = p.guidelineid\n" +
-                "    left join drug d on g.id = d.guidelineid\n" +
-                "group by g.name, g.url, g.pharmgkbid, g.genes, g.notesonusage, g.id\n" +
+                "array_agg(distinct d.name order by d.name) as \"Drugs\", " +
+                "array_agg(distinct p.pmid order by p.pmid) as \"PMIDs\", " +
+                "g.notesonusage as \"Notes on Usage\", " +
+                "g.id::text as \"ID\" " +
+                "from guideline g " +
+                "    left join publication p on g.id = p.guidelineid " +
+                "    left join drug d on g.id = d.guidelineid " +
+                "group by g.name, g.clinpgxId, g.genes, g.notesonusage, g.id " +
                 "order by g.name")
     ) {
       try (ResultSet rs = changeStmt.executeQuery()) {
@@ -63,8 +61,7 @@ public class GuidelineExporter extends BaseExporter {
         while (rs.next()) {
           workbook.write(
               rs.getString(1), // name
-              rs.getString(2), // url
-              rs.getArray(6),  // pharmgkb annotation ids
+              rs.getString(2), // clinpgx id
               rs.getArray(3),  // gene symbols
               rs.getString(7), // notes on usage
               rs.getArray(5),  // PMIDs

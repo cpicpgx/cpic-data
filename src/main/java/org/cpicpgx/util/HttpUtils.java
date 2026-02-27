@@ -59,7 +59,7 @@ public class HttpUtils {
    * @param queryParams optional pairs of name-value query parameter strings (values will be properly escaped)
    * @return a full HTTP URL
    */
-  public static String buildPgkbUrl(String path, String... queryParams) {
+  public static String buildClinpgxUrl(String path, String... queryParams) {
     if (queryParams != null && queryParams.length % 2 != 0) {
       throw new RuntimeException("List of query parameter key-value pairs must be divisible by 2");
     }

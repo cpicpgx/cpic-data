@@ -22,17 +22,17 @@ public class DrugReviewWorkbook extends AbstractWorkbook {
     Row headerRow = sheet.nextRow();
     writeHeaderCell(headerRow, 0, "Name");
     writeHeaderCell(headerRow, 1, "ID");
-    writeHeaderCell(headerRow, 2, "PharmGKB ID");
+    writeHeaderCell(headerRow, 2, "ClinPGx ID");
     writeHeaderCell(headerRow, 3, "RxNorm ID");
     writeHeaderCell(headerRow, 4, "DrugBank ID");
     writeHeaderCell(headerRow, 5, "ATC ID");
   }
 
-  public void writeDrug(String name, String id, String pgkb, String rxnorm, String drugbank, String[] atc) {
+  public void writeDrug(String name, String id, String clinpgxId, String rxnorm, String drugbank, String[] atc) {
     Row drugRow = sheet.nextRow();
     writeStringCell(drugRow, 0, name, false);
     writeStringCell(drugRow, 1, id, false);
-    writeLinkCell(drugRow, 2, pgkb,"https://www.pharmgkb.org/chemical/"+pgkb);
+    writeLinkCell(drugRow, 2, clinpgxId,"https://www.clinpgx.org/drug/"+clinpgxId);
     writeLinkCell(drugRow, 3, rxnorm, "https://purl.bioontology.org/ontology/RXNORM/"+rxnorm);
     writeLinkCell(drugRow, 4, drugbank, "https://www.drugbank.ca/drugs/"+drugbank);
     

@@ -25,10 +25,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import static org.cpicpgx.util.HttpUtils.apiRequest;
-import static org.cpicpgx.util.HttpUtils.buildPgkbUrl;
+import static org.cpicpgx.util.HttpUtils.buildClinpgxUrl;
 
 /**
- * This class will create Gene Resource files for genes by their symbol. This will query the PharmGKB API and match
+ * This class will create Gene Resource files for genes by their symbol. This will query the ClinPGx API and match
  * genes to their primary symbol and then write the found data into a Gene Resource file. The file should be processed by
  * the {@link org.cpicpgx.importer.GeneReferenceImporter} class to add the gene to the DB.
  */
@@ -50,11 +50,11 @@ public class GeneResourceCreator {
       }
 
       if (geneResourceCreator.getNoGeneFoundSet().size() > 0) {
-        sf_logger.warn("Import these genes to PharmGKB: " + String.join("; ", geneResourceCreator.getNoGeneFoundSet()));
+        sf_logger.warn("Import these genes to ClinPGx: " + String.join("; ", geneResourceCreator.getNoGeneFoundSet()));
       }
 
       if (geneResourceCreator.getLackingDataMap().size() > 0) {
-        sf_logger.warn("Fill in more PharmGKB data for:");
+        sf_logger.warn("Fill in more ClinPGx data for:");
         for (String name : geneResourceCreator.getLackingDataMap().keySet()) {
           sf_logger.warn("{} = {}", name, geneResourceCreator.getLackingDataMap().get(name));
         }
@@ -92,7 +92,7 @@ public class GeneResourceCreator {
     String response;
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
-      response = apiRequest(f_httpClient, buildPgkbUrl("data/gene", "view", "max", "symbol", symbol));
+      response = apiRequest(f_httpClient, buildClinpgxUrl("data/gene", "view", "max", "symbol", symbol));
     } catch (Exception ex) {
       throw new RuntimeException("No gene data found for " + symbol, ex);
     }
@@ -109,7 +109,7 @@ public class GeneResourceCreator {
 
     JsonObject geneJson = dataArray.get(0).getAsJsonObject();
 
-    String pharmgkbId = geneJson.get("id").getAsString();
+    String clinpgxId = geneJson.get("id").getAsString();
     String hgncId = null;
     String ncbiId = null;
     String ensemblId = null;
@@ -133,11 +133,11 @@ public class GeneResourceCreator {
     }
 
     if (hgncId == null && ncbiId == null && ensemblId == null) {
-      lackingDataMap.put(symbol, pharmgkbId);
+      lackingDataMap.put(symbol, clinpgxId);
       throw new RuntimeException("Gene record has no external IDs for " + symbol);
     } else {
       GeneResourceWorkbook workbook = new GeneResourceWorkbook(symbol);
-      workbook.writeIds(hgncId, ncbiId, ensemblId, pharmgkbId);
+      workbook.writeIds(hgncId, ncbiId, ensemblId, clinpgxId);
       workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
       Path filePath = f_outputDir.resolve(workbook.getFilename());
       try (OutputStream fo = Files.newOutputStream(filePath)) {

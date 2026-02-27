@@ -6,33 +6,33 @@ const db = require('./db');
 const _ = require('lodash');
 
 /**
- * This script will take current pair data from the CPIC DB, submit it to the PharmGKB API, and apply any found changes
+ * This script will take current pair data from the CPIC DB, submit it to the ClinPGx API, and apply any found changes
  * back to the CPIC DB. This can be safely be run multiple times since any changes will only be applied once and
  * subsequent runs will no longer include that change.
  *
  * __Requirements__
  * Make sure you set the following environment variables. Otherwise, it will default to trying to use localhost
- * 1. PGKBAPI = the domain (and possible port) to use for PharmGKB, default is "localhost.pharmgkb.org:8543"
+ * 1. CLINPGXAPI = the domain (and possible port) to use for ClinPGx, default is "localhost.clinpgx.org:8543"
  * 2. PGHOST = the host of the CPIC DB, default is "localhost"
  * 3. PGPASS = the password for the "cpic" DB account, default is blank
  */
 
-const pgkbApi = process.env.PGKBAPI || 'localhost.pharmgkb.org:8543';
+const clinpgxApi = process.env.CLINPGXAPI || 'localhost.clinpgx.org:8543';
 
 const queryCurrentPairs = async () => {
     return await db.many(`
-        select json_build_object('drugid', d.drugid, 'name', d.name, 'pharmgkbid', d.pharmgkbid) as drug,p.genesymbol,
+        select json_build_object('drugid', d.drugid, 'name', d.name, 'clinpgxid', d.clinpgxid) as drug,p.genesymbol,
                p.clinpgxlevel, p.pgxtesting, p.pairid
         from pair p join drug d on p.drugid=d.drugid where p.removed is false
     `);
 };
 
 const requestUpdates = async (body) => {
-    const pgkbApiUrl = `https://${pgkbApi}/v1/collaborator/cpic/pair`;
-    log.debug(`Checking ${pgkbApiUrl}`);
+    const clinpgxApiUrl = `https://${clinpgxApi}/v1/collaborator/cpic/pair`;
+    log.debug(`Checking ${clinpgxApiUrl}`);
     try {
         const response = await axios.post(
-            pgkbApiUrl,
+            clinpgxApiUrl,
             body
         );
         return response.data;
@@ -70,7 +70,7 @@ const updateCaLevel = async ({pairid, clinpgxlevel: clinpgxlevelIn, name}) => {
              where pairid = $(pairid)`,
             {clinpgxlevel, pairid},
         );
-        return writeChangeNote(`[${currentPair.drugname}-${currentPair.genesymbol}] PharmGKB level changed from ${mapNullToNone(currentPair.clinpgxlevel)} to ${mapNullToNone(clinpgxlevel)}`);
+        return writeChangeNote(`[${currentPair.drugname}-${currentPair.genesymbol}] ClinPGx level changed from ${mapNullToNone(currentPair.clinpgxlevel)} to ${mapNullToNone(clinpgxlevel)}`);
     } else {
         log.debug(`Skipping ${name} since CA level already matches`);
         return Promise.resolve();
@@ -107,7 +107,7 @@ try {
             log.debug(`${data?.length || 0} pairs in CPIC`)
             const changes = await requestUpdates(data);
             const updates = _.filter(changes?.data, (c) => !!c.pairid);
-            log.debug(`${updates?.length || 0} changes found in PGKB`)
+            log.debug(`${updates?.length || 0} changes found in ClinPGx`)
             await processChanges(updates);
         })
         .catch((err) => log.error('Error requesting updates', err))

@@ -31,7 +31,7 @@ public class DrugImporter extends BaseDirectoryImporter {
   private static final int ROW_RXNORM = 1;
   private static final int ROW_DRUGBANK = 2;
   private static final int ROW_ATC = 3;
-  private static final int ROW_PGKB = 4;
+  private static final int ROW_CPGX = 4;
   private static final int COL_NAME = 0;
   private static final int COL_ID = 3;
 
@@ -74,12 +74,12 @@ public class DrugImporter extends BaseDirectoryImporter {
           .forEach(atcArray::add);
     }
 
-    RowWrapper pgkbRow = workbook.getRow(ROW_PGKB);
-    String pgkbId = pgkbRow.getNullableText(COL_ID);
-    String pgkbName = pgkbRow.getText(COL_NAME);
+    RowWrapper cpgxRow = workbook.getRow(ROW_CPGX);
+    String cpgxId = cpgxRow.getNullableText(COL_ID);
+    String clinpgxName = cpgxRow.getText(COL_NAME);
 
-    if (!Objects.equals(pgkbName, rxnormDrugName)) {
-      sf_logger.info("Drug name differs from RxNorm\nPGKB   = {}\nRxNorm = {}", pgkbName, rxnormDrugName);
+    if (!Objects.equals(clinpgxName, rxnormDrugName)) {
+      sf_logger.info("Drug name differs from RxNorm\nClinPGx   = {}\nRxNorm = {}", clinpgxName, rxnormDrugName);
     }
 
     try (Connection conn = ConnectionFactory.newConnection()) {
@@ -87,7 +87,7 @@ public class DrugImporter extends BaseDirectoryImporter {
       boolean newDrug = true;
 
       try (PreparedStatement findName = conn.prepareStatement("select drugid from drug where lower(name)=?")) {
-        findName.setString(1, pgkbName.toLowerCase());
+        findName.setString(1, clinpgxName.toLowerCase());
         ResultSet rs = findName.executeQuery();
         if (rs.next()) {
           drugId = rs.getString(1);
@@ -106,15 +106,15 @@ public class DrugImporter extends BaseDirectoryImporter {
       }
 
       try (PreparedStatement insert = conn.prepareStatement(
-          "insert into drug(drugid, name, pharmgkbid, rxnormid, drugbankid, atcid) " +
+          "insert into drug(drugid, name, clinpgxId, rxnormid, drugbankid, atcid) " +
               "values (?, ?, ?, ?, ?, ?) on conflict (drugid) " +
-              "do update set drugbankid=excluded.drugBankid, pharmgkbid=excluded.pharmgkbid, " +
+              "do update set drugbankid=excluded.drugBankid, clinpgxId=excluded.clinpgxId, " +
               "rxnormid=excluded.rxnormid, atcId=excluded.atcid"
       )) {
         insert.setString(1, drugId);
-        insert.setString(2, pgkbName);
-        if (pgkbId != null) {
-          insert.setString(3, pgkbId);
+        insert.setString(2, clinpgxName);
+        if (cpgxId != null) {
+          insert.setString(3, cpgxId);
         } else {
           insert.setNull(3, Types.VARCHAR);
         }
@@ -136,9 +136,9 @@ public class DrugImporter extends BaseDirectoryImporter {
         int insCount = insert.executeUpdate();
 
         if (insCount == 1 && newDrug) {
-          sf_logger.debug("inserted new drug: {} {}", drugId, pgkbName);
+          sf_logger.debug("inserted new drug: {} {}", drugId, clinpgxName);
         } else {
-          sf_logger.debug("updated drug: {} {}", drugId, pgkbName);
+          sf_logger.debug("updated drug: {} {}", drugId, clinpgxName);
         }
       }
     }

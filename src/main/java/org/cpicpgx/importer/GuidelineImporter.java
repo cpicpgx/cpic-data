@@ -20,7 +20,7 @@ import static org.cpicpgx.workbook.GuidelineWorkbook.FILE_NAME;
 
 /**
  * Class to import and update guideline information in the CPIC DB. This will effectively use the CPIC website URL as
- * the unique identifier for the guideline so make sure you have that before adding a new entry to the sheet.
+ * the unique identifier for the guideline, so make sure you have that before adding a new entry to the sheet.
  */
 public class GuidelineImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -51,23 +51,22 @@ public class GuidelineImporter extends BaseDirectoryImporter {
     try (GuidelineDbHarness db = new GuidelineDbHarness()) {
       for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
-        String url = row.getText(GuidelineWorkbook.IDX_URL);
+        String clinpgxId = row.getText(GuidelineWorkbook.IDX_CLINPGXID);
 
         db.write(
             row.getText(GuidelineWorkbook.IDX_NAME),
-            url,
-            parseArray(row.getText(GuidelineWorkbook.IDX_ANNOTATIONIDS)),
+            clinpgxId,
             parseArray(row.getText(GuidelineWorkbook.IDX_GENES)),
             row.getNullableText(GuidelineWorkbook.IDX_NOTES)
         );
 
-        db.updateDrugs(url, parseArray(row.getText(GuidelineWorkbook.IDX_DRUGS)));
+        db.updateDrugs(clinpgxId, parseArray(row.getText(GuidelineWorkbook.IDX_DRUGS)));
 
         String pmids = row.getNullableText(GuidelineWorkbook.IDX_PMIDS);
         if (pmids == null) {
             sf_logger.warn("No PMID specified for row {}", i + 1);
         }
-        db.updateLits(url, parseArray(pmids));
+        db.updateLits(clinpgxId, parseArray(pmids));
       }
       db.cleanup();
     }
@@ -95,12 +94,12 @@ public class GuidelineImporter extends BaseDirectoryImporter {
 
     public GuidelineDbHarness() throws SQLException {
       super(FileType.GUIDELINE);
-      upsert = prepare("insert into guideline(name, url, pharmgkbid, genes, notesonusage) values (?, ?, ?, ?, ?) on conflict (url) do update set name=excluded.name, pharmgkbid=excluded.pharmgkbid, genes=excluded.genes, notesonusage=excluded.notesonusage");
-      updateDrug = prepare("update drug set guidelineid=(select id from guideline where url=?) where lower(name)=lower(?)");
-      updateLit = prepare("update publication set guidelineid=(select id from guideline where url=?) where pmid=?");
+      upsert = prepare("insert into guideline(name, clinpgxid, genes, notesonusage) values (?, ?, ?, ?) on conflict (clinpgxid) do update set name=excluded.name, genes=excluded.genes, notesonusage=excluded.notesonusage");
+      updateDrug = prepare("update drug set guidelineid=(select id from guideline where clinpgxid=?) where lower(name)=lower(?)");
+      updateLit = prepare("update publication set guidelineid=(select id from guideline where clinpgxid=?) where pmid=?");
 
       try (
-          PreparedStatement existingGuidelines = prepare("select url, name from guideline");
+          PreparedStatement existingGuidelines = prepare("select clinpgxid, name from guideline");
           ResultSet rs = existingGuidelines.executeQuery()
       ) {
         while (rs.next()) {
@@ -109,19 +108,18 @@ public class GuidelineImporter extends BaseDirectoryImporter {
       }
     }
 
-    void write(String name, String url, String[] pharmgkbIds, String[] genes, String notesOnUsage) throws SQLException {
+    void write(String name, String clinpgxId, String[] genes, String notesOnUsage) throws SQLException {
       upsert.setString(1, name);
-      upsert.setString(2, url);
-      setNullableArray(upsert,3, pharmgkbIds);
-      setNullableArray(upsert,4, genes);
-      setNullableString(upsert, 5, notesOnUsage);
+      upsert.setString(2, clinpgxId);
+      setNullableArray(upsert,3, genes);
+      setNullableString(upsert, 4, notesOnUsage);
       upsert.executeUpdate();
 
-      existingGuidelineMap.remove(url);
+      existingGuidelineMap.remove(clinpgxId);
     }
 
-    void updateDrug(String url, String drugName) throws SQLException {
-      updateDrug.setString(1, url);
+    void updateDrug(String clinpgxId, String drugName) throws SQLException {
+      updateDrug.setString(1, clinpgxId);
       updateDrug.setString(2, drugName);
       int changed = updateDrug.executeUpdate();
 
@@ -130,21 +128,21 @@ public class GuidelineImporter extends BaseDirectoryImporter {
       }
     }
 
-    void updateDrugs(String url, String[] drugNames) throws SQLException {
+    void updateDrugs(String clinpgxId, String[] drugNames) throws SQLException {
       for (String drugName : drugNames) {
-        updateDrug(url, drugName);
+        updateDrug(clinpgxId, drugName);
       }
     }
 
-    void updateLit(String url, String pmid) throws SQLException {
-      updateLit.setString(1, url);
+    void updateLit(String clinpgxId, String pmid) throws SQLException {
+      updateLit.setString(1, clinpgxId);
       updateLit.setString(2, pmid);
       updateLit.executeUpdate();
     }
 
-    void updateLits(String url, String[] pmids) throws SQLException {
+    void updateLits(String clinpgxId, String[] pmids) throws SQLException {
       for (String pmid : pmids) {
-        updateLit(url, pmid);
+        updateLit(clinpgxId, pmid);
       }
     }
 

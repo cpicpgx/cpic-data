@@ -36,7 +36,7 @@ public class DrugReviewExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement(
-             "select drugid, name, pharmgkbid, rxnormid, drugbankid, atcid " +
+             "select drugid, name, clinpgxid, rxnormid, drugbankid, atcid " +
                  "from drug d where d.drugid not in " +
                  "(select drugid from pair p where p.guidelineid is not null) order by lower(name)");
          ResultSet grs = geneStmt.executeQuery()
@@ -46,12 +46,12 @@ public class DrugReviewExporter extends BaseExporter {
       while (grs.next()) {
         String id = grs.getString(1);
         String name = grs.getString(2);
-        String pgkb = grs.getString(3);
+        String clinpgx = grs.getString(3);
         String rxnorm = grs.getString(4);
         String drugbank = grs.getString(5);
         String[] atcCodes = grs.getArray(6) == null ? new String[0] : (String[])grs.getArray(6).getArray();
 
-        workbook.writeDrug(name, id, pgkb, rxnorm, drugbank, atcCodes);
+        workbook.writeDrug(name, id, clinpgx, rxnorm, drugbank, atcCodes);
       }
       writeWorkbook(workbook);
       handleFileUpload();

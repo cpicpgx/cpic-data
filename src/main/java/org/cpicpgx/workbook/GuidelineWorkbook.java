@@ -13,12 +13,11 @@ import java.util.Objects;
  */
 public class GuidelineWorkbook extends AbstractWorkbook {
   public static final int IDX_NAME = 0;
-  public static final int IDX_URL = 1;
+  public static final int IDX_CLINPGXID = 1;
   public static final int IDX_GENES = 2;
   public static final int IDX_DRUGS = 3;
   public static final int IDX_PMIDS = 4;
-  public static final int IDX_ANNOTATIONIDS = 5;
-  public static final int IDX_NOTES = 6;
+  public static final int IDX_NOTES = 5;
   public static final String FILE_NAME = "cpic_guidelines.xlsx";
   private static final String SHEET_NAME = "Guidelines";
 
@@ -38,14 +37,13 @@ public class GuidelineWorkbook extends AbstractWorkbook {
     writeHeader(this.sheet, metadata);
   }
 
-  public void write(String name, String url, Array pharmgkbIds, Array genes, String notes, Array pmids, Array drugs) throws SQLException {
+  public void write(String name, String clinpgxid, Array genes, String notes, Array pmids, Array drugs) throws SQLException {
     Row row = sheet.nextRow();
     writeStringCell(row, IDX_NAME, name, false);
-    writeStringCell(row, IDX_URL, url, false);
+    writeStringCell(row, IDX_CLINPGXID, clinpgxid, false);
     writeStringCell(row, IDX_GENES, concatArray(genes), false);
     writeStringCell(row, IDX_DRUGS, concatArray(drugs), false);
     writeStringCell(row, IDX_PMIDS, concatArray(pmids), false);
-    writeStringCell(row, IDX_ANNOTATIONIDS, concatArray(pharmgkbIds), false);
     writeStringCell(row, IDX_NOTES, notes, false);
   }
 

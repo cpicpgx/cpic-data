@@ -23,7 +23,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import static org.cpicpgx.util.HttpUtils.apiRequest;
-import static org.cpicpgx.util.HttpUtils.buildPgkbUrl;
+import static org.cpicpgx.util.HttpUtils.buildClinpgxUrl;
 
 /**
  * This class will create Drug Resource files for drugs based on their names. This will query the PharmGKB API and match
@@ -49,11 +49,11 @@ public class DrugResourceCreator {
       }
 
       if (drugResourceCreator.getNoDrugFoundSet().size() > 0) {
-        sf_logger.warn("Import these drugs to PharmGKB: " + String.join("; ", drugResourceCreator.getNoDrugFoundSet()));
+        sf_logger.warn("Import these drugs to ClinPGx: " + String.join("; ", drugResourceCreator.getNoDrugFoundSet()));
       }
 
       if (drugResourceCreator.getLackingDataMap().size() > 0) {
-        sf_logger.warn("Fill in more PharmGKB data for:");
+        sf_logger.warn("Fill in more ClinPGx data for:");
         for (String name : drugResourceCreator.getLackingDataMap().keySet()) {
           sf_logger.warn("{} = {}", name, drugResourceCreator.getLackingDataMap().get(name));
         }
@@ -89,14 +89,14 @@ public class DrugResourceCreator {
     String response = null;
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
-      response = apiRequest(f_httpClient, buildPgkbUrl("data/chemical", "view", "max", "name", name.toLowerCase(Locale.ROOT)));
+      response = apiRequest(f_httpClient, buildClinpgxUrl("data/chemical", "view", "max", "name", name.toLowerCase(Locale.ROOT)));
     } catch (NotFoundException ex) {
       // safe to ignore 404's
     } catch (Exception ex) {
       throw new RuntimeException("Problem getting drug data", ex);
     }
 
-    String pharmgkbId = "";
+    String clinpgxId = "";
     String rxNormId = "";
     String drugBankId = "";
     List<String> atcIds = new ArrayList<>();
@@ -109,7 +109,7 @@ public class DrugResourceCreator {
       }
       JsonObject drugJson = dataArray.get(0).getAsJsonObject();
 
-      pharmgkbId = drugJson.get("id").getAsString();
+      clinpgxId = drugJson.get("id").getAsString();
 
       JsonArray termArray = drugJson.getAsJsonArray("linkOuts");
       if (termArray == null) {
@@ -128,7 +128,7 @@ public class DrugResourceCreator {
     }
 
     DrugResourceWorkbook workbook = new DrugResourceWorkbook(name);
-    workbook.writeMapping(rxNormId, drugBankId, atcIds.toArray(new String[]{}), pharmgkbId);
+    workbook.writeMapping(rxNormId, drugBankId, atcIds.toArray(new String[]{}), clinpgxId);
     workbook.getSheets().forEach(SheetWrapper::autosizeColumns);
     Path filePath = Paths.get(f_outputPath, workbook.getFilename());
     try (OutputStream fo = Files.newOutputStream(filePath)) {

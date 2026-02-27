@@ -17,20 +17,20 @@ digraph group_relationships {
     cpic [label=\"CPIC\"];
     
     node [shape=box, color=\"#00da9d\"];
-    pgkb [label = \"PharmGKB\"];
+    cpgx [label = \"ClinPGx\"];
     pharmvar [label = \"PharmVar\"]; 
     clinvar [label = \"ClinVar\"]; 
     clingen [label = \"ClinGen\"];
     pharmcat [label = \"PharmCAT\"];
     
     edge [color = black, fontname = Helvetica, fontsize=8, color=\"#7f9298\", labelfontcolor=\"#0d404e\", labeljust=r]
-    pgkb->cpic [label = \"authors\"]
-    cpic->pgkb [label = \"publishes guidelines\"]
-    pgkb->pharmcat [label = \"maintains\"]
-    pgkb->clinvar [label = \"publishes to\"]
+    cpgx->cpic [label = \"authors\"]
+    cpic->cpgx [label = \"publishes guidelines\"]
+    cpgx->pharmcat [label = \"maintains\"]
+    cpgx->clinvar [label = \"publishes to\"]
     cpic->clinvar [label = \"publishes to\"]
     clingen->clinvar [label = \"curates data from\"]
-    pharmvar->pgkb [label = \"publishes & consumed by\"]
+    pharmvar->cpgx [label = \"publishes & consumed by\"]
 }
                   ")
 ```

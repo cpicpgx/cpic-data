@@ -29,11 +29,11 @@ public class DrugResourceWorkbook extends AbstractWorkbook {
     this.sheet.setColCount(4);
   }
 
-  public void writeMapping(String rxnorm, String drugbank, String[] atc, String pharmgkb) {
+  public void writeMapping(String rxnorm, String drugbank, String[] atc, String clinpgx) {
     writeRow("RxNorm", "RxCUI", rxnorm);
     writeRow("DrugBank", "Accession Number", drugbank);
     writeRow("ATC", "ATC Code", Joiner.on(";").join(atc));
-    writeRow("PharmGKB", "PharmGKB Accession ID", pharmgkb);
+    writeRow("ClinPGx", "ClinPGx Accession ID", clinpgx);
   }
 
   void writeRow(String system, String idType, String idValue) {

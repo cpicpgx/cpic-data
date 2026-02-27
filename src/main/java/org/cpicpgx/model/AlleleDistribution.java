@@ -40,7 +40,7 @@ public class AlleleDistribution {
 
   public BigDecimal getAvgFreqForGroup(String group) {
     List<GnomadPopulation> pops = f_freqMap.keySet().stream()
-        .filter(p -> Objects.equals(p.getPgkbGroup(), group))
+        .filter(p -> Objects.equals(p.getCpgxGroup(), group))
         .collect(Collectors.toList());
 
     if (pops.size() == 0) {
@@ -58,7 +58,7 @@ public class AlleleDistribution {
 
   public BigDecimal getMaxFreqForGroup(String group) {
     List<GnomadPopulation> pops = f_freqMap.keySet().stream()
-        .filter(p -> Objects.equals(p.getPgkbGroup(), group))
+        .filter(p -> Objects.equals(p.getCpgxGroup(), group))
         .collect(Collectors.toList());
 
     if (pops.size() == 0) {
@@ -73,7 +73,7 @@ public class AlleleDistribution {
 
   public BigDecimal getMinFreqForGroup(String group) {
     List<GnomadPopulation> pops = f_freqMap.keySet().stream()
-            .filter(p -> Objects.equals(p.getPgkbGroup(), group))
+            .filter(p -> Objects.equals(p.getCpgxGroup(), group))
             .collect(Collectors.toList());
 
     if (pops.size() == 0) {

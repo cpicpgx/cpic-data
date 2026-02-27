@@ -39,7 +39,7 @@ public class DrugResourceExporter extends BaseExporter {
   public void export() throws Exception {
     try (
         Connection conn = ConnectionFactory.newConnection();
-        PreparedStatement drugStmt = conn.prepareStatement("select drugid, name, pharmgkbid, rxnormid, drugbankid, atcid, umlscui from drug d");
+        PreparedStatement drugStmt = conn.prepareStatement("select drugid, name, clinpgxid, rxnormid, drugbankid, atcid, umlscui from drug d");
         ResultSet rs = drugStmt.executeQuery()
         ) {
       while (rs.next()) {

@@ -37,7 +37,7 @@ public class GeneResourceExporter extends BaseExporter {
   public void export() throws Exception {
     try (Connection conn = ConnectionFactory.newConnection();
          PreparedStatement geneStmt = conn.prepareStatement("select distinct g.symbol, g.hgncid, g.ncbiid, " +
-             "g.ensemblid, g.pharmgkbid from gene g order by 1");
+             "g.ensemblid, g.clinpgxId from gene g order by 1");
          ResultSet grs = geneStmt.executeQuery()
     ) {
       while (grs.next()) {
@@ -45,10 +45,10 @@ public class GeneResourceExporter extends BaseExporter {
         String hgnc = grs.getString(2);
         String ncbi = grs.getString(3);
         String ensembl = grs.getString(4);
-        String pgkb = grs.getString(5);
+        String cpgx = grs.getString(5);
         
         GeneResourceWorkbook workbook = new GeneResourceWorkbook(symbol);
-        workbook.writeIds(hgnc, ncbi, ensembl, pgkb);
+        workbook.writeIds(hgnc, ncbi, ensembl, cpgx);
 
         workbook.writeChangeLog(Collections.emptyList());
 
