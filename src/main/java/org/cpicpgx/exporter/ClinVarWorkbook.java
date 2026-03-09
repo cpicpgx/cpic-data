@@ -24,7 +24,7 @@ public class ClinVarWorkbook {
   private static final String CITATION                = "PMID:21270786";
   private static final String CLIN_SIG_HAPLOTYPE      = "Allele function";
   private static final String ASSERTION_METHOD        = "Clinical Pharmacogenetics Implementation Consortium";
-  private static final String CPIC_SITE               = "https://cpicpgx.org";
+  private static final String CPIC_SITE               = "https://www.clinpgx.org/cpic";
   private static final String DRUG_RESPONSE           = "drug response";
   private static final String NOT_APPLICABLE          = "not applicable";
   private static final String GERMLINE                = "germline";
