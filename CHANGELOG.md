@@ -1,3 +1,14 @@
+## 1.55.0 (2026-03-13)
+
+* fix: change guideline links to clinpgx.org ([cb71681](https://github.com/cpicpgx/cpic-data/commit/cb71681))
+* fix: more URL changes to clinpgx.org ([5ee5faf](https://github.com/cpicpgx/cpic-data/commit/5ee5faf))
+* fix: remove NUDT15*2 from allele definitions file ([866edda](https://github.com/cpicpgx/cpic-data/commit/866edda))
+* fix: rename pgkbcalevel to clinpgxlevel ([f957c58](https://github.com/cpicpgx/cpic-data/commit/f957c58))
+* fix: update thiopurine recommendation files ([c26148d](https://github.com/cpicpgx/cpic-data/commit/c26148d))
+* chore: remove data source config ([8b3e81c](https://github.com/cpicpgx/cpic-data/commit/8b3e81c))
+* feat: convert PharmGKB references to ClinPGx ([333ef5d](https://github.com/cpicpgx/cpic-data/commit/333ef5d))
+* feat: CYP2C19 allele definition update from PharmVar ([73637d1](https://github.com/cpicpgx/cpic-data/commit/73637d1))
+
 ## 1.54.0 (2026-02-04)
 
 * fix: change command for exporting data change log ([0d0ba19](https://github.com/cpicpgx/cpic-data/commit/0d0ba19))
