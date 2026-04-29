@@ -2,6 +2,7 @@ package org.cpicpgx.importer;
 
 import com.google.common.net.UrlEscapers;
 import com.google.gson.Gson;
+import io.github.cdimascio.dotenv.Dotenv;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.db.ConnectionFactory;
@@ -15,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -27,6 +29,8 @@ import static org.cpicpgx.util.HttpUtils.apiRequest;
 public class PharmVarApiImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String sf_pharmVarApi = "https://www.pharmvar.org/api-service";
+  private static final String HEADER_API_KEY = "Api-Key";
+  private static final String API_KEY = "PHARMVAR_API_KEY";
 
   public static void main(String[] args) {
     try {
@@ -39,11 +43,14 @@ public class PharmVarApiImporter {
   }
 
   public static void execute() throws IOException, SQLException, NotFoundException {
+    Dotenv dotenv = Dotenv.load();
     OkHttpClient client = new OkHttpClient().newBuilder()
         .build();
     Gson gson = new Gson();
 
-    String geneResponse = apiRequest(client, sf_pharmVarApi + "/genes/list");
+    final Map<String, String> headers = Map.of(HEADER_API_KEY, dotenv.get(API_KEY));
+
+    String geneResponse = apiRequest(client, sf_pharmVarApi + "/genes/list", headers);
     if (geneResponse == null) {
       throw new IOException("No response");
     }
@@ -65,7 +72,7 @@ public class PharmVarApiImporter {
           int id = rs.getInt(3);
 
           try {
-            String alleleResponse = requestFromPharmVar(client, gene, alleleName);
+            String alleleResponse = requestFromPharmVar(client, gene, alleleName, headers);
             if (!StringUtils.isBlank(alleleResponse)) {
               String[] idArray = gson.fromJson(alleleResponse, String[].class);
               if (idArray.length == 1) {
@@ -103,19 +110,24 @@ public class PharmVarApiImporter {
    * @throws IOException can occur from netowrk IO
    * @throws NotFoundException can occur if PharmVar has no record for the allele
    */
-  private static String requestFromPharmVar(OkHttpClient client, String gene, String alleleName) throws IOException, NotFoundException {
+  private static String requestFromPharmVar(
+          OkHttpClient client,
+          String gene,
+          String alleleName,
+          Map<String, String> headers
+  ) throws IOException, NotFoundException {
     boolean ableToRetry = alleleName.matches("\\*\\d+");
     String allelePath = UrlEscapers.urlPathSegmentEscaper().escape(gene + alleleName);
     String url = sf_pharmVarApi + "/alleles/" + allelePath + "/pvid";
     String response = null;
     try {
-      response = apiRequest(client, url);
+      response = apiRequest(client, url, headers);
     } catch (NotFoundException ex) {
       if (ableToRetry) {
         // if not no response and allele is in typical format, we can retry with a common suffix
         String retryPath = UrlEscapers.urlPathSegmentEscaper().escape(gene + alleleName + ".001");
         String retryUrl = sf_pharmVarApi + "/alleles/" + retryPath + "/pvid";
-        response = apiRequest(client, retryUrl);
+        response = apiRequest(client, retryUrl, headers);
       }
     }
     return response;
