@@ -1,3 +1,8 @@
+## 1.56.0 (2026-05-01)
+
+* feat: data update ([8c93ddd](https://github.com/cpicpgx/cpic-data/commit/8c93ddd))
+* fix: fix PharmVar API usage ([c82da7c](https://github.com/cpicpgx/cpic-data/commit/c82da7c))
+
 ## 1.55.0 (2026-03-13)
 
 * fix: change guideline links to clinpgx.org ([cb71681](https://github.com/cpicpgx/cpic-data/commit/cb71681))
