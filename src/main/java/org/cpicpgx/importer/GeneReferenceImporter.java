@@ -64,6 +64,7 @@ public class GeneReferenceImporter extends BaseDirectoryImporter {
               ensemblId = idValue;
               break;
             case "ClinPGx ID":
+            case "PharmGKB ID":
               clinpgxId = idValue;
               break;
             default:
