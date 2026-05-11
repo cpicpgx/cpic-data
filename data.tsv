@@ -1,4 +1,5 @@
 Date of Change	Type of Data	Subject	Note of Change
+2026-05-11	GENE_PHENOTYPE	TPMT	Updated the definition for an individual carrying 1 decreased function and 1 no function allele to IM instead of possible IM.
 2026-02-05	ALLELE_DEFINITION	CYP2C19	added *42
 2026-02-04	PAIR		added update PMID for thiopurine pairs
 2026-02-04	RECOMMENDATION	azathioprine	Updated for the guideline update 2025-2026
@@ -13,6 +14,8 @@ Date of Change	Type of Data	Subject	Note of Change
 2026-02-03	ALLELE_FUNCTION_REFERENCE	TPMT	Summary of Findings added for all alleles
 2026-02-03	GENE_CDS	NUDT15	updated for guideline update
 2026-02-03	GENE_CDS	TPMT	updated for guideline update
+2026-02-03	GENE_PHENOTYPE	NUDT15	updated with decreased function allele
+2026-02-03	GENE_PHENOTYPE	TPMT	updated with decreased function allele
 2026-02-03	RECOMMENDATION	azathioprine	Updated for the guideline update 2025-2026
 2026-02-03	RECOMMENDATION	mercaptopurine	Updated for the guideline update 2025-2026
 2026-02-03	RECOMMENDATION	thioguanine	Updated for the guideline update 2025-2026
@@ -109,6 +112,7 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2023-12-05	ALLELE_DEFINITION	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Notes tab)
 2023-12-05	ALLELE_FUNCTION_REFERENCE	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Notes tab); variant classification updated based on VCEP disusssion - see Notes tab
 2023-12-05	FREQUENCY	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Methods tab)
+2023-12-05	GENE_PHENOTYPE	RYR1	Changed description to reflect the mapping to the MH/RYR1 VCEP classifications.
 2023-12-05	RECOMMENDATION	desflurane	uploaded to CPIC db
 2023-12-05	RECOMMENDATION	enflurane	uploaded to CPIC db
 2023-12-05	RECOMMENDATION	halothane	uploaded to CPIC db
@@ -313,6 +317,8 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2021-10-01	FREQUENCY	G6PD	created version 1
 2021-09-29	ALLELE_DEFINITION	TPMT	updated link to Nomenclature website and added note
 2021-09-24	ALLELE_DEFINITION	UGT1A1	changed representation for *36, *27, *28 from g.233760233 to g.233760235TA[6]; g.233760235TA[7]; g.233760235TA[8]; g.233760235TA[9] and from g.175490 to g.175492TA[6]; g.175492TA[7]; g.175492TA[8]; g.175492TA[9]
+2021-09-22	GENE_PHENOTYPE	ABCG2	file created
+2021-09-22	GENE_PHENOTYPE	SLCO1B1	Updated file based on CPIP statins update 2021
 2021-09-21	FREQUENCY	SLCO1B1	Updated allele table based on PharmVar SLCO1B1 release
 2021-09-17	ALLELE_FUNCTION_REFERENCE	CYP2C19	*39 added
 2021-09-17	FREQUENCY	CYP2C19	added *39 in the allele frequency and references tab
@@ -499,6 +505,7 @@ Remove columns:
 2020-07-21	TEST_ALERT	methoxyflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
 2020-07-21	TEST_ALERT	sevoflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
 2020-07-21	TEST_ALERT	succinylcholine	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
+2020-07-20	GENE_PHENOTYPE	CYP3A5	added description
 2020-07-20	RECOMMENDATION	desflurane	created log
 2020-07-20	RECOMMENDATION	enflurane	created log
 2020-07-20	RECOMMENDATION	halothane	created log
@@ -521,6 +528,8 @@ Remove columns:
 2020-07-17	RECOMMENDATION	atazanavir	Fixed a typo for "interrmediate metabolizer"
 2020-07-15	GENE_CDS	SLCO1B1	added EHR Priority Result Notation none and consultation text for Indeterminate
 2020-07-15	GENE_CDS	SLCO1B1	changed EHR Priority Result Notation from Normal/Routine/Low Risk to none for Possible Increased Function based on Consultation text
+2020-07-15	GENE_PHENOTYPE	SLCO1B1	file created
+2020-07-15	GENE_PHENOTYPE	UGT1A1	changed uncertain to unknown in the description text
 2020-07-15	RECOMMENDATION	simvastatin	added SLCO1B1 possible increased function row
 2020-07-15	TEST_ALERT	atorvastatin	added row for possible increased function
 2020-07-15	TEST_ALERT	lovastatin	added row for possible increased function
