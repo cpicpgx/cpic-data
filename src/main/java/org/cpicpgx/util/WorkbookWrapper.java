@@ -136,6 +136,10 @@ public class WorkbookWrapper {
     return sheetNames;
   }
 
+  public boolean hasSheet(String sheetName) {
+    return StringUtils.isNotBlank(sheetName) && this.workbook.getSheet(sheetName) != null;
+  }
+
   public void write(OutputStream out) throws IOException {
     this.workbook.write(out);
   }

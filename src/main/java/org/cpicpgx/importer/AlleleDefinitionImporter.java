@@ -3,18 +3,16 @@ package org.cpicpgx.importer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.util.CellAddress;
 import org.cpicpgx.db.ConnectionFactory;
-import org.cpicpgx.util.TextUtils;
-import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
+import org.cpicpgx.util.TextUtils;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.sql.*;
-import java.util.Date;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,7 +88,7 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     writeToDB();
 
     writeNotes(m_gene, workbook.getNotes());
-    writeHistory(workbook);
+    writeHistory(workbook, m_gene);
   }
 
   private void readGene(WorkbookWrapper workbook) {
@@ -279,38 +277,6 @@ public class AlleleDefinitionImporter extends BaseDirectoryImporter {
     }
     if (!badAlleleNames.isEmpty()) {
       throw new RuntimeException("Bad allele names: [" + String.join("; ", badAlleleNames) + "]");
-    }
-  }
-
-  void writeHistory(WorkbookWrapper workbook) throws SQLException {
-    workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
-
-    try (Connection conn = ConnectionFactory.newConnection()) {
-      PreparedStatement insertStmt = conn.prepareStatement("insert into change_log (entityId, type, date, note) values (?, ?, ?, ?)");
-      insertStmt.setString(1, m_gene);
-      insertStmt.setString(2, FileType.ALLELE_DEFINITION.name());
-
-      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
-        RowWrapper row = workbook.getRow(i);
-        if (row.hasNoText(0) ^ row.hasNoText(1)) {
-          throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
-        }
-        else if (row.hasNoText(0)) continue;
-
-        Date date = row.getDate(0);
-        String note = row.getNullableText(1);
-
-        if (note.equalsIgnoreCase(AbstractWorkbook.LOG_FILE_CREATED)) continue;
-
-        insertStmt.setDate(3, new java.sql.Date(date.getTime()));
-        if (StringUtils.isNotBlank(note)) {
-          insertStmt.setString(4, note);
-        } else {
-          insertStmt.setString(4, Constants.NA);
-        }
-
-        insertStmt.executeUpdate();
-      }
     }
   }
 

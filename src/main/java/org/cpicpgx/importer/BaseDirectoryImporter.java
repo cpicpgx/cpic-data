@@ -3,15 +3,14 @@ package org.cpicpgx.importer;
 import com.google.gson.JsonObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.cpicpgx.db.ConnectionFactory;
 import org.cpicpgx.exception.NotFoundException;
-import org.cpicpgx.workbook.AbstractWorkbook;
 import org.cpicpgx.model.FileType;
 import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.DbHarness;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
+import org.cpicpgx.workbook.AbstractWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,6 +241,42 @@ public abstract class BaseDirectoryImporter {
         n += 1;
       }
       sf_logger.debug("created {} new notes", notes.size());
+    }
+  }
+
+  void writeHistory(WorkbookWrapper workbook, String entityId) throws SQLException {
+    if (!workbook.hasSheet(AbstractWorkbook.HISTORY_SHEET_NAME)) {
+      return;
+    }
+
+    workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
+
+    try (Connection conn = ConnectionFactory.newConnection()) {
+      PreparedStatement insertStmt = conn.prepareStatement("insert into change_log (entityId, type, date, note) values (?, ?, ?, ?)");
+      insertStmt.setString(1, entityId);
+      insertStmt.setString(2, getFileType().name());
+
+      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+        RowWrapper row = workbook.getRow(i);
+        if (row.hasNoText(0) ^ row.hasNoText(1)) {
+          throw new RuntimeException("Change log row " + (i + 1) + ": row must have both date and text");
+        }
+        else if (row.hasNoText(0)) continue;
+
+        Date date = row.getDate(0);
+        String note = row.getNullableText(1);
+
+        if (note.equalsIgnoreCase(AbstractWorkbook.LOG_FILE_CREATED)) continue;
+
+        insertStmt.setDate(3, new java.sql.Date(date.getTime()));
+        if (StringUtils.isNotBlank(note)) {
+          insertStmt.setString(4, note);
+        } else {
+          insertStmt.setString(4, Constants.NA);
+        }
+
+        insertStmt.executeUpdate();
+      }
     }
   }
 

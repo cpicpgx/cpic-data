@@ -90,9 +90,9 @@ public class GenePhenotypeImporter extends BaseDirectoryImporter {
           throw new RuntimeException("Error processing row " + (i+1), e);
         }
       }
-
-
     }
+
+    writeHistory(workbook, geneSymbol);
   }
 
   static class PhenoDbHarness extends DbHarness {
