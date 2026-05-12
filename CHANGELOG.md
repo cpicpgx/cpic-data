@@ -1,3 +1,10 @@
+## 1.57.0 (2026-05-12)
+
+* feat: add change log import for phenotype files ([c45a659](https://github.com/cpicpgx/cpic-data/commit/c45a659))
+* feat: add thiopurines correction PDF as supplement to publication ([0b72e64](https://github.com/cpicpgx/cpic-data/commit/0b72e64))
+* feat: data update ([2a1c6ba](https://github.com/cpicpgx/cpic-data/commit/2a1c6ba))
+* fix: fix bug in gene resource importer to handle PharmGKB ID correctly ([335e6c5](https://github.com/cpicpgx/cpic-data/commit/335e6c5))
+
 ## 1.56.0 (2026-05-01)
 
 * feat: data update ([8c93ddd](https://github.com/cpicpgx/cpic-data/commit/8c93ddd))
