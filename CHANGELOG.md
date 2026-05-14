@@ -1,3 +1,7 @@
+## 1.58.0 (2026-05-14)
+
+* feat: support "Retired" pairs and update peginterferon guideline data ([079f962](https://github.com/cpicpgx/cpic-data/commit/079f962))
+
 ## 1.57.0 (2026-05-12)
 
 * feat: add change log import for phenotype files ([c45a659](https://github.com/cpicpgx/cpic-data/commit/c45a659))
