@@ -97,8 +97,5 @@ public class DataImport {
     for (BaseDirectoryImporter importer : importers) {
       importer.execute();
     }
-
-    // load PharmVar data
-    PharmVarApiImporter.execute();
   }
 }
