@@ -1,4 +1,5 @@
 Date of Change	Type of Data	Subject	Note of Change
+2026-06-05	ALLELE_DEFINITION	CYP2D6	added *186
 2026-06-05	ALLELE_DEFINITION	CYP3A5	*10 and *11 allele added
 2026-06-05	ALLELE_DEFINITION	NUDT15	added *22-*23
 2026-05-14	PAIR		[amitriptyline-CYP2D6] PGx Testing: Actionable PGx >> Informative PGx
