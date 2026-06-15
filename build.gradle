@@ -90,3 +90,8 @@ dependencyCheck {
     // doing this because OWASP doesn't work with Yarn 3 yet
     analyzers.nodeAudit.yarnEnabled = false
 }
+
+tasks.register('runFlywayMigrate', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.cpicpgx.db.FlywayMigrate'
+}
