@@ -55,6 +55,7 @@ await cpicDbAsPostgres.query(`
   grant usage on schema cpic to web_anon;
   grant select on all tables in schema cpic to web_anon;
   grant execute on all functions in schema cpic to web_anon;
+  grant web_anon to cpic_api;
 `);
 
 
