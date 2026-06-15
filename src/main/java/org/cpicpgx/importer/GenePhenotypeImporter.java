@@ -30,7 +30,9 @@ import java.util.regex.Pattern;
 public class GenePhenotypeImporter extends BaseDirectoryImporter {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String FILE_SUFFIX = "_phenotypes.xlsx";
+  //language=PostgreSQL
   private static final String[] sf_deleteStatements = new String[]{
+      "delete from change_log where type='" + FileType.GENE_PHENOTYPE.name() + "'",
       "delete from gene_result_diplotype",
       "delete from gene_result_lookup",
       "delete from gene_result"
