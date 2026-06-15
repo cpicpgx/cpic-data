@@ -95,3 +95,9 @@ tasks.register('runFlywayMigrate', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'org.cpicpgx.db.FlywayMigrate'
 }
+
+tasks.register('runChangelog', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    args = ['-d', '.']
+    mainClass = 'org.cpicpgx.exporter.ChangelogExporter'
+}
