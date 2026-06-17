@@ -53,6 +53,9 @@ public class AlleleDistribution {
     Integer den = pops.stream()
         .map(f_sizeMap::get)
         .reduce(0, Integer::sum);
+    if (den == 0) {
+      return BigDecimal.ZERO;
+    }
     return num.divide(new BigDecimal(den), RoundingMode.HALF_EVEN);
   }
 

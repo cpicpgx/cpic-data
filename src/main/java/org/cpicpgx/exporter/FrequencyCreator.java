@@ -154,7 +154,7 @@ public class FrequencyCreator {
     try {
       Thread.sleep(HttpUtils.API_WAIT_TIME);
       sf_logger.debug("Requesting frequencies from ClinPGx for: {}", rsid);
-      response = apiRequest(f_httpClient, buildClinpgxUrl("report/variantFrequency", "fp", rsid, "source", "gnomadGenome"));
+      response = apiRequest(f_httpClient, buildClinpgxUrl("report/variantFrequency", "fp", rsid, "source", "gnomadV4"));
     } catch (NotFoundException e) {
       // safe to ignore, just means no frequency data available
     } catch (Exception e) {
@@ -171,23 +171,25 @@ public class FrequencyCreator {
       return;
     }
 
-    JsonObject frequencyObject = jsendObject.getAsJsonObject("data");
-    JsonArray populationArray = frequencyObject.getAsJsonArray("populations");
+    JsonArray allFrequencies = jsendObject.getAsJsonArray("data");
 
-    for (JsonElement populationElement : populationArray) {
-      JsonObject populationObject = populationElement.getAsJsonObject();
-      String populationString = populationObject.get("population").getAsString();
+    for (JsonElement frequency : allFrequencies) {
+      JsonObject frequencyObject = frequency.getAsJsonObject();
+      String populationString = frequencyObject.get("population").getAsString();
       GnomadPopulation population = GnomadPopulation.valueOf(populationString);
 
       BigDecimal freq = BigDecimal.ZERO;
-      for (JsonElement alleleElement : populationObject.getAsJsonArray("bases")) {
-        JsonObject alleleObject = alleleElement.getAsJsonObject();
-        if (f_alleleMap.get(alleleName).equals(alleleObject.get("base").getAsString())) {
-          freq = alleleObject.get("freq").getAsBigDecimal();
+
+      String inBase = frequencyObject.get("alleleText").getAsString();
+      if (f_alleleMap.get(alleleName).equals(inBase)) {
+        JsonElement frequencyElement = frequencyObject.get("frequency");
+        if (frequencyElement != null && !frequencyElement.isJsonNull() &&
+                !(frequencyElement.isJsonPrimitive() && frequencyElement.getAsJsonPrimitive().isString())) {
+          freq = frequencyElement.getAsBigDecimal();
         }
-        if (alleleObject.has("size")) {
-          alleleDistribution.addSize(population, alleleObject.get("size").getAsInt());
-        }
+      }
+      if (frequencyObject.has("totalAlleles")) {
+        alleleDistribution.addSize(population, frequencyObject.get("totalAlleles").getAsInt());
       }
 
       alleleDistribution.set(population, freq);
@@ -230,28 +232,38 @@ public class FrequencyCreator {
     for (String groupName : GnomadPopulation.getCpgxGroups()) {
       workbook.writeEthnicityHeader(groupName, f_allAlleles.size());
       for (GnomadPopulation population : GnomadPopulation.getGnomadsForCpgx(groupName)) {
-        List<String> freqsForAllelesList = new ArrayList<>();
+        int i = 0;
         for (String alleleName : f_allAlleles) {
-          f_alleleDistributions.stream().filter(d -> d.getAlleleName().equals(alleleName)).findFirst()
-              .ifPresentOrElse(
-                  (d) -> freqsForAllelesList.add(d.getFreqAsString(population)),
-                  () -> freqsForAllelesList.add("")
+          final int k = i;
+          f_alleleDistributions.stream()
+                  .filter(d -> d.getAlleleName().equals(alleleName) && d.getSize(population) > 0)
+                  .findFirst()
+              .ifPresent(
+                  (d) -> {
+                    List<String> freqsForAllelesList = new ArrayList<>(f_allAlleles.size());
+                    for (int j = 0; j < f_allAlleles.size(); j++) {
+                      if (k == j) {
+                        freqsForAllelesList.add(d.getFreqAsString(population));
+                      } else {
+                        freqsForAllelesList.add("");
+                      }
+                    }
+
+                    workbook.writePopulation(
+                            dummyAuthors,
+                            LocalDate.now().getYear(),
+                            "",
+                            population.getName(),
+                            population.getVersionedName(),
+                            "",
+                            "",
+                            d.getSize(population),
+                            freqsForAllelesList
+                    );
+                  }
               );
+          i += 1;
         }
-        int subjectCount = f_alleleDistributions.get(0).getSize(population);
-
-        workbook.writePopulation(
-            dummyAuthors,
-            LocalDate.now().getYear(),
-            "",
-            population.getName(),
-            population.getVersionedName(),
-            "",
-            "",
-            subjectCount,
-            freqsForAllelesList
-        );
-
       }
       workbook.startPopulationSummary();
       for (String alleleName : f_allAlleles) {

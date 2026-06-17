@@ -14,9 +14,10 @@ public enum GnomadPopulation {
   MID("Middle Eastern", "Near Eastern"),
   NFE("Non-Finnish European", "European"),
   SAS("South Asian", "Central/South Asian"),
+  remaining("Remaining", null),
   OTH("Other", null);
 
-  public static final String GNOMAD_VERSION = "GnomAD v2.1.1";
+  public static final String GNOMAD_VERSION = "GnomAD v4.1.1";
   private final String f_name;
   private final String f_cpgxGroup;
 
