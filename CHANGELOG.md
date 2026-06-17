@@ -1,3 +1,16 @@
+## 1.59.0 (2026-06-17)
+
+* fix: add db role grant to bootstrap script ([55654dd](https://github.com/cpicpgx/cpic-data/commit/55654dd))
+* fix: fix bug when loading phenotype history ([68f83bb](https://github.com/cpicpgx/cpic-data/commit/68f83bb))
+* fix: fix the FrequencyCalculator to use the new Frequency data structure and not aggregate allelels ([cb0d892](https://github.com/cpicpgx/cpic-data/commit/cb0d892))
+* fix: stop polling PharmVar IDs on every deployment ([72e2d4a](https://github.com/cpicpgx/cpic-data/commit/72e2d4a))
+* feat: add docs for coding agents ([7d88a8b](https://github.com/cpicpgx/cpic-data/commit/7d88a8b))
+* feat: add task for dumping changelog ([bab9763](https://github.com/cpicpgx/cpic-data/commit/bab9763))
+* feat: data update ([e4b6c9c](https://github.com/cpicpgx/cpic-data/commit/e4b6c9c))
+* feat: new CYP2D6 allele ([5376d83](https://github.com/cpicpgx/cpic-data/commit/5376d83))
+* feat: new CYP3A5 and NUDT15 alleles ([1751dc1](https://github.com/cpicpgx/cpic-data/commit/1751dc1))
+* feat: ondansetron guideline update ([f7ea077](https://github.com/cpicpgx/cpic-data/commit/f7ea077))
+
 ## 1.58.0 (2026-05-14)
 
 * feat: support "Retired" pairs and update peginterferon guideline data ([079f962](https://github.com/cpicpgx/cpic-data/commit/079f962))
