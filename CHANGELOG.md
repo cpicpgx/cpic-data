@@ -1,3 +1,7 @@
+## <small>1.59.1 (2026-06-18)</small>
+
+* fix: data fix for RYR1 ([35a0eac](https://github.com/cpicpgx/cpic-data/commit/35a0eac))
+
 ## 1.59.0 (2026-06-17)
 
 * fix: add db role grant to bootstrap script ([55654dd](https://github.com/cpicpgx/cpic-data/commit/55654dd))
