@@ -125,9 +125,7 @@ Date of Change	Type of Data	Subject	Note of Change
 2026-02-03	GENE_CDS	TPMT	updated for guideline update
 2026-02-03	GENE_PHENOTYPE	NUDT15	updated with decreased function allele
 2026-02-03	GENE_PHENOTYPE	TPMT	updated with decreased function allele
-2026-02-03	RECOMMENDATION	azathioprine	Updated for the guideline update 2025-2026
 2026-02-03	RECOMMENDATION	mercaptopurine	Updated for the guideline update 2025-2026
-2026-02-03	RECOMMENDATION	thioguanine	Updated for the guideline update 2025-2026
 2026-01-29	ALLELE_DEFINITION	NUDT15	*2 has become a sub-allele of *3, see Notes tab
 2025-11-03	ALLELE_DEFINITION	CYP4F2	changed protein p.E129L to p.E129K for *12
 2025-11-03	ALLELE_DEFINITION	NUDT15	changed p.L30V to p.L30F in *16
@@ -138,7 +136,11 @@ Date of Change	Type of Data	Subject	Note of Change
 2025-10-14	ALLELE_DEFINITION	SLCO1B1	DELETED HAPLOTYPE: *3, *7, *12, *13, *38, *46
 ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2025-10-14	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Updated to PharmVar 6.2.17 which removed *3, *7, *12, *13, *38, and *46
+2025-09-24	ALLELE_FUNCTION_REFERENCE	NUDT15	*4 and *6 assigned Decreased Allele Biochemical Functional Status
+2025-09-24	ALLELE_FUNCTION_REFERENCE	NUDT15	Allele Clinical Functional Status updated for *4, *5, *6, *7, and *8
 2025-09-24	ALLELE_FUNCTION_REFERENCE	NUDT15	PMIDs updated for all alleles
+2025-09-24	ALLELE_FUNCTION_REFERENCE	NUDT15	Strength of Evidence added for all alleles
+2025-09-24	ALLELE_FUNCTION_REFERENCE	NUDT15	Summary of Findings added for all alleles
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Based on PharmVar assessments of SLCO1B1 allele defintion, *46 merged with *45
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Function assignment, strength of evidence, PMIDs, and summary of findings updated for *39, *41, and *45 based on PCEP evaluation
 2025-09-23	ALLELE_FUNCTION_REFERENCE	SLCO1B1	Strength of evidence, PMIDs, and summary of findings updated for *9 and *31 based on PCEP evaluation. *9 assigned biochemical functional status of decreased
@@ -147,16 +149,16 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2025-09-01	RECOMMENDATION	hydralazine	created
 2025-08-25	ALLELE_DEFINITION	CFTR	added further variants included in ivacaftor label
 2025-08-25	ALLELE_FUNCTION_REFERENCE	CFTR	added further variants included in ivacaftor label
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
-2025-08-20	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
+2025-08-21	GUIDELINE		Removed redundant links to outdated supplemental files
 2025-07-31	ALLELE_DEFINITION	NAT2	added *65-*75
 2025-07-23	GENE_CDS	ABCG2	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	CACNA1S	added gene symbol as a prefix to the phenotype column values
@@ -175,6 +177,7 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2025-07-23	GENE_CDS	SLCO1B1	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	TPMT	added gene symbol as a prefix to the phenotype column values
 2025-07-23	GENE_CDS	UGT1A1	added gene symbol as a prefix to the phenotype column values
+2025-06-29	ALLELE_FUNCTION_REFERENCE	NUDT15	Added NUDT15 *22 and *23
 2025-06-16	ALLELE_DEFINITION	CYP2C19	added *40, *41
 2025-06-16	ALLELE_DEFINITION	CYP2C9	added *86-*88
 2025-06-16	ALLELE_DEFINITION	CYP4F2	new haplotypes *18-*23 added
@@ -217,11 +220,11 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2023-12-20	ALLELE_DEFINITION	MT-RNR1	Added "m." prefix to allele names
 2023-12-20	ALLELE_FUNCTION_REFERENCE	MT-RNR1	Added "m." prefix to allele names
 2023-12-20	FREQUENCY	MT-RNR1	Added "m." prefix to allele names
+2023-12-19	ALLELE_DEFINITION	RYR1	combined g.37687G>C and g.37687G>A and c.1615T>C and c.1615T>G
 2023-12-15	ALLELE_DEFINITION	CYP2D6	Modified: protein header 'p.E402L' to 'p.V402L'); NEW POSITION: Position 4125G>C/g.42126667C>G/g.9144G>C/rs1135832; Position 4134T>C/g.42126658A>G/g.9153T>C/rs1135836; Position 4167T>C/g.42126625A>G/g.9186T>C; Position 4170T>C/g.42126622A>G/g.9189T>C/rs747998333; Position 4173C>T/g.42126619G>A/g.9192C>T/rs28371736; Modified: *36 'PVID:PV00460' to 'PVID:PV02379'; *83 'PVID:PV00500' to 'PVID:PV02385'; *141'PVID:PV01593' to 'PVID:PV02389'
 2023-12-05	ALLELE_DEFINITION	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Notes tab)
 2023-12-05	ALLELE_FUNCTION_REFERENCE	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Notes tab); variant classification updated based on VCEP disusssion - see Notes tab
 2023-12-05	FREQUENCY	RYR1	File was updated to include the RYR1 variants from supplemental table S2 of the ClinGen RYR1 VCEP publication 35849058 (see Methods tab)
-2023-12-05	GENE_PHENOTYPE	RYR1	Changed description to reflect the mapping to the MH/RYR1 VCEP classifications.
 2023-12-05	GENE_PHENOTYPE	RYR1	Changed description to reflect the mapping to the MH/RYR1 VCEP classifications.
 2023-12-05	RECOMMENDATION	desflurane	uploaded to CPIC db
 2023-12-05	RECOMMENDATION	enflurane	uploaded to CPIC db
@@ -304,11 +307,9 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2023-05-10	RECOMMENDATION	hydrocodone	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	RECOMMENDATION	imipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	RECOMMENDATION	nortriptyline	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
-2023-05-10	RECOMMENDATION	ondansetron	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	RECOMMENDATION	tamoxifen	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	RECOMMENDATION	tramadol	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	RECOMMENDATION	trimipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
-2023-05-10	RECOMMENDATION	tropisetron	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	TEST_ALERT	amitriptyline	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	TEST_ALERT	atomoxetine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
 2023-05-10	TEST_ALERT	clomipramine	changed AS ≥4.5 to ≥3.75 and 3.5 to 2.75 duu to changes in the CYP2D6 allele function assignment
@@ -428,8 +429,6 @@ ADDED: *55-*58 MODIFIED: *45 to add wobbles (combining *45 and *46)
 2021-09-29	ALLELE_DEFINITION	TPMT	updated link to Nomenclature website and added note
 2021-09-24	ALLELE_DEFINITION	UGT1A1	changed representation for *36, *27, *28 from g.233760233 to g.233760235TA[6]; g.233760235TA[7]; g.233760235TA[8]; g.233760235TA[9] and from g.175490 to g.175492TA[6]; g.175492TA[7]; g.175492TA[8]; g.175492TA[9]
 2021-09-22	GENE_PHENOTYPE	ABCG2	file created
-2021-09-22	GENE_PHENOTYPE	ABCG2	file created
-2021-09-22	GENE_PHENOTYPE	SLCO1B1	Updated file based on CPIP statins update 2021
 2021-09-22	GENE_PHENOTYPE	SLCO1B1	Updated file based on CPIP statins update 2021
 2021-09-21	FREQUENCY	SLCO1B1	Updated allele table based on PharmVar SLCO1B1 release
 2021-09-17	ALLELE_FUNCTION_REFERENCE	CYP2C19	*39 added
@@ -618,7 +617,6 @@ Remove columns:
 2020-07-21	TEST_ALERT	sevoflurane	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
 2020-07-21	TEST_ALERT	succinylcholine	split RYR1 or CACNA1S phenotyp and RYR1 or CACNA1S Activity score in one column per gene to match other two gene tables
 2020-07-20	GENE_PHENOTYPE	CYP3A5	added description
-2020-07-20	GENE_PHENOTYPE	CYP3A5	added description
 2020-07-20	RECOMMENDATION	desflurane	created log
 2020-07-20	RECOMMENDATION	enflurane	created log
 2020-07-20	RECOMMENDATION	halothane	created log
@@ -642,8 +640,6 @@ Remove columns:
 2020-07-15	GENE_CDS	SLCO1B1	added EHR Priority Result Notation none and consultation text for Indeterminate
 2020-07-15	GENE_CDS	SLCO1B1	changed EHR Priority Result Notation from Normal/Routine/Low Risk to none for Possible Increased Function based on Consultation text
 2020-07-15	GENE_PHENOTYPE	SLCO1B1	file created
-2020-07-15	GENE_PHENOTYPE	SLCO1B1	file created
-2020-07-15	GENE_PHENOTYPE	UGT1A1	changed uncertain to unknown in the description text
 2020-07-15	GENE_PHENOTYPE	UGT1A1	changed uncertain to unknown in the description text
 2020-07-15	RECOMMENDATION	simvastatin	added SLCO1B1 possible increased function row
 2020-07-15	TEST_ALERT	atorvastatin	added row for possible increased function
@@ -661,12 +657,10 @@ Remove columns:
 2020-07-14	RECOMMENDATION	imipramine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
 2020-07-14	RECOMMENDATION	mercaptopurine	log created
 2020-07-14	RECOMMENDATION	nortriptyline	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
-2020-07-14	RECOMMENDATION	ondansetron	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
 2020-07-14	RECOMMENDATION	paroxetine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
 2020-07-14	RECOMMENDATION	tamoxifen	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
 2020-07-14	RECOMMENDATION	thioguanine	log created
 2020-07-14	RECOMMENDATION	trimipramine	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
-2020-07-14	RECOMMENDATION	tropisetron	added AS AS 2.5, 3, 3.5, 4, ≥3, ≥3.25, ≥3.5, ≥4, ≥4.5, ≥5, ≥6 rows
 2020-07-07	ALLELE_FUNCTION_REFERENCE	CACNA1S	Changed column B header to "Activity Value"
 2020-07-07	ALLELE_FUNCTION_REFERENCE	CYP2C9	Changed column B header to "Activity Value"
 2020-07-07	ALLELE_FUNCTION_REFERENCE	G6PD	Updated allele function with CPIC terms
