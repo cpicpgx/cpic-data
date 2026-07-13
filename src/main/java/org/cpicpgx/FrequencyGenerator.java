@@ -253,7 +253,7 @@ public class FrequencyGenerator {
     Float lookupFrequency(String ethnicity, Integer alleleId) throws SQLException {
       PreparedStatement stmt = conn.prepareStatement("SELECT" +
           "       sum(p.subjectcount)," +
-          "       sum(p.subjectcount::numeric * af.frequency / 100::numeric) / sum(p.subjectcount)::numeric * 100::numeric," +
+          "       case when sum(p.subjectcount)::integer = 0 then 0 else (sum(p.subjectcount::numeric * af.frequency / 100::numeric) / sum(p.subjectcount)::numeric * 100::numeric) end freq," +
           "       bool_or(af.frequency is not null) " +
           "FROM population p" +
           "         JOIN allele_frequency af ON p.id = af.population" +
@@ -267,11 +267,17 @@ public class FrequencyGenerator {
           boolean hasData = rs.getBoolean(3);
           if (hasData) {
             freq = rs.getFloat(2);
+            int total = rs.getInt(1);
+            if (total == 0) {
+              sf_logger.warn("Allele ID {} has zero population for ethnicity {}", alleleId, ethnicity);
+            }
           }
         }
         if (rs.next()) {
           throw new RuntimeException("Single result expected");
         }
+      } catch (PSQLException ex) {
+        throw new RuntimeException("Error calculating frequency for " + ethnicity + " and allele ID " + alleleId, ex);
       }
       return freq;
     }
