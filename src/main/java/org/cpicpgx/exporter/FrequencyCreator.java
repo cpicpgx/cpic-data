@@ -37,6 +37,12 @@ import java.util.*;
 import static org.cpicpgx.util.HttpUtils.apiRequest;
 import static org.cpicpgx.util.HttpUtils.buildClinpgxUrl;
 
+/**
+ * This class will create a new frequency workbook for a given gene using the frequency data in ClinPGx.
+ *
+ * <p><strong>NOTE:</strong> This only works for "named variant" genes like DPYD. Within those genes, it will only
+ * output frequencies for the single-position alleles (not Haplotypes).</p>
+ */
 public class FrequencyCreator {
   private static final Logger sf_logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -85,7 +91,7 @@ public class FrequencyCreator {
     f_httpClient = new OkHttpClient().newBuilder().build();
     f_gson = new Gson();
     f_gene = gene;
-    sf_logger.info("Writing new frequency data for: " + f_gene);
+    sf_logger.info("Writing new frequency data for: {}", f_gene);
     loadAlleles();
     f_alleleRsidMap.keySet().forEach(this::loadFrequency);
   }
@@ -93,16 +99,17 @@ public class FrequencyCreator {
   private void loadAlleles() {
     sf_logger.debug("Load data from DB for {}", f_gene);
     try (Connection conn = ConnectionFactory.newConnection()) {
-      PreparedStatement stmt = conn.prepareStatement(
-          "with x as (\n" +
-              "    select alv.alleledefinitionid, alv.locationid, ad.name, alv.variantallele from allele_location_value alv\n" +
-              "        join allele_definition ad on alv.alleledefinitionid = ad.id\n" +
-              "    where ad.matchesreferencesequence is false and ad.genesymbol=? and alv.variantallele !~ '[KMRSWY]'\n" +
-              ")\n" +
-              "select x1.alleledefinitionid, x1.locationid, x1.name, l.dbsnpid, x1.variantallele from x x1 join sequence_location l on (x1.locationid=l.id)\n" +
-              "where not exists (select 1 from x x2 where x1.alleledefinitionid!=x2.alleledefinitionid and x1.locationid =x2.locationid)\n" +
-              "  and not exists (select 1 from x x2 where x1.alleledefinitionid =x2.alleledefinitionid and x1.locationid!=x2.locationid)\n" +
-              "  and l.dbsnpid is not null");
+      PreparedStatement stmt = conn.prepareStatement("""
+select d.id, alv.locationid, d.name, l.dbsnpid, alv.variantallele
+from
+    allele_definition d
+    join allele_location_value alv on d.id=alv.alleledefinitionid
+    join sequence_location l on alv.locationid=l.id
+where
+    d.genesymbol=?
+  and 1=(select count(*) from allele_location_value v where v.alleledefinitionid=d.id)
+  and l.dbsnpid is not null
+""");
       stmt.setString(1, f_gene);
 
       try (ResultSet results = stmt.executeQuery()) {
@@ -118,17 +125,12 @@ public class FrequencyCreator {
         }
       }
 
-      stmt = conn.prepareStatement("select name, matchesreferencesequence from allele_definition where genesymbol=?");
+      stmt = conn.prepareStatement("select name from allele_definition where genesymbol=?");
       stmt.setString(1, f_gene);
       try (ResultSet results = stmt.executeQuery()) {
         while (results.next()) {
           String alleleName = results.getString(1);
-          boolean isReference = results.getBoolean(2);
-          if (isReference) {
-            f_allAlleles.add(alleleName);
-          } else {
-            f_allAlleles.add(alleleName);
-          }
+          f_allAlleles.add(alleleName);
         }
       }
 
@@ -279,7 +281,7 @@ public class FrequencyCreator {
             );
       }
     }
-    // finish "Reference sheet writing
+    // finish Reference sheet writing
 
     workbook.writeMethods("");
     workbook.writeNotes(ImmutableList.of(""));
