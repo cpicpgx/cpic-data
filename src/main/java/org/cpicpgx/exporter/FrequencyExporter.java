@@ -55,11 +55,6 @@ public class FrequencyExporter extends BaseExporter {
               "from allele_frequency f join population p on f.population = p.id join allele a on f.alleleid = a.id\n" +
               "left join publication p2 on p.publicationId=p2.id\n" +
               "where a.genesymbol=? and p.ethnicity=? order by p.ethnicity, p2.year, p2.authors, p.population");
-          PreparedStatement afStmt = conn.prepareStatement(
-              "select f.label, f.frequency from allele_frequency f where f.population=? and f.alleleid=?");
-          PreparedStatement ethAlleleStmt = conn.prepareStatement(
-              "select freq_weighted_avg, freq_max, freq_min from population_frequency_view v where v.name=? and v.population_group=? and v.genesymbol=?"
-          );
           PreparedStatement methodsStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"
           );
@@ -89,29 +84,37 @@ public class FrequencyExporter extends BaseExporter {
           }
 
           // start the Allele Frequency sheet
-          List<String> ethnicities = dbHarness.getEthnicities(geneSymbol);
+          List<String> ethnicities = dbHarness.getAlleleEthnicities(geneSymbol);
           Set<String> alleleNames = dbHarness.getAllelesWithFrequencies(geneSymbol);
           if (alleleNames.isEmpty()) {
             sf_logger.warn("No alleles found for " + geneSymbol);
             continue;
           }
 
-          if (!ethnicities.isEmpty()) {
+          // load every allele's per-ethnicity frequencies for this gene in one round trip instead of
+          // querying once per (ethnicity, allele) pair
+          Map<String, Map<String, BigDecimal>> alleleFrequencyMap = dbHarness.getAlleleFrequencyMap(geneSymbol);
+
+          if (!alleleNames.isEmpty()) {
             workbook.writeAlleleFrequencyHeader(ethnicities);
 
             // infer reference allele values based on other alleles
             if (refAlleleName != null && !alleleNames.contains(refAlleleName)) {
               BigDecimal[] frequencies = new BigDecimal[ethnicities.size()];
+              Map<String, BigDecimal> refFreqs = alleleFrequencyMap.getOrDefault(refAlleleName, Collections.emptyMap());
+              int idx = 0;
               for (String pop : ethnicities) {
-                frequencies[ethnicities.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, refAlleleName, pop);
+                frequencies[idx++] = refFreqs.get(pop);
               }
               workbook.writeAlleleFrequency(refAlleleName, frequencies);
             }
 
             for (String allele : alleleNames) {
               BigDecimal[] frequencies = new BigDecimal[ethnicities.size()];
+              Map<String, BigDecimal> freqs = alleleFrequencyMap.getOrDefault(allele, Collections.emptyMap());
+              int idx = 0;
               for (String pop : ethnicities) {
-                frequencies[ethnicities.indexOf(pop)] = dbHarness.getFrequency(geneSymbol, allele, pop);
+                frequencies[idx++] = freqs.get(pop);
               }
               if (Arrays.stream(frequencies).anyMatch(Objects::nonNull)) {
                 workbook.writeAlleleFrequency(allele, frequencies);
@@ -132,11 +135,9 @@ public class FrequencyExporter extends BaseExporter {
                 BigDecimal[] frequencies = new BigDecimal[dipPops.size()];
                 Map<String, BigDecimal> popMap = diplotypeMap.get(diplotype);
                 if (popMap != null) {
+                  int idx = 0;
                   for (String pop : dipPops) {
-                    int idx = dipPops.indexOf(pop);
-                    if (idx > -1) {
-                      frequencies[idx] = popMap.get(pop);
-                    }
+                    frequencies[idx++] = popMap.get(pop);
                   }
                 }
                 workbook.writeDiplotypeFrequency(diplotype, frequencies);
@@ -155,11 +156,9 @@ public class FrequencyExporter extends BaseExporter {
 
               phenotypeMap.forEach((phenotype, popMap) -> {
                 BigDecimal[] frequencies = new BigDecimal[phenoPops.size()];
+                int idx = 0;
                 for (String pop : phenoPops) {
-                  int idx = phenoPops.indexOf(pop);
-                  if (idx > -1) {
-                    frequencies[idx] = popMap.get(pop);
-                  }
+                  frequencies[idx++] = popMap.get(pop);
                 }
                 workbook.writePhenotypeFrequency(phenotype, frequencies);
               });
@@ -193,17 +192,23 @@ public class FrequencyExporter extends BaseExporter {
 
 
           // We are not guaranteed to have allele_frequency data so skip the References sheet if none
+          ethnicities = dbHarness.getEthnicities(geneSymbol);
           if (!ethnicities.isEmpty()) {
             // write the header row
             workbook.writeReferenceHeader(alleles.keySet());
-          
+
+            // load all allele_frequency rows and population summary rows for this gene in one round trip
+            // each, instead of querying once per (population, allele) / (ethnicity, allele) pair
+            Map<Integer, Map<Integer, String>> alleleFrequencyRows = dbHarness.getAlleleFrequencyRows(geneSymbol);
+            Map<String, Map<String, BigDecimal[]>> populationSummary = dbHarness.getPopulationSummary(geneSymbol);
+
             // population loop (rows)
             for (String ethnicity : ethnicities) {
               popsStmt.setString(1, geneSymbol);
               popsStmt.setString(2, ethnicity);
-            
+
               workbook.writeEthnicityHeader(ethnicity, alleles.size());
-            
+
               try (ResultSet r = popsStmt.executeQuery()) {
                 while (r.next()) {
 
@@ -214,25 +219,14 @@ public class FrequencyExporter extends BaseExporter {
                     authors = (String[]) authorArray.getArray();
                   }
 
+                  Map<Integer, String> frequenciesForPopulation = alleleFrequencyRows.getOrDefault(popId, Collections.emptyMap());
+
                   // allele loop (columns after standard)
-                  String[] frequencies = new String[alleles.keySet().size()];
+                  String[] frequencies = new String[alleles.size()];
                   int i = 0;
                   for (String alleleName : alleles.keySet()) {
                     Integer alleleId = alleles.get(alleleName);
-                    afStmt.clearParameters();
-                    afStmt.setInt(1, popId);
-                    afStmt.setInt(2, alleleId);
-                    try (ResultSet afrs = afStmt.executeQuery()) {
-                      while (afrs.next()) {
-                        String label = afrs.getString(1);
-                        BigDecimal freq = afrs.getBigDecimal(2);
-                        if (freq != null && freq.compareTo(BigDecimal.ZERO) != 0) {
-                          frequencies[i] = freq.toString();
-                        } else {
-                          frequencies[i] = label;
-                        }
-                      }
-                    }
+                    frequencies[i] = frequenciesForPopulation.get(alleleId);
                     i += 1;
                   }
 
@@ -249,27 +243,19 @@ public class FrequencyExporter extends BaseExporter {
                 }
               }
 
-              BigDecimal refAlleleFrequency = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, refAlleleName, ethnicity))
+              BigDecimal refAlleleFrequency = Optional.ofNullable(
+                      alleleFrequencyMap.getOrDefault(refAlleleName, Collections.emptyMap()).get(ethnicity))
                       .orElse(BigDecimal.ZERO);
 
               workbook.startPopulationSummary();
               for (String allele : alleles.keySet()) {
-                ethAlleleStmt.setString(1, allele);
-                ethAlleleStmt.setString(2, ethnicity);
-                ethAlleleStmt.setString(3, geneSymbol);
-                try (ResultSet rsEth = ethAlleleStmt.executeQuery()) {
-                  boolean wroteSummary = false;
-                  while (rsEth.next()) {
-                    workbook.writePopulationSummary(rsEth.getBigDecimal(3), rsEth.getBigDecimal(1), rsEth.getBigDecimal(2));
-                    wroteSummary = true;
-                  }
-                  if (!wroteSummary) {
-                    if (allele.equals(refAllele)) {
-                      workbook.writeReferencePopulationSummary(refAlleleFrequency);
-                    } else {
-                      workbook.writeEmptyPopulationSummary();
-                    }
-                  }
+                BigDecimal[] summary = populationSummary.getOrDefault(allele, Collections.emptyMap()).get(ethnicity);
+                if (summary != null) {
+                  workbook.writePopulationSummary(summary[0], summary[1], summary[2]);
+                } else if (allele.equals(refAllele)) {
+                  workbook.writeReferencePopulationSummary(refAlleleFrequency);
+                } else {
+                  workbook.writeEmptyPopulationSummary();
                 }
               }
             }
@@ -305,21 +291,23 @@ public class FrequencyExporter extends BaseExporter {
     final Gson gson = new Gson();
     final Type bigDecimalMapType = new TypeToken<HashMap<String, BigDecimal>>(){}.getType();
     PreparedStatement ethnicitiesStmt;
-    PreparedStatement allelePopulationStmt;
     PreparedStatement diplotypePopStmt;
     PreparedStatement diplotypeDataStmt;
     PreparedStatement phenotypePopStmt;
     PreparedStatement phenotypeDataStmt;
     PreparedStatement activityDataStmt;
     PreparedStatement alleleNameStmt;
+    PreparedStatement alleleFrequencyMapStmt;
+    PreparedStatement alleleFrequencyRowsStmt;
+    PreparedStatement populationSummaryStmt;
+    PreparedStatement alleleEthnicityStmt;
 
     FrequencyDbHarness() throws SQLException {
       super(FileType.FREQUENCY);
 
       //language=PostgreSQL
       ethnicitiesStmt = prepare("select distinct p.ethnicity from allele_frequency f join allele a on a.id = f.alleleid join population p on f.population = p.id where a.genesymbol=? order by 1");
-      //language=PostgreSQL
-      allelePopulationStmt = prepare("with x as (select frequency -> ? as frequency from allele where genesymbol=? and name=?) select * from x where x.frequency::text != 'null'");
+      alleleEthnicityStmt = prepare("select distinct f from allele a, jsonb_object_keys(frequency) f where frequency is not null and genesymbol=? order by 1");
       //language=PostgreSQL
       diplotypePopStmt = prepare("select distinct jsonb_object_keys(grd.frequency) from gene_result r join gene_result_lookup grl on r.id = grl.phenotypeid join gene_result_diplotype grd on grl.id = grd.functionphenotypeid where r.genesymbol=? and grd.frequency is not null order by 1");
       //language=PostgreSQL
@@ -332,6 +320,12 @@ public class FrequencyExporter extends BaseExporter {
       activityDataStmt = prepare("select activityscore,frequency from gene_result where genesymbol=? and frequency is not null");
       //language=PostgreSQL
       alleleNameStmt = prepare("select distinct name from allele where genesymbol=? and frequency is not null");
+      //language=PostgreSQL
+      alleleFrequencyMapStmt = prepare("select name, frequency from allele where genesymbol=? and frequency is not null");
+      //language=PostgreSQL
+      alleleFrequencyRowsStmt = prepare("select f.population, f.alleleid, f.label, f.frequency from allele_frequency f join allele a on f.alleleid=a.id where a.genesymbol=?");
+      //language=PostgreSQL
+      populationSummaryStmt = prepare("select name, population_group, freq_min, freq_weighted_avg, freq_max from population_frequency_view where genesymbol=?");
     }
 
     Set<String> getAllelesWithFrequencies(String gene) throws SQLException {
@@ -345,17 +339,58 @@ public class FrequencyExporter extends BaseExporter {
       return alleleNames;
     }
 
-    BigDecimal getFrequency(String gene, String alleleName, String ethnicity) throws SQLException {
-      this.allelePopulationStmt.setString(2, gene);
-      this.allelePopulationStmt.setString(3, alleleName);
-      this.allelePopulationStmt.setString(1, ethnicity);
-      try (ResultSet rs = this.allelePopulationStmt.executeQuery()) {
-        if (rs.next()) {
-          return rs.getBigDecimal(1);
-        } else {
-          return null;
+    /**
+     * Loads every allele's per-ethnicity frequency for a gene in a single round trip, keyed by allele name then
+     * ethnicity. Replaces querying the allele's {@code frequency} JSONB column once per (ethnicity, allele) pair.
+     */
+    Map<String, Map<String, BigDecimal>> getAlleleFrequencyMap(String gene) throws SQLException {
+      Map<String, Map<String, BigDecimal>> result = new HashMap<>();
+      alleleFrequencyMapStmt.setString(1, gene);
+      try (ResultSet rs = alleleFrequencyMapStmt.executeQuery()) {
+        while (rs.next()) {
+          result.put(rs.getString(1), gson.fromJson(rs.getString(2), bigDecimalMapType));
         }
       }
+      return result;
+    }
+
+    /**
+     * Loads every allele_frequency row for a gene in a single round trip, keyed by population ID then allele ID.
+     * Replaces querying {@code allele_frequency} once per (population, allele) pair.
+     */
+    Map<Integer, Map<Integer, String>> getAlleleFrequencyRows(String gene) throws SQLException {
+      Map<Integer, Map<Integer, String>> result = new HashMap<>();
+      alleleFrequencyRowsStmt.setString(1, gene);
+      try (ResultSet rs = alleleFrequencyRowsStmt.executeQuery()) {
+        while (rs.next()) {
+          int popId = rs.getInt(1);
+          int alleleId = rs.getInt(2);
+          String label = rs.getString(3);
+          BigDecimal freq = rs.getBigDecimal(4);
+          String value = (freq != null && freq.compareTo(BigDecimal.ZERO) != 0) ? freq.toString() : label;
+          result.computeIfAbsent(popId, k -> new HashMap<>()).put(alleleId, value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Loads every population_frequency_view row for a gene in a single round trip, keyed by allele name then
+     * ethnicity, as {@code [freq_min, freq_weighted_avg, freq_max]}. Replaces querying that view once per
+     * (ethnicity, allele) pair.
+     */
+    Map<String, Map<String, BigDecimal[]>> getPopulationSummary(String gene) throws SQLException {
+      Map<String, Map<String, BigDecimal[]>> result = new HashMap<>();
+      populationSummaryStmt.setString(1, gene);
+      try (ResultSet rs = populationSummaryStmt.executeQuery()) {
+        while (rs.next()) {
+          String allele = rs.getString(1);
+          String ethnicity = rs.getString(2);
+          BigDecimal[] values = new BigDecimal[]{rs.getBigDecimal(3), rs.getBigDecimal(4), rs.getBigDecimal(5)};
+          result.computeIfAbsent(allele, k -> new HashMap<>()).put(ethnicity, values);
+        }
+      }
+      return result;
     }
 
     List<String> getEthnicities(String gene) throws SQLException {
@@ -364,6 +399,20 @@ public class FrequencyExporter extends BaseExporter {
         this.ethnicitiesStmt.clearParameters();
         this.ethnicitiesStmt.setString(1, gene);
         try (ResultSet rs = this.ethnicitiesStmt.executeQuery()) {
+          while (rs.next()) {
+            result.add(rs.getString(1));
+          }
+        }
+      }
+      return result;
+    }
+
+    List<String> getAlleleEthnicities(String gene) throws SQLException {
+      List<String> result = new ArrayList<>();
+      if (StringUtils.isNotBlank(gene)) {
+        this.alleleEthnicityStmt.clearParameters();
+        this.alleleEthnicityStmt.setString(1, gene);
+        try (ResultSet rs = this.alleleEthnicityStmt.executeQuery()) {
           while (rs.next()) {
             result.add(rs.getString(1));
           }
