@@ -11,6 +11,8 @@ import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static org.cpicpgx.workbook.AbstractWorkbook.NOTES_SHEET_NAME;
+
 /**
  * Wrapper class for an Excel workbook. Helps read and setup supporting objects.
  * 
@@ -19,8 +21,6 @@ import java.util.regex.Pattern;
  * @author Ryan Whaley
  */
 public class WorkbookWrapper {
-  public static final String NOTES_SHEET_NAME = "Notes";
-
   private final Workbook workbook;
   private final FormulaEvaluator formulaEvaluator;
   private String fileName = null;
@@ -145,7 +145,7 @@ public class WorkbookWrapper {
   }
 
   /**
-   * Reads all the notes in the workbook. This will look for a sheet named {@link WorkbookWrapper#NOTES_SHEET_NAME}. It
+   * Reads all the notes in the workbook. This will look for a sheet named {@link org.cpicpgx.workbook.AbstractWorkbook#NOTES_SHEET_NAME}. It
    * will assume the first row is a title row and read the first non-empty cell of every subsequent row.
    * @return a List of note strings
    */

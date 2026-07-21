@@ -63,10 +63,10 @@ public class FrequencyExporter extends BaseExporter {
           PreparedStatement methodsStmt = conn.prepareStatement(
               "select frequencyMethods from gene where symbol=?"
           );
-          PreparedStatement geneStmt = conn.prepareStatement(
-              "select distinct a.genesymbol, g.lookupmethod, g.chr, g.includephenotypefrequencies, g.includediplotypefrequencies from allele_frequency f join allele a on a.id = f.alleleid\n" +
-                  "    join gene g on a.genesymbol = g.symbol\n" +
-                  "order by 1");
+          PreparedStatement geneStmt = conn.prepareStatement("""
+            select distinct genesymbol, g.lookupmethod, g.chr, g.includephenotypefrequencies, g.includediplotypefrequencies
+            from allele a join gene g on a.genesymbol=g.symbol
+            where frequency is not null order by genesymbol""");
           ResultSet geneResults = geneStmt.executeQuery();
           PreparedStatement refAlleleStmt = conn.prepareStatement(
               "select name from allele where allele.inferredfrequency is true and genesymbol=?")
@@ -191,80 +191,84 @@ public class FrequencyExporter extends BaseExporter {
             }
           }
 
-          // write the header row
-          workbook.writeReferenceHeader(alleles.keySet());
+
+          // We are not guaranteed to have allele_frequency data so skip the References sheet if none
+          if (!ethnicities.isEmpty()) {
+            // write the header row
+            workbook.writeReferenceHeader(alleles.keySet());
           
-          // population loop (rows)
-          for (String ethnicity : ethnicities) {
-            popsStmt.setString(1, geneSymbol);
-            popsStmt.setString(2, ethnicity);
+            // population loop (rows)
+            for (String ethnicity : ethnicities) {
+              popsStmt.setString(1, geneSymbol);
+              popsStmt.setString(2, ethnicity);
             
-            workbook.writeEthnicityHeader(ethnicity, alleles.size());
+              workbook.writeEthnicityHeader(ethnicity, alleles.size());
             
-            try (ResultSet r = popsStmt.executeQuery()) {
-              while (r.next()) {
+              try (ResultSet r = popsStmt.executeQuery()) {
+                while (r.next()) {
 
-                Array authorArray = r.getArray(6);
-                int popId = r.getInt(8);
-                String[] authors = null;
-                if (authorArray != null) {
-                  authors = (String[]) authorArray.getArray();
-                }
+                  Array authorArray = r.getArray(6);
+                  int popId = r.getInt(8);
+                  String[] authors = null;
+                  if (authorArray != null) {
+                    authors = (String[]) authorArray.getArray();
+                  }
 
-                // allele loop (columns after standard)
-                String[] frequencies = new String[alleles.keySet().size()];
-                int i = 0;
-                for (String alleleName : alleles.keySet()) {
-                  Integer alleleId = alleles.get(alleleName);
-                  afStmt.clearParameters();
-                  afStmt.setInt(1, popId);
-                  afStmt.setInt(2, alleleId);
-                  try (ResultSet afrs = afStmt.executeQuery()) {
-                    while (afrs.next()) {
-                      String label = afrs.getString(1);
-                      BigDecimal freq = afrs.getBigDecimal(2);
-                      if (freq != null && freq.compareTo(BigDecimal.ZERO) != 0) {
-                        frequencies[i] = freq.toString();
-                      } else {
-                        frequencies[i] = label;
+                  // allele loop (columns after standard)
+                  String[] frequencies = new String[alleles.keySet().size()];
+                  int i = 0;
+                  for (String alleleName : alleles.keySet()) {
+                    Integer alleleId = alleles.get(alleleName);
+                    afStmt.clearParameters();
+                    afStmt.setInt(1, popId);
+                    afStmt.setInt(2, alleleId);
+                    try (ResultSet afrs = afStmt.executeQuery()) {
+                      while (afrs.next()) {
+                        String label = afrs.getString(1);
+                        BigDecimal freq = afrs.getBigDecimal(2);
+                        if (freq != null && freq.compareTo(BigDecimal.ZERO) != 0) {
+                          frequencies[i] = freq.toString();
+                        } else {
+                          frequencies[i] = label;
+                        }
                       }
                     }
+                    i += 1;
                   }
-                  i += 1;
-                }
 
-                workbook.writePopulation(
-                    authors,
-                    r.getInt(7),
-                    r.getString(1),
-                    r.getString(2),
-                    r.getString(3),
-                    r.getString(4),
-                    r.getString(5),
-                    r.getInt(9),
-                    frequencies);
+                  workbook.writePopulation(
+                          authors,
+                          r.getInt(7),
+                          r.getString(1),
+                          r.getString(2),
+                          r.getString(3),
+                          r.getString(4),
+                          r.getString(5),
+                          r.getInt(9),
+                          frequencies);
+                }
               }
-            }
 
-            BigDecimal refAlleleFrequency = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, refAlleleName, ethnicity))
-                    .orElse(BigDecimal.ZERO);
+              BigDecimal refAlleleFrequency = Optional.ofNullable(dbHarness.getFrequency(geneSymbol, refAlleleName, ethnicity))
+                      .orElse(BigDecimal.ZERO);
 
-            workbook.startPopulationSummary();
-            for (String allele : alleles.keySet()) {
-              ethAlleleStmt.setString(1, allele);
-              ethAlleleStmt.setString(2, ethnicity);
-              ethAlleleStmt.setString(3, geneSymbol);
-              try (ResultSet rsEth = ethAlleleStmt.executeQuery()) {
-                boolean wroteSummary = false;
-                while (rsEth.next()) {
-                  workbook.writePopulationSummary(rsEth.getBigDecimal(3), rsEth.getBigDecimal(1), rsEth.getBigDecimal(2));
-                  wroteSummary = true;
-                }
-                if (!wroteSummary) {
-                  if (allele.equals(refAllele)) {
-                    workbook.writeReferencePopulationSummary(refAlleleFrequency);
-                  } else {
-                    workbook.writeEmptyPopulationSummary();
+              workbook.startPopulationSummary();
+              for (String allele : alleles.keySet()) {
+                ethAlleleStmt.setString(1, allele);
+                ethAlleleStmt.setString(2, ethnicity);
+                ethAlleleStmt.setString(3, geneSymbol);
+                try (ResultSet rsEth = ethAlleleStmt.executeQuery()) {
+                  boolean wroteSummary = false;
+                  while (rsEth.next()) {
+                    workbook.writePopulationSummary(rsEth.getBigDecimal(3), rsEth.getBigDecimal(1), rsEth.getBigDecimal(2));
+                    wroteSummary = true;
+                  }
+                  if (!wroteSummary) {
+                    if (allele.equals(refAllele)) {
+                      workbook.writeReferencePopulationSummary(refAlleleFrequency);
+                    } else {
+                      workbook.writeEmptyPopulationSummary();
+                    }
                   }
                 }
               }

@@ -1,5 +1,6 @@
 package org.cpicpgx.importer;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.cpicpgx.FrequencyGenerator;
 import org.cpicpgx.model.FileType;
@@ -7,12 +8,13 @@ import org.cpicpgx.util.Constants;
 import org.cpicpgx.util.RowWrapper;
 import org.cpicpgx.util.WorkbookWrapper;
 import org.cpicpgx.workbook.AbstractWorkbook;
+import org.cpicpgx.workbook.FrequencyWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.security.InvalidParameterException;
-import java.util.StringJoiner;
+import java.util.*;
 
 /**
  * Class to read all excel files in the given directory and store the allele frequency information found in them.
@@ -68,18 +70,25 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
    * @param gene The symbol of the gene the alleles in this workbook are for
    */
   private void processAlleles(WorkbookWrapper workbook, String gene) throws Exception {
-    workbook.currentSheetIs("References");
-    try (FrequencyProcessor frequencyProcessor = new FrequencyProcessor(gene, workbook.getRow(0))) {
+    try (FrequencyProcessor frequencyProcessor = new FrequencyProcessor(gene)) {
 
-      // START processing References sheet
-      for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
-        try {
-          frequencyProcessor.insertPopulation(workbook.getRow(i));
-        } catch (Exception ex) {
-          throw new RuntimeException("Error parsing row " + (i+1), ex);
-        }
+      if (workbook.hasSheet(FrequencyWorkbook.SHEET_NAME_REFERENCES)) {
+        sf_logger.debug("Processing reference data for frequencies");
+        processWithReferences(workbook, frequencyProcessor, gene);
+      } else {
+        sf_logger.debug("Processing direct frequencies");
+
+        sf_logger.debug("Processing alleles");
+
+        List<GroupPopulationFrequency> frequencies = processAllelesSheet(workbook);
+        frequencyProcessor.storeAlleleFrequencies(frequencies);
+
+        frequencies = processDiplotypesSheet(workbook);
+        frequencyProcessor.storeDiplotypeFrequencies(frequencies);
+
+        frequencies = processPhenotypesSheet(workbook);
+        frequencyProcessor.storePhenotypeFrequencies(frequencies);
       }
-      // END processing References sheet
 
       // START processing Change log sheet
       workbook.currentSheetIs(AbstractWorkbook.HISTORY_SHEET_NAME);
@@ -87,22 +96,7 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       // END processing Change log sheet
 
       // START processing Methods sheet
-      boolean foundSheet = false;
-      try {
-        workbook.currentSheetIs("Methods and caveats");
-        foundSheet = true;
-      } catch (InvalidParameterException ex) {
-        // drop the exception
-      }
-      try {
-        workbook.currentSheetIs("Methods");
-        foundSheet = true;
-      } catch (InvalidParameterException ex) {
-        // drop the exception
-      }
-      if (!foundSheet) {
-        throw new RuntimeException("Could not find methods sheet");
-      }
+      workbook.currentSheetIs(FrequencyWorkbook.SHEET_NAME_METHODS);
       StringJoiner methodsText = new StringJoiner("\n");
       for (int i = 0; i <= workbook.currentSheet.getLastRowNum(); i++) {
         RowWrapper row = workbook.getRow(i);
@@ -118,13 +112,92 @@ public class AlleleFrequencyImporter extends BaseDirectoryImporter {
       // START processing notes sheet
       writeNotes(gene, workbook.getNotes());
       // END processing notes sheet
+    }
+    sf_logger.debug("Successfully parsed " + gene + " frequencies");
+  }
 
-      sf_logger.debug("Successfully parsed " + gene + " frequencies");
+  private void processWithReferences(WorkbookWrapper workbook, FrequencyProcessor frequencyProcessor, String gene) throws Exception {
+    Preconditions.checkArgument(workbook.hasSheet(FrequencyWorkbook.SHEET_NAME_REFERENCES));
 
-      FrequencyGenerator generator = new FrequencyGenerator(gene);
-      generator.calculate();
+    workbook.currentSheetIs(FrequencyWorkbook.SHEET_NAME_REFERENCES);
 
-      sf_logger.debug("Successfully calculated " + gene + " diplotype/phenotype frequencies");
+    frequencyProcessor.parseReferencesHeader(workbook.getRow(0));
+    for (int i = 1; i <= workbook.currentSheet.getLastRowNum(); i++) {
+      try {
+        frequencyProcessor.insertPopulation(workbook.getRow(i));
+      } catch (Exception ex) {
+        throw new RuntimeException("Error parsing row " + (i+1), ex);
+      }
+    }
+
+    // generate the rest of the frequencies based on what's in the References tab
+    FrequencyGenerator generator = new FrequencyGenerator(gene);
+    generator.calculate();
+
+    sf_logger.debug("Successfully calculated " + gene + " diplotype/phenotype frequencies");
+  }
+
+  List<GroupPopulationFrequency> processAllelesSheet(WorkbookWrapper workbook) {
+    return processGroupSheet(workbook, FrequencyWorkbook.SHEET_NAME_ALLELE);
+  }
+
+  List<GroupPopulationFrequency> processDiplotypesSheet(WorkbookWrapper workbook) {
+    return processGroupSheet(workbook, FrequencyWorkbook.SHEET_DIPLOTYPE);
+  }
+
+  List<GroupPopulationFrequency> processPhenotypesSheet(WorkbookWrapper workbook) {
+    return processGroupSheet(workbook, FrequencyWorkbook.SHEET_PHENOTYPE);
+  }
+
+  List<GroupPopulationFrequency> processGroupSheet(WorkbookWrapper workbook, String sheetName) {
+    List<GroupPopulationFrequency> groupPopulationFrequencies = new ArrayList<>();
+    sf_logger.debug("Processing allele sheet");
+    if (!workbook.hasSheet(sheetName)) {
+      sf_logger.debug("Nothing to process");
+      return groupPopulationFrequencies;
+    }
+
+    workbook.currentSheetIs(sheetName);
+    final int idxAlleleName = 0;
+    final Map<String, Integer> popToIdxMap = new HashMap<>();
+    RowWrapper headerRow = workbook.getRow(1);
+    for (int i = 1; i < headerRow.row.getLastCellNum(); i++) {
+      String cellText = headerRow.getNullableText(i);
+      if (StringUtils.isNotBlank(cellText)) {
+        popToIdxMap.put(cellText, i);
+      }
+    }
+    for (int i = 2; i < workbook.currentSheet.getLastRowNum(); i++) {
+      RowWrapper alleleRow = workbook.getRow(i);
+      String alleleName = alleleRow.getNullableText(idxAlleleName);
+      if (StringUtils.isBlank(alleleName)) {
+        continue;
+      }
+
+      GroupPopulationFrequency groupPopulationFrequency = new GroupPopulationFrequency(alleleName);
+      groupPopulationFrequencies.add(groupPopulationFrequency);
+      for (Map.Entry<String, Integer> entry : popToIdxMap.entrySet()) {
+        String popName = entry.getKey();
+        Double popFreq =  alleleRow.getNullableDouble(entry.getValue());
+
+        groupPopulationFrequency.setPopFreq(popName, popFreq);
+        sf_logger.debug("Population frequency for {}: {} is {}", alleleName, popName, popFreq);
+      }
+    }
+    return groupPopulationFrequencies;
+  }
+
+  static class GroupPopulationFrequency {
+    final String groupName;
+    final Map<String, Double> popNameToFreqMap = new HashMap<>();
+
+    GroupPopulationFrequency(String groupName) {
+      this.groupName = groupName;
+    }
+
+    void setPopFreq(String popName, Double popFreq) {
+      popNameToFreqMap.put(popName, popFreq);
     }
   }
 }
+

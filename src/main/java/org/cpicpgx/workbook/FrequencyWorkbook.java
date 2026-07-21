@@ -17,11 +17,11 @@ import java.util.*;
 public class FrequencyWorkbook extends AbstractWorkbook {
   private static final String FILE_NAME_PATTERN = "%s_frequency_table.xlsx";
 
-  private static final String SHEET_NAME_METHODS = "Methods and Caveats";
-  private static final String SHEET_NAME_REFERENCES = "References";
-  private static final String SHEET_NAME_ALLELE = "Allele frequency";
-  private static final String SHEET_DIPLOTYPE = "Diplotype frequency";
-  private static final String SHEET_PHENOTYPE = "Phenotype frequency";
+  public static final String SHEET_NAME_METHODS = "Methods and Caveats";
+  public static final String SHEET_NAME_REFERENCES = "References";
+  public static final String SHEET_NAME_ALLELE = "Allele frequency";
+  public static final String SHEET_DIPLOTYPE = "Diplotype frequency";
+  public static final String SHEET_PHENOTYPE = "Phenotype frequency";
 
   private static final String[] REFERENCE_COLUMNS = new String[]{
       "Authors", "Year", "PMID", "Population group", "Population", "Add'l population info", "Subject type", "N subjects genotyped"
