@@ -1,0 +1,108 @@
+name: Post Release Notes to Ghost
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-to-ghost:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # install Node.js tools to securely generate Ghost Admin API tokens and convert Markdown
+      - name: Generate Ghost Admin JWT Token
+        id: ghost_token
+        env:
+          GHOST_ADMIN_API_KEY: ${{ secrets.GHOST_ADMIN_API_KEY }}
+        run: |
+          npm install jsonwebtoken marked
+          node <<'NODE'
+          const fs = require('fs');
+          const jwt = require('jsonwebtoken');
+          const key = process.env.GHOST_ADMIN_API_KEY;
+          const [id, secret] = key.split(':');
+          const token = jwt.sign({}, Buffer.from(secret, 'hex'), {
+            keyid: id,
+            algorithm: 'HS256',
+            expiresIn: '5m',
+            audience: '/admin/'
+          });
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `token=${token}\n`);
+          NODE
+
+      # format the Release Body and send it via the Ghost Admin API
+      - name: Post Draft to Ghost
+        run: |
+          CPIC_VERSION=$(jq -r '.release.name // .release.tag_name' "$GITHUB_EVENT_PATH")
+          RELEASE_TITLE="CPIC DB/API $CPIC_VERSION Released"
+
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { marked } = require('marked');
+
+          const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+          const releaseBody = event.release.body || '';
+          const demoteMarkdownHeadings = (markdown) => {
+            const lines = markdown.split(/\r?\n/);
+            let fence = null;
+
+            return lines.map((line) => {
+              const fenceMatch = line.match(/^ {0,3}(`{3,}|~{3,})/);
+              if (fenceMatch) {
+                const fenceMarker = fenceMatch[1];
+                if (fence) {
+                  if (fenceMarker[0] === fence.char && fenceMarker.length >= fence.length) {
+                    fence = null;
+                  }
+                } else {
+                  fence = {
+                    char: fenceMarker[0],
+                    length: fenceMarker.length
+                  };
+                }
+                return line;
+              }
+
+              if (fence) {
+                return line;
+              }
+
+              return line.replace(/^([ \t]{0,3})(#{1,5})([ \t]+.*|[ \t]*)$/, '$1#$2$3');
+            }).join('\n');
+          };
+          const demotedReleaseBody = demoteMarkdownHeadings(releaseBody);
+          marked.use({
+            gfm: true,
+            breaks: false
+          });
+          const html = [
+            '<p><a href="https://github.com/cpic/cpic-data/releases/tag/$CPIC_VERSION">Version $CPIC_VERSION</a> has been released</p>',
+            '<h3>Changelog</h3>',
+            marked.parse(demotedReleaseBody)
+          ].join('\n');
+
+          fs.writeFileSync(path.join(process.env.RUNNER_TEMP, 'release-notes.html'), html);
+          NODE
+
+          jq -n \
+            --arg title "$RELEASE_TITLE" \
+            --rawfile html "$RUNNER_TEMP/release-notes.html" \
+            '{
+              posts: [{
+                title: $title,
+                html: $html,
+                status: "draft",
+                tags: [{ name: "CPIC" }],
+                og_image: "https://s3.pgkb.org/attachment/cpic-title.svg",
+                twitter_image: "https://s3.pgkb.org/attachment/cpic-title.svg"
+              }]
+            }' > "$RUNNER_TEMP/ghost-payload.json"
+
+          # Send Request to Ghost Admin API to create a draft post
+          curl -X POST "${{ secrets.GHOST_API_URL }}/ghost/api/admin/posts/?source=html" \
+            -H "Authorization: Ghost ${{ steps.ghost_token.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            -d @"$RUNNER_TEMP/ghost-payload.json"
