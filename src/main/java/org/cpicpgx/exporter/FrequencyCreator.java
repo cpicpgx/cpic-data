@@ -180,21 +180,18 @@ where
       String populationString = frequencyObject.get("population").getAsString();
       GnomadPopulation population = GnomadPopulation.valueOf(populationString);
 
-      BigDecimal freq = BigDecimal.ZERO;
-
       String inBase = frequencyObject.get("alleleText").getAsString();
       if (f_alleleMap.get(alleleName).equals(inBase)) {
         JsonElement frequencyElement = frequencyObject.get("frequency");
         if (frequencyElement != null && !frequencyElement.isJsonNull() &&
                 !(frequencyElement.isJsonPrimitive() && frequencyElement.getAsJsonPrimitive().isString())) {
-          freq = frequencyElement.getAsBigDecimal();
+          BigDecimal freq = frequencyElement.getAsBigDecimal();
+          alleleDistribution.set(population, freq);
         }
       }
       if (frequencyObject.has("totalAlleles")) {
         alleleDistribution.addSize(population, frequencyObject.get("totalAlleles").getAsInt());
       }
-
-      alleleDistribution.set(population, freq);
     }
     f_alleleDistributions.add(alleleDistribution);
   }
