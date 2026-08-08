@@ -1,3 +1,18 @@
+## 1.60.0 (2026-08-08)
+
+* feat: add new action for publishing release notes to the blog ([2dd0efd](https://github.com/cpicpgx/cpic-data/commit/2dd0efd))
+* feat: add support for pre-computed frequency loading in AlleleFrequencyImporter ([641e2e5](https://github.com/cpicpgx/cpic-data/commit/641e2e5))
+* feat: change FrequencyCreator to use all single-position alleles ([ec19a03](https://github.com/cpicpgx/cpic-data/commit/ec19a03))
+* feat: data update ([4aedcd7](https://github.com/cpicpgx/cpic-data/commit/4aedcd7))
+* feat: data update ([693a2ee](https://github.com/cpicpgx/cpic-data/commit/693a2ee))
+* chore: conventional commit config update ([884f605](https://github.com/cpicpgx/cpic-data/commit/884f605))
+* fix: allow dip-phen for genes without ehrpriority ([0fc8129](https://github.com/cpicpgx/cpic-data/commit/0fc8129))
+* fix: avoid possible divide by 0 error ([9620d7b](https://github.com/cpicpgx/cpic-data/commit/9620d7b))
+* fix: change function names to use clinpgx instead of pharmgkb ([40c1514](https://github.com/cpicpgx/cpic-data/commit/40c1514))
+* fix: fix data log ([34d808d](https://github.com/cpicpgx/cpic-data/commit/34d808d))
+* fix: fix frequency collection bug in FrequencyCreator ([6748a17](https://github.com/cpicpgx/cpic-data/commit/6748a17))
+* fix: improve performance for frequency export ([51a5da1](https://github.com/cpicpgx/cpic-data/commit/51a5da1))
+
 ## <small>1.59.1 (2026-06-18)</small>
 
 * fix: data fix for RYR1 ([35a0eac](https://github.com/cpicpgx/cpic-data/commit/35a0eac))
