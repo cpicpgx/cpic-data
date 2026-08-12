@@ -1,3 +1,7 @@
+## <small>1.60.1 (2026-08-12)</small>
+
+* fix: fix parameters and queries in DB functions ([4b87330](https://github.com/cpicpgx/cpic-data/commit/4b87330)), closes [#51](https://github.com/cpicpgx/cpic-data/issues/51)
+
 ## 1.60.0 (2026-08-08)
 
 * feat: add new action for publishing release notes to the blog ([2dd0efd](https://github.com/cpicpgx/cpic-data/commit/2dd0efd))
