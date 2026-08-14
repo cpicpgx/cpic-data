@@ -248,17 +248,19 @@ where
                       }
                     }
 
-                    workbook.writePopulation(
-                            dummyAuthors,
-                            LocalDate.now().getYear(),
-                            "",
-                            population.getName(),
-                            population.getVersionedName(),
-                            "",
-                            "",
-                            d.getSize(population),
-                            freqsForAllelesList
-                    );
+                    if (d.getFreq(population) != null) {
+                      workbook.writePopulation(
+                              dummyAuthors,
+                              LocalDate.now().getYear(),
+                              "",
+                              population.getName(),
+                              population.getVersionedName(),
+                              "",
+                              "",
+                              d.getSize(population),
+                              freqsForAllelesList
+                      );
+                    }
                   }
               );
           i += 1;
