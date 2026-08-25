@@ -43,6 +43,8 @@ public abstract class AbstractWorkbook {
   private final CellStyle topBorderStyle;
   private final CellStyle highlightStyle;
   private final CellStyle highlightDoubleStyle;
+  private final CellStyle highlightExpoStyle;
+  private final CellStyle highlightZeroStyle;
   private final CellStyle noteStyle;
   CellStyle wrapStyle;
 
@@ -132,17 +134,26 @@ public abstract class AbstractWorkbook {
     this.highlightStyle.setBorderLeft(BorderStyle.HAIR);
     this.highlightStyle.setBorderRight(BorderStyle.HAIR);
 
-    this.highlightDoubleStyle = this.workbook.createCellStyle();
-    this.highlightDoubleStyle.setDataFormat(this.workbook.createDataFormat().getFormat("0.0000"));
-    this.highlightDoubleStyle.setAlignment(HorizontalAlignment.RIGHT);
-    this.highlightDoubleStyle.setVerticalAlignment(VerticalAlignment.TOP);
-    this.highlightDoubleStyle.setFont(newFont);
-    this.highlightDoubleStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.index);
-    this.highlightDoubleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-    this.highlightDoubleStyle.setBorderTop(BorderStyle.HAIR);
-    this.highlightDoubleStyle.setBorderBottom(BorderStyle.HAIR);
-    this.highlightDoubleStyle.setBorderLeft(BorderStyle.HAIR);
-    this.highlightDoubleStyle.setBorderRight(BorderStyle.HAIR);
+    // one highlighted style per number format, so highlighted cells pick their format by magnitude
+    // just like plain numeric cells do
+    this.highlightDoubleStyle = createHighlightNumberStyle("0.0000", newFont);
+    this.highlightExpoStyle = createHighlightNumberStyle("0.00E+00", newFont);
+    this.highlightZeroStyle = createHighlightNumberStyle("0", newFont);
+  }
+
+  private CellStyle createHighlightNumberStyle(String format, Font font) {
+    CellStyle style = this.workbook.createCellStyle();
+    style.setDataFormat(this.workbook.createDataFormat().getFormat(format));
+    style.setAlignment(HorizontalAlignment.RIGHT);
+    style.setVerticalAlignment(VerticalAlignment.TOP);
+    style.setFont(font);
+    style.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.index);
+    style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    style.setBorderTop(BorderStyle.HAIR);
+    style.setBorderBottom(BorderStyle.HAIR);
+    style.setBorderLeft(BorderStyle.HAIR);
+    style.setBorderRight(BorderStyle.HAIR);
+    return style;
   }
 
   public abstract String getFilename();
@@ -226,15 +237,26 @@ public abstract class AbstractWorkbook {
   void write(Row row, int colIdx, BigDecimal value) {
     if (value != null) {
       Cell cell = row.createCell(colIdx);
-      cell.setCellValue(value.toString());
-      if (value.equals(BigDecimal.ZERO)) {
-        cell.setCellStyle(this.zeroNumberStyle);
-      } else if (value.compareTo(sf_exponentThreshold) < 0) {
-        cell.setCellStyle(this.expoNumberStyle);
-      } else {
-        cell.setCellStyle(this.decimalNumberStyle);
-      }
+      // must be set as a number, not a String; Excel ignores number formats on text cells
+      cell.setCellValue(value.doubleValue());
+      cell.setCellStyle(pickNumberStyle(value, this.zeroNumberStyle, this.expoNumberStyle, this.decimalNumberStyle));
     }
+  }
+
+  /**
+   * Chooses the number format for a value by magnitude: exact zeros render as "0" and values below
+   * {@link #sf_exponentThreshold} render in exponential notation, so that small-but-real numbers are
+   * not displayed as "0.0000". The full value is always kept in the cell; only the display changes.
+   */
+  private CellStyle pickNumberStyle(BigDecimal value, CellStyle zero, CellStyle expo, CellStyle decimal) {
+    if (value.compareTo(BigDecimal.ZERO) == 0) {
+      return zero;
+    }
+    // compare on the absolute value so small negatives are not treated as below the threshold
+    if (value.abs().compareTo(sf_exponentThreshold) < 0) {
+      return expo;
+    }
+    return decimal;
   }
 
   void writeHighlightCell(Row row, int colIdx, String value) {
@@ -243,10 +265,12 @@ public abstract class AbstractWorkbook {
 
   void writeHighlightCell(Row row, int colIdx, BigDecimal value) {
     Cell cell = row.createCell(colIdx);
-    cell.setCellStyle(this.highlightDoubleStyle);
-    if (value != null) {
-      cell.setCellValue(value.toString());
+    if (value == null) {
+      cell.setCellStyle(this.highlightDoubleStyle);
+      return;
     }
+    cell.setCellValue(value.doubleValue());
+    cell.setCellStyle(pickNumberStyle(value, this.highlightZeroStyle, this.highlightExpoStyle, this.highlightDoubleStyle));
   }
 
   void writeLinkCell(Row row, int colIdx, String text, String url) {

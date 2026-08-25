@@ -98,9 +98,23 @@ public class FrequencyWorkbook extends AbstractWorkbook {
     int i = REFERENCE_POP_HEADER_COL_COUNT;
     for (String frequency : frequencies) {
       if (frequency != null) {
-        writeStringCell(row, i, frequency);
+        writeFrequencyCell(row, i, frequency);
       }
       i += 1;
+    }
+  }
+
+  /**
+   * Writes a frequency that arrives as text. Numeric text is written as a number so the workbook's
+   * decimal and exponential number formats apply, which keeps the full value in the cell while
+   * displaying it readably. Anything that is not a number (a blank, or a label like "not reported")
+   * is written as text, since Excel number formats do not apply to text cells.
+   */
+  private void writeFrequencyCell(Row row, int colIdx, String frequency) {
+    try {
+      write(row, colIdx, new BigDecimal(frequency.trim()));
+    } catch (NumberFormatException ex) {
+      writeStringCell(row, colIdx, frequency);
     }
   }
   
