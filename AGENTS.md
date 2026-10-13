@@ -13,7 +13,7 @@ make dev-init   # clone cpic-support-files + cpic-data.wiki submodules, install 
 make compile    # build the fat JAR (build/libs/CpicData-all.jar)
 ```
 
-The project uses Java 17 (Gradle + Shadow plugin for fat JAR) and Node.js (Yarn 3).
+The project uses Java 25 (Gradle + Shadow plugin for fat JAR) and Node.js 24 (Yarn 3).
 
 ## Database Configuration
 
