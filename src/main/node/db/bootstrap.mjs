@@ -26,6 +26,18 @@ try {
         throw e;
     }
 }
+// migrations grant to web_anon, so it must exist before they run
+// web_anon is the role used by the CPIC API to query data
+console.log('Creating web_anon role...');
+try {
+    await pgDb.query('create role web_anon nologin');
+} catch (e) {
+    if (alreadyExists.test(e.message)) {
+        console.warn('web_anon role exists, skipping');
+    } else {
+        throw e;
+    }
+}
 console.log('Creating cpic database...');
 try {
     await pgDb.query('create database cpic owner cpic');
