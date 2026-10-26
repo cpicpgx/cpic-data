@@ -1,3 +1,15 @@
+## 1.61.0 (2026-10-26)
+
+* feat: add "subjectsobserved" to the allele_frequency table ([2ba3b16](https://github.com/cpicpgx/cpic-data/commit/2ba3b16))
+* feat: remove Notes tab from frequency files ([97b23d7](https://github.com/cpicpgx/cpic-data/commit/97b23d7))
+* fix: fix a role granting bug when applying db migrations ([b6a8820](https://github.com/cpicpgx/cpic-data/commit/b6a8820))
+* fix: only write FrequencyCreator rows when there is data to write ([63208fb](https://github.com/cpicpgx/cpic-data/commit/63208fb))
+* fix: show proper number format in frequency sheets ([ec74726](https://github.com/cpicpgx/cpic-data/commit/ec74726))
+* chore: IDEA config ([daa5b7e](https://github.com/cpicpgx/cpic-data/commit/daa5b7e))
+* chore: update GitHub actions ([97fa511](https://github.com/cpicpgx/cpic-data/commit/97fa511))
+* chore: upgrade Flyway to 13.10.0 ([7f625fa](https://github.com/cpicpgx/cpic-data/commit/7f625fa))
+* chore: upgrade to Java 25, Gradle 9, and Node 24 ([7caca3d](https://github.com/cpicpgx/cpic-data/commit/7caca3d))
+
 ## <small>1.60.1 (2026-08-12)</small>
 
 * fix: fix parameters and queries in DB functions ([4b87330](https://github.com/cpicpgx/cpic-data/commit/4b87330)), closes [#51](https://github.com/cpicpgx/cpic-data/issues/51)
